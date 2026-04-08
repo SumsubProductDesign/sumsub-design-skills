@@ -1,0 +1,24 @@
+{
+  "name": "sumsub-design-skills",
+  "version": "1.0.0",
+  "description": "Sumsub Product Design team skills — Figma design system, component docs, screen annotations, table pages, design review",
+  "author": "Sumsub UX Team",
+  "skills": [
+    {
+      "name": "specs-docs",
+      "path": "skills/specs-documentation"
+    },
+    {
+      "name": "screen-annotations",
+      "path": "skills/screen-annotations"
+    },
+    {
+      "name": "table-page",
+      "path": "skills/table-page-builder"
+    },
+    {
+      "name": "design-review",
+      "path": "skills/design-review"
+    }
+  ]
+}
