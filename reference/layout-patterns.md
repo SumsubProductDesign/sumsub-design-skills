@@ -43,23 +43,27 @@
 
 ## Pattern 2 — Detail Full-Screen Page (Applicant style)
 
-> Applicant page, Transaction detail — **no global Sidebar**
+> Applicant page, Transaction detail — has **collapsed 52px global Sidebar** as a real column (NOT an overlay)
 
 ```
 [1440 × scroll]
-├── Page header       x=0,   y=0,   w=1440, h=152  ← full-width, tall
-├── Summary/Left      x=0,   y=152, w=360,  h=auto
-└── Body/Content      x=360, y=152, w=1080, h=auto
+├── *Sidebar*         x=0,   y=0,   w=52,   h=1024  ← collapsed DS sidebar, own column
+├── Page header       x=52,  y=0,   w=1388, h=152   ← starts AFTER sidebar
+├── Summary/Left      x=52,  y=152, w=380,  h=auto
+└── Body/Content      x=432, y=152, w=1008, h=auto  (432 = 52 + 380)
     └── (padding 32px each side)
-        └── Cards     w=1016
+        └── Cards     w=944
 ```
 
 **Key metrics:**
-- No Sidebar (0px left margin)
-- Page header: **152px tall**, full 1440px wide
-- Left panel (Summary): **360px** fixed
-- Right body: **1080px** (360+1080=1440)
-- Card padding: 32px → card width = 1080 - 64 = **1016px**
+- Collapsed DS Sidebar: **52px** own column (variant `Type=Applicants, Collapsed=True`)
+- Page header: **152px tall**, w=**1388** (1440−52), starts at x=52
+- Summary panel: **380px** fixed at x=52 (Summary SET `Collapsed=No, Role=Admin`, native 380×747)
+- Body: **1008px** at x=432 (52 + 380 = 432)
+- Layout sum: **52 + 380 + 1008 = 1440** ✓
+- Card padding: 32px → card width = 1008 − 64 = **944px**
+
+> ⚠️ **Common mistake:** treating the 52px sidebar as a floating overlay and extending header/body to full 1440px. The DS sidebar occupies its own left column — everything else is shifted right by 52px.
 
 ---
 
@@ -156,9 +160,9 @@ Content frame (w=1183)
 └── padding: 24px all sides
     └── inner: w=1135, starts at x=24, y=24
 
-Detail pages — Body (w=1080)
+Detail pages — Body (w=1008, at x=432 right of 52px sidebar + 380px summary)
 └── padding: 32px sides
-    └── cards: w=1016
+    └── cards: w=944
 
 Case page — Left area (w=992)
 └── padding: 32px left
@@ -170,11 +174,11 @@ Case page — Left area (w=992)
 ## Page Type Decision Tree
 
 ```
-Is there a global Sidebar?
+Is there a full-width (257px) global Sidebar?
 ├── YES → Standard page (Pattern 1 or 4)
 │   ├── Has table/list → Pattern 1 (Standard List)
 │   └── Has canvas → Pattern 4 (Builder)
-└── NO → Full-screen detail page
-    ├── Header h=152, left panel 360px → Pattern 2 (Applicant)
-    └── Header h=96, left 992 + right 448 → Pattern 3 (Case)
+└── NO → Detail page (may still have a collapsed 52px sidebar)
+    ├── Collapsed 52px sidebar + Header h=152, summary 380px → Pattern 2 (Applicant)
+    └── No sidebar + Header h=96, left 992 + right 448 → Pattern 3 (Case)
 ```
