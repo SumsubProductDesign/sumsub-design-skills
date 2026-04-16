@@ -14,11 +14,21 @@ argument-hint: "[screen description]"
 
 ## Workflow
 
-1. Read `@.claude/figma/blocks/helpers.js` — shared constants, variable keys, helper functions
-2. Read `@.claude/figma/blocks/table-page.js` — the table page block template
-3. Customize parameters in the top section
-4. Concatenate helpers.js + table-page.js
+Block files are bundled with this skill in the `blocks/` subdirectory.
+
+1. Read `blocks/helpers.js` (relative to this SKILL.md) — shared constants, variable keys, helper functions
+2. Read the relevant block template from `blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
+3. Customize parameters in the top section of the block
+4. Concatenate helpers.js + block template
 5. Run via `mcp__figma__use_figma`
+
+## Available Blocks
+
+| Block | File | When to use |
+|---|---|---|
+| Table Page | `blocks/table-page.js` | List of entities: applicants, transactions, cases |
+| Detail Drawer | `blocks/detail-drawer.js` | Right-side drawer over a table page |
+| Form Modal | `blocks/form-modal.js` | Create/edit modal over a table page |
 
 ---
 
