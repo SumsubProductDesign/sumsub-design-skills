@@ -133,18 +133,25 @@ Two steps — first add the marketplace, then install the plugin from it.
 ## Project Structure
 
 ```
-sumsub-design-skills/
-├── plugin.json                         # Plugin manifest
-├── skills/
-│   ├── specs-documentation/SKILL.md    # /specs-docs
-│   ├── screen-annotations/SKILL.md     # /screen-annotations
-│   ├── mockup/SKILL.md                 # /mockup
-│   └── design-review/SKILL.md         # /design-review
-└── reference/
-    ├── design-system.md                # Components, variables, tokens (100+ components, 570 variables)
-    ├── color-usage.md                  # Semantic color usage guide
-    ├── layout-patterns.md              # Page layout patterns (1440x900)
-    └── BLOCKS.md                       # Figma Blocks system
+sumsub-design-skills/                           # Marketplace root
+├── .claude-plugin/
+│   └── marketplace.json                        # Marketplace manifest
+└── plugins/
+    └── sumsub-design-skills/                   # Plugin itself
+        ├── .claude-plugin/
+        │   └── plugin.json                     # Plugin manifest
+        ├── skills/
+        │   ├── specs-documentation/SKILL.md    # /specs-docs
+        │   ├── screen-annotations/SKILL.md     # /screen-annotations
+        │   ├── mockup/
+        │   │   ├── SKILL.md                    # /mockup
+        │   │   └── blocks/                     # helpers.js + block templates
+        │   └── design-review/SKILL.md          # /design-review
+        └── reference/
+            ├── design-system.md                # Components, variables, tokens (100+ components, 570 variables)
+            ├── color-usage.md                  # Semantic color usage guide
+            ├── layout-patterns.md              # Page layout patterns (1440x900)
+            └── BLOCKS.md                       # Figma Blocks system
 ```
 
 ### Skills vs Reference
@@ -169,9 +176,9 @@ When you type `/design-review` in Claude Code, it loads the SKILL.md as context 
 
 When the design system changes (new components, renamed tokens, new libraries):
 
-1. Update the relevant files in `reference/`
-2. Update affected SKILL.md files if workflows changed
-3. Bump `version` in `plugin.json` (required for cache invalidation)
+1. Update the relevant files in `plugins/sumsub-design-skills/reference/`
+2. Update affected SKILL.md files in `plugins/sumsub-design-skills/skills/` if workflows changed
+3. Bump `version` in both `.claude-plugin/marketplace.json` and `plugins/sumsub-design-skills/.claude-plugin/plugin.json` (required for cache invalidation)
 4. Commit and push — team members run `/plugin update sumsub-design-skills` to get updates
 
 ## Team
