@@ -18,10 +18,10 @@ echo ""
 
 # Check if we're already in the repo (ran from cloned dir) or need to download
 if [ -d "skills" ] && [ -f "README.md" ]; then
-  echo "[1/3] Using local skills from $(pwd)"
+  echo "[1/4] Using local skills from $(pwd)"
   SOURCE_SKILLS="$(pwd)/skills"
 else
-  echo "[1/3] Downloading latest skills from GitHub..."
+  echo "[1/4] Downloading latest skills from GitHub..."
   if command -v git &> /dev/null; then
     git clone --depth 1 "$REPO" "$TMP_DIR/repo" > /dev/null 2>&1
   else
@@ -36,7 +36,7 @@ fi
 # Make sure target directory exists
 mkdir -p "$TARGET"
 
-echo "[2/3] Installing skills into $TARGET"
+echo "[2/4] Installing skills into $TARGET"
 # Clean up old (unprefixed) skill folders from previous versions
 for OLD_NAME in mockup specs-docs screen-annotations design-review; do
   if [ -d "$TARGET/$OLD_NAME" ]; then
@@ -52,7 +52,34 @@ for SKILL_DIR in "$SOURCE_SKILLS"/*/; do
   cp -R "$SKILL_DIR" "$TARGET/$SKILL_NAME"
 done
 
-echo "[3/3] Cleaning up"
+echo "[3/4] Registering Figma MCP server"
+CONFIG="$HOME/.claude.json"
+if [ -f "$CONFIG" ]; then
+  cp "$CONFIG" "${CONFIG}.sumsub-backup"
+fi
+python3 - <<PYEOF
+import json, os
+path = os.path.expanduser("~/.claude.json")
+try:
+    with open(path) as f:
+        data = json.load(f)
+except FileNotFoundError:
+    data = {}
+except json.JSONDecodeError:
+    print("       WARNING: ~/.claude.json is not valid JSON, skipping MCP setup")
+    raise SystemExit(0)
+if "mcpServers" not in data:
+    data["mcpServers"] = {}
+if data["mcpServers"].get("figma") == {"type": "http", "url": "https://mcp.figma.com/mcp"}:
+    print("       figma already registered, nothing to change")
+else:
+    data["mcpServers"]["figma"] = {"type": "http", "url": "https://mcp.figma.com/mcp"}
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    print("       figma MCP registered at https://mcp.figma.com/mcp")
+PYEOF
+
+echo "[4/4] Cleaning up"
 rm -rf "$TMP_DIR"
 
 echo ""

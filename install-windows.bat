@@ -19,7 +19,7 @@ echo.
 REM Check if we're already in the repo (ran from cloned dir) or need to download
 if exist "skills\" if exist "README.md" goto usepwd
 
-echo [1/3] Downloading latest skills from GitHub...
+echo [1/4] Downloading latest skills from GitHub...
 if exist "%TMP_DIR%" rmdir /s /q "%TMP_DIR%"
 mkdir "%TMP_DIR%"
 
@@ -54,7 +54,7 @@ set "SOURCE_SKILLS=%TMP_DIR%\repo\skills"
 goto copyskills
 
 :usepwd
-echo [1/3] Using local skills from %CD%
+echo [1/4] Using local skills from %CD%
 set "SOURCE_SKILLS=%CD%\skills"
 
 :copyskills
@@ -66,7 +66,7 @@ if not exist "%SOURCE_SKILLS%" (
 
 if not exist "%TARGET%" mkdir "%TARGET%"
 
-echo [2/3] Installing skills into %TARGET%
+echo [2/4] Installing skills into %TARGET%
 REM Clean up old (unprefixed) skill folders from previous versions
 for %%O in (mockup specs-docs screen-annotations design-review) do (
   if exist "%TARGET%\%%O" (
@@ -80,7 +80,35 @@ for /d %%D in ("%SOURCE_SKILLS%\*") do (
   xcopy "%%D" "%TARGET%\%%~nxD\" /E /I /Q /Y >nul
 )
 
-echo [3/3] Cleaning up
+echo [3/4] Registering Figma MCP server
+set "MCP_SCRIPT=%TEMP%\sumsub-mcp-setup.ps1"
+>"%MCP_SCRIPT%" (
+  echo $config = Join-Path $env:USERPROFILE '.claude.json'
+  echo if ^(Test-Path $config^) {
+  echo   Copy-Item $config "$config.sumsub-backup" -Force
+  echo   try { $data = Get-Content $config -Raw ^| ConvertFrom-Json } catch {
+  echo     Write-Host '       WARNING: .claude.json is not valid JSON, skipping MCP setup'
+  echo     exit 0
+  echo   }
+  echo } else {
+  echo   $data = New-Object PSObject
+  echo }
+  echo if ^(-not $data.PSObject.Properties.Match^('mcpServers'^).Count^) {
+  echo   $data ^| Add-Member -NotePropertyName 'mcpServers' -NotePropertyValue ^(New-Object PSObject^)
+  echo }
+  echo $figma = [PSCustomObject]@{ type = 'http'; url = 'https://mcp.figma.com/mcp' }
+  echo if ^($data.mcpServers.PSObject.Properties.Match^('figma'^).Count^) {
+  echo   $data.mcpServers.figma = $figma
+  echo } else {
+  echo   $data.mcpServers ^| Add-Member -NotePropertyName 'figma' -NotePropertyValue $figma
+  echo }
+  echo $data ^| ConvertTo-Json -Depth 20 ^| Set-Content $config -Encoding UTF8
+  echo Write-Host '       figma MCP registered at https://mcp.figma.com/mcp'
+)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%MCP_SCRIPT%"
+del "%MCP_SCRIPT%" >nul 2>&1
+
+echo [4/4] Cleaning up
 if exist "%TMP_DIR%" rmdir /s /q "%TMP_DIR%"
 
 echo.

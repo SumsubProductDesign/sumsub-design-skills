@@ -9,68 +9,55 @@ Step-by-step instructions for designers. Total time: 5–10 minutes.
 
 ---
 
-## Step 1. Connect the Figma MCP server
+## Step 1. Install everything
 
-In Claude Desktop, open a new chat and run this command:
-
-```
-claude mcp add --transport http figma-remote-mcp https://mcp.figma.com/mcp
-```
-
-This registers Figma's hosted MCP server. Claude will ask you to authenticate with your Figma account on first use.
-
-### Verify the MCP connection
-
-In a new chat, ask:
-```
-what MCP tools do you have available?
-```
-
-You should see tools prefixed with `figma_`. If they're missing — rerun the `claude mcp add` command and restart Claude Desktop.
-
----
-
-## Step 2. Install the design skills
+The installer does two things in one run:
+- copies the skills into `~/.claude/skills/`
+- registers Figma's hosted MCP server (`https://mcp.figma.com/mcp`) in your Claude config
 
 Pick **one** of the options below.
 
-### Option A — One-line command (recommended)
+### Option A — Double-click installer (recommended)
 
-In any terminal:
+Bundles both skills and MCP setup. No Node.js or terminal required.
+
+**macOS:**
+
+1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)** — right-click → **Save Link As…** → save to Downloads
+2. Double-click the downloaded file
+3. If macOS blocks it: right-click → **Open** → confirm **Open**
+4. Terminal opens, runs 4 steps, shows "Done!"
+5. Press any key to close
+
+**Windows:**
+
+1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)** — right-click → **Save link as…** → save to Downloads
+2. Double-click the downloaded file
+3. If SmartScreen blocks it: **More info** → **Run anyway**
+4. Console opens, runs 4 steps, shows "Done!"
+5. Press any key to close
+
+### Option B — `skills` CLI (if you have Node.js)
+
+Two commands. The first installs skills, the second runs a helper skill that registers the Figma MCP server.
 
 ```
 npx skills add SumsubProductDesign/sumsub-design-skills
 ```
 
-Works on macOS, Windows, Linux. The `skills` CLI auto-detects Claude Desktop and installs the skills to `~/.claude/skills/`. Update later with `npx skills update`, remove with `npx skills remove`.
+Then open Claude Desktop and in any new chat run:
 
-Requires Node.js. If you don't have it: https://nodejs.org (LTS version).
+```
+/sumsub-setup
+```
 
-### Option B — Double-click installer
+That's it — `/sumsub-setup` writes the MCP config for you (idempotent, safe to re-run anytime).
 
-No terminal, no Node.js needed.
-
-**macOS:**
-
-1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)**:
-   - Right-click → **Save Link As…** → save to Downloads
-2. Double-click the downloaded file
-3. If macOS blocks it: right-click → **Open** → confirm **Open**
-4. Terminal opens, runs 3 steps, shows "Done!"
-5. Press any key to close
-
-**Windows:**
-
-1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)**:
-   - Right-click → **Save link as…** → save to Downloads
-2. Double-click the downloaded file
-3. If SmartScreen blocks it: **More info** → **Run anyway**
-4. Console opens, runs 3 steps, shows "Done!"
-5. Press any key to close
+Works on macOS, Windows, Linux. Update skills later with `npx skills update`.
 
 ---
 
-## Step 3. Restart Claude Desktop
+## Step 2. Restart Claude Desktop
 
 For Claude to pick up the new skills, **fully restart the app** (not just close the window).
 
@@ -79,7 +66,7 @@ For Claude to pick up the new skills, **fully restart the app** (not just close 
 
 ---
 
-## Step 4. Verify it works
+## Step 3. Verify it works
 
 1. Open a **new chat** in Claude Desktop
 2. Type:
@@ -107,6 +94,7 @@ After installation, Claude Desktop supports 4 commands:
 | `/sumsub-specs-docs [component]` | Generates a Specs page with component anatomy |
 | `/sumsub-screen-annotations` | Adds Scenarios annotations above every screen on the current page |
 | `/sumsub-design-review` | Audits a mockup for design system compliance |
+| `/sumsub-setup` | One-time helper that registers the Figma MCP server. Safe to re-run. |
 
 ---
 
