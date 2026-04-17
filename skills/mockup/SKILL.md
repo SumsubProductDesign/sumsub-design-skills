@@ -14,12 +14,10 @@ argument-hint: "[screen description]"
 
 ## Workflow
 
-Block files are bundled with this plugin. Always reference them through the
-`${CLAUDE_PLUGIN_ROOT}` environment variable — Claude Code resolves it to the
-plugin's absolute install path.
+Block files are bundled with this skill in `~/.claude/skills/mockup/blocks/`.
 
-1. Read `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
-2. Read the relevant block template from `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
+1. Read `~/.claude/skills/mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
+2. Read the relevant block template from `~/.claude/skills/mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
 3. Customize parameters in the top section of the block
 4. Concatenate helpers.js + block template
 5. Run via `mcp__figma__use_figma`
@@ -28,9 +26,9 @@ plugin's absolute install path.
 
 | Block | File | When to use |
 |---|---|---|
-| Table Page | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
-| Detail Drawer | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
-| Form Modal | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/form-modal.js` | Create/edit modal over a table page |
+| Table Page | `~/.claude/skills/mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
+| Detail Drawer | `~/.claude/skills/mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
+| Form Modal | `~/.claude/skills/mockup/blocks/form-modal.js` | Create/edit modal over a table page |
 
 ---
 

@@ -15,7 +15,7 @@
 
 # Sumsub Design Skills
 
-Claude Code plugin for the Sumsub Product Design team. Adds 4 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, and auditing designs for system compliance.
+Claude skills for the Sumsub Product Design team. Adds 4 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, and auditing designs for system compliance.
 
 All skills work through the [Figma MCP server](https://github.com/niceandfun/figma-mcp) and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
 
@@ -30,30 +30,16 @@ Generates Specs-style documentation pages for any component from the design syst
 /specs-docs Button
 ```
 
-**What it produces:**
-- Anatomy exhibit with the "maximum variant" (all boolean props enabled, largest size)
-- Numbered markers aligned to component children
-- Legend with dimensions, dependencies, and text styles
-- Variant grid showing all sizes and states
-- Do/Don't cards for usage guidelines
-
 ---
 
 ### `/screen-annotations` — Scenario Annotations
 
-Adds standardized Scenarios annotation blocks above each screen in a Figma flow. Describes what the user sees and does on each screen, helping reviewers and developers understand the flow.
+Adds standardized Scenarios annotation blocks above each screen in a Figma flow. Numbers them in X.Y format and writes concise English descriptions focused on user actions.
 
 **Example:**
 ```
 /screen-annotations
 ```
-
-**What it does:**
-- Analyzes screens on the current page
-- Creates annotation instances from the shared component set
-- Numbers them in X.Y format (1.1, 1.2, 2.1...)
-- Writes concise English descriptions focused on user actions
-- Positions annotations 100px above each screen
 
 ---
 
@@ -68,63 +54,49 @@ Creates Figma mockups for any dashboard screen. Describe what you need — a tab
 /mockup empty state for no search results
 ```
 
-**What it produces:**
-- 1440x900 frame with Sidebar (257px) and Header (64px)
-- Content area with proper padding and layout
-- Real design system components (Table Starter, Top Toolbar, Modals, Drawers, etc.)
-- Configured cells, filters, tabs, and CTAs matching your description
-- All variables bound (no hardcoded hex values)
-
 ---
 
 ### `/design-review` — Design System Audit
 
-Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues.
+Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues: unbound fills/strokes/spacing, `base/*` tokens instead of `semantic/*`, wrong fonts, wrong libraries.
 
 **Example:**
 ```
 /design-review
 ```
 
-**What it checks:**
-- Unbound fills, strokes, spacing, and border radius (hardcoded values)
-- `base/*` tokens used instead of `semantic/*`
-- Wrong font family (Inter instead of Geist)
-- Components from Redesign library instead of Base
-- Layout pattern violations (title outside Header, missing Toolbar)
-
-**What it skips:**
-- Cover/Overview frames (decorative)
-- Task context instances (internal tooling)
-- Children inside component instances (managed by component)
-
 ---
 
 ## Installation
 
-Two steps — first add the marketplace, then install the plugin from it.
+Designed to work **without the terminal**. Download and double-click an installer.
 
-### From GitHub
+### macOS
 
-```bash
-/plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
-/plugin install sumsub-design-skills@sumsub-design-skills
-```
+1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)** (right-click → "Save Link As…")
+2. Double-click the downloaded file
+3. If macOS blocks it: right-click the file → **Open** → confirm **Open**
 
-### From local path
+The installer downloads the latest skills from GitHub and puts them in `~/.claude/skills/`. Re-run anytime to update.
 
-```bash
-/plugin marketplace add /path/to/sumsub-design-skills
-/plugin install sumsub-design-skills@sumsub-design-skills
-```
+### Windows
 
-> Run the commands inside Claude Code (not in a regular terminal).
-> After the first install, use `/plugin update sumsub-design-skills` to get new versions.
+1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)** (right-click → "Save link as…")
+2. Double-click the downloaded file
+3. If Windows SmartScreen blocks it: click **More info** → **Run anyway**
+
+The installer puts skills in `%USERPROFILE%\.claude\skills\`. Re-run anytime to update.
+
+### After installing
+
+1. **Restart Claude Desktop** so it reloads the skills
+2. Open the **Code** tab
+3. Type `/mockup` (or `/specs-docs`, `/screen-annotations`, `/design-review`) to use a skill
 
 ## Prerequisites
 
-1. **Claude Code** installed and running
-2. **Figma MCP server** configured in Claude Code settings
+1. **Claude Desktop** installed and running
+2. **Figma MCP server** configured in Claude Desktop (Settings → MCP)
 3. **Access to Sumsub Figma libraries:**
    - Base components [Dashboard UI Kit]
    - Organisms [Dashboard UI Kit]
@@ -133,54 +105,31 @@ Two steps — first add the marketplace, then install the plugin from it.
 ## Project Structure
 
 ```
-sumsub-design-skills/                           # Marketplace root
-├── .claude-plugin/
-│   └── marketplace.json                        # Marketplace manifest
-└── plugins/
-    └── sumsub-design-skills/                   # Plugin itself
-        ├── .claude-plugin/
-        │   └── plugin.json                     # Plugin manifest
-        ├── skills/
-        │   ├── specs-documentation/SKILL.md    # /specs-docs
-        │   ├── screen-annotations/SKILL.md     # /screen-annotations
-        │   ├── mockup/
-        │   │   ├── SKILL.md                    # /mockup
-        │   │   └── blocks/                     # helpers.js + block templates
-        │   └── design-review/SKILL.md          # /design-review
-        └── reference/
-            ├── design-system.md                # Components, variables, tokens (100+ components, 570 variables)
-            ├── color-usage.md                  # Semantic color usage guide
-            ├── layout-patterns.md              # Page layout patterns (1440x900)
-            └── BLOCKS.md                       # Figma Blocks system
+sumsub-design-skills/
+├── install-macos.command               # Double-click installer (macOS)
+├── install-windows.bat                 # Double-click installer (Windows)
+├── skills/
+│   ├── specs-documentation/SKILL.md    # /specs-docs
+│   ├── screen-annotations/SKILL.md     # /screen-annotations
+│   ├── mockup/
+│   │   ├── SKILL.md                    # /mockup
+│   │   └── blocks/                     # helpers.js + block templates
+│   └── design-review/SKILL.md          # /design-review
+└── reference/
+    ├── design-system.md                # Components, variables, tokens
+    ├── color-usage.md                  # Semantic color usage
+    ├── layout-patterns.md              # Page layout patterns (1440x900)
+    └── BLOCKS.md                       # Figma Blocks system
 ```
-
-### Skills vs Reference
-
-- **`skills/`** — actionable instructions. Each SKILL.md contains a complete workflow: when to use, parameters, Figma Plugin API code, gotchas, and checklists.
-- **`reference/`** — design system data. Component keys, variable keys, hex values, layout dimensions. Skills read from these docs when they need specific keys or tokens.
-
-## How Skills Work
-
-Each skill is a SKILL.md file with YAML frontmatter:
-
-```yaml
----
-name: design-review
-description: "Audit Figma mockups for design system compliance"
----
-```
-
-When you type `/design-review` in Claude Code, it loads the SKILL.md as context and follows its instructions. The skill uses the Figma MCP server (`mcp__figma__use_figma`) to run Plugin API code directly in Figma.
 
 ## Updating
 
-When the design system changes (new components, renamed tokens, new libraries):
+When the design system or any skill changes:
 
-1. Update the relevant files in `plugins/sumsub-design-skills/reference/`
-2. Update affected SKILL.md files in `plugins/sumsub-design-skills/skills/` if workflows changed
-3. Bump `version` in both `.claude-plugin/marketplace.json` and `plugins/sumsub-design-skills/.claude-plugin/plugin.json` (required for cache invalidation)
-4. Commit and push — team members run `/plugin update sumsub-design-skills` to get updates
+1. Edit files in `skills/` or `reference/`
+2. Commit and push
+3. Team members re-run the installer (double-click) — it replaces old skills with the latest
 
 ## Team
 
-Maintained by the Sumsub UX Team (14 product designers).
+Maintained by the Sumsub UX Team.
