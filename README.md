@@ -69,25 +69,37 @@ Audits Figma mockups for compliance with the Sumsub Dashboard design system. Wal
 
 ## Installation
 
-Designed to work **without the terminal**. Download and double-click an installer.
+Two options — pick whichever fits you.
 
-### macOS
+### Option A — Double-click installer (recommended for designers)
+
+No terminal, no Node.js needed.
+
+**macOS:**
 
 1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)** (right-click → "Save Link As…")
 2. Double-click the downloaded file
 3. If macOS blocks it: right-click the file → **Open** → confirm **Open**
 
-The installer downloads the latest skills from GitHub and puts them in `~/.claude/skills/`. Re-run anytime to update.
-
-### Windows
+**Windows:**
 
 1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)** (right-click → "Save link as…")
 2. Double-click the downloaded file
 3. If Windows SmartScreen blocks it: click **More info** → **Run anyway**
 
-The installer puts skills in `%USERPROFILE%\.claude\skills\`. Re-run anytime to update.
+The installer downloads the latest skills from GitHub and puts them in `~/.claude/skills/` (macOS) or `%USERPROFILE%\.claude\skills\` (Windows). Re-run anytime to update.
 
-### After installing
+### Option B — `skills` CLI (if you have Node.js)
+
+Uses the universal [`skills`](https://github.com/vercel-labs/skills) tool, which auto-detects your AI agent and installs to the right place.
+
+```bash
+npx skills add SumsubProductDesign/sumsub-design-skills
+```
+
+Update later with `npx skills update`, remove with `npx skills remove`.
+
+### After installing (either option)
 
 1. **Restart Claude Desktop** so it reloads the skills
 2. Open the **Code** tab
