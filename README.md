@@ -73,80 +73,56 @@ Audits Figma mockups for compliance with the Sumsub Dashboard design system. Wal
 
 ## Installation
 
-Two options — pick whichever fits you.
-
-### Option A — `skills` CLI (recommended)
-
-Uses the universal [`skills`](https://github.com/vercel-labs/skills) tool, which auto-detects your AI agent and installs to the right place.
+Installs as an official Claude Code plugin. Run these in Claude Desktop's Code tab:
 
 ```bash
-npx skills add SumsubProductDesign/sumsub-design-skills
+/plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
+/plugin install sumsub@sumsub-design-skills
 ```
 
-Then open Claude Desktop and run `/sumsub-setup` once in any new chat — it registers the Figma MCP server. Update later with `npx skills update`.
+The plugin bundles the 4 skills + Figma remote MCP server configuration. Update later with `/plugin update sumsub`.
 
-Requires Node.js (LTS): https://nodejs.org
-
-### Option B — Double-click installer (if you can't use Node.js)
-
-No terminal, no Node.js needed. Bundles skills and MCP setup in one click.
-
-**macOS:**
-
-1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)** (right-click → "Save Link As…")
-2. Double-click the downloaded file
-3. If macOS blocks it: right-click the file → **Open** → confirm **Open**
-
-**Windows:**
-
-1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)** (right-click → "Save link as…")
-2. Double-click the downloaded file
-3. If Windows SmartScreen blocks it: click **More info** → **Run anyway**
-
-The installer downloads the latest skills from GitHub, puts them in `~/.claude/skills/` (macOS) or `%USERPROFILE%\.claude\skills\` (Windows), and registers the Figma MCP server. Re-run anytime to update.
-
-### After installing (either option)
-
-1. **Restart Claude Desktop** so it reloads the skills
-2. Open the **Code** tab
-3. Type `/sumsub-mockup` (or `/sumsub-specs-docs`, `/sumsub-screen-annotations`, `/sumsub-design-review`) to use a skill
+See [INSTALL.md](INSTALL.md) for a full walkthrough including prerequisites and troubleshooting.
 
 ## Prerequisites
 
-1. **Claude Desktop** installed and running
-2. **Figma MCP server** configured in Claude Desktop (Settings → MCP)
-3. **Access to Sumsub Figma libraries:**
-   - Base components [Dashboard UI Kit]
-   - Organisms [Dashboard UI Kit]
-   - Assets (icons, flags)
+1. **Claude Desktop** (latest version, for `/plugin` support) — https://claude.ai/download
+2. **Figma Desktop** (for authentication and viewing designs) — https://www.figma.com/downloads/
+3. Access to Sumsub Figma libraries (Base components, Organisms, Assets)
 
 ## Project Structure
 
 ```
-sumsub-design-skills/
-├── install-macos.command               # Double-click installer (macOS)
-├── install-windows.bat                 # Double-click installer (Windows)
-├── skills/
-│   ├── sumsub-specs-docs/SKILL.md          # /sumsub-specs-docs
-│   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-screen-annotations
-│   ├── sumsub-mockup/
-│   │   ├── SKILL.md                        # /sumsub-mockup
-│   │   └── blocks/                         # helpers.js + block templates
-│   └── sumsub-design-review/SKILL.md       # /sumsub-design-review
-└── reference/
-    ├── design-system.md                # Components, variables, tokens
-    ├── color-usage.md                  # Semantic color usage
-    ├── layout-patterns.md              # Page layout patterns (1440x900)
-    └── BLOCKS.md                       # Figma Blocks system
+sumsub-design-skills/                                   # Marketplace root
+├── .claude-plugin/
+│   └── marketplace.json                                # Marketplace manifest
+└── plugins/
+    └── sumsub-design-skills/                           # Plugin itself
+        ├── .claude-plugin/
+        │   └── plugin.json                             # Plugin manifest
+        ├── .mcp.json                                   # Figma MCP config (auto-installed)
+        ├── skills/
+        │   ├── specs-docs/SKILL.md                     # /sumsub:specs-docs
+        │   ├── screen-annotations/SKILL.md             # /sumsub:screen-annotations
+        │   ├── mockup/
+        │   │   ├── SKILL.md                            # /sumsub:mockup
+        │   │   └── blocks/                             # helpers.js + block templates
+        │   └── design-review/SKILL.md                  # /sumsub:design-review
+        └── reference/
+            ├── design-system.md                        # Components, variables, tokens
+            ├── color-usage.md                          # Semantic color usage
+            ├── layout-patterns.md                      # Page layout patterns
+            └── BLOCKS.md                               # Figma Blocks system
 ```
 
 ## Updating
 
 When the design system or any skill changes:
 
-1. Edit files in `skills/` or `reference/`
-2. Commit and push
-3. Team members re-run the installer (double-click) — it replaces old skills with the latest
+1. Edit files in `plugins/sumsub-design-skills/skills/` or `plugins/sumsub-design-skills/reference/`
+2. Bump `version` in both `.claude-plugin/marketplace.json` and `plugins/sumsub-design-skills/.claude-plugin/plugin.json`
+3. Commit and push
+4. Team members run `/plugin update sumsub` in Claude Desktop
 
 ## Team
 

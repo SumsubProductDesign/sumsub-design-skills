@@ -1,5 +1,5 @@
 ---
-name: sumsub-design-review
+name: design-review
 description: "Audit a Figma mockup for design system compliance — checks variables, text styles, spacing, components, base-to-semantic token usage. Use before handoff or during reviews."
 argument-hint: "[figma-node-url]"
 ---

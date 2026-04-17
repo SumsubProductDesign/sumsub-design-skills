@@ -1,0 +1,10 @@
+{
+  "name": "sumsub",
+  "description": "Sumsub Product Design team skills for Figma — mockups, component specs, screen annotations, design review. Bundles the Figma remote MCP server.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Sumsub UX Team"
+  },
+  "homepage": "https://github.com/SumsubProductDesign/sumsub-design-skills",
+  "repository": "https://github.com/SumsubProductDesign/sumsub-design-skills"
+}

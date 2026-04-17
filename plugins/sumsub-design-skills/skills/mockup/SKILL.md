@@ -1,5 +1,5 @@
 ---
-name: sumsub-mockup
+name: mockup
 description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states. Describe what you need and get a pixel-perfect screen using Sumsub design system components."
 argument-hint: "[screen description]"
 ---
@@ -14,10 +14,10 @@ argument-hint: "[screen description]"
 
 ## Workflow
 
-Block files are bundled with this skill in `~/.claude/skills/sumsub-mockup/blocks/`.
+Block files are bundled with this skill in `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/`.
 
-1. Read `~/.claude/skills/sumsub-mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
-2. Read the relevant block template from `~/.claude/skills/sumsub-mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
+1. Read `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
+2. Read the relevant block template from `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
 3. Customize parameters in the top section of the block
 4. Concatenate helpers.js + block template
 5. Run via `mcp__figma__use_figma`
@@ -26,9 +26,9 @@ Block files are bundled with this skill in `~/.claude/skills/sumsub-mockup/block
 
 | Block | File | When to use |
 |---|---|---|
-| Table Page | `~/.claude/skills/sumsub-mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
-| Detail Drawer | `~/.claude/skills/sumsub-mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
-| Form Modal | `~/.claude/skills/sumsub-mockup/blocks/form-modal.js` | Create/edit modal over a table page |
+| Table Page | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
+| Detail Drawer | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
+| Form Modal | `${CLAUDE_PLUGIN_ROOT}/skills/mockup/blocks/form-modal.js` | Create/edit modal over a table page |
 
 ---
 

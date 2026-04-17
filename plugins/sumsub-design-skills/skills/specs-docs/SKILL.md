@@ -1,5 +1,5 @@
 ---
-name: sumsub-specs-docs
+name: specs-docs
 description: "Generate Specs-style component documentation in Figma — anatomy exhibits with numbered markers, Do/Dont cards. 1076px width, rounded sections, branded Header."
 argument-hint: "[component-name]"
 ---
