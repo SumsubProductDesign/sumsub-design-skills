@@ -32,7 +32,25 @@ You should see tools prefixed with `figma_`. If they're missing — rerun the `c
 
 ## Step 2. Install the design skills
 
-### macOS
+Pick **one** of the options below.
+
+### Option A — One-line command (recommended)
+
+In any terminal:
+
+```
+npx skills add SumsubProductDesign/sumsub-design-skills
+```
+
+Works on macOS, Windows, Linux. The `skills` CLI auto-detects Claude Desktop and installs the skills to `~/.claude/skills/`. Update later with `npx skills update`, remove with `npx skills remove`.
+
+Requires Node.js. If you don't have it: https://nodejs.org (LTS version).
+
+### Option B — Double-click installer
+
+No terminal, no Node.js needed.
+
+**macOS:**
 
 1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)**:
    - Right-click → **Save Link As…** → save to Downloads
@@ -41,7 +59,7 @@ You should see tools prefixed with `figma_`. If they're missing — rerun the `c
 4. Terminal opens, runs 3 steps, shows "Done!"
 5. Press any key to close
 
-### Windows
+**Windows:**
 
 1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)**:
    - Right-click → **Save link as…** → save to Downloads
