@@ -102,19 +102,24 @@ Audits Figma mockups for compliance with the Sumsub Dashboard design system. Wal
 
 ## Installation
 
+Two steps — first add the marketplace, then install the plugin from it.
+
 ### From GitHub
 
 ```bash
-/plugin add https://github.com/SumsubProductDesign/sumsub-design-skills
+/plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
+/plugin install sumsub-design-skills@sumsub-design-skills
 ```
 
 ### From local path
 
 ```bash
-/plugin add /path/to/sumsub-design-skills
+/plugin marketplace add /path/to/sumsub-design-skills
+/plugin install sumsub-design-skills@sumsub-design-skills
 ```
 
-> Run the command inside Claude Code (not in a regular terminal).
+> Run the commands inside Claude Code (not in a regular terminal).
+> After the first install, use `/plugin update sumsub-design-skills` to get new versions.
 
 ## Prerequisites
 
@@ -167,7 +172,7 @@ When the design system changes (new components, renamed tokens, new libraries):
 1. Update the relevant files in `reference/`
 2. Update affected SKILL.md files if workflows changed
 3. Bump `version` in `plugin.json` (required for cache invalidation)
-4. Commit and push — team members run `/plugin update https://github.com/SumsubProductDesign/sumsub-design-skills` to get updates
+4. Commit and push — team members run `/plugin update sumsub-design-skills` to get updates
 
 ## Team
 
