@@ -12,10 +12,10 @@ argument-hint: "[screen description]"
 
 ## Workflow
 
-Block files are bundled with this skill in `${CLAUDE_SKILL_DIR}/blocks/`.
+Block files are bundled with this skill in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/`.
 
-1. Read `${CLAUDE_SKILL_DIR}/blocks/helpers.js` — shared constants, variable keys, helper functions
-2. Read the relevant block template from `${CLAUDE_SKILL_DIR}/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
+1. Read `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
+2. Read the relevant block template from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
 3. Customize parameters in the top section of the block
 4. Concatenate helpers.js + block template
 5. Run via `mcp__figma__use_figma`
@@ -24,9 +24,9 @@ Block files are bundled with this skill in `${CLAUDE_SKILL_DIR}/blocks/`.
 
 | Block | File | When to use |
 |---|---|---|
-| Table Page | `${CLAUDE_SKILL_DIR}/blocks/table-page.js` | List of entities: applicants, transactions, cases |
-| Detail Drawer | `${CLAUDE_SKILL_DIR}/blocks/detail-drawer.js` | Right-side drawer over a table page |
-| Form Modal | `${CLAUDE_SKILL_DIR}/blocks/form-modal.js` | Create/edit modal over a table page |
+| Table Page | `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
+| Detail Drawer | `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
+| Form Modal | `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/form-modal.js` | Create/edit modal over a table page |
 
 ---
 
