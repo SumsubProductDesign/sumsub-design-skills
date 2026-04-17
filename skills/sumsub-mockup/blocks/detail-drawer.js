@@ -69,7 +69,7 @@ content.appendChild(table);
 table.layoutSizingHorizontal = "FILL";
 table.layoutSizingVertical = "FILL";
 
-// 6. Tint — компонент из дизайн-системы, покрывает ВЕСЬ root-фрейм (1440×900)
+// 6. Tint — design system component, covers the ENTIRE root frame (1440×900)
 const tintComp = await figma.importComponentByKeyAsync("815f961c100c14a0aca85988a8545a2c37821c1c");
 const scrim = tintComp.createInstance();
 scrim.name = "Tint";
@@ -79,7 +79,7 @@ scrim.resize(SCREEN_W, SCREEN_H);
 scrim.x = 0;
 scrim.y = 0;
 
-// 7. Drawer — абсолютный, прижат к правому краю экрана
+// 7. Drawer — absolutely positioned, pinned to the right edge of the screen
 const drawerSet = await figma.importComponentSetByKeyAsync(COMPONENTS.drawerBasic);
 const drawer = drawerSet.defaultVariant.createInstance();
 try { drawer.setProperties({ "Size": DRAWER_SIZE }); } catch(e) {}

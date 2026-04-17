@@ -67,7 +67,7 @@ const table = tableSet.defaultVariant.createInstance();
 bgContent.appendChild(table);
 table.layoutSizingHorizontal = "FILL";
 
-// 6. Tint — компонент из дизайн-системы, покрывает ВЕСЬ root-фрейм (1440×900)
+// 6. Tint — design system component, covers the ENTIRE root frame (1440×900)
 const tintComp = await figma.importComponentByKeyAsync("815f961c100c14a0aca85988a8545a2c37821c1c");
 const scrim = tintComp.createInstance();
 scrim.name = "Tint";

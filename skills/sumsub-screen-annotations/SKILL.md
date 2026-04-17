@@ -102,7 +102,7 @@ Examples:
 **When reviewing or creating mockups:**
 1. Check if Scenarios annotations exist above each screen
 2. If missing — **proactively suggest adding them**:
-   > "Я заметил, что над макетами нет Scenarios-аннотаций. Хочешь, добавлю описания к каждому экрану?"
+   > "I noticed the mockups don't have Scenarios annotations above them. Want me to add a description to each screen?"
 3. When adding: analyze each screen's content to write appropriate descriptions
 4. Number sequentially based on the flow order (left-to-right, top-to-bottom)
 
