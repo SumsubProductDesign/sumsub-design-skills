@@ -1,6 +1,6 @@
 {
   "name": "sumsub-design-skills",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Sumsub Product Design team skills for Claude — Figma design system, component specs, screen annotations, mockups, design review. One command installs skills + Figma MCP server.",
   "bin": {
     "sumsub-design-skills": "bin/install.js"

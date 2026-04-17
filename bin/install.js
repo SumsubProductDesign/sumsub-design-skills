@@ -13,6 +13,15 @@ const HOME = os.homedir();
 const TARGET_SKILLS = path.join(HOME, ".claude", "skills");
 const CONFIG_PATH = path.join(HOME, ".claude.json");
 const SOURCE_SKILLS = path.join(__dirname, "..", "skills");
+const VERSION_FILE = path.join(TARGET_SKILLS, ".sumsub-design-skills-version");
+
+const SELF_VERSION = (() => {
+  try {
+    return require(path.join(__dirname, "..", "package.json")).version;
+  } catch (e) {
+    return "unknown";
+  }
+})();
 
 const MCP_KEY = "figma";
 const MCP_CONFIG = {
@@ -60,6 +69,10 @@ function installSkills() {
     log("       - " + name);
     copyDirRecursive(src, dest);
   }
+
+  // Record installed version so skills can compare against GitHub and notify about updates
+  fs.writeFileSync(VERSION_FILE, SELF_VERSION + "\n");
+  log("       recorded version " + SELF_VERSION + " in " + VERSION_FILE);
 }
 
 function registerFigmaMcp() {

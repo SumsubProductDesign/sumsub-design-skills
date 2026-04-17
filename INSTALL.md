@@ -63,13 +63,33 @@ Use the sumsub-mockup skill to create an applicant list page in Figma
 
 ## Updating
 
-Re-run the installer any time:
+### Automatic reminders
+
+Every time you run any `sumsub-*` skill, Claude silently checks whether a newer version is on GitHub. If there is one, you'll see a one-line notice at the top of the reply, like:
+
+> A newer version of **sumsub-design-skills** is available (`3.1.0` → `3.2.0`). Update anytime with: `npx --prefer-online github:SumsubProductDesign/sumsub-design-skills` — proceeding with the installed version.
+
+The skill still runs on the current version — the notice is just a heads-up. Copy the command, run it when convenient, restart Claude Desktop.
+
+### Manual update (anytime)
 
 ```
-npx github:SumsubProductDesign/sumsub-design-skills
+npx --prefer-online github:SumsubProductDesign/sumsub-design-skills
 ```
 
-It replaces old skill versions with the latest. Restart Claude Desktop afterwards.
+The `--prefer-online` flag forces npm to ignore any cached copy and pull the latest from `main`. Run this any time a maintainer says "pull the update" in Slack.
+
+After the installer finishes, **fully restart Claude Desktop** so it picks up new skill files.
+
+### If the update notice keeps appearing after updating
+
+1. Check that you ran the command with `--prefer-online` (without the flag, npm may use a stale cache).
+2. Clear the cache manually:
+   ```
+   npm cache clean --force
+   npx --prefer-online github:SumsubProductDesign/sumsub-design-skills
+   ```
+3. Restart Claude Desktop.
 
 ---
 
