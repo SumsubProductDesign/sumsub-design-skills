@@ -1,32 +1,34 @@
 # Installation Guide — Sumsub Design Skills
 
-Installs as an official Claude Code plugin. Skills + Figma MCP server — all in one command.
+One command, installs everything: skills + Figma MCP server.
 
 ## Prerequisites
 
-1. **Claude Desktop** (latest version) — https://claude.ai/download
+1. **Claude Desktop** — https://claude.ai/download
 2. **Figma Desktop** — https://www.figma.com/downloads/
-   - Required: Claude uses your logged-in Figma session to authenticate with the MCP server, and the app needs to be open when you use the skills so Claude can see and edit your files.
-3. A Figma account with access to Sumsub libraries
-
-> If the `/plugin` command doesn't work in Claude Desktop, update to the latest version.
+   - Required: Claude uses your logged-in Figma session to authenticate with the MCP server, and the app needs to be open when you use the skills.
+3. **Node.js** (LTS) — https://nodejs.org
+   - Needed to run the one-line installer.
+4. A Figma account with access to Sumsub libraries.
 
 ---
 
 ## Install
 
-In Claude Desktop's Code tab, run these two commands:
+In any terminal, run:
 
 ```
-/plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
-/plugin install sumsub@sumsub-design-skills
+npx github:SumsubProductDesign/sumsub-design-skills
 ```
 
-That's it. The plugin bundles:
-- 4 skills (mockup, specs-docs, screen-annotations, design-review)
-- Figma remote MCP server at `https://mcp.figma.com/mcp`
+That's it. The installer:
+- Copies 4 skills into `~/.claude/skills/sumsub-*`
+- Registers the Figma remote MCP server (`https://mcp.figma.com/mcp`) in `~/.claude.json`
+- Backs up your previous config to `~/.claude.json.sumsub-backup`
 
-After install, Claude Desktop will prompt you to authenticate with Figma on first use of any skill.
+Then **fully restart Claude Desktop**:
+- macOS: `⌘ Q` → reopen
+- Windows: right-click tray icon → Quit → reopen
 
 ---
 
@@ -35,60 +37,61 @@ After install, Claude Desktop will prompt you to authenticate with Figma on firs
 1. Open a **new chat** in Claude Desktop
 2. Type:
    ```
-   /sumsub:mockup create an applicant list page
+   /sumsub-mockup create an applicant list page
    ```
 3. Claude should start the skill — Figma opens and a mockup appears
+
+> **Note:** the `/sumsub-mockup` hint may not appear in the autocomplete dropdown — that's fine. Just type the command and hit Enter.
+
+If nothing happens, try it without the slash:
+```
+Use the sumsub-mockup skill to create an applicant list page in Figma
+```
 
 ---
 
 ## Available commands
 
-After installation, these 4 commands are available:
-
 | Command | What it does |
 |---|---|
-| `/sumsub:mockup [description]` | Creates a mockup in Figma from your description |
-| `/sumsub:specs-docs [component]` | Generates a Specs page with component anatomy |
-| `/sumsub:screen-annotations` | Adds Scenarios annotations above every screen on the current page |
-| `/sumsub:design-review` | Audits a mockup for design system compliance |
+| `/sumsub-mockup [description]` | Creates a mockup in Figma from your description |
+| `/sumsub-specs-docs [component]` | Generates a Specs page with component anatomy |
+| `/sumsub-screen-annotations` | Adds Scenarios annotations above every screen on the current page |
+| `/sumsub-design-review` | Audits a mockup for design system compliance |
 
 ---
 
 ## Updating
 
-When a new plugin version is released, team members update with:
+Re-run the installer any time:
 
 ```
-/plugin update sumsub
+npx github:SumsubProductDesign/sumsub-design-skills
 ```
 
-Restart Claude Desktop after updating.
-
----
-
-## Uninstall
-
-```
-/plugin uninstall sumsub
-```
+It replaces old skill versions with the latest. Restart Claude Desktop afterwards.
 
 ---
 
 ## Troubleshooting
 
-### `/plugin` command isn't recognized
+### `npx` not found
 
-Update Claude Desktop to the latest version. The plugin system is only available in recent releases.
+Install Node.js LTS from https://nodejs.org. `npx` ships with it.
 
-### Skills don't appear after install
+### Skills aren't recognized
 
-Run `/reload-plugins` or restart Claude Desktop fully (`⌘ Q` on macOS, Quit from tray on Windows).
+1. Open in your file manager:
+   - macOS: `~/.claude/skills/` (in Finder: `⌘⇧G`, paste the path)
+   - Windows: `%USERPROFILE%\.claude\skills\`
+2. You should see 4 folders: `sumsub-design-review`, `sumsub-mockup`, `sumsub-screen-annotations`, `sumsub-specs-docs`
+3. If folders are missing — the installer didn't finish. Re-run and check the console.
 
-### Figma tools aren't available
+### Figma MCP tools aren't available in Claude
 
-1. Check that Figma Desktop is running and you're logged in
-2. Run `/plugin update sumsub` to ensure the MCP config is current
-3. Restart Claude Desktop
+1. Make sure Figma Desktop is running and you're logged in
+2. Re-run the installer to ensure MCP is registered
+3. Fully restart Claude Desktop
 
 ### A skill runs but fails with an error
 
