@@ -1,0 +1,11 @@
+{
+  "name": "sumsub-design",
+  "description": "Sumsub Product Design team skills for Claude — Figma design system, component specs, screen annotations, mockups, design review",
+  "version": "3.2.0",
+  "author": {
+    "name": "Sumsub UX Team"
+  },
+  "homepage": "https://github.com/SumsubProductDesign/sumsub-design-skills",
+  "repository": "https://github.com/SumsubProductDesign/sumsub-design-skills",
+  "license": "MIT"
+}

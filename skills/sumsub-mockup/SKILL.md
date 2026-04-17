@@ -10,26 +10,12 @@ argument-hint: "[screen description]"
 > Supports table pages, detail pages, forms, modals, drawers, and custom layouts.
 > Uses the Figma Blocks system (helpers.js + block JS) and Sumsub design system components.
 
-## Before running (silent update check)
-
-Do this before starting the main task below:
-
-1. Read local version from `~/.claude/skills/.sumsub-design-skills-version`. If the file is missing, treat as `0.0.0`.
-2. Fetch remote version: `curl -sfL --max-time 3 https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/package.json` and parse the `"version"` field.
-3. **If versions match** or the fetch fails → say nothing, proceed silently.
-4. **If remote is newer** → add ONE short note at the top of your reply:
-   > A newer version of **sumsub-design-skills** is available (`{local}` → `{remote}`). Update anytime with: `npx --prefer-online github:SumsubProductDesign/sumsub-design-skills` — proceeding with the installed version.
-
-   Then continue with the main task. Never block, never ask for confirmation.
-
----
-
 ## Workflow
 
-Block files are bundled with this skill in `~/.claude/skills/sumsub-mockup/blocks/`.
+Block files are bundled with this skill in `${CLAUDE_SKILL_DIR}/blocks/`.
 
-1. Read `~/.claude/skills/sumsub-mockup/blocks/helpers.js` — shared constants, variable keys, helper functions
-2. Read the relevant block template from `~/.claude/skills/sumsub-mockup/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
+1. Read `${CLAUDE_SKILL_DIR}/blocks/helpers.js` — shared constants, variable keys, helper functions
+2. Read the relevant block template from `${CLAUDE_SKILL_DIR}/blocks/` — `table-page.js`, `detail-drawer.js`, or `form-modal.js`
 3. Customize parameters in the top section of the block
 4. Concatenate helpers.js + block template
 5. Run via `mcp__figma__use_figma`
@@ -38,9 +24,9 @@ Block files are bundled with this skill in `~/.claude/skills/sumsub-mockup/block
 
 | Block | File | When to use |
 |---|---|---|
-| Table Page | `~/.claude/skills/sumsub-mockup/blocks/table-page.js` | List of entities: applicants, transactions, cases |
-| Detail Drawer | `~/.claude/skills/sumsub-mockup/blocks/detail-drawer.js` | Right-side drawer over a table page |
-| Form Modal | `~/.claude/skills/sumsub-mockup/blocks/form-modal.js` | Create/edit modal over a table page |
+| Table Page | `${CLAUDE_SKILL_DIR}/blocks/table-page.js` | List of entities: applicants, transactions, cases |
+| Detail Drawer | `${CLAUDE_SKILL_DIR}/blocks/detail-drawer.js` | Right-side drawer over a table page |
+| Form Modal | `${CLAUDE_SKILL_DIR}/blocks/form-modal.js` | Create/edit modal over a table page |
 
 ---
 
