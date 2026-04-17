@@ -1,171 +1,128 @@
-# Установка Sumsub Design Skills
+# Installation Guide — Sumsub Design Skills
 
-Пошаговая инструкция для дизайнеров. Весь процесс — 5–10 минут.
+Step-by-step instructions for designers. Total time: 5–10 minutes.
 
-## Что должно быть установлено заранее
+## Prerequisites
 
 1. **Claude Desktop** — https://claude.ai/download
-2. **Figma Desktop** (не web-версия!) — https://www.figma.com/downloads/
-
-> Web-версия Figma не поддерживает MCP-сервер. Нужен именно Desktop.
+2. A Figma account with access to Sumsub libraries
 
 ---
 
-## Шаг 1. Включи Figma MCP-сервер
+## Step 1. Connect the Figma MCP server
 
-1. Открой **Figma Desktop**
-2. В меню **Figma → Preferences** (на Mac) или **Edit → Preferences** (Windows)
-3. Найди пункт **Enable Dev Mode MCP Server** и включи его
-4. Figma покажет зелёное уведомление «MCP server is running on port 3845»
+In Claude Desktop, open a new chat and run this command:
 
-Figma должна оставаться открытой, пока ты пользуешься скиллами.
+```
+claude mcp add --transport http figma-remote-mcp https://mcp.figma.com/mcp
+```
+
+This registers Figma's hosted MCP server. Claude will ask you to authenticate with your Figma account on first use.
+
+### Verify the MCP connection
+
+In a new chat, ask:
+```
+what MCP tools do you have available?
+```
+
+You should see tools prefixed with `figma_`. If they're missing — rerun the `claude mcp add` command and restart Claude Desktop.
 
 ---
 
-## Шаг 2. Подключи Figma к Claude Desktop
-
-### На macOS
-
-1. Открой **Claude Desktop**
-2. **Claude → Settings** (или `⌘ ,`)
-3. Вкладка **Developer** → **Edit Config**
-4. Откроется файл `claude_desktop_config.json`. Вставь в него:
-
-```json
-{
-  "mcpServers": {
-    "figma": {
-      "url": "http://127.0.0.1:3845/mcp"
-    }
-  }
-}
-```
-
-5. Сохрани файл (`⌘ S`)
-6. **Перезапусти Claude Desktop** полностью (`⌘ Q`, потом открой снова)
-
-### На Windows
-
-1. Открой **Claude Desktop**
-2. **File → Settings** (шестерёнка слева внизу)
-3. Вкладка **Developer** → **Edit Config**
-4. Откроется `claude_desktop_config.json`. Вставь то же содержимое:
-
-```json
-{
-  "mcpServers": {
-    "figma": {
-      "url": "http://127.0.0.1:3845/mcp"
-    }
-  }
-}
-```
-
-5. Сохрани файл (`Ctrl S`)
-6. **Перезапусти Claude Desktop** (правый клик на иконке в трее → Quit → открой снова)
-
-### Проверка что MCP подключился
-
-В Claude Desktop создай новый чат и спроси:
-```
-какие у тебя есть MCP-инструменты?
-```
-
-В списке должны быть инструменты с префиксом `figma_` (например `figma_use_figma`, `figma_get_design_context`). Если их нет — Figma Desktop не запущена или MCP-сервер не включён (Шаг 1).
-
----
-
-## Шаг 3. Установи дизайн-скиллы
+## Step 2. Install the design skills
 
 ### macOS
 
-1. Скачай **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)**:
-   - Правый клик → **Save Link As…** → сохранить в Downloads
-2. Двойной клик по скачанному файлу
-3. Если macOS блокирует: правый клик → **Open** → подтвердить **Open**
-4. Откроется Terminal, прогонит 3 шага и покажет «Done!»
-5. Нажми любую клавишу чтобы закрыть
+1. Download **[install-macos.command](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-macos.command)**:
+   - Right-click → **Save Link As…** → save to Downloads
+2. Double-click the downloaded file
+3. If macOS blocks it: right-click → **Open** → confirm **Open**
+4. Terminal opens, runs 3 steps, shows "Done!"
+5. Press any key to close
 
 ### Windows
 
-1. Скачай **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)**:
-   - Правый клик → **Save link as…** → сохранить в Downloads
-2. Двойной клик по скачанному файлу
-3. Если SmartScreen блокирует: **More info** → **Run anyway**
-4. Откроется консоль, прогонит 3 шага и покажет «Done!»
-5. Нажми любую клавишу чтобы закрыть
+1. Download **[install-windows.bat](https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/install-windows.bat)**:
+   - Right-click → **Save link as…** → save to Downloads
+2. Double-click the downloaded file
+3. If SmartScreen blocks it: **More info** → **Run anyway**
+4. Console opens, runs 3 steps, shows "Done!"
+5. Press any key to close
 
 ---
 
-## Шаг 4. Перезапусти Claude Desktop
+## Step 3. Restart Claude Desktop
 
-Чтобы Claude подхватил установленные скиллы — **полностью перезапусти приложение** (не просто закрой окно).
+For Claude to pick up the new skills, **fully restart the app** (not just close the window).
 
-- **macOS:** `⌘ Q` → открой снова
-- **Windows:** правый клик на иконке в трее → Quit → открой снова
+- **macOS:** `⌘ Q` → reopen
+- **Windows:** right-click tray icon → Quit → reopen
 
 ---
 
-## Шаг 5. Проверь что всё работает
+## Step 4. Verify it works
 
-1. В Claude Desktop открой **новый чат**
-2. Напиши:
+1. Open a **new chat** in Claude Desktop
+2. Type:
    ```
-   /mockup создай страницу со списком заявителей
+   /sumsub-mockup create an applicant list page
    ```
-3. Claude должен начать работу со скиллом — откроется Figma, появится макет
+3. Claude should start the skill — Figma opens and a mockup appears
 
-> **Важно:** подсказка `/mockup` может не показываться в выпадающем списке — это нормально. Просто печатай команду и жми Enter.
+> **Note:** the `/sumsub-mockup` hint may not appear in the autocomplete dropdown — that's fine. Just type the command and hit Enter.
 
-Если ничего не происходит — попробуй без `/`:
+If nothing happens, try it without the slash:
 ```
-Используй skill mockup и создай страницу со списком заявителей в Figma
+Use the sumsub-mockup skill to create an applicant list page in Figma
 ```
 
 ---
 
-## Что теперь доступно
+## Available commands
 
-После установки в Claude Desktop работают 4 команды:
+After installation, Claude Desktop supports 4 commands:
 
-| Команда | Что делает |
+| Command | What it does |
 |---|---|
-| `/mockup [описание]` | Создаёт макет в Figma из твоего описания |
-| `/specs-docs [компонент]` | Генерирует страницу Specs с анатомией компонента |
-| `/screen-annotations` | Расставляет Scenarios-аннотации над экранами на текущей странице |
-| `/design-review` | Проверяет макеты на соответствие дизайн-системе |
+| `/sumsub-mockup [description]` | Creates a mockup in Figma from your description |
+| `/sumsub-specs-docs [component]` | Generates a Specs page with component anatomy |
+| `/sumsub-screen-annotations` | Adds Scenarios annotations above every screen on the current page |
+| `/sumsub-design-review` | Audits a mockup for design system compliance |
 
 ---
 
-## Обновление скиллов
+## Updating
 
-Когда в репозиторий выкатывают новую версию — просто **запусти инсталлер ещё раз**. Он перезапишет старые версии свежими. Перезапускать Claude после обновления обязательно.
+When a new version is released — **just run the installer again**. It replaces old skill versions with the latest. Restart Claude Desktop after updating.
 
 ---
 
-## Если что-то не работает
+## Troubleshooting
 
-### Скиллы не находятся
+### Skills aren't recognized
 
-1. Открой в проводнике:
-   - macOS: `~/.claude/skills/` (в Finder: `⌘⇧G` → введи путь)
+1. Open in your file manager:
+   - macOS: `~/.claude/skills/` (in Finder: `⌘⇧G`, paste the path)
    - Windows: `%USERPROFILE%\.claude\skills\`
-2. Должны быть 4 папки: `design-review`, `mockup`, `screen-annotations`, `specs-documentation`
-3. Если папок нет — инсталлер не отработал. Запусти заново и смотри ошибки в консоли.
+2. You should see 4 folders: `sumsub-design-review`, `sumsub-mockup`, `sumsub-screen-annotations`, `sumsub-specs-docs`
+3. If folders are missing — the installer didn't finish. Run it again and watch the console for errors.
 
-### MCP-инструменты Figma недоступны в Claude
+### Figma MCP tools aren't available in Claude
 
-1. Убедись что Figma Desktop открыта
-2. В Figma: Preferences → **Enable Dev Mode MCP Server** должно быть включено
-3. Перезапусти Claude Desktop
-4. Проверь `claude_desktop_config.json` — URL должен быть `http://127.0.0.1:3845/mcp`
+1. Re-run the MCP setup command:
+   ```
+   claude mcp add --transport http figma-remote-mcp https://mcp.figma.com/mcp
+   ```
+2. Restart Claude Desktop
+3. Make sure you authenticated with your Figma account when prompted
 
-### Скилл запускается но падает с ошибкой
+### A skill runs but fails with an error
 
-Скопируй точный текст ошибки и напиши в команду `#ux-claude-skills` (или кому-то из поддерживающих).
+Copy the exact error text and send it to the UX team channel (or ping a maintainer).
 
 ---
 
-## Поддержка
+## Support
 
-Maintained by Sumsub UX Team. Issues и вопросы — в GitHub Issues репозитория или напрямую мейнтейнерам.
+Maintained by the Sumsub UX Team. Issues and questions — GitHub Issues on this repo, or ping maintainers directly.

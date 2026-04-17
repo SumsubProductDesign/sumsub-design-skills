@@ -67,6 +67,13 @@ if not exist "%SOURCE_SKILLS%" (
 if not exist "%TARGET%" mkdir "%TARGET%"
 
 echo [2/3] Installing skills into %TARGET%
+REM Clean up old (unprefixed) skill folders from previous versions
+for %%O in (mockup specs-docs screen-annotations design-review) do (
+  if exist "%TARGET%\%%O" (
+    echo        removing old %%O ^(replaced by sumsub-%%O^)
+    rmdir /s /q "%TARGET%\%%O"
+  )
+)
 for /d %%D in ("%SOURCE_SKILLS%\*") do (
   echo        - %%~nxD
   if exist "%TARGET%\%%~nxD" rmdir /s /q "%TARGET%\%%~nxD"
@@ -85,6 +92,6 @@ echo Installed skills:
 dir /B "%TARGET%"
 echo.
 echo Restart Claude Desktop to pick up the new skills.
-echo Then in the Code tab, type /mockup or /specs-docs to use them.
+echo Then type /sumsub-mockup or /sumsub-specs-docs to use them.
 echo.
 pause

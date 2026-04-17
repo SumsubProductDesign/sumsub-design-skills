@@ -19,54 +19,54 @@ Claude skills for the Sumsub Product Design team. Adds 4 slash commands that aut
 
 All skills work through the Figma MCP server and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
 
-> **📘 Подробная инструкция по установке (RU): [INSTALL.md](INSTALL.md)**
+> **📘 Detailed install guide: [INSTALL.md](INSTALL.md)**
 >
-> Шаги для дизайнеров: как установить Claude Desktop, подключить Figma MCP-сервер, и поставить скиллы.
+> Step-by-step for designers: Claude Desktop + Figma MCP server + skills.
 
 ## Available Skills
 
-### `/specs-docs` — Component Anatomy Documentation
+### `/sumsub-specs-docs` — Component Anatomy Documentation
 
 Generates Specs-style documentation pages for any component from the design system. Creates anatomy exhibits with numbered markers pointing to structural parts, a legend with attributes, variant grids, and Do/Don't usage cards.
 
 **Example:**
 ```
-/specs-docs Button
+/sumsub-specs-docs Button
 ```
 
 ---
 
-### `/screen-annotations` — Scenario Annotations
+### `/sumsub-screen-annotations` — Scenario Annotations
 
 Adds standardized Scenarios annotation blocks above each screen in a Figma flow. Numbers them in X.Y format and writes concise English descriptions focused on user actions.
 
 **Example:**
 ```
-/screen-annotations
+/sumsub-screen-annotations
 ```
 
 ---
 
-### `/mockup` — Mockup Builder
+### `/sumsub-mockup` — Mockup Builder
 
 Creates Figma mockups for any dashboard screen. Describe what you need — a table page, detail view, form, modal, empty state — and get a pixel-perfect screen built with design system components.
 
 **Examples:**
 ```
-/mockup applicant list with status and date columns
-/mockup settings page with form and save button
-/mockup empty state for no search results
+/sumsub-mockup applicant list with status and date columns
+/sumsub-mockup settings page with form and save button
+/sumsub-mockup empty state for no search results
 ```
 
 ---
 
-### `/design-review` — Design System Audit
+### `/sumsub-design-review` — Design System Audit
 
 Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues: unbound fills/strokes/spacing, `base/*` tokens instead of `semantic/*`, wrong fonts, wrong libraries.
 
 **Example:**
 ```
-/design-review
+/sumsub-design-review
 ```
 
 ---
@@ -107,7 +107,7 @@ Update later with `npx skills update`, remove with `npx skills remove`.
 
 1. **Restart Claude Desktop** so it reloads the skills
 2. Open the **Code** tab
-3. Type `/mockup` (or `/specs-docs`, `/screen-annotations`, `/design-review`) to use a skill
+3. Type `/sumsub-mockup` (or `/sumsub-specs-docs`, `/sumsub-screen-annotations`, `/sumsub-design-review`) to use a skill
 
 ## Prerequisites
 
@@ -125,12 +125,12 @@ sumsub-design-skills/
 ├── install-macos.command               # Double-click installer (macOS)
 ├── install-windows.bat                 # Double-click installer (Windows)
 ├── skills/
-│   ├── specs-documentation/SKILL.md    # /specs-docs
-│   ├── screen-annotations/SKILL.md     # /screen-annotations
-│   ├── mockup/
-│   │   ├── SKILL.md                    # /mockup
-│   │   └── blocks/                     # helpers.js + block templates
-│   └── design-review/SKILL.md          # /design-review
+│   ├── sumsub-specs-docs/SKILL.md          # /sumsub-specs-docs
+│   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-screen-annotations
+│   ├── sumsub-mockup/
+│   │   ├── SKILL.md                        # /sumsub-mockup
+│   │   └── blocks/                         # helpers.js + block templates
+│   └── sumsub-design-review/SKILL.md       # /sumsub-design-review
 └── reference/
     ├── design-system.md                # Components, variables, tokens
     ├── color-usage.md                  # Semantic color usage

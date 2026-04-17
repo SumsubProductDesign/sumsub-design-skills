@@ -37,6 +37,13 @@ fi
 mkdir -p "$TARGET"
 
 echo "[2/3] Installing skills into $TARGET"
+# Clean up old (unprefixed) skill folders from previous versions
+for OLD_NAME in mockup specs-docs screen-annotations design-review; do
+  if [ -d "$TARGET/$OLD_NAME" ]; then
+    echo "       removing old $OLD_NAME (replaced by sumsub-$OLD_NAME)"
+    rm -rf "$TARGET/$OLD_NAME"
+  fi
+done
 # Copy each skill (merge — don't touch unrelated skills in $TARGET)
 for SKILL_DIR in "$SOURCE_SKILLS"/*/; do
   SKILL_NAME="$(basename "$SKILL_DIR")"
@@ -57,7 +64,7 @@ echo "Installed skills:"
 ls -1 "$TARGET"
 echo ""
 echo "Restart Claude Desktop to pick up the new skills."
-echo "Then in the Code tab, type /mockup or /specs-docs to use them."
+echo "Then type /sumsub-mockup or /sumsub-specs-docs to use them."
 echo ""
 read -n 1 -s -r -p "Press any key to close..."
 echo ""
