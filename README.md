@@ -17,7 +17,11 @@
 
 Claude skills for the Sumsub Product Design team. Adds 4 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, and auditing designs for system compliance.
 
-All skills work through the [Figma MCP server](https://github.com/niceandfun/figma-mcp) and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
+All skills work through the Figma MCP server and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
+
+> **📘 Подробная инструкция по установке (RU): [INSTALL.md](INSTALL.md)**
+>
+> Шаги для дизайнеров: как установить Claude Desktop, подключить Figma MCP-сервер, и поставить скиллы.
 
 ## Available Skills
 
