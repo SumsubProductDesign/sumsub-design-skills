@@ -1,5 +1,5 @@
 ---
-name: mockup
+name: sumsub-mockup
 description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states. Describe what you need and get a pixel-perfect screen using Sumsub design system components."
 argument-hint: "[screen description]"
 ---

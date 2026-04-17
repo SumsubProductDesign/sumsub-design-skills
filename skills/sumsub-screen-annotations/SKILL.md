@@ -1,5 +1,5 @@
 ---
-name: screen-annotations
+name: sumsub-screen-annotations
 description: "Add Scenarios annotation blocks above Figma mockup screens. Use when creating flows or when mockups are missing annotations. Proactively suggests adding them."
 argument-hint: "[figma-file-url]"
 ---

@@ -21,38 +21,38 @@ All skills work through the Figma MCP server (registered automatically with the 
 
 ## Available Commands
 
-### `/sumsub-design:specs-docs` — Component Anatomy Documentation
+### `/sumsub-design:sumsub-specs-docs` — Component Anatomy Documentation
 
 Generates Specs-style documentation pages for any component from the design system. Creates anatomy exhibits with numbered markers pointing to structural parts, a legend with attributes, variant grids, and Do/Don't usage cards.
 
 ```
-/sumsub-design:specs-docs Button
+/sumsub-design:sumsub-specs-docs Button
 ```
 
-### `/sumsub-design:screen-annotations` — Scenario Annotations
+### `/sumsub-design:sumsub-screen-annotations` — Scenario Annotations
 
 Adds standardized Scenarios annotation blocks above each screen in a Figma flow. Numbers them in X.Y format and writes concise English descriptions focused on user actions.
 
 ```
-/sumsub-design:screen-annotations
+/sumsub-design:sumsub-screen-annotations
 ```
 
-### `/sumsub-design:mockup` — Mockup Builder
+### `/sumsub-design:sumsub-mockup` — Mockup Builder
 
 Creates Figma mockups for any dashboard screen. Describe what you need — a table page, detail view, form, modal, empty state — and get a pixel-perfect screen built with design system components.
 
 ```
-/sumsub-design:mockup applicant list with status and date columns
-/sumsub-design:mockup settings page with form and save button
-/sumsub-design:mockup empty state for no search results
+/sumsub-design:sumsub-mockup applicant list with status and date columns
+/sumsub-design:sumsub-mockup settings page with form and save button
+/sumsub-design:sumsub-mockup empty state for no search results
 ```
 
-### `/sumsub-design:design-review` — Design System Audit
+### `/sumsub-design:sumsub-design-review` — Design System Audit
 
 Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues: unbound fills/strokes/spacing, `base/*` tokens instead of `semantic/*`, wrong fonts, wrong libraries.
 
 ```
-/sumsub-design:design-review
+/sumsub-design:sumsub-design-review
 ```
 
 ## Installation
@@ -79,7 +79,7 @@ This registers the Figma MCP server automatically — no separate setup needed.
 In a new session, type:
 
 ```
-/sumsub-design:mockup create an applicant list page
+/sumsub-design:sumsub-mockup create an applicant list page
 ```
 
 Figma should open and a mockup should appear.
@@ -103,12 +103,12 @@ sumsub-design-skills/
 │   └── marketplace.json             # marketplace catalog
 ├── .mcp.json                        # Figma MCP server config
 ├── skills/
-│   ├── mockup/
-│   │   ├── SKILL.md                 # /sumsub-design:mockup
-│   │   └── blocks/                  # helpers.js + block templates
-│   ├── specs-docs/SKILL.md          # /sumsub-design:specs-docs
-│   ├── screen-annotations/SKILL.md  # /sumsub-design:screen-annotations
-│   └── design-review/SKILL.md       # /sumsub-design:design-review
+│   ├── sumsub-mockup/
+│   │   ├── SKILL.md                        # /sumsub-design:sumsub-mockup
+│   │   └── blocks/                         # helpers.js + block templates
+│   ├── sumsub-specs-docs/SKILL.md          # /sumsub-design:sumsub-specs-docs
+│   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-design:sumsub-screen-annotations
+│   └── sumsub-design-review/SKILL.md       # /sumsub-design:sumsub-design-review
 └── reference/
     ├── design-system.md             # Components, variables, tokens
     ├── color-usage.md               # Semantic color usage
