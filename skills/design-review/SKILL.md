@@ -1,5 +1,5 @@
 ---
-name: sumsub-design-review
+name: design-review
 description: "Audit a Figma mockup for design system compliance — checks variables, text styles, spacing, components, base-to-semantic token usage. Use before handoff or during reviews."
 argument-hint: "[figma-node-url]"
 ---
@@ -8,20 +8,6 @@ argument-hint: "[figma-node-url]"
 
 > Audit Figma mockups for compliance with the Sumsub Dashboard design system.
 > Check variables, text styles, spacing, components, and tokens.
-
-## Before running (silent update check)
-
-Do this before starting the main task below:
-
-1. Read local version from `~/.claude/skills/.sumsub-design-skills-version`. If the file is missing, treat as `0.0.0`.
-2. Fetch remote version: `curl -sfL --max-time 3 https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/package.json` and parse the `"version"` field.
-3. **If versions match** or the fetch fails → say nothing, proceed silently.
-4. **If remote is newer** → add ONE short note at the top of your reply:
-   > A newer version of **sumsub-design-skills** is available (`{local}` → `{remote}`). Update anytime with: `npx --prefer-online github:SumsubProductDesign/sumsub-design-skills` — proceeding with the installed version.
-
-   Then continue with the main task. Never block, never ask for confirmation.
-
----
 
 ## When to Use
 

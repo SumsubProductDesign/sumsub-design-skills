@@ -1,0 +1,16 @@
+{
+  "name": "sumsub-design",
+  "owner": {
+    "name": "Sumsub Product Design"
+  },
+  "metadata": {
+    "description": "Sumsub design system skills marketplace"
+  },
+  "plugins": [
+    {
+      "name": "sumsub-design",
+      "source": "./",
+      "description": "Figma design system skills: mockups, specs docs, screen annotations, design review"
+    }
+  ]
+}

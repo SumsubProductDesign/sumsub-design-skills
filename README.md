@@ -15,108 +15,128 @@
 
 # Sumsub Design Skills
 
-Claude skills for the Sumsub Product Design team. Adds 4 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, and auditing designs for system compliance.
+Claude Code plugin for the Sumsub Product Design team. Adds 4 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, and auditing designs for system compliance.
 
-All skills work through the Figma MCP server and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
+All skills work through the Figma MCP server (registered automatically with the plugin) and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
 
-> **📘 Detailed install guide: [INSTALL.md](INSTALL.md)**
->
-> Step-by-step for designers: Claude Desktop + Figma MCP server + skills.
+## Available Commands
 
-## Available Skills
-
-### `/sumsub-specs-docs` — Component Anatomy Documentation
+### `/sumsub-design:specs-docs` — Component Anatomy Documentation
 
 Generates Specs-style documentation pages for any component from the design system. Creates anatomy exhibits with numbered markers pointing to structural parts, a legend with attributes, variant grids, and Do/Don't usage cards.
 
-**Example:**
 ```
-/sumsub-specs-docs Button
+/sumsub-design:specs-docs Button
 ```
 
----
-
-### `/sumsub-screen-annotations` — Scenario Annotations
+### `/sumsub-design:screen-annotations` — Scenario Annotations
 
 Adds standardized Scenarios annotation blocks above each screen in a Figma flow. Numbers them in X.Y format and writes concise English descriptions focused on user actions.
 
-**Example:**
 ```
-/sumsub-screen-annotations
+/sumsub-design:screen-annotations
 ```
 
----
-
-### `/sumsub-mockup` — Mockup Builder
+### `/sumsub-design:mockup` — Mockup Builder
 
 Creates Figma mockups for any dashboard screen. Describe what you need — a table page, detail view, form, modal, empty state — and get a pixel-perfect screen built with design system components.
 
-**Examples:**
 ```
-/sumsub-mockup applicant list with status and date columns
-/sumsub-mockup settings page with form and save button
-/sumsub-mockup empty state for no search results
+/sumsub-design:mockup applicant list with status and date columns
+/sumsub-design:mockup settings page with form and save button
+/sumsub-design:mockup empty state for no search results
 ```
 
----
-
-### `/sumsub-design-review` — Design System Audit
+### `/sumsub-design:design-review` — Design System Audit
 
 Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues: unbound fills/strokes/spacing, `base/*` tokens instead of `semantic/*`, wrong fonts, wrong libraries.
 
-**Example:**
 ```
-/sumsub-design-review
+/sumsub-design:design-review
 ```
-
----
 
 ## Installation
 
-One command, installs everything (skills + Figma MCP):
+### Prerequisites
 
-```bash
-npx github:SumsubProductDesign/sumsub-design-skills
+1. **Claude Code** (desktop app or CLI) — https://claude.ai/download
+2. **Figma Desktop** — https://www.figma.com/downloads/ (must be running and logged in; Claude uses your logged-in session to authenticate with the Figma MCP)
+3. Access to Sumsub Figma libraries (Base components, Organisms, Assets)
+
+### Install the plugin
+
+In Claude Code, add the marketplace and install the plugin:
+
+```
+/plugin marketplace add SumsubProductDesign/sumsub-design-skills
+/plugin install sumsub-design@sumsub-design
 ```
 
-Restart Claude Desktop afterwards. See [INSTALL.md](INSTALL.md) for prerequisites and troubleshooting.
+This registers the Figma MCP server automatically — no separate setup needed.
 
-## Prerequisites
+### Verify
 
-1. **Claude Desktop** — https://claude.ai/download
-2. **Figma Desktop** — https://www.figma.com/downloads/ (for authentication and viewing designs)
-3. **Node.js** (LTS) — https://nodejs.org (to run `npx`)
-4. Access to Sumsub Figma libraries (Base components, Organisms, Assets)
+In a new session, type:
+
+```
+/sumsub-design:mockup create an applicant list page
+```
+
+Figma should open and a mockup should appear.
+
+## Updating
+
+Plugins auto-update from the marketplace. To force a refresh:
+
+```
+/plugin marketplace update sumsub-design
+```
+
+Maintainers bump `version` in `.claude-plugin/plugin.json` when releasing.
 
 ## Project Structure
 
 ```
 sumsub-design-skills/
-├── bin/
-│   └── install.js              # npx entry point — copies skills + registers MCP
-├── package.json                # npm manifest (name, bin, repo)
+├── .claude-plugin/
+│   ├── plugin.json                  # plugin manifest
+│   └── marketplace.json             # marketplace catalog
+├── .mcp.json                        # Figma MCP server config
 ├── skills/
-│   ├── sumsub-mockup/
-│   │   ├── SKILL.md            # /sumsub-mockup
-│   │   └── blocks/             # helpers.js + block templates
-│   ├── sumsub-specs-docs/SKILL.md          # /sumsub-specs-docs
-│   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-screen-annotations
-│   └── sumsub-design-review/SKILL.md       # /sumsub-design-review
+│   ├── mockup/
+│   │   ├── SKILL.md                 # /sumsub-design:mockup
+│   │   └── blocks/                  # helpers.js + block templates
+│   ├── specs-docs/SKILL.md          # /sumsub-design:specs-docs
+│   ├── screen-annotations/SKILL.md  # /sumsub-design:screen-annotations
+│   └── design-review/SKILL.md       # /sumsub-design:design-review
 └── reference/
-    ├── design-system.md        # Components, variables, tokens
-    ├── color-usage.md          # Semantic color usage
-    ├── layout-patterns.md      # Page layout patterns
-    └── BLOCKS.md               # Figma Blocks system
+    ├── design-system.md             # Components, variables, tokens
+    ├── color-usage.md               # Semantic color usage
+    ├── layout-patterns.md           # Page layout patterns
+    └── BLOCKS.md                    # Figma Blocks system
 ```
 
-## Updating
+## Team-wide distribution
 
-When the design system or any skill changes:
+To auto-register the marketplace for everyone on a project, add to the project's `.claude/settings.json`:
 
-1. Edit files in `skills/` or `reference/`
-2. Bump `version` in `package.json`
-3. Commit and push to `main`
-4. Team members re-run `npx github:SumsubProductDesign/sumsub-design-skills` to pull the latest
+```json
+{
+  "extraKnownMarketplaces": {
+    "sumsub-design": {
+      "source": {
+        "source": "github",
+        "repo": "SumsubProductDesign/sumsub-design-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "sumsub-design@sumsub-design": true
+  }
+}
+```
+
+Team members will be prompted to install the plugin when they trust the project folder.
 
 ## Team
 

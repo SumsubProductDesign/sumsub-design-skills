@@ -1,5 +1,5 @@
 ---
-name: sumsub-screen-annotations
+name: screen-annotations
 description: "Add Scenarios annotation blocks above Figma mockup screens. Use when creating flows or when mockups are missing annotations. Proactively suggests adding them."
 argument-hint: "[figma-file-url]"
 ---
@@ -8,20 +8,6 @@ argument-hint: "[figma-file-url]"
 
 > Add Scenarios annotation blocks above mockup screens describing key functionality.
 > Proactively suggest adding annotations if they're missing.
-
-## Before running (silent update check)
-
-Do this before starting the main task below:
-
-1. Read local version from `~/.claude/skills/.sumsub-design-skills-version`. If the file is missing, treat as `0.0.0`.
-2. Fetch remote version: `curl -sfL --max-time 3 https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/package.json` and parse the `"version"` field.
-3. **If versions match** or the fetch fails → say nothing, proceed silently.
-4. **If remote is newer** → add ONE short note at the top of your reply:
-   > A newer version of **sumsub-design-skills** is available (`{local}` → `{remote}`). Update anytime with: `npx --prefer-online github:SumsubProductDesign/sumsub-design-skills` — proceeding with the installed version.
-
-   Then continue with the main task. Never block, never ask for confirmation.
-
----
 
 ## What & Why
 
