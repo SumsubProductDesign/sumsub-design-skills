@@ -5,7 +5,9 @@ Step-by-step instructions for designers. Total time: 5–10 minutes.
 ## Prerequisites
 
 1. **Claude Desktop** — https://claude.ai/download
-2. A Figma account with access to Sumsub libraries
+2. **Figma Desktop** — https://www.figma.com/downloads/
+   - Required: Claude uses your logged-in Figma session to authenticate with the MCP server, and the app needs to be open when you use the skills so Claude can see and edit your files.
+3. A Figma account with access to Sumsub libraries
 
 ---
 
