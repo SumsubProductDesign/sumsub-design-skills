@@ -104,6 +104,16 @@ After installation, Claude Desktop supports 4 commands:
 
 When a new version is released — **just run the installer again**. It replaces old skill versions with the latest. Restart Claude Desktop after updating.
 
+### Already installed skills but not MCP?
+
+If you installed the skills earlier via `npx skills add` or manually (without registering the Figma MCP server), open Claude Desktop and run:
+
+```
+/sumsub-setup
+```
+
+It writes the MCP config for you in under a second. Fully restart Claude Desktop afterwards (`⌘ Q` on macOS, Quit from tray on Windows) and you're good to go.
+
 ---
 
 ## Troubleshooting
