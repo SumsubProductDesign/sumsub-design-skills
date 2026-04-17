@@ -57,15 +57,9 @@ Audits Figma mockups for compliance with the Sumsub Dashboard design system. Wal
 
 ## Installation
 
-### Prerequisites
+> **📘 Full step-by-step guide: [INSTALL.md](INSTALL.md)** — prerequisites, verification, updating, team-wide setup, troubleshooting.
 
-1. **Claude Code** (desktop app or CLI) — https://claude.ai/download
-2. **Figma Desktop** — https://www.figma.com/downloads/ (must be running and logged in; Claude uses your logged-in session to authenticate with the Figma MCP)
-3. Access to Sumsub Figma libraries (Base components, Organisms, Assets)
-
-### Install the plugin
-
-In Claude Code, add the marketplace and install the plugin:
+Quick version:
 
 ```
 /plugin marketplace add SumsubProductDesign/sumsub-design-skills
