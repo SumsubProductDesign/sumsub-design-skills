@@ -19,9 +19,29 @@ The installer does two things in one run:
 
 Pick **one** of the options below.
 
-### Option A — Double-click installer (recommended)
+### Option A — `skills` CLI (recommended)
 
-Bundles both skills and MCP setup. No Node.js or terminal required.
+Two commands. Works on macOS, Windows, Linux.
+
+In any terminal:
+
+```
+npx skills add SumsubProductDesign/sumsub-design-skills
+```
+
+Then open Claude Desktop and in a new chat run:
+
+```
+/sumsub-setup
+```
+
+`/sumsub-setup` writes the Figma MCP config for you (idempotent, safe to re-run anytime).
+
+Requires Node.js. If you don't have it: https://nodejs.org (LTS version). Update skills later with `npx skills update`.
+
+### Option B — Double-click installer (if you can't use Node.js)
+
+Bundles both skills and MCP setup in one double-click. No terminal required.
 
 **macOS:**
 
@@ -38,24 +58,6 @@ Bundles both skills and MCP setup. No Node.js or terminal required.
 3. If SmartScreen blocks it: **More info** → **Run anyway**
 4. Console opens, runs 4 steps, shows "Done!"
 5. Press any key to close
-
-### Option B — `skills` CLI (if you have Node.js)
-
-Two commands. The first installs skills, the second runs a helper skill that registers the Figma MCP server.
-
-```
-npx skills add SumsubProductDesign/sumsub-design-skills
-```
-
-Then open Claude Desktop and in any new chat run:
-
-```
-/sumsub-setup
-```
-
-That's it — `/sumsub-setup` writes the MCP config for you (idempotent, safe to re-run anytime).
-
-Works on macOS, Windows, Linux. Update skills later with `npx skills update`.
 
 ---
 

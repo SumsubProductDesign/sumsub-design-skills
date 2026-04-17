@@ -75,9 +75,21 @@ Audits Figma mockups for compliance with the Sumsub Dashboard design system. Wal
 
 Two options — pick whichever fits you.
 
-### Option A — Double-click installer (recommended for designers)
+### Option A — `skills` CLI (recommended)
 
-No terminal, no Node.js needed.
+Uses the universal [`skills`](https://github.com/vercel-labs/skills) tool, which auto-detects your AI agent and installs to the right place.
+
+```bash
+npx skills add SumsubProductDesign/sumsub-design-skills
+```
+
+Then open Claude Desktop and run `/sumsub-setup` once in any new chat — it registers the Figma MCP server. Update later with `npx skills update`.
+
+Requires Node.js (LTS): https://nodejs.org
+
+### Option B — Double-click installer (if you can't use Node.js)
+
+No terminal, no Node.js needed. Bundles skills and MCP setup in one click.
 
 **macOS:**
 
@@ -91,17 +103,7 @@ No terminal, no Node.js needed.
 2. Double-click the downloaded file
 3. If Windows SmartScreen blocks it: click **More info** → **Run anyway**
 
-The installer downloads the latest skills from GitHub and puts them in `~/.claude/skills/` (macOS) or `%USERPROFILE%\.claude\skills\` (Windows). Re-run anytime to update.
-
-### Option B — `skills` CLI (if you have Node.js)
-
-Uses the universal [`skills`](https://github.com/vercel-labs/skills) tool, which auto-detects your AI agent and installs to the right place.
-
-```bash
-npx skills add SumsubProductDesign/sumsub-design-skills
-```
-
-Update later with `npx skills update`, remove with `npx skills remove`.
+The installer downloads the latest skills from GitHub, puts them in `~/.claude/skills/` (macOS) or `%USERPROFILE%\.claude\skills\` (Windows), and registers the Figma MCP server. Re-run anytime to update.
 
 ### After installing (either option)
 
