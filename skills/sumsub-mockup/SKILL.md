@@ -10,6 +10,22 @@ argument-hint: "[screen description]"
 > Supports table pages, detail pages, forms, modals, drawers, and custom layouts.
 > Uses the Figma Blocks system (helpers.js + block JS) and Sumsub design system components.
 
+## 🚨 Critical rules — read and follow every time
+
+These are non-negotiable. Violating any of them is treated as a bug:
+
+1. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
+
+2. **Page title goes INSIDE the `*Header*` component.** Use the Header's built-in title property (e.g. `Title text#3817:0`). NEVER create a separate TEXT node for the page title above or below the header. Don't build a "Title Row" — that's duplication.
+
+3. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
+
+4. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
+
+5. **Self-verify before delivering.** After every build, run an audit script via `use_figma` that checks: no children overflow, widths match spec, cornerRadius applied, text filled correctly, instances positioned in bounds. Fix everything it finds BEFORE sharing the link. Never say "done!" without verifying. Assume nothing worked until Plugin API confirms it.
+
+---
+
 ## Block vs Page — read this first
 
 Before starting, decide what the user actually wants:
