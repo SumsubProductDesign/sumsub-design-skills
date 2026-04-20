@@ -42,6 +42,20 @@ Before starting, decide what the user actually wants:
 
 **If unclear, ask first.** Never default to wrapping a block in a full-page layout — that loses focus on the block itself. When building just a block, place it on free canvas near the original in the same file.
 
+## Product-specific references
+
+When the task mentions a specific Sumsub product area, READ the matching reference doc first before building:
+
+| Product | Reference file |
+|---|---|
+| Applicant page / Applicant flow | `reference/applicant-page-pattern.md`, `reference/ap-component-catalog.md` |
+| Flow Builder / Workflow canvas / Workflow nodes | `reference/flowbuilder.md` |
+| Page layouts (table, detail, etc.) | `reference/layout-patterns.md` |
+| Design system components / variables | `reference/design-system.md`, `reference/color-usage.md` |
+| Blocks system (helpers + templates) | `reference/BLOCKS.md` |
+
+These references contain exact component keys, variant names, measured paddings, and gotchas. Do NOT guess — consult the reference.
+
 ## Text truncation — always enable
 
 Every `TEXT` node you create must have ellipsis truncation so it degrades gracefully when content doesn't fit:
