@@ -26,6 +26,36 @@ Before starting, decide what the user actually wants:
 
 **If unclear, ask first.** Never default to wrapping a block in a full-page layout — that loses focus on the block itself. When building just a block, place it on free canvas near the original in the same file.
 
+## Text truncation — always enable
+
+Every `TEXT` node you create must have ellipsis truncation so it degrades gracefully when content doesn't fit:
+
+```js
+text.textAutoResize = "TRUNCATE";   // one line, ellipsis if overflow
+text.textTruncation = "ENDING";      // adds "…"
+```
+
+For multi-line descriptions (captions, body text that may wrap):
+
+```js
+text.textAutoResize = "HEIGHT";
+text.textTruncation = "ENDING";
+text.maxLines = 2;  // or 3
+```
+
+**Requirement:** the text node must have a bounded width — either fixed (`resize(W, …)`) or `layoutSizingHorizontal = "FILL"`. Truncation has no effect on `WIDTH_AND_HEIGHT`.
+
+**Never leave** data-fed text (names, IDs, URLs, locations) with default `WIDTH_AND_HEIGHT` — it will overflow containers when real data is longer than the placeholder.
+
+## Icons: always from the DS icon pack
+
+**Never build custom icons from rectangles, ellipses, or vectors.** Always use an instance from the Sumsub Assets library.
+
+- 626 icons available in 4 sizes: `small/8px`, `small`, `normal`, `large`
+- If `search_design_system` with one keyword returns nothing, try synonyms (monitor / device / computer / laptop / desktop / screen) and check all sizes
+- Check both `Assets` library and `Base components` library
+- **If truly no matching icon exists, tell the user explicitly** before building a custom shape. Never silently draw rectangles.
+
 ## Workflow
 
 Block files are bundled with this skill in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/`.
