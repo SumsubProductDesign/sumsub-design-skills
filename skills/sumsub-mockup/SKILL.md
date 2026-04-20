@@ -10,6 +10,22 @@ argument-hint: "[screen description]"
 > Supports table pages, detail pages, forms, modals, drawers, and custom layouts.
 > Uses the Figma Blocks system (helpers.js + block JS) and Sumsub design system components.
 
+## Block vs Page — read this first
+
+Before starting, decide what the user actually wants:
+
+**Build just the block** (no page wrapper) when the user:
+- Says "recreate **this** block" / "build this component" / "пересоздай этот блок"
+- Shares a single Figma node URL pointing to a component or internal frame (not a full-page frame)
+- Describes a single UI element (card, drawer, modal, etc.) without mentioning a page
+
+**Build a full page** (sidebar + header + content) when the user:
+- Says "page" / "screen" / "mockup" / "страница" / "экран"
+- Shares a URL to a top-level 1440×900 frame
+- Asks for a flow or multiple screens
+
+**If unclear, ask first.** Never default to wrapping a block in a full-page layout — that loses focus on the block itself. When building just a block, place it on free canvas near the original in the same file.
+
 ## Workflow
 
 Block files are bundled with this skill in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/`.
