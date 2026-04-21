@@ -9,6 +9,7 @@
   "plugins": [
     {
       "name": "sumsub-design",
+      "version": "3.9.3",
       "source": "./",
       "description": "Figma design system skills: mockups, specs docs, screen annotations, design review"
     }

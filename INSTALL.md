@@ -138,6 +138,8 @@ Claude should start the skill — Figma opens and a mockup appears.
 
 The plugin doesn't auto-update. You need to refresh the marketplace cache and then pull the new version. Three ways to do it — pick one.
 
+> ⚠️ **Claude Desktop's "Check for updates" button is not enough.** It only looks at the locally cached marketplace copy and can show a stale "latest version". You MUST refresh the cache via the terminal first (any of the options below does this). After that, Desktop will show the correct latest version.
+
 ### Option A — `sumsub-update` one-liner (recommended, after one-time setup)
 
 This creates an alias in your shell so updating becomes a single command.
