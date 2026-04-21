@@ -14,14 +14,17 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
-0. **Ask WHERE to create the mockup — before anything else.** Don't assume the "current file". The user may want the mockup in a specific project. Ask first:
+0. **Ask WHERE to create the mockup — before anything else.** Don't assume the "current file" and don't default to personal Drafts. Four distinct destinations — ask explicitly:
 
    > Where should I create the mockup?
    > 1. **Existing file** — share a Figma URL (tell me which section/frame if relevant)
-   > 2. **Your Drafts** — I'll create a new file there
-   > 3. **Team folder** — tell me which team, I'll create a new file there
+   > 2. **Personal Drafts** — new file in your Drafts (personal tier)
+   > 3. **Team project** — tell me which team (Starter/Pro tier — has MCP file-creation limits)
+   > 4. **Sumsub org** — new file in the Sumsub organization (Org tier — recommended for work tasks)
 
-   Wait for the answer. Only start building once location is confirmed.
+   Wait for the answer. For work tasks (anything building on Sumsub product surfaces — Flow Builder, Applicant page, Dashboard screens, etc.) the default is option 4 (Sumsub org). Personal Drafts = Starter-tier limits = you WILL hit an MCP file-creation cap mid-build. Offer option 4 by default and ask to confirm.
+
+   **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
 
 1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
 
@@ -53,11 +56,22 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
 3. **Never invent components for known Sumsub products, and never deliver a "bare" mockup as a workaround.** If the product exists in our design system, every major structural piece (Sidebar, Header, Flowbuilder Header, Canvas, Canvas Bars, AP page header) must be an instance of an actual DS component.
 
-   **Two forbidden patterns:**
-   - Creating custom `FRAME` nodes named "Top Bar", "Toolbar", "Flow Builder Header", "Canvas" — these are fakes.
-   - **Delivering just the inner content** (e.g. "just the canvas with nodes, no Header, no Sidebar") and justifying it as "I couldn't find the shell components". A Flow Builder mockup without Flowbuilder Header + Sidebar + Canvas (with its bars) is not a Flow Builder mockup — it's a broken mockup. The components exist; find them via the reference.
+   **Forbidden patterns:**
+   - Creating custom `FRAME` nodes named "Top Bar", "Toolbar", "Flow Builder Header", "Canvas", "Dot Grid" — these are fakes.
+   - **Delivering just the inner content** ("just the canvas with nodes, no Header, no Sidebar") and justifying with "I couldn't find the shell components". A Flow Builder mockup without Flowbuilder Header + Sidebar + Canvas = broken mockup.
+   - **Building Canvas as a custom FRAME with a dot-grid fill**. The Canvas is a published component — use it as an instance. A dot-grid FRAME is a Canvas fake.
 
-   If you catch yourself about to say "I built just X because I couldn't find Y" — stop, read the reference for this product, and build the full thing.
+   **Forbidden justifications (all of these are the same banned excuse rephrased):**
+   - "the component doesn't exist in `search_design_system`"
+   - "the component isn't published as a library component"
+   - "the component is internal to a source file"
+   - "I'll use a generic `*Header*` instead of Flowbuilder Header because the latter isn't available"
+
+   If the library is truly not accessible (unpublished local component, file-private), the correct response is: *"The Flow Builder components live in file `X` as local components and aren't published. I can either (a) work directly inside that file, or (b) wait for DS to publish them — which do you prefer?"*. NOT "I'll build a custom frame".
+
+   **Never quote a reference as authority without citing it.** Saying "the reference recommends using generic Header" requires pasting the exact line from `reference/flowbuilder.md` that says so. If you can't paste the line, you're fabricating the authority — stop.
+
+   If you catch yourself about to say "I built just X because Y isn't available" — stop, re-read the reference for this product, and either build the full thing or surface the blocker to the user.
 
 4. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
 
@@ -203,8 +217,17 @@ These are non-negotiable. Violating any of them is treated as a bug:
      requireInstance(
        "Canvas",
        n => n.mainComponent?.parent?.name === "Canvas" || n.mainComponent?.name?.startsWith("Status="),
-       ["Canvas"] // forbidden as FRAME, required as INSTANCE
+       ["Canvas", "Dot Grid", "Canvas Background", "Grid", "Flow Canvas"] // forbidden as FRAME, required as INSTANCE
      );
+     // Fake-Canvas detection: a FRAME with dot-pattern / grid-like fill, used as Canvas substitute
+     const fakeDotGrids = all.filter(n =>
+       n.type === "FRAME" &&
+       n.fills?.some(f => f.type === "PATTERN" || (f.type === "IMAGE" && /grid|dot/i.test(n.name))) &&
+       n.width > 800 && n.height > 500
+     );
+     if (fakeDotGrids.length) {
+       issues.push(`${fakeDotGrids.length} large FRAME(s) with dot/grid pattern fill detected — looks like a fake Canvas built instead of using the Canvas component instance`);
+     }
      // Verify canvas bars exist (they come inside Canvas instance by default)
      const canvasInst = root.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas");
      if (canvasInst) {
