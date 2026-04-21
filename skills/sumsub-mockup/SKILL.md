@@ -31,15 +31,106 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
 7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
 
-8. **Self-verify before delivering.** After every build, run an audit script via `use_figma` that checks:
-   - No children overflow their parents
-   - Widths match spec
-   - cornerRadius applied
-   - Text filled correctly
-   - Instances positioned in bounds
-   - **Component-vs-FRAME ratio:** count instances of DS components vs custom FRAMEs for product-specific structure. If >50% of structural pieces are custom FRAMEs for a product that has real components, that's a red flag — something was invented instead of imported.
+8. **Self-verify before delivering.** Before sharing the link, you must run the concrete audit below via `use_figma`. If any check fails, fix it and re-run until everything is green. Never say "done!" without a passing audit.
 
-   Fix everything the audit finds BEFORE sharing the link. Never say "done!" without verifying. Assume nothing worked until Plugin API confirms it.
+   ```js
+   // Audit script — paste and adapt ROOT_ID
+   const root = figma.getNodeById("ROOT_ID_HERE");
+   const issues = [];
+   const all = root.findAll(n => true);
+
+   // 1. Title Row antipattern — page title MUST be in Header's Title text property
+   const titleRowAntipatterns = all.filter(n =>
+     n.type === "FRAME" && /^(Title Row|Title Stack|Page Title)$/i.test(n.name)
+   );
+   if (titleRowAntipatterns.length) {
+     issues.push(`Title Row antipattern: ${titleRowAntipatterns.length} frame(s) — move title into *Header* 'Title text' property and delete`);
+   }
+
+   // 2. Placeholder text in *Header* properties
+   const placeholderPhrases = [
+     "Life was like a box of chocolates",
+     "Hey, what's up, dude",
+     "Hi, I'm sabtitle",
+     "Page title",        // default header title
+     "Label",              // default input label
+     "Placeholder",        // default field placeholder
+     "Filled text",        // default field filled
+     "Caption text",
+     "Text in cell",
+     "Tab_1", "Tab_2", "Tab_3",
+   ];
+   const headerInst = root.findOne(n =>
+     n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Header*"
+   );
+   if (headerInst) {
+     for (const [key, val] of Object.entries(headerInst.componentProperties)) {
+       if (val.type !== "TEXT") continue;
+       if (placeholderPhrases.some(p => val.value?.includes(p))) {
+         issues.push(`Header property '${key}' still has placeholder: "${val.value}"`);
+       }
+     }
+   }
+
+   // 3. Double-tabs — *Tab Basic* outside Header when Header.Subheader=Tabs
+   if (headerInst) {
+     const headerHasTabs = !!headerInst.findOne(n =>
+       n.type === "INSTANCE" && /Type=Tabs/.test(n.mainComponent?.name || "")
+     );
+     const standaloneTabs = all.filter(n =>
+       n.type === "INSTANCE" && n.name === "*Tab Basic*" &&
+       !headerInst.findAll(x => x === n).length
+     );
+     if (headerHasTabs && standaloneTabs.length) {
+       issues.push(`Double tabs: Header has Subheader=Tabs AND ${standaloneTabs.length} standalone *Tab Basic* below — keep only one`);
+     }
+   }
+
+   // 4. Sidebar variant mismatch with page context
+   const sidebar = root.findOne(n =>
+     n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Sidebar*"
+   );
+   if (sidebar) {
+     const variant = sidebar.mainComponent.name; // e.g. "Type=Dashboard, Collapsed=False"
+     // For Applicants pages, expected Type=Applicants; for Integrations, Type=Integrations; etc.
+     // Report variant so author can confirm it matches the page type
+     issues.push(`Sidebar variant: "${variant}" — verify this matches the page context (Applicants/Integrations/Dashboard/etc.)`);
+   }
+
+   // 5. Overflow — any node extending beyond its parent's bounds
+   for (const n of all) {
+     if (n.type === "PAGE" || !n.parent) continue;
+     const p = n.parent;
+     if (!("width" in p) || p.clipsContent === false) continue;
+     if (n.x + n.width > p.width + 0.5) issues.push(`Overflow right: ${n.name} in ${p.name}`);
+     if (n.y + n.height > p.height + 0.5) issues.push(`Overflow bottom: ${n.name} in ${p.name}`);
+   }
+
+   // 6. Component-vs-FRAME ratio for product-specific areas
+   const totalStructural = all.filter(n => n.type === "FRAME" || n.type === "INSTANCE").length;
+   const customFrames = all.filter(n =>
+     n.type === "FRAME" && !["Main","Content","Item List","row"].includes(n.name)
+   ).length;
+   const customRatio = customFrames / totalStructural;
+   if (customRatio > 0.5) {
+     issues.push(`Custom FRAME ratio ${(customRatio*100).toFixed(0)}% > 50% — likely invented structure instead of using DS components`);
+   }
+
+   // 7. Unbound spacing / cornerRadius / fills on custom frames
+   for (const n of all) {
+     if (n.type !== "FRAME" || ["Item List","Main","Content"].includes(n.name)) continue;
+     if (n.cornerRadius > 0 && !n.boundVariables?.topLeftRadius) {
+       issues.push(`Unbound cornerRadius on ${n.name}: ${n.cornerRadius}px`);
+     }
+     if (n.fills?.[0]?.type === "SOLID" && !n.fills[0].boundVariables?.color) {
+       issues.push(`Hardcoded fill on ${n.name}`);
+     }
+   }
+
+   return issues.length === 0 ? "✅ Audit PASSED" : JSON.stringify({ failed: issues.length, issues }, null, 2);
+   ```
+
+   Adapt the root id, run, fix findings, re-run. Only share the link when the audit returns "✅ Audit PASSED". The most common failure modes are #1 (Title Row), #2 (placeholder subtitle), and #3 (double tabs) — those are the ones users see first and flag.
 
 ---
 
