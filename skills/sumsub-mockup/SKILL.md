@@ -88,13 +88,28 @@ These are non-negotiable. Violating any of them is treated as a bug:
    - Audit failed = **do not share the link**. Fix every issue, re-run, keep iterating until it returns "✅ Audit PASSED".
    - Do not say "done", "готово", "макет создан", or paste a Figma URL in the same message unless the previous tool call was a passing audit.
 
-   No audit = no delivery. No exceptions.
+   **Paste the audit script VERBATIM.** Do not write a "simplified version", "custom audit", or "smarter check". Do not remove checks because they produced too many findings on the first run — findings are the point. The only allowed edits to the script body are (a) set `ROOT_ID_HERE` and (b) set `productContext`. If a specific check in the script has a bug (false positives), report it to the user and keep running — do NOT silently strip the check and declare PASSED. Auditing your own work by writing a softer audit is the skill-equivalent of grading your own exam: it always passes.
+
+   If you're tempted to think "this check is noisy, I'll skip it" — the check is what catches the bug you're about to ship. Paste the real audit.
+
+   No audit = no delivery. Simplified audit = no delivery. No exceptions.
 
    ```js
    // Audit script — paste and adapt ROOT_ID
    const root = figma.getNodeById("ROOT_ID_HERE");
    const issues = [];
    const all = root.findAll(n => true);
+
+   // Helper: component internals are not our responsibility. Skip any node
+   // whose ancestor chain (between itself and root) passes through an INSTANCE.
+   function isInsideInstance(n) {
+     let p = n.parent;
+     while (p && p !== root && p.type !== "PAGE") {
+       if (p.type === "INSTANCE") return true;
+       p = p.parent;
+     }
+     return false;
+   }
 
    // 1. Title Row antipattern — page title MUST be in Header's Title text property
    const titleRowAntipatterns = all.filter(n =>
@@ -155,8 +170,10 @@ These are non-negotiable. Violating any of them is treated as a bug:
    }
 
    // 5. Overflow — any node extending beyond its parent's bounds
+   // Skip everything inside component instances: DS owns its internals.
    for (const n of all) {
      if (n.type === "PAGE" || !n.parent) continue;
+     if (isInsideInstance(n)) continue;
      const p = n.parent;
      if (!("width" in p) || p.clipsContent === false) continue;
      if (n.x + n.width > p.width + 0.5) issues.push(`Overflow right: ${n.name} in ${p.name}`);
@@ -194,9 +211,13 @@ These are non-negotiable. Violating any of them is treated as a bug:
      if (!hasInstance) {
        issues.push(`${label}: required component instance is missing — did you build it as a custom FRAME instead?`);
      }
-     const fakes = all.filter(n => n.type === "FRAME" && forbiddenFrameNames.some(name =>
-       new RegExp(`^${name}$`, "i").test(n.name)
-     ));
+     // Check forbidden names ONLY on top-level FRAMEs (not inside component instances —
+     // DS components contain their own internally-named frames like "Header" / "Dot Grid").
+     const fakes = all.filter(n =>
+       n.type === "FRAME" &&
+       !isInsideInstance(n) &&
+       forbiddenFrameNames.some(name => new RegExp(`^${name}$`, "i").test(n.name))
+     );
      if (fakes.length) {
        issues.push(`${label}: ${fakes.length} custom FRAME(s) with forbidden name(s) [${fakes.map(f => f.name).join(", ")}] — replace with the real component instance`);
      }
@@ -212,7 +233,9 @@ These are non-negotiable. Violating any of them is treated as a bug:
      requireInstance(
        "Flowbuilder Header",
        n => n.mainComponent?.parent?.name === "Flowbuilder / *Header*" || /Flowbuilder/.test(n.mainComponent?.parent?.name || ""),
-       ["Flow Builder Header", "FB Header", "Workflow Header", "Header"]
+       // "Header" alone is too broad — every DS component has an internal "Header" frame.
+       // Only flag top-level custom frames with explicit Flow Builder–mimicking names.
+       ["Flow Builder Header", "FB Header", "Workflow Header", "Flowbuilder Header"]
      );
      requireInstance(
        "Canvas",
@@ -257,13 +280,17 @@ These are non-negotiable. Violating any of them is treated as a bug:
      if (legends.length) {
        issues.push(`'Legend' frame(s) present — real Flow Builder doesn't have an on-canvas legend; remove unless user asked for it`);
      }
-     // Connector strokeWeight — must be 2.51 per reference/flowbuilder.md
+     // Connector strokeWeight — must be 2.51 per reference/flowbuilder.md.
+     // Only check OUR connectors (not strokes inside DS component instances, which include
+     // decorative lines at strokeWeight=1 inside Canvas bars and Wizard).
      const connectors = all.filter(n =>
-       (n.type === "VECTOR" || n.type === "LINE") && n.strokes?.length > 0
+       (n.type === "VECTOR" || n.type === "LINE") &&
+       n.strokes?.length > 0 &&
+       !isInsideInstance(n)
      );
      const wrongWeight = connectors.filter(c => c.strokeWeight && Math.abs(c.strokeWeight - 2.51) > 0.05);
      if (wrongWeight.length) {
-       issues.push(`${wrongWeight.length} connector(s) with strokeWeight ≠ 2.51 (found: ${[...new Set(wrongWeight.map(c => c.strokeWeight))].join(", ")}) — see reference/flowbuilder.md`);
+       issues.push(`${wrongWeight.length}/${connectors.length} top-level connector(s) strokeWeight ≠ 2.51 (found: ${[...new Set(wrongWeight.map(c => c.strokeWeight))].join(", ")}) — see reference/flowbuilder.md`);
      }
      // Custom node renaming — Node / Canvas instances should keep their default names
      const renamedNodes = nodeInstances.filter(n => /^Node — /.test(n.name) || /^Node - /.test(n.name));
