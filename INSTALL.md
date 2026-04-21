@@ -146,6 +146,29 @@ Claude should start the skill — Figma opens and a mockup appears.
 
 ---
 
+## Example prompts
+
+See [`examples/prompts.md`](examples/prompts.md) for copy-paste-ready prompts covering:
+
+- Building mockups (table pages, detail views, multi-screen flows)
+- Asking the skill to put the result in the Sumsub org vs Drafts vs a team
+- Running the audit verbatim (and re-running it after a plugin update)
+- Fixing audit findings
+- Flow Builder / Applicant page–specific recipes
+- Reviewing existing mockups
+- Common anti-patterns to avoid
+
+Short on time? The most useful one — rerunning the full audit after a plugin update:
+
+```
+Update sumsub-design plugin (run sumsub-update in terminal, restart
+Desktop), then rerun the sumsub-mockup audit VERBATIM on <frame>
+(node <id>, productContext="<table-page|flow-builder|applicant-page>").
+Return the raw JSON — don't fix anything, I want the issue list first.
+```
+
+---
+
 ## Updating
 
 The plugin doesn't auto-update. You need to refresh the marketplace cache and then pull the new version. Three ways to do it — pick one.
