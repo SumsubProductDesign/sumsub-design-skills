@@ -14,6 +14,15 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
+0. **Ask WHERE to create the mockup — before anything else.** Don't assume the "current file". The user may want the mockup in a specific project. Ask first:
+
+   > Where should I create the mockup?
+   > 1. **Existing file** — share a Figma URL (tell me which section/frame if relevant)
+   > 2. **Your Drafts** — I'll create a new file there
+   > 3. **Team folder** — tell me which team, I'll create a new file there
+
+   Wait for the answer. Only start building once location is confirmed.
+
 1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected to the current file. If the task is for a specific Sumsub product (Flow Builder, Applicant page, Specs, etc.) and its library isn't connected — STOP and tell the user:
    > "The `<library name>` library isn't connected to this file. Please add it (Assets panel → + Manage libraries) or move me to a file where it's enabled. I won't fabricate the components."
 
