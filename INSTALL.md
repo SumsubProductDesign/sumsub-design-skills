@@ -136,18 +136,20 @@ Claude should start the skill — Figma opens and a mockup appears.
 
 ## Updating
 
-The plugin doesn't auto-update. You need to refresh the marketplace cache and then pull the new version — two terminal commands.
+The plugin doesn't auto-update. You need to refresh the marketplace cache and then pull the new version. Three ways to do it — pick one.
 
-### One-time setup — add a shell alias
+### Option A — `sumsub-update` one-liner (recommended, after one-time setup)
 
-Paste this into your terminal **once** to create a `sumsub-update` command:
+This creates an alias in your shell so updating becomes a single command.
+
+**One-time setup:** open a plain terminal (**not** inside `claude` — just Terminal.app or PowerShell with the regular prompt) and paste one of these:
 
 **macOS / Linux (zsh / bash):**
 ```
 echo "alias sumsub-update='claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design && echo \"✅ Updated. Now quit and reopen Claude Desktop.\"'" >> ~/.zshrc && source ~/.zshrc
 ```
 
-(If you use bash instead of zsh, replace `.zshrc` with `.bashrc` in both places.)
+If you use bash instead of zsh, replace `.zshrc` with `.bashrc` in both places.
 
 **Windows (PowerShell):**
 ```powershell
@@ -155,7 +157,7 @@ Add-Content $PROFILE "`nfunction sumsub-update { claude plugin marketplace updat
 . $PROFILE
 ```
 
-From now on, updating is one command:
+**From now on** — whenever a new version ships — open a plain terminal (again: **not** inside `claude`, just the regular prompt) and type:
 
 ```
 sumsub-update
@@ -163,8 +165,25 @@ sumsub-update
 
 Then fully quit and reopen Claude Desktop.
 
-### Without the alias (manual, two commands)
+### Option B — Interactive `/plugin` menu inside the `claude` REPL
 
+If you prefer a UI-ish flow:
+
+1. Open a plain terminal and launch the Claude Code REPL by typing `claude` and pressing Enter.
+2. Once you see the `>` prompt, type:
+   ```
+   /plugin
+   ```
+3. Navigate the menu that appears → **Marketplaces** → pick `sumsub-design` → **Update**.
+4. Then go back and pick **Installed plugins** → `sumsub-design@sumsub-design` → **Update**.
+5. Exit with `/quit` or `Ctrl+C`.
+6. Quit and reopen Claude Desktop.
+
+Note: `/plugin` works **only inside the `claude` terminal REPL**, not in Claude Desktop's Code tab.
+
+### Option C — Manual two commands (no alias, no REPL)
+
+In a plain terminal:
 ```
 claude plugin marketplace update sumsub-design
 claude plugin update sumsub-design@sumsub-design
