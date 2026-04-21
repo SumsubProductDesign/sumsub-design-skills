@@ -205,6 +205,33 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
+   // 7.05. Content frame background — Rule #6. Content MUST be white.
+   // If Content has no fill, the root subtlest-grey shows through and the page
+   // looks fully grey. Find top-level frames named "Content" / "Page Content" and
+   // verify they're bound to a white/inverse variable.
+   const contentFrames = all.filter(n =>
+     n.type === "FRAME" && !isInsideInstance(n) && /^(Content|Page Content)$/i.test(n.name)
+   );
+   for (const cf of contentFrames) {
+     const fill = cf.fills?.[0];
+     if (!fill || fill.visible === false) {
+       issues.push(`Content frame "${cf.name}" has no fill — set it to semantic/background/neutral/inverse/normal (white). Otherwise page looks grey.`);
+       continue;
+     }
+     if (fill.type !== "SOLID") continue;
+     const isWhite = fill.color.r > 0.98 && fill.color.g > 0.98 && fill.color.b > 0.98;
+     const boundVarId = cf.boundVariables?.fills?.[0]?.id;
+     let boundName = "";
+     if (boundVarId) {
+       try { boundName = figma.variables.getVariableById(boundVarId)?.name || ""; } catch(e) {}
+     }
+     if (!isWhite) {
+       issues.push(`Content frame "${cf.name}" is not white (fill hex approx non-white) — bind to semantic/background/neutral/inverse/normal`);
+     } else if (boundName && /subtlest|subtler|subtle/.test(boundName)) {
+       issues.push(`Content frame "${cf.name}" bound to "${boundName}" (grey variant) — should be inverse/normal (white)`);
+     }
+   }
+
    // 7.1. Default component-property placeholder text — EVERYWHERE, including inside instances.
    // When you create a *Filter* / *Select* / *Button* / Table cell and don't customize via
    // setProperties(), the default text stays ("Label", "Placeholder", "Button", "Text in cell",
@@ -673,10 +700,24 @@ Scrim always covers **full root frame** (1440×900), including sidebar.
 
 ## Background Rules
 
-| Frame | Fill |
-|---|---|
-| Root frame | `semantic/background/neutral/inverse/normal` (#ffffff) via `VARS.cardBg` |
-| Content frame | **No fill** (`fills = []`) — child components provide their own backgrounds |
+> These rules implement Critical rule #6. Do not deviate.
+
+| Frame | Fill | Variable |
+|---|---|---|
+| Root / page frame | **Subtlest grey** (`#f6f7f9`) | `semantic/background/neutral/subtlest/normal` |
+| Main (right of sidebar) | **Inherit / no fill** — transparent so root grey shows at page margins | — |
+| Content (inside Main) | **White** (`#ffffff`) — this is the working surface, never grey | `semantic/background/neutral/inverse/normal` |
+| Cards inside Content | White, or as the card component dictates | `semantic/background/neutral/inverse/normal` |
+
+**Do NOT** leave the `Content` frame with no fill — the root's grey will show through and the page will look entirely grey. The visual model: grey margin around, white content surface in the middle.
+
+```js
+// Content frame setup — always do this
+const bg = await figma.variables.importVariableByKeyAsync(VARS.cardBg); // inverse/normal
+content.fills = [figma.variables.setBoundVariableForPaint(
+  { type: "SOLID", color: { r: 1, g: 1, b: 1 } }, "color", bg
+)];
+```
 
 ---
 
