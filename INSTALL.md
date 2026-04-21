@@ -49,7 +49,17 @@ If you see a policy error, run this once first:
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
-then retry the install. Close PowerShell and open a fresh window.
+then retry the install.
+
+**Windows: add the install directory to your PATH.** The installer puts `claude.exe` in `C:\Users\<you>\.local\bin` but doesn't auto-add that folder to your PATH. Run this once after install:
+
+```powershell
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.local\bin", "User")
+```
+
+Then **close PowerShell completely and open a fresh window** — the new PATH is only picked up by new sessions. Verify with `claude --version`.
+
+(On macOS / Linux the installer updates your shell rc file automatically — only Windows requires this manual PATH step.)
 
 ### 1c. Verify it's installed
 
@@ -227,7 +237,22 @@ Then run `claude --version` again. If it still says "not found", reopen the term
 
 ### `'claude' is not recognized…` (Windows) after installing the CLI
 
-PowerShell hasn't picked up the new PATH entry. Close ALL PowerShell windows and open a fresh one. If that still fails, check that the install directory (`$env:USERPROFILE\.local\bin` or similar) is in your User PATH via System Settings → Environment Variables.
+The installer warned "Native installation exists but `C:\Users\<you>\.local\bin` is not in your PATH" — it doesn't auto-add it on Windows.
+
+**Fix:** in PowerShell, run once:
+
+```powershell
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.local\bin", "User")
+```
+
+Then **close ALL PowerShell windows and open a fresh one**. Verify with `claude --version`.
+
+If the command still fails, add the path via GUI:
+1. `Win + R` → type `SystemPropertiesAdvanced` → Enter
+2. **Environment Variables** → in the top "User variables" section select `Path` → **Edit**
+3. **New** → paste `C:\Users\<your-username>\.local\bin`
+4. OK → OK → OK
+5. Close all PowerShell windows, open a fresh one, retry `claude --version`
 
 ### Installer script fails with permission errors
 
