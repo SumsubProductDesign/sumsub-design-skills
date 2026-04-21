@@ -61,7 +61,15 @@ Before starting, decide what the user actually wants:
 
 ## Product-specific references (used by Critical rule #2)
 
-Before building anything for a product in this table, **open the matching reference file with the `Read` tool first** and actually consume its content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
+Before building anything, **open the matching reference file(s) with the `Read` tool first** and actually consume their content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
+
+**Read for EVERY build (Plugin API gotchas):**
+
+| Always read | Reference file |
+|---|---|
+| Plugin API pitfalls, library keys, patterns | `reference/figma-gotchas.md` |
+
+**Read when building a specific product:**
 
 | Product | Reference file |
 |---|---|
