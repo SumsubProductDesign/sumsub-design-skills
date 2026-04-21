@@ -101,6 +101,8 @@ Quit and reopen Claude Desktop so it picks up the new skills:
 - **macOS:** `⌘ Q` → reopen
 - **Windows:** right-click tray icon → Quit → reopen
 
+> After this step, the marketplace also appears in **Claude Desktop → Settings → Customize → Plugins** alongside "Anthropic & Partners". You can enable/disable individual plugins from there if you prefer a GUI. But all install/update still goes through the terminal commands above.
+
 Done. The plugin bundles:
 - 4 skills (`sumsub-mockup`, `sumsub-specs-docs`, `sumsub-screen-annotations`, `sumsub-design-review`)
 - Figma remote MCP server — registered automatically
