@@ -23,14 +23,41 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    Wait for the answer. Only start building once location is confirmed.
 
-1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected to the current file. If the task is for a specific Sumsub product (Flow Builder, Applicant page, Specs, etc.) and its library isn't connected — STOP and tell the user:
-   > "The `<library name>` library isn't connected to this file. Please add it (Assets panel → + Manage libraries) or move me to a file where it's enabled. I won't fabricate the components."
+1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
 
-   Do not proceed with invented structures.
+   | Product | Required libraries |
+   |---|---|
+   | Flow Builder | Organisms [Dashboard UI Kit], Base components [Dashboard UI Kit], Assets |
+   | Applicant page | Applicant-page-and-Tasks-components (`QKXZwWodIwPVsjAjj4gMnE`), Organisms, Base components, Assets |
+   | Table / Detail pages | Organisms, Base components, Assets |
 
-2. **Read the product reference FIRST.** Before building anything for a known Sumsub product, use the `Read` tool on the matching reference file from this plugin's `reference/` folder (table below). Reference files contain exact component keys, paddings, color logic, and anti-patterns. Building from general knowledge or imagination is a bug. If the task mentions Flow Builder / Applicant page / Specs and you haven't read the corresponding reference, you're not ready to build.
+   If a required library is missing — STOP and ask the user to connect it. Do not proceed with invented structures.
 
-3. **Never invent components for known Sumsub products.** If the product exists in our design system, every major structural piece must be an instance of an actual DS component, not a custom `FRAME`. If you catch yourself creating FRAMEs named "Node Palette", "Top Bar", "Toolbar" for a product that has real components — stop and ask which component maps to it, or re-read the reference.
+   **⛔ The "I couldn't find it in search_design_system" excuse is forbidden.** `search_design_system` is keyword-matched and often misses. Before telling the user a component doesn't exist, you MUST:
+   1. Read the product's reference file from this plugin's `reference/` folder (see rule #2)
+   2. Try `importComponentByKeyAsync` / `importComponentSetByKeyAsync` with keys listed there
+   3. Only if both fail, report to the user
+
+   Saying "the library doesn't contain Flowbuilder Header" when `reference/flowbuilder.md` lists its exact component key is a bug, not a limitation.
+
+2. **Read the product reference FIRST — mandatory.** Before any `use_figma` call for a known Sumsub product, use the `Read` tool on ALL reference files listed below for that product. Not optional, not "if you're unsure" — mandatory. The skill does not have the knowledge baked in; it lives in the reference files.
+
+   | Product / Task | Required reads (ALL of them) |
+   |---|---|
+   | Flow Builder | `reference/figma-gotchas.md`, `reference/flowbuilder.md`, `reference/design-system.md` |
+   | Applicant page | `reference/figma-gotchas.md`, `reference/applicant-page-pattern.md`, `reference/ap-component-catalog.md`, `reference/layout-patterns.md` |
+   | Table page | `reference/figma-gotchas.md`, `reference/layout-patterns.md`, `reference/BLOCKS.md` |
+   | Any custom page | `reference/figma-gotchas.md`, `reference/design-system.md`, `reference/color-usage.md`, `reference/layout-patterns.md` |
+
+   If you haven't read the required references for the task's product, you're not ready to build. Building from "general knowledge" is a bug — the reference has exact keys, paddings, connector stroke weights, color logic that you cannot guess correctly.
+
+3. **Never invent components for known Sumsub products, and never deliver a "bare" mockup as a workaround.** If the product exists in our design system, every major structural piece (Sidebar, Header, Flowbuilder Header, Canvas, Canvas Bars, AP page header) must be an instance of an actual DS component.
+
+   **Two forbidden patterns:**
+   - Creating custom `FRAME` nodes named "Top Bar", "Toolbar", "Flow Builder Header", "Canvas" — these are fakes.
+   - **Delivering just the inner content** (e.g. "just the canvas with nodes, no Header, no Sidebar") and justifying it as "I couldn't find the shell components". A Flow Builder mockup without Flowbuilder Header + Sidebar + Canvas (with its bars) is not a Flow Builder mockup — it's a broken mockup. The components exist; find them via the reference.
+
+   If you catch yourself about to say "I built just X because I couldn't find Y" — stop, read the reference for this product, and build the full thing.
 
 4. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
 
@@ -40,7 +67,14 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
 7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
 
-8. **Self-verify before delivering.** Before sharing the link, you must run the concrete audit below via `use_figma`. If any check fails, fix it and re-run until everything is green. Never say "done!" without a passing audit.
+8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
+
+   - Audit not run = **do not share the link**. Treat it as the build being incomplete.
+   - `productContext === null` is only acceptable for generic custom pages. For Flow Builder / Applicant page / Table page tasks, `null` is a bug — set the context.
+   - Audit failed = **do not share the link**. Fix every issue, re-run, keep iterating until it returns "✅ Audit PASSED".
+   - Do not say "done", "готово", "макет создан", or paste a Figma URL in the same message unless the previous tool call was a passing audit.
+
+   No audit = no delivery. No exceptions.
 
    ```js
    // Audit script — paste and adapt ROOT_ID
@@ -155,15 +189,21 @@ These are non-negotiable. Violating any of them is treated as a bug:
    }
 
    if (productContext === "flow-builder") {
+     // Shell components — fail loudly if any of the three is missing.
+     // These are the most common skip: "I built just the canvas, no shell".
+     // Flow Builder = Sidebar + Flowbuilder Header + Canvas (with bars). All three required.
+     if (!sidebar) {
+       issues.push(`Flow Builder page is missing the *Sidebar* instance. Required — import key 60be5cbb4d070ccc4853589a555d949c3f23f62e and use the variant matching the dashboard context.`);
+     }
      requireInstance(
        "Flowbuilder Header",
-       n => n.mainComponent?.parent?.name === "Flowbuilder / *Header*",
-       ["Flow Builder Header", "FB Header", "Workflow Header"]
+       n => n.mainComponent?.parent?.name === "Flowbuilder / *Header*" || /Flowbuilder/.test(n.mainComponent?.parent?.name || ""),
+       ["Flow Builder Header", "FB Header", "Workflow Header", "Header"]
      );
      requireInstance(
        "Canvas",
        n => n.mainComponent?.parent?.name === "Canvas" || n.mainComponent?.name?.startsWith("Status="),
-       ["Canvas"] // ONLY forbidden if it's a FRAME, not INSTANCE
+       ["Canvas"] // forbidden as FRAME, required as INSTANCE
      );
      // Verify canvas bars exist (they come inside Canvas instance by default)
      const canvasInst = root.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas");
@@ -193,6 +233,25 @@ These are non-negotiable. Violating any of them is treated as a bug:
      const legends = all.filter(n => n.type === "FRAME" && /^Legend$/i.test(n.name));
      if (legends.length) {
        issues.push(`'Legend' frame(s) present — real Flow Builder doesn't have an on-canvas legend; remove unless user asked for it`);
+     }
+     // Connector strokeWeight — must be 2.51 per reference/flowbuilder.md
+     const connectors = all.filter(n =>
+       (n.type === "VECTOR" || n.type === "LINE") && n.strokes?.length > 0
+     );
+     const wrongWeight = connectors.filter(c => c.strokeWeight && Math.abs(c.strokeWeight - 2.51) > 0.05);
+     if (wrongWeight.length) {
+       issues.push(`${wrongWeight.length} connector(s) with strokeWeight ≠ 2.51 (found: ${[...new Set(wrongWeight.map(c => c.strokeWeight))].join(", ")}) — see reference/flowbuilder.md`);
+     }
+     // Custom node renaming — Node / Canvas instances should keep their default names
+     const renamedNodes = nodeInstances.filter(n => /^Node — /.test(n.name) || /^Node - /.test(n.name));
+     if (renamedNodes.length) {
+       issues.push(`${renamedNodes.length} Node / Canvas instance(s) renamed with "Node — *" pattern — keep default instance names`);
+     }
+     // Info Block placeholder — the component ships with "Start time: 24 Jul, 23 13:43" / "Time in node: 8y:12m:14d" defaults
+     const placeholderTexts = ["Start time: 24 Jul", "Time in node: 8y", "Time in node: 8y:12m:14d"];
+     const placeholderHits = all.filter(n => n.type === "TEXT" && placeholderTexts.some(p => n.characters?.includes(p)));
+     if (placeholderHits.length) {
+       issues.push(`Info Block placeholder text still present in ${placeholderHits.length} text node(s) — replace with realistic times or hide Info Block`);
      }
    }
 
