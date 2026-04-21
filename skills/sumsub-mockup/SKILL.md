@@ -110,6 +110,15 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
      return false;
    }
+   // Helper: is the node visible on canvas? (walks up checking every ancestor's visible flag)
+   function isVisible(n) {
+     let cur = n;
+     while (cur && cur !== root) {
+       if (cur.visible === false) return false;
+       cur = cur.parent;
+     }
+     return true;
+   }
 
    // 1. Title Row antipattern — page title MUST be in Header's Title text property
    const titleRowAntipatterns = all.filter(n =>
@@ -232,11 +241,11 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
-   // 7.1. Default component-property placeholder text — EVERYWHERE, including inside instances.
-   // When you create a *Filter* / *Select* / *Button* / Table cell and don't customize via
-   // setProperties(), the default text stays ("Label", "Placeholder", "Button", "Text in cell",
-   // "Subheader text"). Rule #7 (fill realistic data) — these are real bugs, not false positives.
-   // We check INSIDE instances here because these ARE the customization points.
+   // 7.1. Default component-property placeholder text — check only VISIBLE nodes.
+   // Components like *Filters group* ship with many HIDDEN spare slots (unused
+   // filter types) that keep their "Label" default — those are not bugs. Only
+   // visible placeholders matter. Rule #7 (fill realistic data) applies to
+   // what the user sees on canvas.
    const defaultTexts = [
      "Label", "Placeholder", "Button", "Text in cell", "Table cell",
      "Subheader text", "Caption text", "Page title",
@@ -245,12 +254,13 @@ These are non-negotiable. Violating any of them is treated as a bug:
    for (const n of all) {
      if (n.type !== "TEXT") continue;
      if (!n.characters) continue;
+     if (!isVisible(n)) continue; // skip hidden component slots
      if (defaultTexts.includes(n.characters)) {
        defaultTextCounts[n.characters] = (defaultTextCounts[n.characters] || 0) + 1;
      }
    }
    for (const [txt, count] of Object.entries(defaultTextCounts)) {
-     issues.push(`${count} TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
+     issues.push(`${count} VISIBLE TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
    }
 
    // 8. Product-required components (fabrication check)
