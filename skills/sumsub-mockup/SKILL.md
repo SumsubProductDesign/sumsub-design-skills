@@ -158,15 +158,14 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
-   // 4. Sidebar variant mismatch with page context
+   // 4. Sidebar variant — reported as info (not a failure). Human must verify
+   // the variant matches the page context (Applicants page → Type=Applicants, etc.).
    const sidebar = root.findOne(n =>
      n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Sidebar*"
    );
+   const infos = [];
    if (sidebar) {
-     const variant = sidebar.mainComponent.name; // e.g. "Type=Dashboard, Collapsed=False"
-     // For Applicants pages, expected Type=Applicants; for Integrations, Type=Integrations; etc.
-     // Report variant so author can confirm it matches the page type
-     issues.push(`Sidebar variant: "${variant}" — verify this matches the page context (Applicants/Integrations/Dashboard/etc.)`);
+     infos.push(`[info] Sidebar variant: "${sidebar.mainComponent.name}" — verify it matches the page context`);
    }
 
    // 5. Overflow — any node extending beyond its parent's bounds
@@ -180,25 +179,51 @@ These are non-negotiable. Violating any of them is treated as a bug:
      if (n.y + n.height > p.height + 0.5) issues.push(`Overflow bottom: ${n.name} in ${p.name}`);
    }
 
-   // 6. Component-vs-FRAME ratio for product-specific areas
-   const totalStructural = all.filter(n => n.type === "FRAME" || n.type === "INSTANCE").length;
-   const customFrames = all.filter(n =>
+   // 6. Component-vs-FRAME ratio (custom frames that could have been DS components).
+   // Count only top-level frames — component internals don't count toward "invented structure".
+   const topLevelNodes = all.filter(n => !isInsideInstance(n));
+   const totalStructural = topLevelNodes.filter(n => n.type === "FRAME" || n.type === "INSTANCE").length;
+   const customFrames = topLevelNodes.filter(n =>
      n.type === "FRAME" && !["Main","Content","Item List","row"].includes(n.name)
    ).length;
-   const customRatio = customFrames / totalStructural;
-   if (customRatio > 0.5) {
+   const customRatio = totalStructural > 0 ? customFrames / totalStructural : 0;
+   if (customRatio > 0.5 && totalStructural > 10) {
      issues.push(`Custom FRAME ratio ${(customRatio*100).toFixed(0)}% > 50% — likely invented structure instead of using DS components`);
    }
 
-   // 7. Unbound spacing / cornerRadius / fills on custom frames
+   // 7. Unbound spacing / cornerRadius / fills on YOUR custom frames.
+   // Skip anything inside a component instance — DS owns its own tokens.
    for (const n of all) {
-     if (n.type !== "FRAME" || ["Item List","Main","Content"].includes(n.name)) continue;
+     if (n.type !== "FRAME") continue;
+     if (isInsideInstance(n)) continue;
+     if (["Item List","Main","Content"].includes(n.name)) continue;
      if (n.cornerRadius > 0 && !n.boundVariables?.topLeftRadius) {
        issues.push(`Unbound cornerRadius on ${n.name}: ${n.cornerRadius}px`);
      }
      if (n.fills?.[0]?.type === "SOLID" && !n.fills[0].boundVariables?.color) {
        issues.push(`Hardcoded fill on ${n.name}`);
      }
+   }
+
+   // 7.1. Default component-property placeholder text — EVERYWHERE, including inside instances.
+   // When you create a *Filter* / *Select* / *Button* / Table cell and don't customize via
+   // setProperties(), the default text stays ("Label", "Placeholder", "Button", "Text in cell",
+   // "Subheader text"). Rule #7 (fill realistic data) — these are real bugs, not false positives.
+   // We check INSIDE instances here because these ARE the customization points.
+   const defaultTexts = [
+     "Label", "Placeholder", "Button", "Text in cell", "Table cell",
+     "Subheader text", "Caption text", "Page title",
+   ];
+   const defaultTextCounts = {};
+   for (const n of all) {
+     if (n.type !== "TEXT") continue;
+     if (!n.characters) continue;
+     if (defaultTexts.includes(n.characters)) {
+       defaultTextCounts[n.characters] = (defaultTextCounts[n.characters] || 0) + 1;
+     }
+   }
+   for (const [txt, count] of Object.entries(defaultTextCounts)) {
+     issues.push(`${count} TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
    }
 
    // 8. Product-required components (fabrication check)
@@ -328,7 +353,9 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
-   return issues.length === 0 ? "✅ Audit PASSED" : JSON.stringify({ failed: issues.length, issues }, null, 2);
+   return issues.length === 0
+     ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
+     : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);
    ```
 
    **Set `productContext`** at the top of the script to one of `"flow-builder" | "applicant-page" | "table-page" | null` based on the user's task. This enables the targeted checks in #8. When `null`, #8 is skipped.
