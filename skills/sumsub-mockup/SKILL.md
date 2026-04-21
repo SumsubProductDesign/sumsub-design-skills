@@ -14,15 +14,32 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
-1. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
+1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected to the current file. If the task is for a specific Sumsub product (Flow Builder, Applicant page, Specs, etc.) and its library isn't connected — STOP and tell the user:
+   > "The `<library name>` library isn't connected to this file. Please add it (Assets panel → + Manage libraries) or move me to a file where it's enabled. I won't fabricate the components."
 
-2. **Page title goes INSIDE the `*Header*` component.** Use the Header's built-in title property (e.g. `Title text#3817:0`). NEVER create a separate TEXT node for the page title above or below the header. Don't build a "Title Row" — that's duplication.
+   Do not proceed with invented structures.
 
-3. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
+2. **Read the product reference FIRST.** Before building anything for a known Sumsub product, use the `Read` tool on the matching reference file from this plugin's `reference/` folder (table below). Reference files contain exact component keys, paddings, color logic, and anti-patterns. Building from general knowledge or imagination is a bug. If the task mentions Flow Builder / Applicant page / Specs and you haven't read the corresponding reference, you're not ready to build.
 
-4. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
+3. **Never invent components for known Sumsub products.** If the product exists in our design system, every major structural piece must be an instance of an actual DS component, not a custom `FRAME`. If you catch yourself creating FRAMEs named "Node Palette", "Top Bar", "Toolbar" for a product that has real components — stop and ask which component maps to it, or re-read the reference.
 
-5. **Self-verify before delivering.** After every build, run an audit script via `use_figma` that checks: no children overflow, widths match spec, cornerRadius applied, text filled correctly, instances positioned in bounds. Fix everything it finds BEFORE sharing the link. Never say "done!" without verifying. Assume nothing worked until Plugin API confirms it.
+4. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
+
+5. **Page title goes INSIDE the `*Header*` component.** Use the Header's built-in title property (e.g. `Title text#3817:0`). NEVER create a separate TEXT node for the page title above or below the header. Don't build a "Title Row" — that's duplication.
+
+6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
+
+7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
+
+8. **Self-verify before delivering.** After every build, run an audit script via `use_figma` that checks:
+   - No children overflow their parents
+   - Widths match spec
+   - cornerRadius applied
+   - Text filled correctly
+   - Instances positioned in bounds
+   - **Component-vs-FRAME ratio:** count instances of DS components vs custom FRAMEs for product-specific structure. If >50% of structural pieces are custom FRAMEs for a product that has real components, that's a red flag — something was invented instead of imported.
+
+   Fix everything the audit finds BEFORE sharing the link. Never say "done!" without verifying. Assume nothing worked until Plugin API confirms it.
 
 ---
 
@@ -42,9 +59,9 @@ Before starting, decide what the user actually wants:
 
 **If unclear, ask first.** Never default to wrapping a block in a full-page layout — that loses focus on the block itself. When building just a block, place it on free canvas near the original in the same file.
 
-## Product-specific references
+## Product-specific references (used by Critical rule #2)
 
-When the task mentions a specific Sumsub product area, READ the matching reference doc first before building:
+Before building anything for a product in this table, **open the matching reference file with the `Read` tool first** and actually consume its content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
 
 | Product | Reference file |
 |---|---|
