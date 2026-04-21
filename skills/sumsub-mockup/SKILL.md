@@ -136,10 +136,99 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
+   // 8. Product-required components (fabrication check)
+   // For product-specific mockups, these top-level pieces MUST be real component instances, not custom FRAMEs.
+   // Detect product based on what's present or what the user asked for.
+   const productContext = /* set to "flow-builder" | "applicant-page" | "table-page" | null based on the task */ null;
+
+   function requireInstance(label, matchFn, forbiddenFrameNames = []) {
+     const hasInstance = all.some(n => n.type === "INSTANCE" && matchFn(n));
+     if (!hasInstance) {
+       issues.push(`${label}: required component instance is missing — did you build it as a custom FRAME instead?`);
+     }
+     const fakes = all.filter(n => n.type === "FRAME" && forbiddenFrameNames.some(name =>
+       new RegExp(`^${name}$`, "i").test(n.name)
+     ));
+     if (fakes.length) {
+       issues.push(`${label}: ${fakes.length} custom FRAME(s) with forbidden name(s) [${fakes.map(f => f.name).join(", ")}] — replace with the real component instance`);
+     }
+   }
+
+   if (productContext === "flow-builder") {
+     requireInstance(
+       "Flowbuilder Header",
+       n => n.mainComponent?.parent?.name === "Flowbuilder / *Header*",
+       ["Flow Builder Header", "FB Header", "Workflow Header"]
+     );
+     requireInstance(
+       "Canvas",
+       n => n.mainComponent?.parent?.name === "Canvas" || n.mainComponent?.name?.startsWith("Status="),
+       ["Canvas"] // ONLY forbidden if it's a FRAME, not INSTANCE
+     );
+     // Verify canvas bars exist (they come inside Canvas instance by default)
+     const canvasInst = root.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas");
+     if (canvasInst) {
+       const hasTopBar = !!canvasInst.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas Bar / Top");
+       const hasRightBar = !!canvasInst.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas Bar / Right");
+       const hasBottomBar = !!canvasInst.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Canvas Bar / Bottom");
+       if (!hasTopBar || !hasRightBar || !hasBottomBar) {
+         issues.push(`Canvas is present but bars are missing (top: ${hasTopBar}, right: ${hasRightBar}, bottom: ${hasBottomBar}). Make sure you used the Canvas INSTANCE, not a custom FRAME.`);
+       }
+     }
+     // Node attachments should be used sparingly — not on every node
+     const nodeInstances = all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Node / Canvas");
+     const nodesWithBadge = nodeInstances.filter(n =>
+       n.findAll(c => c.type === "INSTANCE" && c.mainComponent?.name === "Node / Badge / Start").length > 0
+     ).length;
+     if (nodeInstances.length > 1 && nodesWithBadge === nodeInstances.length) {
+       issues.push(`All ${nodeInstances.length} canvas nodes show 'Start Badge' — only the first node should have it`);
+     }
+     const nodesWithDanger = nodeInstances.filter(n =>
+       n.findAll(c => c.type === "INSTANCE" && /Status=Danger/.test(c.mainComponent?.name || "")).length > 0
+     ).length;
+     if (nodeInstances.length > 1 && nodesWithDanger === nodeInstances.length) {
+       issues.push(`All ${nodeInstances.length} canvas nodes show 'Status=Danger' — realistic flows have mixed or empty statuses`);
+     }
+     // Invented "Legend" frame
+     const legends = all.filter(n => n.type === "FRAME" && /^Legend$/i.test(n.name));
+     if (legends.length) {
+       issues.push(`'Legend' frame(s) present — real Flow Builder doesn't have an on-canvas legend; remove unless user asked for it`);
+     }
+   }
+
+   if (productContext === "applicant-page") {
+     requireInstance(
+       "AP page header",
+       n => n.mainComponent?.parent?.name === "AP page header" || n.mainComponent?.name?.startsWith("Client type="),
+       ["AP Header", "Applicant Header", "Applicant Page Header"]
+     );
+     // Sidebar should be the collapsed 52px variant for AP pages
+     if (sidebar && !/Collapsed=True/.test(sidebar.mainComponent.name)) {
+       issues.push(`Applicant page Sidebar should use Collapsed=True (52px), but got "${sidebar.mainComponent.name}"`);
+     }
+   }
+
+   if (productContext === "table-page") {
+     // Table pages should use Top Toolbar component, not a custom toolbar
+     const tableInst = all.find(n => n.type === "INSTANCE" && n.name === "*Table Starter*");
+     if (tableInst) {
+       const hasTopToolbar = !!root.findOne(n => n.type === "INSTANCE" && n.name === "Top Toolbar");
+       if (!hasTopToolbar) {
+         issues.push(`Table page has *Table Starter* but no 'Top Toolbar' instance — tables typically need one for search/filters/CTA`);
+       }
+     }
+   }
+
    return issues.length === 0 ? "✅ Audit PASSED" : JSON.stringify({ failed: issues.length, issues }, null, 2);
    ```
 
-   Adapt the root id, run, fix findings, re-run. Only share the link when the audit returns "✅ Audit PASSED". The most common failure modes are #1 (Title Row), #2 (placeholder subtitle), and #3 (double tabs) — those are the ones users see first and flag.
+   **Set `productContext`** at the top of the script to one of `"flow-builder" | "applicant-page" | "table-page" | null` based on the user's task. This enables the targeted checks in #8. When `null`, #8 is skipped.
+
+   Adapt the root id, set the context, run, fix findings, re-run. Only share the link when the audit returns "✅ Audit PASSED". The most common failure modes:
+   - #1 (Title Row antipattern)
+   - #2 (placeholder subtitle)
+   - #3 (double tabs)
+   - #8 (fabricated Flowbuilder Header / Canvas as FRAMEs instead of component instances, all nodes with Start Badge, invented Legend frame)
 
 ---
 
