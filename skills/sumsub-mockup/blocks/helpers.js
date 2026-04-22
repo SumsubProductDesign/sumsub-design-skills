@@ -160,3 +160,32 @@ async function makeInstanceSingle(componentKey, properties = {}) {
   if (Object.keys(properties).length) instance.setProperties(properties);
   return instance;
 }
+
+// ─── Canvas placement ─────────────────────────────────────────────────────────
+// Find free space on the current page so new mockups don't overlap existing ones.
+// Scans all top-level frames on currentPage, computes their bounding box,
+// returns a position to the RIGHT of the rightmost frame with a gap.
+// Falls back to (0, 0) if the page is empty.
+//
+// Usage:
+//   const { x, y } = findFreeCanvasSpot({ width: 1440, height: 900, gap: 200 });
+//   root.x = x; root.y = y;
+function findFreeCanvasSpot({ width = 1440, height = 900, gap = 200 } = {}) {
+  const page = figma.currentPage;
+  const frames = page.children.filter(n => n.type === "FRAME" || n.type === "SECTION");
+  if (frames.length === 0) return { x: 0, y: 0 };
+
+  // Rightmost edge of existing content
+  let maxRight = -Infinity;
+  let minTop = Infinity;
+  for (const f of frames) {
+    const right = f.x + f.width;
+    if (right > maxRight) maxRight = right;
+    if (f.y < minTop) minTop = f.y;
+  }
+
+  return {
+    x: maxRight + gap,
+    y: minTop === Infinity ? 0 : minTop,
+  };
+}

@@ -24,7 +24,7 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    Wait for the answer. For work tasks (anything building on Sumsub product surfaces — Flow Builder, Applicant page, Dashboard screens, etc.) the default is option 4 (Sumsub org). Personal Drafts = Starter-tier limits = you WILL hit an MCP file-creation cap mid-build. Offer option 4 by default and ask to confirm.
 
-   **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
+   **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
 
 1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
 
@@ -37,20 +37,20 @@ These are non-negotiable. Violating any of them is treated as a bug:
    If a required library is missing — STOP and ask the user to connect it. Do not proceed with invented structures.
 
    **⛔ The "I couldn't find it in search_design_system" excuse is forbidden.** `search_design_system` is keyword-matched and often misses. Before telling the user a component doesn't exist, you MUST:
-   1. Read the product's reference file from this plugin's `reference/` folder (see rule #2)
+   1. Read the product's reference file from this plugin's `${CLAUDE_PLUGIN_ROOT}/reference/` folder (see rule #2)
    2. Try `importComponentByKeyAsync` / `importComponentSetByKeyAsync` with keys listed there
    3. Only if both fail, report to the user
 
-   Saying "the library doesn't contain Flowbuilder Header" when `reference/flowbuilder.md` lists its exact component key is a bug, not a limitation.
+   Saying "the library doesn't contain Flowbuilder Header" when `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md` lists its exact component key is a bug, not a limitation.
 
 2. **Read the product reference FIRST — mandatory.** Before any `use_figma` call for a known Sumsub product, use the `Read` tool on ALL reference files listed below for that product. Not optional, not "if you're unsure" — mandatory. The skill does not have the knowledge baked in; it lives in the reference files.
 
    | Product / Task | Required reads (ALL of them) |
    |---|---|
-   | Flow Builder | `reference/figma-gotchas.md`, `reference/flowbuilder.md`, `reference/design-system.md` |
-   | Applicant page | `reference/figma-gotchas.md`, `reference/applicant-page-pattern.md`, `reference/ap-component-catalog.md`, `reference/layout-patterns.md` |
-   | Table page | `reference/figma-gotchas.md`, `reference/layout-patterns.md`, `reference/BLOCKS.md` |
-   | Any custom page | `reference/figma-gotchas.md`, `reference/design-system.md`, `reference/color-usage.md`, `reference/layout-patterns.md` |
+   | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` |
+   | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
+   | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
+   | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
 
    If you haven't read the required references for the task's product, you're not ready to build. Building from "general knowledge" is a bug — the reference has exact keys, paddings, connector stroke weights, color logic that you cannot guess correctly.
 
@@ -69,7 +69,7 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    If the library is truly not accessible (unpublished local component, file-private), the correct response is: *"The Flow Builder components live in file `X` as local components and aren't published. I can either (a) work directly inside that file, or (b) wait for DS to publish them — which do you prefer?"*. NOT "I'll build a custom frame".
 
-   **Never quote a reference as authority without citing it.** Saying "the reference recommends using generic Header" requires pasting the exact line from `reference/flowbuilder.md` that says so. If you can't paste the line, you're fabricating the authority — stop.
+   **Never quote a reference as authority without citing it.** Saying "the reference recommends using generic Header" requires pasting the exact line from `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md` that says so. If you can't paste the line, you're fabricating the authority — stop.
 
    If you catch yourself about to say "I built just X because Y isn't available" — stop, re-read the reference for this product, and either build the full thing or surface the blocker to the user.
 
@@ -80,6 +80,16 @@ These are non-negotiable. Violating any of them is treated as a bug:
 6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
 
 7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
+
+7.5. **Never place new mockups on top of existing ones.** Before `appendChild`-ing your root frame to `figma.currentPage`, find free canvas space to the right of existing frames. Use the `findFreeCanvasSpot()` helper from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`:
+
+   ```js
+   const spot = findFreeCanvasSpot({ width: 1440, height: 900, gap: 200 });
+   root.x = spot.x;
+   root.y = spot.y;
+   ```
+
+   If you're not using the helpers (writing custom code), replicate the logic: scan `figma.currentPage.children`, find the rightmost frame's `x + width`, place the new root at that value + 200px gap. Never default to (0, 0) on a page that already has frames — your mockup will silently overlap the previous one.
 
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
@@ -429,17 +439,17 @@ Before building anything, **open the matching reference file(s) with the `Read` 
 
 | Always read | Reference file |
 |---|---|
-| Plugin API pitfalls, library keys, patterns | `reference/figma-gotchas.md` |
+| Plugin API pitfalls, library keys, patterns | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md` |
 
 **Read when building a specific product:**
 
 | Product | Reference file |
 |---|---|
-| Applicant page / Applicant flow | `reference/applicant-page-pattern.md`, `reference/ap-component-catalog.md` |
-| Flow Builder / Workflow canvas / Workflow nodes | `reference/flowbuilder.md` |
-| Page layouts (table, detail, etc.) | `reference/layout-patterns.md` |
-| Design system components / variables | `reference/design-system.md`, `reference/color-usage.md` |
-| Blocks system (helpers + templates) | `reference/BLOCKS.md` |
+| Applicant page / Applicant flow | `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md` |
+| Flow Builder / Workflow canvas / Workflow nodes | `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md` |
+| Page layouts (table, detail, etc.) | `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
+| Design system components / variables | `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md` |
+| Blocks system (helpers + templates) | `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
 
 These references contain exact component keys, variant names, measured paddings, and gotchas. Do NOT guess — consult the reference.
 

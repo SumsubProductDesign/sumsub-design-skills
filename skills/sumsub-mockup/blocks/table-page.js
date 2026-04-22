@@ -30,8 +30,13 @@ const root = makeFrame(FRAME_NAME, { direction: "HORIZONTAL", w: SCREEN_W, h: SC
 root.primaryAxisSizingMode = "FIXED";
 root.counterAxisSizingMode = "FIXED";
 root.clipsContent = true;
-await bindFill(root, VARS.cardBg); // semantic/background/neutral/inverse/normal #ffffff
+await bindFill(root, VARS.pageBg); // page root = subtlest grey (#f6f7f9) per Rule #6
 figma.currentPage.appendChild(root);
+
+// Place on free canvas — avoid overlapping existing frames on the page
+const spot = findFreeCanvasSpot({ width: SCREEN_W, height: SCREEN_H, gap: 200 });
+root.x = spot.x;
+root.y = spot.y;
 
 // 2. Sidebar — append first, then set sizing
 const sidebar = await makeInstance(COMPONENTS.sidebar);
@@ -60,6 +65,7 @@ content.itemSpacing = SP.xl;
 main.appendChild(content);
 content.layoutSizingHorizontal = "FILL";
 content.layoutSizingVertical = "FILL";
+await bindFill(content, VARS.cardBg); // Content area = white (Rule #6)
 
 // 6. Title row — append first, then set sizing
 const titleRow = makeFrame("Title Row", { direction: "HORIZONTAL" });
