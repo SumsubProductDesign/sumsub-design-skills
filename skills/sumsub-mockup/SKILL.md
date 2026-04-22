@@ -14,6 +14,57 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
+### Pre-flight: check for plugin updates (run FIRST, once per session)
+
+Before executing Rule #0 or any other work, verify the plugin is up to date. Stale skills are the source of most "it regressed" bugs — the skill followed outdated docs. Check and prompt the user to update.
+
+**Steps:**
+
+1. **Read local version.** Use the `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Parse JSON, extract `version`. If read fails, skip the check — proceed with warning "could not verify plugin version".
+
+2. **Fetch remote version.** Use the `WebFetch` tool:
+   - URL: `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json`
+   - Prompt: `"Return the raw JSON content of this file, nothing else."`
+   - Parse the response JSON, extract `version`. If fetch fails (network, 404) — skip with warning "could not check for updates".
+
+3. **Compare SemVer.** `local = "3.25.0"`, `remote = "3.28.0"` → remote > local, update available.
+
+4. **If remote > local — STOP and show the user this message verbatim:**
+
+   > ⚠️ **sumsub-design plugin update available**
+   >
+   > Your local version: **vLOCAL** · Latest: **vREMOTE**
+   >
+   > Newer versions fix real bugs — each release ships audit checks and guidance that prevent silent mockup failures. Recommended: update before continuing.
+   >
+   > **How to update:**
+   > 1. Open a regular terminal (not Claude Desktop's Code tab — `/plugin` doesn't work there)
+   > 2. Run: `sumsub-update`
+   > 3. Fully quit Claude Desktop (⌘Q on macOS, right-click tray → Quit on Windows) and reopen
+   > 4. Come back to this chat
+   >
+   > Reply:
+   > - **`updated`** — I ran `sumsub-update` and restarted Desktop
+   > - **`continue anyway`** — don't update, use the current (older) version
+   >
+   > If you don't have the `sumsub-update` alias set up yet: see `INSTALL.md` in the repo, section "Updating".
+
+   Substitute `vLOCAL` / `vREMOTE` with the actual versions.
+
+5. **Wait for explicit reply.** Only after the user says "updated" or "continue anyway" proceed to Rule #0. Do not start building.
+
+6. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
+
+**When the check does NOT fire:**
+- Local ≥ remote (no update needed) — proceed silently to Rule #0.
+- WebFetch failed — warn once, proceed anyway.
+- Local plugin.json unreadable — warn once, proceed anyway.
+- User already said "continue anyway" earlier in this conversation — proceed.
+
+**Implementation note — cache the result.** Once the version is verified (either up-to-date, user accepted update, or user said continue), remember the outcome for the rest of the conversation. Don't make the user answer twice.
+
+---
+
 0. **Ask WHERE to create the mockup — before anything else.** Don't assume the "current file" and don't default to personal Drafts. Four distinct destinations — ask explicitly:
 
    > Where should I create the mockup?
