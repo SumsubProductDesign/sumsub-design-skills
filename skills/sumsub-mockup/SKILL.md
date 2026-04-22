@@ -269,11 +269,13 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    // 5. Overflow — any node extending beyond its parent's bounds
    // Skip everything inside component instances: DS owns its internals.
+   // SECTION nodes don't have clipsContent property — skip as parent.
    for (const n of all) {
      if (n.type === "PAGE" || !n.parent) continue;
      if (isInsideInstance(n)) continue;
      const p = n.parent;
-     if (!("width" in p) || p.clipsContent === false) continue;
+     if (p.type === "SECTION") continue;
+     if (!("width" in p) || !("clipsContent" in p) || p.clipsContent === false) continue;
      if (n.x + n.width > p.width + 0.5) issues.push(`Overflow right: ${n.name} in ${p.name}`);
      if (n.y + n.height > p.height + 0.5) issues.push(`Overflow bottom: ${n.name} in ${p.name}`);
    }
@@ -386,34 +388,76 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
-   // 7.2. Modal Basic checks — unfilled Content slot + vertical centering.
-   // Most common failure: slot-swap silently fails because bodyComp wasn't
-   // appended to currentPage before setProperties. Symptom: the Content SLOT
-   // property value stays null/undefined, and the modal shows the default
-   // empty 72px Body frame.
+   // 7.2. Modal / Drawer — empty Body + vertical centering + fake-modal detection.
+   // SLOT properties on Modal Basic / Drawer Basic are READ-ONLY in the Plugin API
+   // (figma throws "Slot component property values cannot be edited"). Correct
+   // path is to appendChild into the instance's Body FRAME directly.
    const modals = all.filter(n =>
-     n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Modal Basic*"
+     n.type === "INSTANCE" && (
+       n.mainComponent?.parent?.name === "*Modal Basic*" ||
+       n.mainComponent?.parent?.name === "*Drawer Basic*"
+     )
    );
    for (const m of modals) {
-     // Unfilled SLOT check — iterate all SLOT-type properties on the modal
-     const props = m.componentProperties || {};
-     for (const [key, prop] of Object.entries(props)) {
-       if (prop.type !== "SLOT") continue;
-       const v = prop.value;
-       if (v === undefined || v === null || v === "") {
-         issues.push(`Modal Basic "${m.name}" — SLOT property "${key}" is empty. Create a local component, appendChild to currentPage BEFORE setProperties, then swap: modal.setProperties({"${key}": bodyComp.id})`);
-       }
+     // Empty Body check — Body frame should have children (the content you added)
+     const bodyFrame = m.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     if (bodyFrame && bodyFrame.children.length === 0) {
+       issues.push(`Modal/Drawer "${m.name}" — Body frame is empty. appendChild your content into modal.children.find(c=>c.name.trim()==="Body"). SLOT via setProperties is read-only and will throw.`);
      }
-     // Vertical centering check (only if modal has an explicit parent with height)
+     // Vertical centering check
      const parent = m.parent;
      if (parent && typeof parent.height === "number" && parent.height > 0 && m.layoutPositioning === "ABSOLUTE") {
        const modalCenter = m.y + m.height / 2;
        const parentCenter = parent.height / 2;
        const off = Math.abs(modalCenter - parentCenter);
        if (off > 40) {
-         issues.push(`Modal Basic "${m.name}" not vertically centered in "${parent.name}" (off by ${Math.round(off)}px). Compute y AFTER slot swap: modal.y = (parent.height - modal.height) / 2`);
+         issues.push(`Modal/Drawer "${m.name}" not vertically centered in "${parent.name}" (off by ${Math.round(off)}px). Compute y AFTER body is populated: modal.y = (parent.height - modal.height) / 2`);
        }
      }
+   }
+
+   // 7.3. Fabrication detector — custom FRAMEs that should be DS component instances.
+   // Pattern: name starts with "Modal · …", "Drawer · …", "Annotation · …",
+   // "Empty State", "Table · …", "Toolbar · …", "Scenario · …" → fake.
+   const fabricationPatterns = [
+     { re: /^Modal\s*[·\/]/i,      fix: "Use *Modal Basic* instance + Body frame appendChild" },
+     { re: /^Drawer\s*[·\/]/i,     fix: "Use *Drawer Basic* instance + Body frame appendChild" },
+     { re: /^Popover\s*[·\/]/i,    fix: "Use *Popover* instance" },
+     { re: /^Annotation\s*[·\/]/i, fix: "Use Scenarios annotation component (key b5cdb94a14e3e6cd513db397cbd5d1391327896f, Type=Scenario)" },
+     { re: /^Scenario\s*[·\/]/i,   fix: "Use Scenarios annotation component (key b5cdb94a14e3e6cd513db397cbd5d1391327896f)" },
+     { re: /^Table\s*[·\/]/i,      fix: "Use *Table Starter* instance (key 213b7e3d7cc4503bbab83cd6c249e41e06dae295)" },
+     { re: /^Toolbar\s*[·\/]/i,    fix: "Use Top Toolbar instance (key fa8defc5fadd20a84c812784786217c6e0003ca0)" },
+     { re: /^Empty\s*State\s*[·\/]?/i, fix: "Use *Empty State* instance (key 0b0b611dba138a4a822b216114888d96513d248a)" },
+     { re: /^Alert\s*[·\/]/i,      fix: "Use *Alert* instance (key 6d834b2f2da31f8a505379dcf26283d0be873609)" },
+     { re: /^Filter\s*[·\/]/i,     fix: "Use *Filter* / *Filters group* instance" },
+     { re: /^Status\s*[·\/]/i,     fix: "Use *Status* instance" },
+   ];
+   const fakes = {};
+   for (const n of all) {
+     if (n.type !== "FRAME") continue;
+     if (isInsideInstance(n)) continue;
+     for (const p of fabricationPatterns) {
+       if (p.re.test(n.name)) {
+         fakes[p.fix] = (fakes[p.fix] || 0) + 1;
+         break;
+       }
+     }
+   }
+   for (const [fix, count] of Object.entries(fakes)) {
+     issues.push(`${count} custom FRAME(s) found that should be DS component instances. Fix: ${fix}`);
+   }
+
+   // 7.4. Annotation presence — if task involves annotations, they must be the real
+   // Scenarios component, not custom FRAMEs named "Annotation · …" (caught by 7.3).
+   // Also detect the DS Scenarios component for a sanity count.
+   const realScenarios = all.filter(n =>
+     n.type === "INSTANCE" && /Scenario/i.test(n.mainComponent?.parent?.name || "")
+   );
+   const fakeAnnotations = all.filter(n =>
+     n.type === "FRAME" && !isInsideInstance(n) && /^Annotation\s*[·\/]/i.test(n.name)
+   );
+   if (fakeAnnotations.length > 0 && realScenarios.length === 0) {
+     issues.push(`${fakeAnnotations.length} custom "Annotation · …" FRAME(s) found, zero real Scenarios instances. Use component key b5cdb94a14e3e6cd513db397cbd5d1391327896f with Type=Scenario variant.`);
    }
 
    // 8. Product-required components (fabrication check)
@@ -848,18 +892,18 @@ Scrim always covers **full root frame** (1440×900), including sidebar.
 
 ---
 
-## Modal Basic — setting body content via slot swap
+## Modal Basic — setting body content via the Body frame (NOT slot swap)
 
-`*Modal Basic*` exposes its body as a SLOT property (`Content#19312:24`). The correct way to populate it is to create a **local main component**, fill it with your content, then swap the slot to it. The skill often gets this ~80% right but misses one critical step: **append the local component to the page BEFORE `setProperties`**. Without that, the component exists only in memory, the slot can't resolve it, and your modal renders with the default empty 72px Body.
+**Critical fact about Figma Plugin API:** SLOT component properties are **READ-ONLY** from plugin code. `instance.setProperties({"Content#19312:24": bodyComp.id})` on `*Modal Basic*` throws `"Slot component property values cannot be edited"`. SLOT swaps are only possible via the Figma editor UI, not programmatically. Do not try.
 
-**Correct pattern — copy this exactly:**
+**The correct path is the Body frame.** `*Modal Basic*` exposes a direct-child FRAME named `Body` inside the instance. It's a regular frame (not a sub-instance), so you can `appendChild` into it — Figma treats it as an instance override, no detach needed. Rule "never detach instances" still holds.
 
 ```js
-// 1. Create the modal instance
+// 1. Create modal instance from the Size variant you need
 const modalSet = await figma.importComponentSetByKeyAsync(COMPONENTS.modalBasic);
 const modal = modalSet.children.find(v => v.name === "Size=Medium").createInstance();
 
-// 2. Customize the modal Header (title + close button)
+// 2. Customize the modal Header
 const modalHeader = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Header");
 modalHeader.setProperties({
   "Title text#3834:3": "Add domain",
@@ -873,56 +917,42 @@ const footerBtns = modalFooter.findAll(n => n.type === "INSTANCE" && n.name === 
 footerBtns[2].setProperties({ "Button Text#143:1442": "Cancel",   "Type": "Secondary" });
 footerBtns[3].setProperties({ "Button Text#143:1442": "Continue", "Type": "Primary" });
 
-// 4. Create a LOCAL main component for the body content
-const bodyComp = figma.createComponent();
-bodyComp.name = "Modal Body / Add domain";
-bodyComp.layoutMode = "VERTICAL";
-bodyComp.primaryAxisSizingMode = "AUTO";    // auto-grow to fit content
-bodyComp.counterAxisSizingMode = "FIXED";
-bodyComp.resize(modal.width, 100);          // width matches modal
+// 4. Find the Body FRAME (direct child of the modal instance) and set up auto-layout
+const modalBody = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+modalBody.layoutMode = "VERTICAL";
+modalBody.primaryAxisSizingMode = "AUTO";    // grow vertically with content
+modalBody.counterAxisSizingMode = "FIXED";   // keep modal width
+modalBody.itemSpacing = 16;
+modalBody.paddingLeft = 24; modalBody.paddingRight = 24;
+modalBody.paddingTop = 0;   modalBody.paddingBottom = 16;
 
-// 5. ⚠️ CRITICAL: append bodyComp to currentPage BEFORE setProperties.
-//    Without this, bodyComp exists in memory but isn't in the document tree —
-//    the slot can't resolve it and your modal keeps showing default empty Body.
-figma.currentPage.appendChild(bodyComp);
-
-// 6. Build your content and append into bodyComp
+// 5. Build your content and appendChild into modalBody
 const desc = await makeText("Enter the domain…", "regular/body-m", "textSubtle");
-bodyComp.appendChild(desc);
+modalBody.appendChild(desc);
 desc.layoutSizingHorizontal = "FILL";
 
 const input = await makeInstance(COMPONENTS.inputBasic);
-bodyComp.appendChild(input);
+modalBody.appendChild(input);
 input.layoutSizingHorizontal = "FILL";
 
-// 7. Swap the Content slot on the modal instance — now bodyComp resolves correctly
-modal.setProperties({ "Content#19312:24": bodyComp.id });
-// Do NOT wrap this in try/catch. If it throws, surface the error — a silent
-// failure leaves the modal empty and you'll ship a broken mockup.
-
-// 8. Hide the local component off-screen so it doesn't clutter the canvas
-bodyComp.x = -20000; bodyComp.y = -20000;
-
-// 9. Place modal on scrim, CENTERED.
-//    Compute x/y AFTER the slot swap: modal.height is only final once the slot
-//    is populated and auto-layout has resolved.
+// 6. Place the modal on the scrim root, CENTERED.
+//    Compute x/y AFTER all Body children are appended — modal.height is only
+//    final once auto-layout has resolved the new content.
 scrimRoot.appendChild(modal);
 modal.layoutPositioning = "ABSOLUTE";
 modal.x = (scrimRoot.width  - modal.width)  / 2;
 modal.y = (scrimRoot.height - modal.height) / 2;
 ```
 
-**The five most common failures:**
+**If SLOT errors appear anyway** (e.g. "Slot component property values cannot be edited"): you're not following the pattern above. Stop, re-read this section, don't try to work around the API.
 
-| Mistake | Symptom |
-|---|---|
-| Not appending `bodyComp` to currentPage before `setProperties` | Modal body stays empty (default 72px) |
-| Wrapping `setProperties` in `try/catch` | Errors hidden → silent slot miss → broken ship |
-| Computing `modal.x/y` before slot swap | Modal positioned using pre-swap (200px) height, ends up off-centre |
-| Hardcoding `modal.y = 120/140/200` | Only correct by coincidence at one modal size |
-| Re-using one `bodyComp` for multiple modals | Later modals inherit the first's content — always create a new component per modal |
+**What you MUST NOT do:**
+- Don't call `modal.setProperties({"Content#19312:24": ...})` — throws.
+- Don't wrap `setProperties` in `try/catch` to swallow errors.
+- Don't build modals as custom FRAMEs named `Modal · *` with hand-composed Header / Body / Footer children. That's Rule #3 fabrication. Use the `*Modal Basic*` instance + Body frame.
+- Don't compute `modal.x/y` before the Body children are appended — height isn't final yet.
 
----
+**Drawer Basic** (`*Drawer Basic*`) has the same Body-frame pattern. Same rules apply.
 
 ## Library Rules
 
