@@ -112,6 +112,17 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    For 1–3 screens a horizontal row is fine. For 4+ always grid.
 
+7.7. **SECTION background = `#404040`, canvas background = `#1e1e1e`.** Sumsub standard from the Design-Project-Template. Every SECTION you create must have fill set to `#404040` (dark grey). Never leave the default white / transparent section — it visually leaks into the white page frames and ruins the review experience.
+
+   ```js
+   const section = figma.createSection();
+   section.name = "Domain Management (draft)";
+   section.fills = [{ type: "SOLID", color: { r: 0x40/255, g: 0x40/255, b: 0x40/255 } }];
+   // …then appendChild screens as usual
+   ```
+
+   If you're creating multiple sections on a page, all of them get `#404040`. The page canvas itself should be `#1e1e1e` (darker) — that's a figma.currentPage setting, not the section.
+
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
    - Audit not run = **do not share the link**. Treat it as the build being incomplete.
@@ -294,18 +305,46 @@ These are non-negotiable. Violating any of them is treated as a bug:
      issues.push(`${count} VISIBLE TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
    }
 
-   // 7.2. Modal Basic checks — empty Body + vertical centering.
-   // Common failure: skill tries slot-swap with local component and it fails silently,
-   // leaving the Modal's "Body" frame empty (72px default). OR the modal is hardcoded
-   // to a y-value that doesn't vertically center it in its parent.
+   // 7.15. SECTION background check — Rule 7.7. If root is inside a SECTION,
+   // verify the section's fill is #404040 (dark grey per Sumsub template).
+   {
+     let anc = root.parent;
+     while (anc && anc.type !== "PAGE") {
+       if (anc.type === "SECTION") {
+         const f = anc.fills?.[0];
+         const is404040 = f && f.type === "SOLID" &&
+           Math.abs(f.color.r - 0x40/255) < 0.01 &&
+           Math.abs(f.color.g - 0x40/255) < 0.01 &&
+           Math.abs(f.color.b - 0x40/255) < 0.01;
+         if (!f || f.visible === false) {
+           issues.push(`SECTION "${anc.name}" has no fill — set fills to [{type:"SOLID",color:{r:0x40/255,g:0x40/255,b:0x40/255}}] per Rule 7.7`);
+         } else if (!is404040) {
+           const hex = f.type === "SOLID" ? "#" + [f.color.r,f.color.g,f.color.b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join("") : f.type;
+           issues.push(`SECTION "${anc.name}" fill is ${hex}, expected #404040 (Rule 7.7)`);
+         }
+         break;
+       }
+       anc = anc.parent;
+     }
+   }
+
+   // 7.2. Modal Basic checks — unfilled Content slot + vertical centering.
+   // Most common failure: slot-swap silently fails because bodyComp wasn't
+   // appended to currentPage before setProperties. Symptom: the Content SLOT
+   // property value stays null/undefined, and the modal shows the default
+   // empty 72px Body frame.
    const modals = all.filter(n =>
      n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Modal Basic*"
    );
    for (const m of modals) {
-     // Empty body check
-     const bodyFrame = m.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
-     if (bodyFrame && bodyFrame.children.length === 0) {
-       issues.push(`Modal Basic "${m.name}" has an empty Body frame — slot-swap probably failed silently. Add content directly: modal.findOne(n => n.name.trim()==="Body").appendChild(yourContent)`);
+     // Unfilled SLOT check — iterate all SLOT-type properties on the modal
+     const props = m.componentProperties || {};
+     for (const [key, prop] of Object.entries(props)) {
+       if (prop.type !== "SLOT") continue;
+       const v = prop.value;
+       if (v === undefined || v === null || v === "") {
+         issues.push(`Modal Basic "${m.name}" — SLOT property "${key}" is empty. Create a local component, appendChild to currentPage BEFORE setProperties, then swap: modal.setProperties({"${key}": bodyComp.id})`);
+       }
      }
      // Vertical centering check (only if modal has an explicit parent with height)
      const parent = m.parent;
@@ -314,7 +353,7 @@ These are non-negotiable. Violating any of them is treated as a bug:
        const parentCenter = parent.height / 2;
        const off = Math.abs(modalCenter - parentCenter);
        if (off > 40) {
-         issues.push(`Modal Basic "${m.name}" not vertically centered in "${parent.name}" (off by ${Math.round(off)}px). Compute y AFTER body content is set: modal.y = (parent.height - modal.height) / 2`);
+         issues.push(`Modal Basic "${m.name}" not vertically centered in "${parent.name}" (off by ${Math.round(off)}px). Compute y AFTER slot swap: modal.y = (parent.height - modal.height) / 2`);
        }
      }
    }
@@ -751,18 +790,18 @@ Scrim always covers **full root frame** (1440×900), including sidebar.
 
 ---
 
-## Modal Basic — setting body content
+## Modal Basic — setting body content via slot swap
 
-**Do NOT slot-swap via `figma.createComponent()`.** The slot property `Content#19312:24` on `*Modal Basic*` expects a published/library component ID. Passing a local `figma.createComponent()` result silently fails (wrapped in try/catch you won't see it). Symptom: modal stays at default 200px height with empty Body (72px), your custom content is nowhere.
+`*Modal Basic*` exposes its body as a SLOT property (`Content#19312:24`). The correct way to populate it is to create a **local main component**, fill it with your content, then swap the slot to it. The skill often gets this ~80% right but misses one critical step: **append the local component to the page BEFORE `setProperties`**. Without that, the component exists only in memory, the slot can't resolve it, and your modal renders with the default empty 72px Body.
 
-**Do this instead — directly append into the Body frame of the modal instance:**
+**Correct pattern — copy this exactly:**
 
 ```js
-// 1. Create modal instance
+// 1. Create the modal instance
 const modalSet = await figma.importComponentSetByKeyAsync(COMPONENTS.modalBasic);
 const modal = modalSet.children.find(v => v.name === "Size=Medium").createInstance();
 
-// 2. Customize header (title + close button)
+// 2. Customize the modal Header (title + close button)
 const modalHeader = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Header");
 modalHeader.setProperties({
   "Title text#3834:3": "Add domain",
@@ -770,41 +809,60 @@ modalHeader.setProperties({
   "Close button#8216:0": true,
 });
 
-// 3. Find the Body frame INSIDE the modal instance — it's a direct-child FRAME
-//    (not a sub-instance), so we can appendChild into it.
-const modalBody = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
-modalBody.layoutMode = "VERTICAL";
-modalBody.primaryAxisSizingMode = "AUTO";  // auto-grow with content
-modalBody.itemSpacing = 16;
-modalBody.paddingLeft = 24; modalBody.paddingRight = 24;
-modalBody.paddingTop = 0;   modalBody.paddingBottom = 16;
+// 3. Customize the modal Footer buttons
+const modalFooter = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Footer");
+const footerBtns = modalFooter.findAll(n => n.type === "INSTANCE" && n.name === "*Button*");
+footerBtns[2].setProperties({ "Button Text#143:1442": "Cancel",   "Type": "Secondary" });
+footerBtns[3].setProperties({ "Button Text#143:1442": "Continue", "Type": "Primary" });
 
-// 4. Build your content and append into Body
+// 4. Create a LOCAL main component for the body content
+const bodyComp = figma.createComponent();
+bodyComp.name = "Modal Body / Add domain";
+bodyComp.layoutMode = "VERTICAL";
+bodyComp.primaryAxisSizingMode = "AUTO";    // auto-grow to fit content
+bodyComp.counterAxisSizingMode = "FIXED";
+bodyComp.resize(modal.width, 100);          // width matches modal
+
+// 5. ⚠️ CRITICAL: append bodyComp to currentPage BEFORE setProperties.
+//    Without this, bodyComp exists in memory but isn't in the document tree —
+//    the slot can't resolve it and your modal keeps showing default empty Body.
+figma.currentPage.appendChild(bodyComp);
+
+// 6. Build your content and append into bodyComp
 const desc = await makeText("Enter the domain…", "regular/body-m", "textSubtle");
-modalBody.appendChild(desc);
+bodyComp.appendChild(desc);
 desc.layoutSizingHorizontal = "FILL";
 
 const input = await makeInstance(COMPONENTS.inputBasic);
-modalBody.appendChild(input);
+bodyComp.appendChild(input);
 input.layoutSizingHorizontal = "FILL";
 
-// 5. Customize footer buttons
-const modalFooter = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Footer");
-const footerBtns = modalFooter.findAll(n => n.type === "INSTANCE" && n.name === "*Button*");
-footerBtns[2].setProperties({ "Button Text#143:1442": "Cancel", "Type": "Secondary" });
-footerBtns[3].setProperties({ "Button Text#143:1442": "Continue", "Type": "Primary" });
+// 7. Swap the Content slot on the modal instance — now bodyComp resolves correctly
+modal.setProperties({ "Content#19312:24": bodyComp.id });
+// Do NOT wrap this in try/catch. If it throws, surface the error — a silent
+// failure leaves the modal empty and you'll ship a broken mockup.
 
-// 6. Place modal on scrim, CENTERED. Compute position AFTER all content is set
-//    so modal.height reflects the real size (Body auto-grew to fit content).
+// 8. Hide the local component off-screen so it doesn't clutter the canvas
+bodyComp.x = -20000; bodyComp.y = -20000;
+
+// 9. Place modal on scrim, CENTERED.
+//    Compute x/y AFTER the slot swap: modal.height is only final once the slot
+//    is populated and auto-layout has resolved.
 scrimRoot.appendChild(modal);
 modal.layoutPositioning = "ABSOLUTE";
 modal.x = (scrimRoot.width  - modal.width)  / 2;
 modal.y = (scrimRoot.height - modal.height) / 2;
 ```
 
-**Why the Body frame is safe to mutate:** it's a regular `FRAME` child of the `*Modal Basic*` instance, not a sub-`INSTANCE`. Figma allows appending new children to frames inside instances (it becomes an override — not a detach). Rule "never detach instances" still holds.
+**The five most common failures:**
 
-**Modal centering rule:** always compute `x`/`y` AFTER the body content is filled. Modal height is not final until auto-layout has resolved. If you set `modal.y = 200` before populating Body, your modal ends up off-centre by whatever amount Body grew.
+| Mistake | Symptom |
+|---|---|
+| Not appending `bodyComp` to currentPage before `setProperties` | Modal body stays empty (default 72px) |
+| Wrapping `setProperties` in `try/catch` | Errors hidden → silent slot miss → broken ship |
+| Computing `modal.x/y` before slot swap | Modal positioned using pre-swap (200px) height, ends up off-centre |
+| Hardcoding `modal.y = 120/140/200` | Only correct by coincidence at one modal size |
+| Re-using one `bodyComp` for multiple modals | Later modals inherit the first's content — always create a new component per modal |
 
 ---
 
