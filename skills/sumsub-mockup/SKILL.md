@@ -54,6 +54,19 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    If you haven't read the required references for the task's product, you're not ready to build. Building from "general knowledge" is a bug — the reference has exact keys, paddings, connector stroke weights, color logic that you cannot guess correctly.
 
+   **Pattern-specific triggers — re-read the matching SKILL.md section BEFORE writing the relevant code.** These override "I think I remember it" — you don't, and getting them wrong is a silent failure that audit barely catches.
+
+   | If the task involves… | Re-read this SKILL.md section (with the Read tool) BEFORE writing code |
+   |---|---|
+   | A Modal, dialog, confirmation, or any pop-up window | **"Modal Basic — setting body content via slot swap"** — wrong slot swap = empty modal body shipped |
+   | A Drawer or side panel | **"Modal Basic — setting body content via slot swap"** (same SLOT pattern applies to Drawer Basic) |
+   | A table / data list page | **"Top Toolbar — Rules"** and **"Table Cell Configuration"** |
+   | Anything with filters | Check filter label customization — filter instances default to "Label" text |
+   | A multi-screen task (≥4 screens) | Rule 7.6 (grid layout) |
+   | A task that mentions "all necessary screens" / "все экраны" / "flow" | Rule 7.6 + realistic-data Rule #7 applies to every screen, including modals |
+
+   Trigger is the user's task text, not your plan. If the user says "domain management with add flow", the task involves modals — re-read the Modal section before `use_figma` even if your plan doesn't mention it yet.
+
 3. **Never invent components for known Sumsub products, and never deliver a "bare" mockup as a workaround.** If the product exists in our design system, every major structural piece (Sidebar, Header, Flowbuilder Header, Canvas, Canvas Bars, AP page header) must be an instance of an actual DS component.
 
    **Forbidden patterns:**
