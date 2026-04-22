@@ -137,21 +137,34 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    Trigger is the user's task text, not your plan. If the user says "domain management with add flow", the task involves modals — re-read the Modal section before `use_figma` even if your plan doesn't mention it yet.
 
-   **Product-docs triggers — read the matching docs file from `${CLAUDE_PLUGIN_ROOT}/reference/products/` BEFORE writing code.** These are the canonical feature docs from docs.sumsub.com. Reading them gives you real feature names, correct flow steps, actual field labels instead of made-up ones.
+   **Product-docs triggers — MANDATORY READ before any `use_figma` call.** This is not "read if you're unsure" — it's "if the task keywords match, STOP and Read before generating any plan". Sumsub product behaviour doesn't match generic SaaS patterns. Skipping these docs = shipping a mockup that looks like Azure AD / Okta / Auth0 but doesn't match actual Sumsub flows.
 
-   | Task mentions / is about… | Read (from `${CLAUDE_PLUGIN_ROOT}/reference/products/`) |
+   **Step-by-step for every new task:**
+
+   1. Read the user's task text once. Extract all product-domain keywords — `domain`, `SSO`, `KYC`, `applicant`, `workflow`, `case`, `TM`, `transaction`, `fraud`, etc.
+   2. Match each keyword against the trigger table below.
+   3. For every matched row, call the `Read` tool on the listed file **before anything else**. Yes, before the library check. Before the reference-file reads. Before planning screens.
+   4. Use `Grep` tool to find the specific section in the file (file is 2K+ lines — don't ingest it all).
+   5. Build the plan using the actual terminology, field names, and flow steps from the docs. Not from your memory of how "domain verification usually works".
+
+   | Task keywords | REQUIRED READ (from `${CLAUDE_PLUGIN_ROOT}/reference/products/`) |
    |---|---|
-   | Dashboard overview, account, billing, **SSO, domain management**, verification levels overview, team roles | `sumsub-docs-overview.txt` |
-   | Applicant verification, KYC, ID docs, selfie, biometric, address, phone/email, questionnaire, payment checks, applicant flow, reusable identity | `sumsub-docs-user-verification.txt` |
-   | Fraud prevention, device intelligence, risk scoring, blocklists, IP check, antifraud | `sumsub-docs-fraud-prevention.txt` |
-   | KYB, business verification, company, UBO, ownership, AML watchlists, adverse media, corporate docs | `sumsub-docs-kyb.txt` |
-   | Transactions, transaction monitoring, rules, travel rule, crypto, VASP, wallet, payments flagging | `sumsub-docs-transaction-monitoring.txt` |
-   | Case management, queues, compliance officer, blueprints, SAR/STR, investigation | `sumsub-docs-case-management.txt` |
-   | Workflow builder, verification levels/steps, automation, marketplace, conditions, actions, review steps | `sumsub-docs-workflow.txt` |
+   | domain, SSO, single sign-on, SAML, OIDC, IdP, provisioning, team roles, account, billing, verification levels overview, dashboard | `sumsub-docs-overview.txt` |
+   | KYC, applicant, ID doc, selfie, biometric, liveness, address proof, phone check, email check, questionnaire, payment check, reusable identity | `sumsub-docs-user-verification.txt` |
+   | fraud, device intelligence, risk score, blocklist, IP check, antifraud | `sumsub-docs-fraud-prevention.txt` |
+   | KYB, business verification, UBO, ownership, AML watchlist, adverse media, corporate doc | `sumsub-docs-kyb.txt` |
+   | transaction monitoring, TM, rule, travel rule, crypto, VASP, wallet, payment flagging | `sumsub-docs-transaction-monitoring.txt` |
+   | case management, queue, compliance officer, blueprint, SAR, STR, investigation | `sumsub-docs-case-management.txt` |
+   | workflow, verification level, verification step, automation, marketplace, condition, action, review step | `sumsub-docs-workflow.txt` |
 
-   These files are large (user-verification.txt is 12K lines). **Read with `limit: 2000` and navigate by keyword** — search for the specific feature (e.g. `Domain management`, `Workflow builder`, `Case blueprint`) and read that section. Don't try to ingest the whole file. Use `Grep` tool if Read won't find the right section.
+   **If the docs say the feature works differently than the user's brief describes**, the docs win. Build the mockup using Sumsub's actual terminology and structure. If the user's brief contradicts the docs meaningfully, STOP and ask before building.
 
-   Failure mode: building a "Domain management" mockup with invented field names, flow steps, and statuses — when docs-overview.txt has the exact spec. If you skip the read, you'll ship a mockup that doesn't match the actual product.
+   **Must-log in your build log:** state explicitly which product-docs files you read and which sections (by grep keyword). Example: *"Read sumsub-docs-overview.txt: sections 'Single sign-on (SSO)', 'SSO configuration fields', 'Configure SSO login'."* If your build log doesn't show a product-docs read for a task whose keywords clearly match the trigger table — you skipped Rule #2 and the mockup is suspect.
+
+   **Failure examples (don't repeat):**
+   - Domain Management mockup using invented `sumsub-domain-verify=xxx` TXT instead of the actual SPF + DKIM patterns from docs (`v=spf1 include:spf.sumsub.com ~all`, `sumsub1.domainkey CNAME sumsub1.domainkey.sumsub.com.`).
+   - Building a standalone "Domain Management" module when the real docs only describe Domain as a field inside SSO configuration.
+   - Using SSO provider UI patterns copied from Auth0/Okta dashboards instead of how the real Sumsub Settings → SSO page is documented.
 
 3. **Never invent components for known Sumsub products, and never deliver a "bare" mockup as a workaround.** If the product exists in our design system, every major structural piece (Sidebar, Header, Flowbuilder Header, Canvas, Canvas Bars, AP page header) must be an instance of an actual DS component.
 
