@@ -155,6 +155,66 @@ async function bindFrameSpacing(node, { padLeft, padRight, padTop, padBottom, pa
   if (gap)       await bindSpacing(node, "itemSpacing",   gap);
 }
 
+// ─── Local components home ────────────────────────────────────────────────────
+// Every local main component the skill creates (modal body slots, drawer bodies,
+// custom illustrations, anything via figma.createComponent()) must live on a
+// dedicated "Local components" page, inside a SECTION named "Components (by Claude)".
+// This keeps the Drafts page clean of orphan components stacked at (-20000, -20000).
+//
+// getLocalComponentsHome() finds or creates both and returns the SECTION. Call it
+// at the point where you would have previously done:
+//   figma.currentPage.appendChild(bodyComp);
+//   bodyComp.x = -20000; bodyComp.y = -20000;
+// Replace with:
+//   const home = await getLocalComponentsHome();
+//   home.appendChild(bodyComp);
+//
+// The function auto-positions the new component in a grid inside the section so
+// multiple bodies don't stack on each other.
+async function getLocalComponentsHome() {
+  // 1. Page "Local components" (find or create; case-insensitive, singular/plural)
+  let page = figma.root.children.find(p => /^local\s*components?$/i.test(p.name));
+  if (!page) {
+    page = figma.createPage();
+    page.name = "Local components";
+  }
+  await page.loadAsync();
+
+  // 2. Section "Components (by Claude)" inside that page
+  let section = page.children.find(n =>
+    n.type === "SECTION" && /^Components\s*\(by Claude\)\s*$/.test(n.name)
+  );
+  if (!section) {
+    section = figma.createSection();
+    section.name = "Components (by Claude)";
+    page.appendChild(section);
+    // Match the dark-grey Sumsub section convention
+    section.fills = [{ type: "SOLID", color: { r: 0x40/255, g: 0x40/255, b: 0x40/255 } }];
+    section.resizeWithoutConstraints(4800, 4000);
+  }
+
+  // 3. Auto-position the NEXT component added. Caller appendChild(bodyComp) and
+  //    can immediately read section.__nextX / __nextY, or use positionInHome().
+  //    We avoid modifying existing components — only place new ones.
+  return section;
+}
+
+// Position a newly-added component inside the Local components section.
+// Arranges in a grid, 4 columns, 600×500 cells. Call AFTER appendChild.
+function positionInHome(section, node, { cellW = 600, cellH = 500, cols = 4, gap = 40 } = {}) {
+  const existing = section.children.filter(n => n.type === "COMPONENT" && n !== node);
+  const idx = existing.length;
+  const col = idx % cols;
+  const row = Math.floor(idx / cols);
+  node.x = 40 + col * (cellW + gap);
+  node.y = 40 + row * (cellH + gap);
+  // Grow section if needed
+  const neededW = 40 + cols * (cellW + gap) + 40;
+  const neededH = 40 + (row + 1) * (cellH + gap) + 40;
+  if (section.width < neededW) section.resizeWithoutConstraints(neededW, Math.max(section.height, neededH));
+  else if (section.height < neededH) section.resizeWithoutConstraints(section.width, neededH);
+}
+
 // Creates a text node with proper style + semantic color variable
 async function makeText(content, styleKey, colorKey) {
   await figma.loadFontAsync({ family: "Geist", style: "Regular" });

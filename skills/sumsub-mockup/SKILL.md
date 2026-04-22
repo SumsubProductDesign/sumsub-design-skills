@@ -311,6 +311,28 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Don't bind inside component instances** — DS owns its internals. Only bind on YOUR custom frames (outside any INSTANCE). Audit ignores instance internals.
 
+7.9. **Local components go on the "Local components" page, inside the "Components (by Claude)" SECTION.** Never `appendChild` a `figma.createComponent()` to `figma.currentPage` with `x = -20000`. That stacks every local component on top of each other at a single off-canvas point and is impossible to review.
+
+   Use the `getLocalComponentsHome()` + `positionInHome()` helpers from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`:
+
+   ```js
+   const bodyComp = figma.createComponent();
+   bodyComp.name = "Modal Body / Add domain";
+   // …configure layout…
+
+   const home = await getLocalComponentsHome(); // finds or creates:
+                                                 //   Page: "Local components"
+                                                 //   Section: "Components (by Claude)" (fill #404040)
+   home.appendChild(bodyComp);
+   positionInHome(home, bodyComp);              // auto-grid, 4 cols × 600×500 cells
+   ```
+
+   If you can't use the helper (writing fully custom code), replicate the logic:
+   1. Find `figma.root.children` for a PAGE whose name matches `/^local\s*components?$/i`. Create one named `Local components` if not found.
+   2. On that page, find a SECTION named `Components (by Claude)`. Create one with fill `#404040` if not found.
+   3. `appendChild(bodyComp)` into that SECTION (not into the Drafts SECTION, not into currentPage).
+   4. Position new components in a grid to avoid overlap.
+
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
    - Audit not run = **do not share the link**. Treat it as the build being incomplete.
@@ -634,6 +656,43 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
          issues.push(`${md.mainComponent.parent.name} "${md.name}" — internal Header '${key}' still default: "${v}". Call setProperties on the / Header sub-instance to replace.`);
        } else if (exactDefaultsInModalHeader.includes(v)) {
          issues.push(`${md.mainComponent.parent.name} "${md.name}" — internal Header '${key}' is literal default "${v}". Replace with real content.`);
+       }
+     }
+   }
+
+   // 7.19. Orphan local COMPONENTs — Rule 7.9. Any figma.createComponent() the
+   // skill produces must live on a "Local components" page inside the
+   // "Components (by Claude)" SECTION. Scan all pages for COMPONENT nodes not
+   // housed correctly.
+   {
+     const orphans = [];
+     for (const page of figma.root.children) {
+       // Skip the official home page
+       if (/^local\s*components?$/i.test(page.name)) continue;
+       for (const n of page.children) {
+         if (n.type !== "COMPONENT") continue;
+         // Direct child of a non-"Local components" page = orphan
+         orphans.push(`"${n.name}" on page "${page.name}"`);
+       }
+       // Also check components hanging loose in sections on this page
+       for (const sec of page.children.filter(c => c.type === "SECTION")) {
+         for (const n of sec.children) {
+           if (n.type === "COMPONENT") {
+             orphans.push(`"${n.name}" in section "${sec.name}" on page "${page.name}"`);
+           }
+         }
+       }
+     }
+     if (orphans.length > 0) {
+       issues.push(`${orphans.length} local COMPONENT(s) outside "Local components" page (Rule 7.9): ${orphans.slice(0, 3).join(", ")}${orphans.length > 3 ? "…" : ""}. Move via getLocalComponentsHome() helper.`);
+     }
+     // Also check: on "Local components" page, components should be inside the
+     // "Components (by Claude)" SECTION, not bare on the page.
+     const homePage = figma.root.children.find(p => /^local\s*components?$/i.test(p.name));
+     if (homePage) {
+       const bareOnHome = homePage.children.filter(n => n.type === "COMPONENT");
+       if (bareOnHome.length > 0) {
+         issues.push(`${bareOnHome.length} COMPONENT(s) on "Local components" page not inside the "Components (by Claude)" SECTION — appendChild them to the section.`);
        }
      }
    }
@@ -1192,9 +1251,16 @@ bodyComp.itemSpacing = 16;
 bodyComp.paddingLeft = 24; bodyComp.paddingRight = 24;
 bodyComp.paddingTop = 0;   bodyComp.paddingBottom = 16;
 bodyComp.resize(modal.width, 100);
-figma.currentPage.appendChild(bodyComp);  // must be in document tree before swap
 
-// 7. Build content inside the local component
+// 7. Park the local component on the dedicated Local components page.
+//    DO NOT appendChild to currentPage with x=-20000 — that stacks every
+//    component at the same off-canvas point and is unreadable. Use the
+//    getLocalComponentsHome() helper from blocks/helpers.js:
+const home = await getLocalComponentsHome();  // "Local components" page → "Components (by Claude)" SECTION
+home.appendChild(bodyComp);
+positionInHome(home, bodyComp);  // auto-grid, 4 cols, no collisions
+
+// 8. Build content inside the local component
 const desc = await makeText("Enter the domain…", "regular/body-m", "textSubtle");
 bodyComp.appendChild(desc);
 desc.layoutSizingHorizontal = "FILL";
@@ -1203,11 +1269,8 @@ const input = await makeInstance(COMPONENTS.inputBasic);
 bodyComp.appendChild(input);
 input.layoutSizingHorizontal = "FILL";
 
-// 8. Swap the inner slot instance to point at your component
+// 9. Swap the inner slot instance to point at your component
 slotInst.swapComponent(bodyComp);
-
-// 9. Hide the source component off-screen
-bodyComp.x = -20000; bodyComp.y = -20000;
 
 // 10. Place modal on scrim, centered AFTER swap (height is now final)
 scrimRoot.appendChild(modal);
