@@ -35,25 +35,44 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
    >
    > Your local version: **vLOCAL** · Latest: **vREMOTE**
    >
-   > Newer versions fix real bugs — each release ships audit checks and guidance that prevent silent mockup failures. Recommended: update before continuing.
+   > Newer versions fix real bugs — each release ships audit checks and guidance that prevent silent mockup failures.
    >
-   > **How to update:**
-   > 1. Open a regular terminal (not Claude Desktop's Code tab — `/plugin` doesn't work there)
-   > 2. Run: `sumsub-update`
-   > 3. Fully quit Claude Desktop (⌘Q on macOS, right-click tray → Quit on Windows) and reopen
-   > 4. Come back to this chat
+   > I can update it for you right now by running:
+   > ```
+   > claude plugin marketplace update sumsub-design
+   > claude plugin update sumsub-design@sumsub-design
+   > ```
    >
    > Reply:
-   > - **`updated`** — I ran `sumsub-update` and restarted Desktop
+   > - **`yes`** / **`update`** — I'll run the two commands via Bash, then you just quit and reopen Claude Desktop
    > - **`continue anyway`** — don't update, use the current (older) version
-   >
-   > If you don't have the `sumsub-update` alias set up yet: see `INSTALL.md` in the repo, section "Updating".
 
    Substitute `vLOCAL` / `vREMOTE` with the actual versions.
 
-5. **Wait for explicit reply.** Only after the user says "updated" or "continue anyway" proceed to Rule #0. Do not start building.
+5. **If user replies `yes` or `update` — run the update automatically.** Use the `Bash` tool to execute both commands in sequence:
 
-6. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
+   ```bash
+   claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design
+   ```
+
+   After the Bash call completes:
+   - If both commands succeeded (exit 0) — tell the user:
+     > ✅ Updated to vREMOTE. Fully quit Claude Desktop (⌘Q on macOS, right-click tray → Quit on Windows) and reopen so the new version loads. Then reply `restarted` and I'll continue.
+   - If commands failed — surface the exact error output and the manual fallback:
+     > ❌ Update failed: `<stderr excerpt>`
+     >
+     > Try manually in a regular terminal:
+     > ```
+     > claude plugin marketplace update sumsub-design
+     > claude plugin update sumsub-design@sumsub-design
+     > ```
+     > …or reply `continue anyway` to proceed on the current version.
+
+   After restart, the user comes back to the chat. Proceed to Rule #0.
+
+6. **If user replies `continue anyway`** — skip the update, cache the decision, proceed to Rule #0.
+
+7. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
 
 **When the check does NOT fire:**
 - Local ≥ remote (no update needed) — proceed silently to Rule #0.
