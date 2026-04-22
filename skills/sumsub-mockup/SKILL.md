@@ -162,14 +162,71 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
 7.7. **SECTION background = `#404040`, canvas background = `#1e1e1e`.** Sumsub standard from the Design-Project-Template. Every SECTION you create must have fill set to `#404040` (dark grey). Never leave the default white / transparent section — it visually leaks into the white page frames and ruins the review experience.
 
+   **Naming — always end with `(made by Claude)`** so human reviewers can find and clean up your sections. Format: `<Task name> (made by Claude)`.
+
    ```js
    const section = figma.createSection();
-   section.name = "Domain Management (draft)";
+   section.name = "Domain management — self-service (made by Claude)";
    section.fills = [{ type: "SOLID", color: { r: 0x40/255, g: 0x40/255, b: 0x40/255 } }];
    // …then appendChild screens as usual
    ```
 
-   If you're creating multiple sections on a page, all of them get `#404040`. The page canvas itself should be `#1e1e1e` (darker) — that's a figma.currentPage setting, not the section.
+   If you're creating multiple sections on a page, all of them get `#404040` and all of them get the `(made by Claude)` suffix. The page canvas itself should be `#1e1e1e` (darker) — that's a figma.currentPage setting, not the section.
+
+7.8. **Bind every non-zero spacing, gap, radius value to a design token — no raw numbers.**
+
+   When you write `frame.paddingLeft = 24` or `frame.cornerRadius = 8`, you're shipping a hardcoded value. It looks fine visually but doesn't respond to DS updates, and any reviewer comparing tokens sees the number as a "break". Sumsub's convention: custom frames always bind these values to variables.
+
+   **Spacing variables** (import via `figma.variables.importVariableByKeyAsync`, bind via `setBoundVariable`):
+
+   | Token | Value | Variable key |
+   |---|---|---|
+   | `spacing/2xs` | 4px | `3d3cc3a15da0b893bf326da6053d7a1c37f1d836` |
+   | `spacing/xs`  | 6px | `a4dad7f0e560345e844697b529325a2eca2ff23a` |
+   | `spacing/s`   | 8px | `5a8e4573770ee8f921f141c1ab6c96835c3125a0` |
+   | `spacing/m`   | 12px | `de89b1cae49981816929db80a4e795842e7baf77` |
+   | `spacing/lg`  | 16px | `2b3382099953af94f32cb6ffe5c7f44c74d5fed7` |
+   | `spacing/xl`  | 24px | `7dc2647090da988c17327693bc2224e2308047a2` |
+   | `spacing/2xl` | 28px | `fceb37ce155723145d25d273574c665a8d7d30e6` |
+   | `spacing/3xl` | 32px | `a2e089548b83ff33c8ee5e914fa24e67b889b38c` |
+
+   **Border-radius variables:**
+
+   | Token | Value | Variable key |
+   |---|---|---|
+   | `border-radius/s`  | 2px | `885152d55a536fb853461592cc3eff926e94858d` |
+   | `border-radius/m`  | 4px | `311dc09093e9474a8b582c8fb7ccc7a628065a20` |
+   | `border-radius/lg` | 8px | `95839af397884cd7f8fadb34a62d4763f88d68dd` |
+   | `border-radius/xl` | 12px | `03884e014085a48cf26670632be200a02b5a160c` |
+
+   **Binding pattern (use helpers or inline):**
+
+   ```js
+   // Using helpers.js (recommended)
+   await bindSpacing(frame, "paddingLeft", SP_VARS.xl);   // 24px
+   await bindSpacing(frame, "paddingRight", SP_VARS.xl);
+   await bindSpacing(frame, "paddingTop", SP_VARS.xl);
+   await bindSpacing(frame, "paddingBottom", SP_VARS.xl);
+   await bindSpacing(frame, "itemSpacing", SP_VARS.lg);   // 16px
+   await bindRadius(frame, RADIUS_VARS.lg);                // 8px all corners
+
+   // Inline equivalent
+   const sp24 = await figma.variables.importVariableByKeyAsync("7dc2647090da988c17327693bc2224e2308047a2");
+   frame.setBoundVariable("paddingLeft", sp24);
+   frame.setBoundVariable("paddingRight", sp24);
+   frame.setBoundVariable("paddingTop", sp24);
+   frame.setBoundVariable("paddingBottom", sp24);
+
+   const r8 = await figma.variables.importVariableByKeyAsync("95839af397884cd7f8fadb34a62d4763f88d68dd");
+   frame.setBoundVariable("topLeftRadius", r8);
+   frame.setBoundVariable("topRightRadius", r8);
+   frame.setBoundVariable("bottomLeftRadius", r8);
+   frame.setBoundVariable("bottomRightRadius", r8);
+   ```
+
+   **Zero is zero — don't bind a variable to a 0-value spacing/radius.** `frame.paddingLeft = 0` stays as 0, no variable needed. Only non-zero values require binding.
+
+   **Don't bind inside component instances** — DS owns its internals. Only bind on YOUR custom frames (outside any INSTANCE). Audit ignores instance internals.
 
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
@@ -365,12 +422,13 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
-   // 7.15. SECTION background check — Rule 7.7. If root is inside a SECTION,
-   // verify the section's fill is #404040 (dark grey per Sumsub template).
+   // 7.15. SECTION background + naming check — Rules 7.7. If root is inside a
+   // SECTION, verify (a) fill = #404040 and (b) name ends with "(made by Claude)".
    {
      let anc = root.parent;
      while (anc && anc.type !== "PAGE") {
        if (anc.type === "SECTION") {
+         // Fill check
          const f = anc.fills?.[0];
          const is404040 = f && f.type === "SOLID" &&
            Math.abs(f.color.r - 0x40/255) < 0.01 &&
@@ -382,10 +440,58 @@ These are non-negotiable. Violating any of them is treated as a bug:
            const hex = f.type === "SOLID" ? "#" + [f.color.r,f.color.g,f.color.b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join("") : f.type;
            issues.push(`SECTION "${anc.name}" fill is ${hex}, expected #404040 (Rule 7.7)`);
          }
+         // Naming check — must end with "(made by Claude)"
+         if (!/\(made by Claude\)\s*$/.test(anc.name)) {
+           issues.push(`SECTION "${anc.name}" missing "(made by Claude)" suffix — rename per Rule 7.7`);
+         }
          break;
        }
        anc = anc.parent;
      }
+   }
+
+   // 7.16. Spacing / border-radius token binding — Rule 7.8.
+   // Every non-zero paddingLeft/Right/Top/Bottom, itemSpacing and cornerRadius
+   // on a custom FRAME (outside instances) must be bound to a design-token variable.
+   // Zero values don't need binding.
+   const spacingProps = ["paddingLeft","paddingRight","paddingTop","paddingBottom","itemSpacing"];
+   const radiusProps = ["topLeftRadius","topRightRadius","bottomLeftRadius","bottomRightRadius"];
+   const unboundBy = {}; // aggregate by frame to avoid spam
+   for (const n of all) {
+     if (n.type !== "FRAME") continue;
+     if (isInsideInstance(n)) continue;
+     if (["Item List","Main","Content"].includes(n.name)) continue;
+     // Spacing props
+     for (const prop of spacingProps) {
+       const val = n[prop];
+       if (typeof val !== "number" || val === 0) continue;
+       const bound = n.boundVariables?.[prop];
+       if (!bound) {
+         unboundBy[n.name] = unboundBy[n.name] || { spacing: [], radius: [] };
+         unboundBy[n.name].spacing.push(`${prop}=${val}px`);
+       }
+     }
+     // Radius props (each corner)
+     for (const prop of radiusProps) {
+       const val = n[prop];
+       if (typeof val !== "number" || val === 0) continue;
+       const bound = n.boundVariables?.[prop];
+       if (!bound) {
+         unboundBy[n.name] = unboundBy[n.name] || { spacing: [], radius: [] };
+         unboundBy[n.name].radius.push(`${prop}=${val}px`);
+       }
+     }
+   }
+   const unboundFrameCount = Object.keys(unboundBy).length;
+   if (unboundFrameCount > 0) {
+     // Show up to 5 sample frames, compact
+     const samples = Object.entries(unboundBy).slice(0, 5).map(([name, v]) => {
+       const parts = [];
+       if (v.spacing.length) parts.push(`spacing[${v.spacing.join(", ")}]`);
+       if (v.radius.length) parts.push(`radius[${v.radius.join(", ")}]`);
+       return `${name}: ${parts.join(" ")}`;
+     }).join(" | ");
+     issues.push(`${unboundFrameCount} custom FRAME(s) with unbound spacing/radius values (Rule 7.8). Sample: ${samples}${unboundFrameCount > 5 ? " …" : ""}. Bind to spacing/* and border-radius/* variables via setBoundVariable.`);
    }
 
    // 7.18. Modal/Drawer internal header defaults — catch "Hey, what's up, dude?",

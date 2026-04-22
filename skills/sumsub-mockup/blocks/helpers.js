@@ -103,6 +103,58 @@ async function bindStroke(node, varKey) {
   )];
 }
 
+// ─── Spacing / Border-radius variable keys ───────────────────────────────────
+const SP_VARS = {
+  "2xs":  "3d3cc3a15da0b893bf326da6053d7a1c37f1d836", // 4px
+  "xs":   "a4dad7f0e560345e844697b529325a2eca2ff23a", // 6px
+  "s":    "5a8e4573770ee8f921f141c1ab6c96835c3125a0", // 8px
+  "m":    "de89b1cae49981816929db80a4e795842e7baf77", // 12px
+  "lg":   "2b3382099953af94f32cb6ffe5c7f44c74d5fed7", // 16px
+  "xl":   "7dc2647090da988c17327693bc2224e2308047a2", // 24px
+  "2xl":  "fceb37ce155723145d25d273574c665a8d7d30e6", // 28px
+  "3xl":  "a2e089548b83ff33c8ee5e914fa24e67b889b38c", // 32px
+};
+const RADIUS_VARS = {
+  "s":  "885152d55a536fb853461592cc3eff926e94858d", // 2px
+  "m":  "311dc09093e9474a8b582c8fb7ccc7a628065a20", // 4px
+  "lg": "95839af397884cd7f8fadb34a62d4763f88d68dd", // 8px
+  "xl": "03884e014085a48cf26670632be200a02b5a160c", // 12px
+};
+
+// Bind a single spacing prop (paddingLeft/Right/Top/Bottom or itemSpacing)
+// to a spacing token. Use size keys "2xs"..."3xl" or a direct variable key.
+async function bindSpacing(node, prop, sizeOrKey) {
+  const key = SP_VARS[sizeOrKey] || sizeOrKey;
+  const v = await figma.variables.importVariableByKeyAsync(key);
+  node.setBoundVariable(prop, v);
+}
+
+// Bind all four corner radii on a frame to a single border-radius token.
+// Use size keys "s" | "m" | "lg" | "xl" or a direct variable key.
+async function bindRadius(node, sizeOrKey) {
+  const key = RADIUS_VARS[sizeOrKey] || sizeOrKey;
+  const v = await figma.variables.importVariableByKeyAsync(key);
+  node.setBoundVariable("topLeftRadius", v);
+  node.setBoundVariable("topRightRadius", v);
+  node.setBoundVariable("bottomLeftRadius", v);
+  node.setBoundVariable("bottomRightRadius", v);
+}
+
+// Convenience: bind all four paddings and itemSpacing at once.
+// Pass tokens for each; omit or pass 0 to skip.
+// Example: await bindFrameSpacing(frame, { pad: "xl", gap: "lg" });
+async function bindFrameSpacing(node, { padLeft, padRight, padTop, padBottom, pad, gap } = {}) {
+  padLeft   ??= pad;
+  padRight  ??= pad;
+  padTop    ??= pad;
+  padBottom ??= pad;
+  if (padLeft)   await bindSpacing(node, "paddingLeft",   padLeft);
+  if (padRight)  await bindSpacing(node, "paddingRight",  padRight);
+  if (padTop)    await bindSpacing(node, "paddingTop",    padTop);
+  if (padBottom) await bindSpacing(node, "paddingBottom", padBottom);
+  if (gap)       await bindSpacing(node, "itemSpacing",   gap);
+}
+
 // Creates a text node with proper style + semantic color variable
 async function makeText(content, styleKey, colorKey) {
   await figma.loadFontAsync({ family: "Geist", style: "Regular" });
