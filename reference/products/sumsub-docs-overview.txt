@@ -1,0 +1,3019 @@
+# Overview
+URL: https://docs.sumsub.com/docs/overview
+
+To get you up and running with Sumsub, we recommend you do the following:
+
+1. Log in to the Dashboard.
+2. Set up user access management, invite your team, and determine roles and permissions.
+3. Create your first verification level.
+4. Customize your settings.
+5. Test your setup.
+6. Choose between SDK or API and go live.
+
+> 👍 Tip
+> 
+> Get the most out of Sumsub solutions with our product webinars.
+
+# Fundamentals
+
+[block:html]
+{
+  "html": "\n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n      \n         User verification\n         Onboard trusted users from any country in under 30 seconds. Our platform offers customizable KYC/AML flows to ensure top pass rates and adherence to compliance standards.\n      \n      \n         Business verification\n         Speed up business onboarding by conducting registry screening, UBO verification, ownership structure checks, AML watchlist screening, and corporate document verification in one place.\n      \n      \n         Transaction monitoring\n         Protect your company from the $362 billion in online payment fraud losses expected by 2028. Detect suspicious transactions with advanced anti-fraud and AML Transaction Monitoring.\n     \n      \n         Travel Rule\n         Streamline compliance with Sumsub Travel Rule solution for safe and seamless data exchange within a secure environment.\n      \n      \n         Verification levels\n         Create robust verification flows to confirm the identity of your applicants.\n      \n      \n         Customization\n         Customize the appearance of your SDK interface.\n      \n   \n   \n"
+}
+[/block]
+
+# SDK and API
+
+================================================================================
+
+# Account
+URL: https://docs.sumsub.com/docs/account
+
+By using your Sumsub account, you can seamlessly explore Sandbox testing, efficiently orchestrate no-code verification processes, and gain access to case management and comprehensive statistics, thereby enhancing decision-making and improving risk management.
+
+To secure access to the Dashboard, it is mandatory to use Two-factor authentication when logging in. You can also authenticate with multiple applications and websites using one set of credentials with Single sign-on (SSO).
+
+# Get started with Sumsub account
+
+[block:html]
+{
+  "html": "\n   .container2 {\n   display: grid;\n   grid-gap: 24px;\n   grid-template-columns: repeat(3, 1fr); / Set three equal-width columns /  \n   } \n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n      \n         Start a team\n         Invite your team members to access your Sumsub account.\n      \n      \n         Set up brand customization\n         Customize the look and feel of your brand, giving it the appearance you would like your applicants to see.\n      \n      \n         Manage your self-service account\n         Use Sumsub's automated solution to quickly handle basic user verification needs and simplify related processes.\n      \n   \n   \n"
+}
+[/block]
+
+================================================================================
+
+# Add team members
+URL: https://docs.sumsub.com/docs/add-team-members
+
+If you are an administrator or project owner, you can invite your team members to access the Sumsub Dashboard. 
+
+You can invite as many team members as you need. You can also restrict access to certain Dashboard functionality by assigning appropriate roles.
+
+# Invite new team members
+
+To invite a new team member:
+
+1. In the Dashboard, go to the Members page and click Invite team member.
+2. Enter the email address of the team member to whom you want to send an invitation and provide their first and last names.
+3. From the list of available roles, select a role that you want to assign to the person you are inviting.
+4. Select the Allow Sign-In with Google checkbox to allow access via Single sign-on (SSO).
+5. Click Invite.
+
+Upon receiving and accepting the invitation, the new team member will get access to the Dashboard and will be able to perform operations in accordance with the given roles.
+
+> 📘 Note
+> 
+> Adding team members from other domains is not supported.
+
+# Manage team member accounts
+
+You can manage your team accounts in any of the following ways:
+
+- Edit team member profile. Lets you edit team member account details.
+- Deactivate team member account. Lets you restrict team members access to the Dashboard.
+- Reset team member password. Lets you reset a team member password.
+- Remove team member account. Lets you permanently remove accounts.
+
+> 📘 Note
+> 
+> If you have the Manage dashboard users permission, you can update basic account information, block accounts, and reset two-factor authentication (2FA) for any team member within your access scope.
+> 
+> However, you cannot perform sensitive actions (such as deleting an account) on users with a higher permission level than your own.
+
+# View active sessions
+
+Monitor statistics on the location of the logged in team members.
+
+> 📘 Note
+> 
+> The session validity time may vary. For example, if a team member logs in but does not perform any activity, their session will be valid for 12 hours, after which they will have to log in again.
+
+# View activity log
+
+Monitor statistics on activities of your team members for the selected period of time.
+
+================================================================================
+
+# User roles
+URL: https://docs.sumsub.com/docs/user-roles
+
+Roles help you restrict access to certain Dashboard functionality. You can create as many roles as you need. Each role has a set of permissions; each permission regulates the behavior of how your team members can use the Dashboard.
+
+With Sumsub, you receive the following default roles:
+
+- Admin. Has full access to all functionality and statistics. Can set up rules and customize verification processes.
+- Compliance Officer. Can review applicant profiles, approve and decline applicants, and upload additional documents.
+- Developer. Can set up rules and customize verification processes.
+
+# Create roles
+
+To create a new role:
+
+1. In the Dashboard, go to the Roles page and click Add new role.
+2. Provide the role name and optional description.
+3. [Optional] From the Start from a copy of drop-down list, select an existing role from which you want to inherit permissions.
+4. Configure access limitations.
+5. Configure IP addresses or CIDR ranges (e.g., 192.168.1.100, 192.168.1.0/24) from which your team members can access the Dashboard.
+
+> 📘 Note
+> 
+> You as a creator/editor can only adjust the limitations enabled for your own role. For example, if you have the Reset applicants permission, you can add or remove this permission in other roles. However, if you do not have this permission, access to add or modify it will be restricted.
+> 
+> You can edit IP addresses in any available role, but only within the range defined by your own role’s IP restrictions. You cannot assign a role whose IP restrictions are broader than your own, or a role without IP restrictions if your role has them. This prevents expanding access beyond your allowed IP range.
+
+6. Decide on which source keys you want to assign the role to. To use all source keys, select the Enabled access to all source keys checkbox. To use specific keys, deselect the box and pick the keys from the dropdown list.
+
+> 📘 Note
+> 
+> You can only create or edit roles with source keys accessible to you. Objects (roles, users, and tokens) that do not contain any source keys accessible to you will be hidden.
+
+7. On the right, select permissions that you want to grant to the role. You can only grant permissions available for your own role. Make sure to thoroughly examine each permission and its description before selecting it.
+8. Save your changes.
+
+# Permissions
+
+The following table explains permissions that help you manage access granted to your team members to a certain Dashboard functionality.
+
+[block:html]
+{
+  "html": "\n    .line {\n        border-top: 1px solid rgb(0 0 0 / 10%);\n        margin-bottom: -32px;\n        margin-top: 50px;\n    }\n  \n    [data-color-mode=\"dark\"] .line {\n        background-color: rgb(255 255 255 / 8%);\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            background-color: rgb(255 255 255 / 8%);\n        }\n    }\n  \n    .footer-container {\n        display: grid;\n        grid-template-columns: repeat(2, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 500px;\n    }\n  \n    .footer-container h3 {\n        font-size: 14px;\n    }\n  \n    .footer-container basic {\n        font-size: 12px;\n        font-weight: 500;\n        color: #5f666c;\n        line-height: 24px;\n    }\n  \n    .footer-container2 {\n        display: grid;\n        grid-template-columns: repeat(4, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 800px;\n    }\n  \n    .footer-container2 h3 {\n        font-size: 14px;\n    }\n  \n    .font-small-header {\n        font-size: 14px;\n        font-weight: 600;\n    }\n  \n    --- .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n  \n    .wide-column {\n        min-width: 180px;\n    }\n  \n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n  \n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n  \n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n    }\n  \n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n  \n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n  \n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n  \n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n  \n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n  \n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n  \n    ul2 {\n        margin-left: -40px !important;\n    }\n    li2 {\n        margin-bottom: 10px;\n        display: flex;\n        align-items: top;\n    }\n    .icongreen {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .iconred {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .flag-container {\n        display: grid;\n        grid-template-columns: repeat(3, 1fr);\n        gap: 24px;\n        padding-top: 0px;\n    }\n  \n    .flag-container basic {\n        font-size: 15px;\n        color: #384248;\n        line-height: 36px;\n    }\n  \n    .flag-icon {\n        width: 20px;\n        height: 20px;\n        margin-right: 5px;\n    }\n  \n    .tag-green {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #d0f1e8;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #115242;\n        margin-top: 4px;\n    }\n    .tag-red {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #ffd2ce;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #5e0214;\n        margin-top: 4px;\n    }\n    .tag-purple {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #eedbff;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #250960;\n        margin-top: 4px;\n    }\n    .tag-grey {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #edeff2;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #393f4e;\n        margin-top: 4px;\n    }\n    .tag-yellow {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #fff4c6;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #613400;\n        margin-top: 4px;\n    }\n  \n  \n    \n        \n            \n                \n                    \n                        Permission\n                    \n                    \n                        Description\n                    \n                \n                \n                    \n                        \n                            Moderate\n                            Permissions to moderate applicant statuses, manage personal data and check results, blocklist applicants, and so on.\n                        \n                    \n                    \n                        \n                            Moderate applicants\n                        \n                        \n                            Allows user to manage the statuses of all applicants.\n                        \n                    \n                    \n                        \n                            Moderate delegated applicants\n                        \n                        \n                            \n                                Allows user to manage the statuses of applicants that have been delegated to compliance officers (for example, an applicant in the Requires action status).\n                        \n                    \n                    \n                        \n                            Moderate rejected applicants\n                        \n                        \n                            \n                                Allows user to manage the statuses of applicants that have been rejected with a final rejection reason.\n                        \n                    \n                    \n                        \n                            Use moderation buttons\n                        \n                        \n                            \n                                Allows user to use moderation buttons to streamline applicant rejection. The system automatically generates a rejection comment in the applicant’s language based on the selected reason. Without this permission, users must manually enter the rejection reason.\n                        \n                    \n                    \n                        \n                            Change applicant's personal data\n                        \n                        \n                            Allows user to modify an applicant’s personal information and upload new documents via the dashboard.\n                        \n                    \n                    \n                        \n                            Manage check results\n                        \n                        \n                            Allows user to change check results in the Summary section, such as cross-validation or face match results.\n                        \n                    \n                    \n                        \n                            Manage applicant notes\n                        \n                        \n                            Allows user to view and edit internal comments about the applicant. These notes are visible on the dashboard but never shown to the applicant.\n                        \n                    \n                    \n                        \n                            Create applicants\n                        \n                        \n                            \n                                Allows user to create applicants, including via permalinks. Without this permission, the user cannot create applicants and cannot see unilinks or permalinks created by others.\n                            \n                        \n                    \n                    \n                        \n                            Reset applicants\n                        \n                        \n                            Allows user to reset an applicant.\n                        \n                    \n                    \n                        \n                            Change verification level\n                        \n                        \n                            Allows user to change an applicant's level.\n                        \n                    \n                    \n                        \n                            Manage applicant tags\n                        \n                        \n                            Allows user to assign and remove tags from an applicant.\n                        \n                    \n                    \n                        \n                            Blocklist applicants\n                        \n                        \n                            Allows user to add an applicant to the blocklist. If the same document is uploaded for another applicant, it will be rejected.\n                        \n                    \n                    \n                        \n                            Deactivate applicants\n                        \n                        \n                            Allows user to deactivate and reactivate applicants.\n                        \n                    \n                    \n                        \n                            View\n                            Permissions to view different types of information, such as the personal data of the applicant, check results, cost of checks, and so on.\n                        \n                    \n                    \n                        \n                            View list of applicants\n                        \n                        \n                            Allows user to view the list of all applicants, filter the list, and search applicants by keyword or ID. If this permission is not set, the user can only find applicants by exact Applicant ID or External ID.\n                        \n                    \n                    \n                        \n                            View applicant's personal data\n                        \n                        \n                            Allows user to view applicants’ personal data.\n                        \n                    \n                    \n                        \n                            View applicant’s images in personal data\n                        \n                        \n                            Allows user to view images in applicants’ personal data.\n                        \n                    \n                    \n                        \n                            View check results\n                        \n                        \n                            Allows user to view the results of different checks, such as watchlist screening and face comparison.\n                        \n                    \n                    \n                        \n                            View statistics and analytics\n                        \n                        \n                        Allows user to access the Statistics and Analytics tabs in the Dashboard. Note that this permission is also required to view statistics and analytics when using Summy AI Copilot.\n                        \n                    \n                    \n                        \n                            View costs of checks\n                        \n                        \n                            Allows user to view the cost of checks, including payment method verification, identity verification, and others.\n                        \n                    \n                    \n                        \n                            View original applicant images\n                        \n                        \n                            Allows user to view original images uploaded by applicants.\n                        \n                    \n                    \n                        \n                            View approved applicants\n                        \n                        \n                            Allows user to view applicants who have already been approved.\n                        \n                          \n                    \n                        \n                            View fraud networks\n                        \n                        \n                            Allows user to view fraud networks.\n                        \n                    \n                    \n                        \n                            View video ident media recordings\n                        \n                        \n                            Allows user to view video identification media recordings on the applicant page.\n                        \n                                      \n                    \n                        \n                            Data export\n                            Permissions to manage applicant data export settings.\n                        \n                    \n                    \n                        \n                            Download bulk applicant report\n                        \n                        \n                            Allows user to generate and download instant, non-configurable CSV reports with a predefined structure. This export may include applicant and action data. Requires the View list of applicants and View applicant’s personal data permissions to access applicant data.\n                        \n                    \n                    \n                        \n                            Custom CSV export (Lower sensitive data)\n                        \n                        \n                            Allows user to export lower-sensitive data using the Custom CSV export feature and Summy AI Copilot CSV export. Requires the View list of applicants and View applicant’s personal data permissions to access this data.\n                        \n                    \n                    \n                        \n                            Custom CSV export (Higher sensitive data)\n                        \n                        \n                            Allows user to export higher-sensitive data using the Custom CSV export feature. Requires the View list of applicants and View applicant’s personal data permissions to access this data.\n                        \n                    \n                    \n                        \n                            Manage\n                            Permissions to manage user roles and Dashboard settings.\n                        \n                    \n                    \n                        \n                            Manage dashboard users\n                        \n                        \n                            Allows user to view and change dashboard roles and permissions, including SSO groups, including their own (within the limits they are enlitled to), and reset passwords for dashboard users.\n                        \n                    \n                    \n                        \n                            Manage company settings\n                        \n                        \n                            Allows user to manage company settings, such as changing the primary email, configuring regulations, and setting up webhooks.\n                        \n                    \n                    \n                        \n                            Manage workflows\n                        \n                        \n                            Allows user to manage applicant workflows,including creating, editing, publishing, and unpublishing workflows.\n                        \n                    \n                    \n                        \n                            Manage application tokens\n                        \n                        \n                            Allows user to view, generate and delete application tokens to authenticate and authorize API requests.\n                        \n                    \n                    \n                        \n                            Customizable Lists\n                            Permissions to view and manage client lists.\n                        \n                    \n                    \n                        \n                            View customizable lists\n                        \n                        \n                            Allows user to view customizable lists.\n                        \n                    \n                    \n                        \n                            Manage customizable lists\n                        \n                        \n                            Allows user to create, delete, and modify customizable client lists and their values.\n                        \n                    \n                    \n                        \n                            TM\n                            Permissions to view and manage TM rules, settings, and transactions.\n                        \n                    \n                    \n                        \n                            Manage TM settings\n                        \n                        \n                            Allows user to manage TM settings, such as setting default currency and thresholds.\n                        \n                    \n                    \n                        \n                            View TM transactions\n                        \n                        \n                            Allows user to view TM transactions.\n                        \n                    \n                    \n                        \n                            Manage TM transactions - Decisions\n                        \n                        \n                            Allows user to make decisions on transactions make decisions on transactions, including approving, rejecting, and confirming.\n                        \n                    \n                    \n                        \n                            Manage TM transactions - Review\n                        \n                        \n                            Allows user to perform actions on transaction reviews, such as assigning/adding notes, and tags.\n                        \n                    \n                    \n                        \n                            Manage TM rules\n                        \n                        \n                            Allows user to manage TM rules, including installing, creating, editing and removing rules.\n                        \n                    \n                    \n                        \n                            View TM Rules\n                        \n                        \n                            Allows user to view rules in both installed rules and the rules library.\n                        \n                    \n                    \n                        \n                            View TM Network\n                        \n                        \n                            Allows user to view the network of customers transacting with each other.\n                        \n                    \n                    \n                        \n                            AML screening\n                            Permissions to view and manage AML screening.\n                        \n                    \n                    \n                        \n                            View AML screening\n                        \n                        \n                            Allows user to view AML screening.\n                        \n                    \n                    \n                        \n                            Manage AML screening\n                        \n                        \n                            Allows user to manage AML screening, such as assigning and reviewing cases.\n                        \n                    \n                    \n                        \n                            Case Management\n                            Permissions to see and manage cases.\n                        \n                    \n                    \n                        \n                            View case management\n                        \n                        \n                            Allows user to view case management, including lists of queues and cases. Also enables managing items covered by other permissions, such as Manage TM transactions.\n                        \n                    \n                    \n                        \n                            Manage case management settings \n                        \n                        \n                            Allows user to manage queue settings, create custom queues and make templates for FIU reports.\n                        \n                    \n                \n            \n        \n    "
+}
+[/block]
+
+> 📘 Note
+> 
+> - Permissions cannot be directly assigned to team members. You need to create a role with a certain set of permissions, and then assign this role to a team member.
+> - You can create roles only within your own permission scope, which means you will not be able to create a role more powerful than your own or grant permissions you do not have yourself.
+> - If you do not see some of the listed permissions, it means you do not use the associated Sumsub products or solutions. Contact our sales team or reach out to your account manager to obtain a new product.
+
+# Access limitations
+
+The following table explains access limitations that help you manage access of your team members to a certain Dashboard functionality.
+
+[block:html]
+{
+  "html": "\n    .line {\n        border-top: 1px solid rgb(0 0 0 / 10%);\n        margin-bottom: -32px;\n        margin-top: 50px;\n    }\n  \n    [data-color-mode=\"dark\"] .line {\n        background-color: rgb(255 255 255 / 8%);\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            background-color: rgb(255 255 255 / 8%);\n        }\n    }\n  \n    .footer-container {\n        display: grid;\n        grid-template-columns: repeat(2, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 500px;\n    }\n  \n    .footer-container h3 {\n        font-size: 14px;\n    }\n  \n    .footer-container basic {\n        font-size: 12px;\n        font-weight: 500;\n        color: #5f666c;\n        line-height: 24px;\n    }\n  \n    .footer-container2 {\n        display: grid;\n        grid-template-columns: repeat(4, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 800px;\n    }\n  \n    .footer-container2 h3 {\n        font-size: 14px;\n    }\n  \n    .font-small-header {\n        font-size: 14px;\n        font-weight: 600;\n    }\n  \n    --- .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n  \n    .wide-column {\n        min-width: 180px;\n    }\n  \n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n  \n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n  \n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n    }\n  \n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n  \n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n  \n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n  \n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n  \n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n  \n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n  \n    ul2 {\n        margin-left: -40px !important;\n    }\n    li2 {\n        margin-bottom: 10px;\n        display: flex;\n        align-items: top;\n    }\n    .icongreen {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .iconred {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .flag-container {\n        display: grid;\n        grid-template-columns: repeat(3, 1fr);\n        gap: 24px;\n        padding-top: 0px;\n    }\n  \n    .flag-container basic {\n        font-size: 15px;\n        color: #384248;\n        line-height: 36px;\n    }\n  \n    .flag-icon {\n        width: 20px;\n        height: 20px;\n        margin-right: 5px;\n    }\n  \n    .tag-green {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #d0f1e8;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #115242;\n        margin-top: 4px;\n    }\n    .tag-red {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #ffd2ce;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #5e0214;\n        margin-top: 4px;\n    }\n    .tag-purple {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #eedbff;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #250960;\n        margin-top: 4px;\n    }\n    .tag-grey {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #edeff2;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #393f4e;\n        margin-top: 4px;\n    }\n    .tag-yellow {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #fff4c6;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #613400;\n        margin-top: 4px;\n    }\n  \n  \n    \n        \n            \n                \n                    \n                        Access limitation\n                    \n                    \n                        Description\n                    \n                \n                \n                    \n                        \n                            View only applicants created by this account\n                        \n                        \n                            Allows viewing only applicants created by this account or via links generated by it.\n                        \n                    \n                    \n                        \n                            Sandbox-only access\n                        \n                        \n                            Restricts access to sandbox data only. The user can’t view or act on production data.\n                        \n                    \n                    \n                        \n                            Enable read-only mode\n                        \n                        \n                            Prevents users from editing or making changes to settings, applicants, or data-modifying actions.\n                        \n                    \n                    \n                        \n                            Allow only one active session\n                        \n                        \n                            \n                                Limits the account to one login at a time across all devices and browsers.\n                            \n                        \n                    \n                \n            \n        \n    "
+}
+[/block]
+
+# Manage roles
+
+You can manage roles in any of the following ways:
+
+- Edit roles. Lets you edit an existing role in case you want to change certain parameters. For example, you may want to change permissions that you have assigned previously or change the name of the role, and so on. 
+- Remove roles. Lets you permanently remove the role in case you no longer need it. Mind that you cannot remove the role if at least one team member is currently logged in under this role.
+
+================================================================================
+
+# Automatic suspension of inactive users
+URL: https://docs.sumsub.com/docs/automatic-suspension-of-inactive-users
+
+In cases, when users log into the Dashboard after a long period of inactivity, you might need to recheck their accounts to ensure their identity and eligibility are still valid.
+
+The auto member blocking role setting allows you to avoid manual reviews and automatically disable inactive members.
+
+# How auto member blocking works
+
+You can configure a time period, after which our system will block inactive members. Once a member exceeds the configured inactivity period:
+
+1. The next login attempt will fail.
+2. The member will see a message explaining that their account has been locked for security reasons.
+3. Their status will change to disabled.
+
+> 📘 Note
+> 
+> - Our system automatically blocks the account once per day after the inactivity period has already passed. The script will run within 24 hours.
+> - Login blocking works when the user tries to log in after the inactivity period has passed.
+
+We will notify members before being blocked due to inactivity 3 days and then 1 day before the scheduled blocking date. The notifications include instructions on how to keep the account active or contact an administrator for reactivation. An administrator with the appropriate permissions can reactivate the member manually from the Dashboard. After reactivation, the member can log in again.
+
+> 🚧 Attention
+> 
+> If a user was already blocked and later reactivated by an admin, their account will not be automatically disabled again.
+
+# Configure auto member blocking
+
+To set up auto blocking conditions:
+
+1. In the Dashboard, navigate to the Settings. Open the Team page and go to the Roles.
+2. Select the role of your interest.
+3. In the role configuration, scroll to the Automatically block inactive members setting.
+4. Select the corresponding checkbox and the number of days of inactivity (from 7 to 365 days) after which our system will block the user.
+
+================================================================================
+
+# Branding
+URL: https://docs.sumsub.com/docs/branding
+
+You can customize the look and feel of your brand, giving it the appearance you would like your applicants to see.
+
+# Get started with branding customization
+
+To customize the appearance:
+
+1. In the Dashboard, go to the Branding page.
+2. Upload an icon. Once you set the icon, it becomes available in the Dashboard interface. The icon also will be used in email communications, if the Hide Sumsub logo in MobileSDK and WebSDK toggle is turned on (see step 5).
+3. Upload a logo. Once you set the logo, it becomes available on the welcome screen shown to your applicants during verification in the WebSDK.
+4. In the Send customer emails from field, specify the email address from which you want your applicants to receive verification results. Sending emails from a custom domain requires an SPF and DKIM record configured on your DNS server.
+5. To hide the Sumsub service logo in the WebSDK and the Powered by Sumsub label in the MobileSDK, enable the Hide Sumsub logo in MobileSDK and WebSDK toggle. When this setting is enabled, the Sumsub logo is removed from the SDK and email communications. In email communications, it is replaced with the icon configured in the Branding section.
+6. Save your changes.
+
+> 📘 Note
+> 
+> Setting up your custom branding is available at an additional cost. For more information, contact our sales team or your Customer Success Manager.
+
+================================================================================
+
+# Single sign-on (SSO)
+URL: https://docs.sumsub.com/docs/single-sign-on-sso
+
+> (SSO) is an authentication method that you can use to set up your sign-in requirements and team member access to the Dashboard.
+
+Specifically, Sumsub supports Security Assertion Markup Language (SAML) version 2.0 which allows authentication  and team member account creation to be delegated to the Identity Provider (IdP).
+
+Using SSO has two main benefits:
+
+- Security enhancements
+  - Allow your team members to access the Dashboard without the need for a password.
+  - Make the most out of your authentication decisions that you define through an IdP, such as password policies or two-factor authentication.
+
+- Easily manageable access
+  - Allow new team members to instantly sign in to the Dashboard using Just-in-Time (JIT) account provisioning.
+  - Revoke Dashboard access as and when it is needed.
+
+# SSO features
+
+We support the following features:
+
+- SSO configuration options. Configure Sumsub accounts to either set up SSO for all team members or to allow sign-in using SSO or email and password.
+- Just-in-Time account creation. Provision new Sumsub accounts for team members without existing access upon their first SSO sign-in.
+- Custom dashboard roles for team members. Configure dashboard roles through the IdP.
+- IdP-initiated login. Directly authenticate from an identity provider website or browser extension, assuming the IdP supports service provider-initiated login.
+- Group rules. You can create several user groups signed in via SSO and apply an individual set of permissions to each group.
+
+# Configure SSO login
+
+To configure SSO login, go to the SSO Login page and set the following parameters:
+
+| Parameter                         | Description                                                                                                                                                                                                                                                   |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SP EntityId/Metadata              | Link to the XML file, which contains metadata and a unique service provider identifier. The file structure shows how and where you need to input your data.                                                                                                   |
+| Domains                           | Authentication domain(s).                                                                                                                                                                                                                                     |
+| IdP Entity Id                     | Unique identity provider identifier.                                                                                                                                                                                                                          |
+| Name Id Format                    | Defines name formats supported by the identity provider.                                                                                                                                                                                                      |
+| SSO Service URL                   | Can be initiated at the identity provider or service provider site.                                                                                                                                                                                           |
+| Logout Service URL                | Used by a partner to contact the Single logout profile. Can be initiated at the identity provider or service provider site.                                                                                                                                   |
+| Certificate                       | An X.509 certificate that holds the corresponding public key along with the metadata related to the organization issued the certificate. The way you generate keys and certificates depends on your development platform and programming language preference. |
+| Certificate Fingerprint           | A certificate digest in the x509 binary format. The fingerprint type depends on the algorithm used to generate the fingerprint.                                                                                                                               |
+| Certificate Fingerprint Algorithm | Encryption algorithm used to generate a certificate fingerprint, such as `sha1`, `sha256`, `sha384`, `sha512`.                                                                                                                                                |
+| Email Attribute                   | SAML attribute used to pass the user email address.                                                                                                                                                                                                           |
+| First Name Attribute              | SAML attribute used to pass the user first name.                                                                                                                                                                                                              |
+| Last Name Attribute               | SAML attribute used to pass the user last name.                                                                                                                                                                                                               |
+| Groups Attribute                  | SAML attribute used to pass the assigned user groups. Leave the setting empty to apply default controller permissions to all users signed in via SSO.                                                                                                         |
+
+# Set group settings
+
+You can create several user groups signed in via SSO and apply an individual set of permissions to each of them.
+
+To create a group:
+
+1. At the bottom of the SSO Login page, click Add group.
+
+2. Provide a group name on the identity provider side.
+
+3. Select a role.
+
+4. Repeat steps 1-2 to create as many groups as you need and save your configuration once done.
+
+# Log in with SSO
+
+Once you have configured SSO login:
+
+1. Navigate to https://cockpit.sumsub.com and select Use Single sign-on (SSO).
+2. Provide your email address and complete SSO authentication.
+
+================================================================================
+
+# Integrate with Okta
+URL: https://docs.sumsub.com/docs/integrate-with-okta
+
+Okta is a cloud-based identity and access platform that allows organizations to securely manage user access to various applications and services. It enables the simplification of user authentication and authorization processes, as well as enhances security by ensuring that users have the right level of access to systems and data.
+
+Upon Okta integration, you will be able to:
+
+- Use single sign-on (SSO). Okta enables users to access multiple applications with a single set of login credentials.
+- Configure multi-factor authentication (MFA). Okta offers MFA options, such as biometric verification or one-time passcodes, to add an extra layer of security.
+- Secure data usage. Okta provides tools for monitoring user activity and detecting suspicious behavior.
+- Centralize access management. Okta provides a platform for managing user access to multiple applications, making it easier to control permissions and security policies across the organization.
+
+# Get started with Okta integration
+
+To integrate with Okta, you need to start with setting up your Okta account, following the steps below. After setting it up, you will have all the information necessary to complete the integration from our side.
+
+## In Okta
+
+In the Okta Dashboard, you need to create and set up your integration:
+
+1. Create a new app integration:
+   1. In the OKTA Dashboard, go to Applications and click Create App Integration.
+   2. When a pop-up window appears, select SAML 2.0 and proceed to the next step.
+2. Edit SAML integration:
+   1. In the General Setting tab, enter the name of the integration.
+   2. Navigate to Configure SAML:
+      1. Within the General section, fill in Single sign-on with .
+      2. In Audience URI (SP Entity ID), enter the following: .
+      3. Fill in Attribute Statements with your given name, last name, and email address. These fields are necessary to complete since our system will use this data to pull up information about a particular user.
+      4. In  Group Attribute Statements, specify the name of the group attribute.
+3. View created integration:
+   1. Go back to Applications and select the integration from the list.
+   2. Navigate to the Sign On tab to view the Metadata details and Certificate fingerprint data.
+   3. Use this data to fill the fields in the Sumsub Dashboard.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/ad4fffa271dae5e9f7b89eacf2f8b2d1b263b5a0fe62e2e9517088480489db08-OKTAsettings1.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+## In Sumsub
+
+Once your integration is created and configured, transfer the data to the Sumsub Dashboard to complete integration with Okta:
+
+1. In the Dashboard, open the SSO Login page. 
+2. Use the corporate email domain in the Domain field.
+3. For IdP Entity ID, go to the Metadata details in Okta and paste the data from the Issuer field.
+4. You can leave Name Id Format empty. For more information about this field, see this section.
+5. For SSO service URL, use data from the Sign on URL field in Okta.
+6. For Logout service URL, use data from the Sign on URL field in Okta.
+7. From Metadata details in your Okta account, copy Signing Certificate and paste it in the Certificate field.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/db64f528ba2543f462a535819085cfb7f77db53882a5b20d6f6c1b0d76824dd5-SSOLogin1.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+8. Fill in Attributes with the data from Attribute Statements in the same format as you specified them in Okta.
+9. Set up Groups:
+   1. Fill in the Groups Attribute field with the group attribute name from Okta.
+   2. Click Add group to create a group within Sumsub.
+   3. Use IdP Group name to give a name to your group.
+   4. Select a role that will be associated with the group.
+10. When finished, click Test and save.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/94aa5eb334ec7bc94b3767184d930e4a7e2aacdb4748d1e5e9fd933be90c1da1-SSOLogin2.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+================================================================================
+
+# Two-factor authentication
+URL: https://docs.sumsub.com/docs/two-factor-authentication
+
+Two-factor authentication (2FA) is a security method that requires an additional step of identification to protect your Dashboard account from unauthorized access.
+
+You can perform either of the following to complete two-factor authentication:
+
+- Enter the code generated by the Authenticator app.
+- Log in with the Security key.
+
+# Authenticator
+
+You can choose any Authenticator app, as they all have a similar interface and operate in the same way. The first time you log in to the Dashboard, you need to configure two-factor authentication using your preferred app.
+
+The following algorithm describes the 2FA configuration, using Google Authenticator as an example:
+
+1. On the Dashboard login screen, enter your email (or username) and password.
+2. Open the Google Authenticator app on your device, tap the `+` icon and choose Scan a QR code.
+3. Scan the QR code displayed on the Dashboard login screen.
+4. Enter the app-generated authentication code, following the on-screen instructions.
+
+Once you configure 2FA in the Google Authenticator app, you will be required to enter the code each time you log in to the Dashboard. The app generates a new code automatically every 30 seconds.
+
+# Security key
+
+A security key is a secondary (and optional) method for two-factor authentication. This is a reliable and convenient form of authentication that uses public-key cryptography to keep your login credentials secure.
+
+The security key allows you to use the following methods for two-factor authentication:
+
+- Fingerprint sensor or face recognition on your laptop.
+- Yubikey or any other hardware key.
+- Mobile devices.
+
+To enable the security key as a two-factor authentication:
+
+1. In the Dashboard, go to the Profile settings page.
+2. Click Change  next to the Two-factor authentication section.
+3. Click Add security key in the Security key section and follow the on-screen instructions to configure one or more options suggested by the system. You can add as many keys as you need.
+
+Once the security key is added, you can access the Dashboard as follows:
+
+1. On the Dashboard login screen, enter your email (or username) and password.
+2. A pop-up window will request you to authenticate.
+3. Use the preferred security key that you have previously configured.
+
+The system stores the last two-factor authentication method you used and offers this option the next time you log in. If you want to revert to Google Authenticator, in the pop-up window, click Cancel.
+
+# Manage 2FA authentication
+
+You can always reset your Authenticator code or delete an existing security key.
+
+To reset the Authenticator code:
+
+1. In the Dashboard, go to the Profile settings page.
+2. Click Change  next to the Two-factor authentication section.
+3. Click Reset code for Authenticator.
+4. Open the Authenticator app on your device and scan the QR code displayed on the Dashboard login screen.
+5. Enter the app-generated authentication code, following the on-screen instructions.
+
+To delete a security key:
+
+1. In the Dashboard, go to the Profile settings page.
+2. Click Change  next to the Two-factor authentication section.
+3. Click the trash bin icon next to the security key you want to remove.
+
+After deleting a security key, you will see a Restore  button next to it, allowing you to restore the key if needed.
+
+================================================================================
+
+# Billing
+URL: https://docs.sumsub.com/docs/billing
+
+Billing shows information about the services rendered to you by Sumsub.
+
+It includes the types of checks you used, the number of these checks, the price per check, and the total amount due.
+
+> 🚧 Attention
+> 
+> Checks appear on the Billing page the following day, not on the day they run.
+
+You can view all the checks calculated in your invoice by downloading the detailed report for the selected period as a CSV file.
+
+To download the file:
+
+1. In the Dashboard, go to the Billing page.
+2. Select a period from the drop-down list.
+3. In the top-right, click Export report and save the file on your device.
+
+> 📘 Note
+> 
+> Mind that the current month report values may be a little higher than those shown in the Billing section, because the current month report does not take into account the free period of recheck (30 days) and it calculates all the checks made up to and including the previous day.
+> 
+> After the month is over, all data is recalculated taking into consideration the free period of recheck accordingly.
+
+# Billing for Self-service
+
+If you are a Self-service customer, your Billing page includes the following blocks with the information about your subscription: 
+
+- Current plan
+- Next payment due
+- Payment method
+
+By using these blocks’ functionality, you can change or cancel your plan, find information on the next funds debiting, and update your payment method.
+
+Downloading the report is also available in the Self-service billing menu:
+
+1. In the Dashboard, go to the Billing page.
+2. From the drop-down list, select a period.
+3. In the top-right, click Export report and save the file on your device.
+
+The Balance field in the top-right corner indicates the deposit funds used in the context of the Enterprise plan.
+
+> 📘 Note
+> 
+> - If you have some money on your balance, the funds debiting will be performed from the balance.
+> - If there is not enough money to pay for the services, we will charge you within the card added to Payment methods.
+
+# Contents of billing report
+
+There will be the following information in the report:
+
+| Value            | Description                                                              |
+| :--------------- | :----------------------------------------------------------------------- |
+| `serviceName`    | The name of a particular service.                                        |
+| `serviceTime`    | A service provision time (UTC +0).                                       |
+| `clientId`       | A unique client identifier.                                              |
+| `quantity`       | The quantity of provided and invoiced services.                          |
+| `applicantId`    | A unique applicant identifier.                                           |
+| `externalUserId` | A unique applicant identifier used in the client's system.               |
+| `sourceKey`      | A unique identifier for distinguishing of applicants. |
+| `applicantTags`  | Custom labels created and assigned to a particular applicant.            |
+| `country`        | An applicant's country (allows viewing expenses by country).             |
+| `levelNames`     | A list of verification level names for which the check was performed.    |
+
+Also, your report may include additional values related to a specific service/parameter.
+
+================================================================================
+
+# Business information
+URL: https://docs.sumsub.com/docs/business-information
+
+The Business information tab of the Dashboard stores key details about your company, including legal information, Dashboard and SDK configurations, and regulations-related settings. 
+
+# View and manage legal information
+
+This section contains details about the legal entity that has signed a contract with Sumsub. To update any of these details, use the Edit button at the bottom of the section:
+
+- Legal company name. The official name of the legal entity under which your company is registered.
+- Legal email. The email address used in contractual and user agreements.
+- Registration number. The unique company registration number assigned by your local authority.
+- Business website. The company’s official website.
+- Business address. The registered headquarters address of your company.
+
+> 📘 Note
+> 
+> - Only users with the Manage company settings permission are allowed to view, update, and configure the displayed data.
+> - With a Deposit subscription, this section is fully editable at any time. 
+> - In Self-service, the is editable only while the key has no active subscription. Once a plan is activated, any changes must be requested through Sumsub support.
+
+# Adjust SDK and Dashboard settings
+
+Configure how your company is represented in the SDK and Dashboard:
+
+1. Set Company display name. The name of the company or brand shown on the SDK welcome screen, notifications, and emails. If verification-level customizations are applied, they override this value.
+2. Identify Alias name. A custom label for your Client ID, used internally within the Dashboard. It helps differentiate between multiple keys associated with the same entity and provides a more human-readable identifier. Note that this alias does not replace the Client ID and is not visible in the SDK, emails, or notifications.
+
+# Configure regulations
+
+Set your company’s regulatory status. Use the Change button to select whether your company is regulated or not regulated.
+
+================================================================================
+
+# Verification levels
+URL: https://docs.sumsub.com/docs/verification-levels
+
+A level is a sequence of steps that your applicants have to take to verify their identity. Each level may include document-based or selfie-based verification, Liveness & Face match, Short video fragment, Questionnaire, Payment methods, and many other checks.
+
+There are two types of verification levels that you can create:
+
+- Individuals. Used for user verification. 
+- Companies. Used for business verification. 
+
+You can create as many levels as you need. Each level may consist of different check sequences, depending on your scenario and how you want your applicants to be verified. For example, you can create a region-based level that requests one set of documents in low-risk regions and a different set of documents in high-risk regions.
+
+# Set up and customize your verification flow
+
+[block:html]
+{
+  "html": "\n    .box5 {\n        background: #ffffff;\n        border: 1px solid #e1e5ea;\n        border-radius: 12px;\n        align-items: top;\n        display: grid;\n        text-decoration: none !important;\n        grid-template-rows: min-content auto;\n        transition: 0.3s ease-in !important;\n    }\n    .box5 text-basic {\n        padding: 0px 24px 24px 24px;\n        font-style: normal;\n        font-weight: 400;\n        font-size: 14px;\n        line-height: 24px;\n        color: #586073;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 text-basic {\n            color: #fff;\n            opacity: 0.8;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 text-basic {\n        color: #fff;\n        opacity: 0.8;\n    }\n    .box5:hover {\n        box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1);\n        transition: 0.3s ease-in;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 {\n            background: #20252c;\n            border: 1px solid #333844;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 {\n        background: #20252c;\n        border: 1px solid #333844;\n    }\n    .text5-h1 {\n        font-style: normal;\n        font-weight: 500;\n        font-size: 15px;\n        line-height: 24px;\n        color: #377cf7;\n        transition: 0.3s ease-in;\n        padding: 16px 24px 8px 24px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .text5-h1 {\n            color: #fff;\n        }\n    }\n    [data-color-mode=\"dark\"] .text5-h1 {\n        color: #fff;\n    }\n    .box5:hover .text5-h1 {\n        color: #377cf7;\n        opacity: 0.8;\n        transition: 0.3s ease-in;\n    }\n    .img5 {\n        margin: 16px 0px -10px 0px !important;\n        width: 100%;\n        height: auto;\n    }\n    .line {\n        border-top: 1px solid #e1e5ea;\n        margin-bottom: 8px;\n        margin-top: 10px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            color: #fff;\n            opacity: 0.2;\n        }\n    }\n    [data-color-mode=\"dark\"] .line {\n        color: #fff;\n        opacity: 0.2;\n    }\n\n\n    \n        \n            Configure verification levels\n            Build complex verification flows for your business needs.\n        \n        \n            Orchestrate levels with Workflow builder\n            Build unique verification flows with fully automated decision-making processes.\n        \n    \n    \n"
+}
+[/block]
+
+================================================================================
+
+# Configure verification levels
+URL: https://docs.sumsub.com/docs/configure-verification-levels
+
+Configure verification levels to collect information about your applicants in a user-friendly manner:
+
+1. Set up the WebSDK or MobileSDK integration.
+2. In the Dashboard, open the Individuals page and click Create level.
+3. Select the level type:
+   - Standard — for standard applicant verification, for example, to onboard new applicants.
+   - Applicant actions — to perform additional verification that may be triggered by specific applicant activities. For more information about applicant actions, see this article.
+4. Configure verification steps, set configuration, configure document settings, configure AML Screening, use integration abilities, review execution flows, and many more. 
+5. Test your level to see how it behaves.
+6. Switch from Sandbox to production mode.
+
+# Configure verification steps
+
+On the Steps tab, provide a name and optional description for your levels and configure the additional options, such as the level type, database validation, SDK customization, as well as set up the verification steps for your verification flow:
+
+1. Provide a name and optional description that you want to use for the new level.
+2. Configure SDK customization to set colors and styles exactly as you want them to appear to your applicants. You can also add instructions and tips for each of your verification steps and then preview the resulting verification flow with just a few clicks:
+   1. From the WebSDK and/or MobileSDK dropdown lists, select an [SDK customization](). Click Edit if you want to change the configuration of the chosen customization. In case you want to create a new customization, click Manage customization settings in the dropdown menu.
+   2. From the SDK translations dropdown list, select a translation type for both SDKs.  Click Edit if you want to change the configuration of the chosen translation. In case you want to create a new translation, click Manage translation settings in the dropdown menu. For more information about SDK translations, refer to this article.
+3. From the Database Validation drop-down list, select one or multiple solutions for identity document and personal data validation against external data sources. For more information, see this article.
+4. Enable Video Identification and select the document types that can be uploaded.
+5. Configure verification steps as required.
+
+> 🚧 Limitation
+> 
+> We do not support Proof of Address checks in levels with Video Identification. If you need to have Proof of Address checks after Video Identification checks, create a separate level for Proof of Address and use Workflow Builder to change the level once Video Identification is approved.
+
+# Set configuration
+
+On the Configurations tab, set up the level settings from the left-hand menu.
+
+## Location settings
+
+In Location settings, you can configure access controls and restrictions for applicant verification based on their location:
+
+1. In the Country restriction for verification steps section, configure the countries that are accepted (or restricted) at this level and select the verification steps where the filter should be applied. Mind that this setting always affects the Applicant data and Identity document steps by default, and these steps cannot be excluded.
+2. In the IP settings section, configure verification access to control applicants’ IP addresses by allowing or blocking selected countries.
+3. In the USA resident settings section, select the checkbox to decline applicant profiles that belong to USA residents automatically.
+4. In the VPN detection section, enable the checkbox to pause verification when a VPN is detected. Verification will resume once the applicant disables their VPN.
+
+## Fraud prevention
+
+In the Fraud prevention section, you can enable checks across email, phone, IP, geo, and device signals to spot fraud early and allow only trusted users to continue:
+
+1. In the Device intelligence section, enable the checkbox if you want to collect device signals during verification for suspicious activity detection.
+2. In Applicant Insights, select the options to enable the following checks:
+   1. Email insights — to enable email risk assessment.
+   2. Phone insights — to enable [phone risk assessment]().
+   3. IP insights — to enable [advanced IP check]().
+   4. AI suspicious name check — to enable AI checks that determine whether the applicant's name is considered suspicious. If the applicant's name falls under the AI criteria, the applicant profile receives any of the following [risk labels](): Famous person, Strange name.
+
+## AML Screening
+
+In the AML Screening section, you can turn off or customize AML screening:
+
+1. Clear the Enable AML screening checkbox in case you do not need it for this level. By default, the checkbox is enabled.
+2. In the Custom AML screening section, select the checkbox if you want to provide custom AML settings for this level. By default, global AML screening settings are applied.
+3. From the Choose the provider you’d like to use for AML screening dropdown list, select a provider for your custom AML screening settings.
+4. In the Search configuration section, select whether the search is done by warning types or with a custom search profile.
+   1. To configure search by warning types, use the checkboxes to select the categories you want to include in the screening, such as Sanctions, Warnings, Fitness & Probity, and Politically Exposed Persons (PEPs). From the Adverse Media General dropdown list, select the types of adverse media to be considered.
+   2. To configure search by custom search profiles, enter a profile identifier. For more information about AML Screening configuration, refer to [this article]().
+5. In the Name matching criteria section, select how strictly names should be matched during AML screening at this level. To learn more about how our matching techniques work, refer to this article.
+6. From the Ongoing AML monitoring state dropdown list, select whether auto-screening should be enabled, disabled, or set to default. If enabled, select the Delegate manual review tasks for ongoing monitoring checkbox if you want to send all approved applicants found in AML lists to your compliance officers for manual review.
+
+## ID document settings
+
+You cannot customize the ID document settings during level creation; adjustments are only possible afterward. Once the level is set up, configure the [document verification settings]() as required.
+
+## Advanced settings
+
+In Advanced settings, you can configure advanced options such as notifications, environment, and data processing preferences:
+
+1. Select a [source key]() from the dropdown list. This option is available only if you have at least one source key configured in your environment.
+2. From the Email notifications dropdown list, select when notifications should be sent to your applicants. You can select any of the following options:
+   1. Send when applicant is approved.
+   2. Send when applicant requires resubmission.
+   3. Send when applicant is rejected.
+3. In the Applicant scoring section, enable the checkbox to calculate the risk score of your applicants.
+4. In the Visibility configuration section, select the checkbox to make the level available only in [Production mode]().
+5. Select the Disable automatic checks checkbox if you want to review each applicant yourself manually. Mind that this option stops all automatic checks.
+6. Select the Skip consent screen checkbox to allow your applicants to pass verification without forcing them to accept the terms and conditions. Mind that this option is only available for Questionnaire and/or Applicant data steps. If your verification level includes any other steps, this option will not be displayed. For more information, see [this article]().
+7. In the Custom consent for data processing section, choose how to display consent on the agreement screen in the WebSDK:
+   1. Default — no additional consent link or text will be shown.
+   2. Link — provide a link to your personal data processing consent (if any) to be added to the agreement screen.
+   3. Text — provide a custom processing consent text to be displayed to your applicants on the agreement screen.
+
+## Sandbox mode for verification testing
+
+> 🚧 Important
+> 
+> This section is only displayed in [Sandbox]() mode.
+
+In the Sandbox mode for verification testing section, you can apply a preset to the level to perform test verification. Presets allow you to define verification checks by selecting the type of review and configuring verification modes for specific checks. For more information about preset creation, refer to [this article](). 
+
+# Use integration code
+
+You can use automatically generated integration code to integrate with our WebSDK. Just save the level, and this functionality becomes immediately available to you upon clicking the Integrations button.
+
+```java
+import snsWebSdk from '@sumsub/websdk';
+
+/
+  @param accessToken - access token that you generated
+  on the backend with levelName: sumsub-signin-demo-level
+ /
+function launchWebSdk(accessToken) {
+  let snsWebSdkInstance = snsWebSdk.init(
+      accessToken,
+      // token update callback, must return Promise
+      () => this.getNewAccessToken()
+    )
+    .withConf({
+      //language of WebSDK texts and comments (ISO 639-1 format)
+      lang: 'en',
+    })
+    .on('onError', (error) => {
+      console.log('onError', payload)
+    })
+    .onMessage((type, payload) => {
+      console.log('onMessage', type, payload)
+    })
+    .build();
+
+  // you are ready to go:
+  // just launch the WebSDK by providing the container element for it
+  snsWebSdkInstance.launch('#sumsub-websdk-container')
+}
+```
+
+# Use WebSDK verification links
+
+If you have not yet integrated with Sumsub, you can still let your applicants pass verification by generating and sending them a direct link to our WebSDK.
+
+To generate a link:
+
+1. Open any of your existing verification levels.
+2. Click the Verification links, choose either the Unilink or Permalink tab, and follow the on-screen instructions to generate a link. 
+
+# Test your level
+
+Try out your levels before letting your applicants use them to ensure maximum performance:
+
+1. Find a level that you want to run. You have three options to test it:
+   1. Click Run level in new tab on the right-hand side of the level record, or open the level and click Run level inside it.
+   2. Open the level and click Verification links to generate a unilink or a permalink. You can also generate a permalink on the right-hand side of the level record without opening the level.
+   3. Open the level, click Verification links, and go to the [Test WebSDK]() tab to run the level inside an iframe.
+2. Go through your level to see how it behaves.
+
+> 📘 Note
+> 
+> For the most accurate results, it is recommended to test your verification flow directly within your own integration (for example, in your app or website). This allows you to see the exact user experience and confirm that the SDK or links are working as expected.
+
+## Test WebSDK verification flow
+
+You can also use the Test WebSDK tab to preview and test your WebSDK integration before going live. It allows you to run the full verification flow inside an iframe, check SDK messages in real time, and test individual SDK modules.
+
+1. Open a level that you want to run, click Verification links, and go to the Test WebSDK tab.
+2. Enter an External user ID, which can be any string (for example, the ID of the applicant you created, or just a random value automatically generated by the system).
+3. Adjust other fields, such as Language, Link validity, Customization, or SDK translations. The test flow uses the level’s default settings unless you set them. If configured, the verification flow remains the same as in the level, but your selected settings will be applied.
+4. Click Additional launch options to configure the following, if needed:
+   1. Provide email / phone details to emulate data normally passed via API.
+   2. Select Single step to test standalone SDK modules, such as ID step or Liveness, if you plan to use only these modules in your integration.
+5. Click Launch to start the test flow. This will open the full verification UI inside the iframe so you can preview the applicant experience and test event handling.
+6. In the WebSDK preview tab, you can click through the entire verification flow and see how it looks when embedded.
+7. In the WebSDK Messages tab, you can view real-time messages/events emitted by the SDK during the verification process. For more information about WebSDK message types, refer to [this article]().
+
+# Manage level settings
+
+You can manage your verification levels as follows:
+
+- Edit level settings. Lets you adjust your existing levels according to your current business specification.
+- Duplicate level. Lets you inherit the selected level settings in case you want to create a new level but with some differences from the parent one.
+- Remove any level that you have configured previously. Lets you declutter your environment by removing levels that are no longer in use.
+
+# Enable notifications about applicant status change
+
+The following is a sequence of steps to be taken to enable notifications about applicants being moved to the Requires action status:
+
+1. Go to the Profile settings and open Notifications.
+2. In the table, find Applicant requires action.
+3. Enable the Send by Email and/or Display on Dashboard toggles.
+
+================================================================================
+
+# Verification steps
+URL: https://docs.sumsub.com/docs/verification-steps
+
+This article lists verification steps that you can use to verify the identity of your applicants. Combine all the steps listed below to build complex verification flows based on your scenario.
+
+> 📘 Note
+> 
+> You can only add one verification type of the same kind per level. For example, if you already selected the Identity document verification type, you will no longer be able to add this particular type within the same level. However, you can add a 2nd-4th Identity document, Proof of address, Selfie step if needed.
+
+[block:html]
+{
+  "html": "\n    .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 200px;\n    }\n\n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n\n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n        min-width: 200px;\n    }\n\n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n\n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n\n    \n        \n            \n                \n                    Step\n                \n                \n                    Description\n                \n            \n            \n                \n                    \n                        Applicant data\n                    \n                    \n                        The Applicant data step allows you to collect additional information about your applicants during verification in SDKs.\n                        \n                        To configure the applicant data collection process:\n                        \n                            \n                                \n                                    In the Fields drop-down list, add fields such as the applicant's first name, last name, date of birth, TIN, tax residence country, and so on. Also, you can select the Required checkbox so your applicants cannot skip\n                                    them.\n                                \n                            \n                            \n                                Click Add custom field to add custom fields based on the particular information you want to collect from your applicants.\n                            \n                            \n                                Select the Pre-fill known data checkbox to auto-fill fields with existing data. Note that this feature may not work if used right after document recognition.\n                            \n                        \n                        Note:\n                        \n                            \n                                At least one field in the Fields section must be required.\n                            \n                            \n                                You can collect applicant data with both Standard and Applicant actions levels.\n                            \n                            \n                                \n                                    Multiple TINs can be collected only if both TIN and Tax residence country fields are selected and set as required. \n                                    In this case, applicants can add more than one TIN and Tax residence country pair.\n                                \n                            \n                            \n                                A maximum of 8 TIN fields can be collected.\n                            \n                        \n                    \n                \n                \n                    \n                        Identity document\n                    \n                    \n                        On the Identity document step, you can request an identity document from your applicants.\n                        \n                        In the Document type drop-down list, add or remove the type of identity confirmation.\n                        \n                        Available document types:\n                        \n                            \n                                Passport\n                            \n                            \n                                Driver's license\n                            \n                            \n                                ID card\n                            \n                            \n                                Residence permit\n                            \n                        \n                        In the Capture method section, you can select the way applicants provide their documents:\n                        \n                            \n                                File upload — Applicant uploads an existing file or image from their device.\n                            \n                            \n                                Live capture — Applicant takes a photo of their documents in real time during the application process.\n                            \n                        \n                        \n                            In the Capture mode drop-down list, choose whether applicants can also upload documents manually, or only use live capture. Additionally, the Fallback to file upload setting lets you control whether\n                            file upload is always available, only allowed if camera capture fails, or not available at all.\n                        \n                        \n                        Note:\n                        \n                            \n                                For more information on document customization, see this article.\n                            \n                            \n                                To learn how to set up Live capture mode, refer to this article.\n                            \n                        \n                    \n                \n                \n                    \n                        Selfie\n                    \n                    \n                        The Selfie step requires your applicants to take a photo or video of themselves to prove their actual presence.\n                        \n                        In the Selfie type drop-down, choose the selfie type that matches your requirements.\n                        \n                        Available selfie types:\n                        \n                            \n                                Advanced liveness check — Applicant passes a facial biometric check during application. You can specify whether they need to move their head to complete the check.\n                            \n                            \n                                Short video fragment — Applicant records a short video in real time, pronouncing the digits displayed on the screen.\n                            \n                        \n                        Note: Consider that the Head movement required option for Advanced liveness check is available only in the WebSDK.\n                    \n                \n                \n                    \n                        Proof of address (PoA)\n                    \n                    \n                        \n                            On the Proof of address step, you request address confirmation from your applicants. They can provide it as a document, such as a utility bill, bank statement, lease agreement, and so on, depending on your\n                            requirements. Also, there is an option to confirm the address by tracking their GPS location.\n                        \n                        \n                        To configure the address confirmation process:\n                        \n                            \n                                \n                                    In the Select PoA preset drop-down list, you need to select the necessary preset if you have created them previously. In case there are no available presets, refer to\n                                    this article to learn how to set one up. Click Edit to add or remove PoA requirements in the existing preset.\n                                \n                            \n                        \n                        \n                        \n                            \n                                \n                                    In the Geolocation checkbox, you can activate geolocation tracking as an alternative or additional method of address confirmation. With this setting, the applicant does not need to upload any\n                                    documents; the system detects their location via GPS to verify the address.\n                                \n                            \n                        \n                        \n                            \n                                \n                                    In the Fields drop-down list, select all necessary fields that should be provided, such as a country, city, street, and so on. Click Add field to add a new field, and set the\n                                    Required checkbox to make it mandatory if necessary.\n                                \n                            \n                        \n                        \n                            Note: Mind that by enabling the second Geolocation checkbox, your applicants will not be able to provide their PoA documents as an alternative to geolocation check. This setting is only supported in\n                            the WebSDK 2.0.\n                        \n                    \n                \n                \n                    \n                        Payment methods\n                    \n                    \n                        The Payment methods step helps you confirm payment method ownership and prevents fraudulent and suspicious transactions.\n                        \n                      You can set up a new payment method for:\n                        \n                            Bank card — Applicant uploads a photo of their bank card to confirm the applicant's name and card number. Select the Bank cards toggle to set up bank card sides requirements.\n                            Bank account — Applicant should either provide an image of a bank statement, or verify their detailed bank account information through a standard Online banking authentication process. Select the Bank accounts toggle to choose how an applicant can verify their bank account ownership.\n                            E-wallet — Applicant uploads screenshots and statements with the wallet's identification number and other personal data. Select the E-wallets toggle if you want your applicant to connect their digital wallet for ownership verification.\n                            Crypto wallet — Applicant provides their crypto wallet address and currency and chain details. Select the Crypto wallet toggle to verify your applicant's cryptocurrency wallets.\n                        \n                        \n                        Note: Payment Method Check Advanced can be used as a Payment methods step in either a Standard level or an Applicant actions level.\n                        \n                            \n                                For more information on how to set up a payment method, refer to this article.\n                            \n                            \n                                To learn how to configure applicant actions, see this article.\n                            \n                        \n                    \n                \n                \n                    \n                        Questionnaire\n                    \n                    \n                        Within the Questionnaire step, you can request additional data from your applicants.\n                        \n                        To configure the questionnaire:\n                        \n                            \n                                \n                                    Choose the required questionnaire type in the Questionnaire drop-down list if you have set it up in advance. If not, refer to this article to create your custom\n                                    set of questions.\n                                \n                            \n                            \n                                Click Edit to add or remove questions in the existing questionnaire.\n                            \n                        \n                    \n                \n                \n                    \n                        Phone verification\n                    \n                    \n                        \n                            The Phone verification step allows you to confirm the reliability of the applicant's phone number. Applicant receives a one-time code via SMS, enter it for confirmation, and the system determines the risk\n                            level based on their number and IP check.\n                        \n                        \n                        This step does not require any settings. For more information, see this article.\n                    \n                \n                \n                    \n                        Email verification\n                    \n                    \n                        \n                            The Email verification step allows you to confirm the reliability of the applicant's email address. Applicant receives a one-time code via email, enter it for confirmation, and the system determines the\n                            risk level of their email address and IP check.\n                        \n                        \n                        This step does not require any settings. For more information, see this article.\n                    \n                \n                \n                    \n                        Non-doc\n                    \n                    \n                        \n                            With the Non-doc step, applicants do not need to provide photos of their ID or PoA documents. They just fill in their identity document number or log in to a bank account, and pass the\n                            Advanced liveness check.\n                        \n                        \n                        If you add this step to your verification scenario, it will be mandatory for applicants. Select the corresponfing checkbox in case you want to allow them to skip the Non-Doc step.\n                        \n                        \n                             Note: The Non-Doc Verification is only available for documents from a limited number of countries. Check the country availability and learn how to set up the Non-doc step for your verification flow\n                            in the Identity Verification and Address Verification articles.\n                        \n                    \n                \n                \n                    \n                        Video Identification\n                    \n                    \n                        \n                            Video Identification allows you to conduct a more in-depth applicant verification through a live video call. During the call, your applicants confirm their identity and answer security questions to verify\n                            authenticity.\n                        \n                        \n                        To configure the video identification process:\n                        \n                            \n                                \n                                    In the General step, select the Enable video identification for all steps toggle to add video identification to your flow. Use the\n                                    Select document types that can be uplocaded drop-down list to choose what document types applicant can provide for video verification, such as a passport, ID card, driver's license, and so on.\n                                \n                            \n                            \n                                You can also configure other steps as part of video identification using Include this step diring video identification checkboxes in these steps.\n                            \n                        \n                    \n                \n            \n        \n    \n"
+}
+[/block]
+
+# Manage steps in verification flows
+
+You can manage verification steps in any of the following ways:
+
+- Select Add new step to add a new step to your flow.
+- Use the trash bin icon to remove a step or field from the created verification flow.
+- Reorder steps or fields by clicking and holding the six dots icon.
+
+# Save applicant verification progress
+
+Sumsub automatically saves the information an applicant enters while completing the Questionnaire and/or Applicant data steps in the browser session storage for the entire duration of the verification session. The verification session remains valid as long as the verification link is active.
+
+You can configure how long a verification session stays valid in the Verification links settings.
+
+> 📘 Note
+> 
+> If the session expires before the applicant finishes entering their information, they will need to re-enter their data when they return.
+
+================================================================================
+
+# Consent screen
+URL: https://docs.sumsub.com/docs/consent-screen
+
+Since Sumsub is a data processing company, in specific cases when it is prescribed by the regulation of a certain country (for instance, in the US), we must ensure that applicants undergoing verification give their consent to process their data. This way, we stay compliant with regulations, including the presence of the consent screen in the process of verification, which is mandatory for Sumsub as a data processor and our clients as data controllers.
+
+# How consent screen works
+
+By default, the consent screen is shown at the beginning of verification and allows your applicants to give their consent to the terms and conditions of data processing. 
+
+Depending on the steps chosen in your verification level settings, there will be different options and scenarios of showing the consent: 
+
+- A verification level including only the Questionnaire and/or Applicant data steps allows you to skip the consent screen in the level settings as no biometry is involved when passing the mentioned steps.
+- The Applicant actions level type that is used for additional verification after onboarding does not imply showing the consent.
+- The Workflow Builder levels take into account all the conditions, as described above. But if your applicant undergoes Questionnaire or Applicant data level verification, and then they are transferred to any other level, such as one with providing documents, they will see the consent screen.
+
+> 📘 Mind the additional conditions that may affect showing the consent screen:
+> 
+> - If applicants give their consent during onboarding, they will not see the consent screen when passing actions.
+> - If applicants pass onboarding checks that include only the Applicant data / Questionnaire steps, they will need to give their consent during further additional verification that implies other steps.
+> - Applicants may be asked to give their consent during both onboarding and additional verification if the consents are not the same in each case.
+
+# Set up consent screen
+
+When verifying applicants, you have a few options for skipping the consent screen or adjusting it in your WebSDK or MobileSDK verification flow.
+
+## Skip consent for some verification steps
+
+You can avoid displaying the consent by selecting the Skip consent screen checkbox in the level configuration if there are only the Questionnaire or Applicant data steps included in the verification level. Otherwise, the checkbox will not be shown.
+
+## Use WebSDK custom consent
+
+By default, the WebSDK consent screen contains two paragraphs describing the major terms of giving consent to data processing. When you set up your own consent text, a third customizable paragraph appears on the consent screen. The paragraph also includes a link (named Notification to Processing of Personal Data by default, but you can rename it) that opens your custom text or page.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/d79400d637323562791f2d0e8abf89bb48e6dc5e86bad6a773a243573b34bb32-Updatedscreenshotfordocsv1_cropped.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "sizing": "300px"
+    }
+  ]
+}
+[/block]
+
+The rest of the consent screen text cannot be changed or translated.
+
+### Adjust customizable paragraph
+
+To change the text of the third, customizable paragraph:
+
+1. In the Dashboard, open the SDK translations page.
+2. Select the Common section.
+3. Find the `"agreements.custom"` object.
+4.  Change the text for the `"defaultDescription"` string.
+5. You can also rename the link (by default named Notification to Processing of Personal Data) to any title you prefer. When the applicant clicks this link, your custom text or page opens.
+
+### Provide your custom consent for WebSDK
+
+To add your consent to data processing within the WebSDK integration, navigate to the level configuration, open the Advanced settings section, and scroll down to Custom consent for data processing. There are two ways to do this, from which you should choose one option that is more convenient for your case:
+
+- Provide the Link that leads to an external source (a website). The link is embedded into the customizable paragraph shown in the WebSDK and opens in a new tab when the applicant clicks the consent link.
+- Paste the Text that will be shown in the WebSDK when the applicant clicks the consent link in the third paragraph.
+
+By default, no extra consent link or text is added to the consent screen.
+
+## Use MobileSDK custom consent
+
+The MobileSDK consent screen contains two paragraphs describing the major terms of giving consent to data processing that cannot be customized. You can add your own consent text below these paragraphs, which can include plain text or links formatted as you wish.
+
+### Provide your custom consent for MobileSDK
+
+1. To add your consent text to data processing within the MobileSDK integration:  
+   In the Dashboard, open the SDK translations page, choose the translation you want to adjust, and navigate to the Common tab.
+2. Find the `"agreements.custom"` object.
+3. Add a new string `"customDescription": "Your consent link or text for data processing in MobileSDK"`.
+4. Customize your consent text in the string as you wish; markdown formatting is supported.
+
+> 📘 Note
+> 
+> Level settings for adding a consent link or text apply only to the WebSDK. For the MobileSDK, the string must be added manually on the SDK translations page.
+
+================================================================================
+
+# Applicant actions
+URL: https://docs.sumsub.com/docs/applicant-actions
+
+An applicant action is an additional check that you can configure in your verification level settings. Actions can be triggered by specific events performed by applicants.
+
+For example, every time your applicants make a transfer or payment, they are asked to confirm their identity by passing an action check.
+
+> 📘 Note
+> 
+> You can test applicant actions in the Sandbox environment. For more details, see Test Applicant actions.
+
+# Benefits of applicant actions
+
+Applicant actions might be used as post-onboarding checks that provide an additional layer of security when your applicants perform some activities after they have passed initial verification. 
+
+These are the most popular and effective practices of using the applicant actions in your verification: 
+
+- Requesting a Liveness check when the applicant makes a financial operation or any action associated with the account (a password reset, Two-Factor Authentication, and so on)
+- Performing a Payment method check when the applicant adds a new means of payment.
+- Asking to fill out a questionnaire when the applicant withdraws a huge amount to clarify the information about this transaction.
+- Requesting additional data from the applicant, such as name, date of birth, address data, TIN, tax resident country, and so on.
+
+> 📘 Note
+> 
+> The Sumsub's Transaction Monitoring solution also offers the ability to set triggers and define further actions while checking transactions. To do so, you have to create custom rules that will ensure an extra level of security within many cases.
+
+# How applicant actions work
+
+An applicant action scenario depends on the configuration of your verification level. The following verification steps can be included: 
+
+- Applicant data
+- Selfie
+- Payment methods
+- Questionnaire
+- Phone verification
+- Email verification
+- Travel Rule: recipient information
+
+Once verification is set, it will generally look as follows: 
+
+1. An applicant performs a particular action.
+2. The action triggers the established check, and the applicant is asked to pass additional verification.
+3. Once done, the verification results are displayed in the applicant profile.
+
+> 📘 Note
+> 
+> Passing an action check does not affect the current applicant verification status.
+
+# Add applicant actions to verification level
+
+To configure applicant actions, you have to create a verification level, make adjustments in the level settings, and set up the SDK.
+
+## Step 1: Create verification level
+
+In the Dashboard, create a verification level: 
+
+1. Go to the Integrations section, open Applicant levels (Individuals) and click Create level.
+2. In the pop up window, select Applicant actions and click Continue.
+3. In the created level, set up the steps your applicants must take to get verified with actions. You can select any of the following verification methods:
+   1. Applicant data
+   2. Selfie
+   3. Payment methods
+   4. Questionnaire
+   5. Phone verification
+   6. Email verification
+   7. Travel Rule: recipient information
+4. Continue with setting up the level as required and save your changes when done.
+
+> 📘 Note
+> 
+> Once you select the Applicant actions level type, the level type cannot be changed afterwards.
+
+## Step 2: Configure verification level
+
+To set up configurations for Applicant actions, on the Configurations tab, select the level settings from the left-hand menu.
+
+Note that the configurations for Applicant actions are limited compared to the standard levels due to the nature of the Applicant actions structure.
+
+### Location settings
+
+In Location settings, you can configure access controls and restrictions for applicant verification based on their location:
+
+1. In the Country restriction for verification steps section, configure the countries that are accepted (or restricted) at this level and select the verification steps where the filter should be applied. Mind that this setting will affect the payment methods check by default.
+2. In the IP settings section, configure verification access to control applicants’ IP addresses by allowing or blocking selected countries.
+3. In the VPN detection section, enable the checkbox to pause verification when a VPN is detected. Verification will resume once the applicant disables their VPN.
+
+### Advanced settings
+
+In Advanced settings, you can configure advanced options such as notifications, environment, and data processing preferences:
+
+1. In the Visibility configuration section, select the checkbox to make the level available only in Production mode.
+2. Check the Disable automatic checks box if you want to review each applicant manually. Mind that this option stops all automatic checks.
+
+## Step 3: Initialize SDK
+
+To initialize the WebSDK for using applicant actions:
+
+1. Generate an access token using this API method and specify the following parameters of the verification level to be passed to the WebSDK:
+   1. `externalActionId`
+   2. `userId`
+2. Install an NPM package or use the CDN version of the script and launch it with the `accessToken` you have generated at the previous step.
+
+## Step 4: View verification results
+
+Find the applicant action check results in the applicant profile or get it via webhooks.
+
+================================================================================
+
+# Customization
+URL: https://docs.sumsub.com/docs/sdk-customization
+
+Sumsub customization lets you adjust the look and feel of your applicants' journey while they pass verification in WebSDK and MobileSDK.
+
+When configuring customization, you will be able to set colors and styles exactly as you want them to appear to your applicants. You can also add instructions and tips for each of your verification steps and then preview the resulting verification flow with just a few clicks.
+
+# Get started with SDK customization
+
+# Manage customization
+
+================================================================================
+
+# Supported SDK languages
+URL: https://docs.sumsub.com/docs/supported-sdk-languages
+
+This page lists the languages available for your applicants during the verification process via the Web and Mobile SDKs.
+
+You can also use the SDK translations functionality to define custom translations for a particular language from the list below to cover cases specific to your business.
+
+> 📘 Note
+> 
+> ISO 639-1 codes represent two-letter language codes that identify languages in software settings.
+
+================================================================================
+
+# Test Business Verification
+URL: https://docs.sumsub.com/docs/test-business-verification
+
+In the Sandbox, you can perform test verifications for companies. The test environment allows you to build a Business Verification integration from scratch, learn how it works, and understand which results you may receive after the checks.
+
+# Mock companies for testing
+
+Once the test verification flow is set, you can use the mock companies data in your tests to conduct checks and get specific results. These are pre-made data sets that you can use to perform Business Verification checks in Sandbox:
+
+- Active company with registry data and beneficiaries
+- Active company with registry data, no beneficiaries
+- Inactive company with registry data, no beneficiaries
+
+## Active company with registry data and beneficiaries
+
+Submit the following information to get the results for a company that is Active, has registry data and beneficiaries.
+
+| Field               | Company data                        |
+| :------------------ | :---------------------------------- |
+| Company name        | Demo Company With Beneficiaries Ltd |
+| Registration number | 99999999                            |
+| Country             | GBR                                 |
+
+## Active company with registry data, no beneficiaries
+
+Provide the following data to get the results for a company that is Active, has registry data available, but does not have beneficiaries.
+
+| Field               | Company data     |
+| :------------------ | :--------------- |
+| Company name        | Demo Company Ltd |
+| Registration number | 88888888         |
+| Country             | GBR              |
+
+## Inactive company with registry data, no beneficiaries
+
+Use this set of data to obtain the results for a company that is Inactive, has registry data available, but does not have beneficiaries.
+
+| Field               | Company data              |
+| :------------------ | :------------------------ |
+| Company name        | Demo Company Inactive Ltd |
+| Registration number | 77777777                  |
+| Country             | GBR                       |
+
+# Conduct test checks for business verification
+
+To run test checks and obtain results, you need to set up verification in the Sandbox and use the pre-made mock company data:
+
+1. Switch to Sandbox in the Dashboard.
+2. Set up a Business Verification level.
+3. Submit the mock company data using one of the following methods:
+   1. Create an applicant manually in the Dashboard
+   2. Use verification links
+   3. Create an applicant via API
+4. Review the results:
+   1. Via API
+   2. In the Dashboard:
+      1. Go to Applicants → Companies and select the required profile from the list.
+      2. Navigate to the Verification tab and review the Company data, Company structure, and Checks sections.
+
+================================================================================
+
+# Test AML Screening
+URL: https://docs.sumsub.com/docs/test-aml-screening
+
+In the Sandbox, you can perform test AML checks and get mock AML results based on the entered applicant name. This applies to both Individuals and Companies applicants. 
+
+To test AML in Sandbox: 
+
+1. Enable and set up AML Screening. 
+2. Create an applicant profile, provide a name, upload document templates (if applicable), and request a check. 
+
+The table below outlines examples of the results you might get. The AML mock results include: 
+
+- Applicant type — applicant type (Individual or company). 
+- Full name — applicant's name. 
+- Produce hit — parameter displaying whether an AML hit has been found. 
+- Exact_match hit — identification of an exact match. 
+- Hit type — type of AML hit.
+
+================================================================================
+
+# Test Applicant actions
+URL: https://docs.sumsub.com/docs/test-applicant-actions
+
+In Sandbox, you can perform test Applicant actions and get the results before going live with this feature. 
+
+> 🚧 Important
+> 
+> - We recommend conducting these tests only in Sandbox mode.
+> - To perform the test, you must have an approved applicant at the Standard verification level.
+
+To test Applicant actions in Sandbox:
+
+1. Choose an approved applicant on the Standard verification level or create a new applicant for testing and copy its `externalUserId`. You can find it in the applicant’s profile under the Profile data section.
+2. Go to the Integrations → Individuals page, choose an Applicant action level, and do one of the following:
+   1. Click WebSDK permalinks on the right-hand side of the level record, or
+   2. Open the level and click Verification links →  Permalinks.
+3. In the External user ID field, paste the applicant’s `externalUserId` to generate the link. 
+4. Click Generate link, then use the link to perform the Applicant action check.
+
+After the check is completed, details of the Applicant action will appear in the applicant’s profile in the Actions tab. For more information about the Applicant action check results, refer to this article.
+
+================================================================================
+
+# Go live
+URL: https://docs.sumsub.com/docs/go-live
+
+We have put a lot of effort into making the integration as simple and straightforward as possible, providing you with the following integration types.
+
+[block:html]
+{
+  "html": "\n    .box7 {\n        background: #ffffff;\n        border: 1px solid #e1e5ea;\n        border-radius: 12px;\n        align-items: top;\n        display: grid;\n        text-decoration: none !important;\n        grid-template-rows: repeat(4, min-content);\n        transition: 0.3s ease-in !important;\n    }\n\n    .box7 text-basic {\n        padding: 0px 24px 24px 24px;\n        font-style: normal;\n        font-weight: 400;\n        font-size: 14px;\n        line-height: 24px;\n        color: #586073;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box7 text-basic {\n            color: #fff;\n            opacity: 0.8;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .box7 text-basic {\n        color: #fff;\n        opacity: 0.8;\n    }\n\n    .box7:hover {\n        box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1);\n        transition: 0.3s ease-in;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box7 {\n            background: #20252c;\n            border: 1px solid #333844;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .box7 {\n        background: #20252c;\n        border: 1px solid #333844;\n    }\n\n    .text7-h1 {\n        font-style: normal;\n        font-weight: 700;\n        font-size: 18px;\n        line-height: 24px;\n        color: #20252c;\n        transition: 0.3s ease-in;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .text7-h1 {\n            color: #fff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .text7-h1 {\n        color: #fff;\n    }\n\n    .box7:hover .text7-h1 {\n        color: #377cf7;\n        transition: 0.3s ease-in;\n    }\n\n    .img5 {\n        margin: 16px 0px -10px 0px !important;\n        width: 100%;\n        max-height: 150px;\n        object-fit: contain;\n    }\n\n    @media (max-width: 1024px) {\n        .img5 {\n            max-height: 130px;\n        }\n    }\n\n    .line {\n        border-top: 1px solid #e1e5ea;\n        margin-bottom: 8px;\n        margin-top: 10px;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            color: #fff;\n            opacity: 0.2;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .line {\n        color: #fff;\n        opacity: 0.2;\n    }\n\n    .headline-tag-container {\n        display: flex;\n        flex-wrap: wrap;\n        padding: 16px 24px 8px;\n        align-items: center;\n        gap: 8px;\n    }\n\n    @media (max-width: 1280px) {\n        .headline-tag-container {\n            flex-direction: column;\n            align-items: flex-start;\n        }\n    }\n\n    @media (max-width: 1024px) {\n        .headline-tag-container {\n            flex-direction: row;\n            align-items: center;\n        }\n    }\n\n    .tag-green {\n        display: flex;\n        flex-direction: row;\n        align-items: center;\n        padding: 2px 8px;\n        gap: 4px;\n        height: 20px !important;\n        background: #c8f4e6;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #156a55;\n        margin-top: 8px;\n    }\n\n    .tag-blue {\n        display: flex;\n        flex-direction: row;\n        align-items: center;\n        padding: 2px 8px;\n        gap: 8px;\n        height: 20px !important;\n        background: #d6eaff;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #1542ab;\n    }\n\n    .tag-yellow {\n        display: flex;\n        flex-direction: row;\n        align-items: center;\n        padding: 2px 8px;\n        gap: 8px;\n        height: 20px !important;\n        background: #fff2c2;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #a65113;\n        margin-top: 8px;\n    }\n\n    .tag-red {\n        display: flex;\n        flex-direction: row;\n        align-items: center;\n        padding: 2px 8px;\n        gap: 8px;\n        height: 20px !important;\n        background: #ffdfdb;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #c71e1e;\n        margin-top: 8px;\n    }\n\n\n\n    \n        \n\n        \n\n        \n            Verification Links\n            No code\n        \n\n        Create verification links that you can easily share with your applicants, code-free.\n    \n\n    \n        \n\n        \n\n        \n            Sumsub SDKs\n            Recommended\n        \n\n        Build in PHP, Java, Python, Node.js, Ruby, .NET, iOS, Android, React Native, and Flutter. \n    \n\n    \n        \n\n        \n\n        \n            Sumsub API\n            Most code\n        \n\n        Send and receive applicant data through simple RESTful APIs.\n    \n\n\n"
+}
+[/block]
+
+You can use any of these types in combination, making it more precise and customizable, depending on your business scenarios. 
+
+No matter which type you choose, you will always be able to:
+
+- Conduct effective identity and address verification of your applicants, manage results, and be at the helm of the entire process.
+- Perform document-free verification — a convenient way when all that is required from your applicant is to provide their ID number and prove the identity by submitting biometric data and other established information that can be validated through reliable government sources.
+- Monitor inbound and outbound transactions using our Transaction monitoring solution, including Travel Rule and Gambling.
+- Carry out Business verification — delegate AML watchlist and registry screening, beneficiary verification, and company structure checks to Sumsub.
+
+================================================================================
+
+# Webhooks
+URL: https://docs.sumsub.com/docs/webhooks
+
+Sumsub’s Webhooks is a tool that allows you to automatically receive notifications for various events and changes related to your applicants’ verification process. When creating a webhook, you can customize the updates you want to receive (such as application creation, review, or being placed on hold), as well as other important events or triggers. Notifications are sent via your preferred method: 
+
+- HTTP address
+- Slack
+- Telegram
+- Email address
+
+Additionally, you can track and analyze every event using webhook logs.
+
+# Get started with webhooks
+
+[block:html]
+{
+  "html": "\n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n      \n         Manage webhooks\n         Explore webhook settings for customized notifications on your applicants.\n      \n      \n         Study webhook logs\n         Monitor webhook logs in real-time to track and resolve issues.\n      \n   \n   \n"
+}
+[/block]
+
+# Explore webhook types
+
+================================================================================
+
+# Webhook manager
+URL: https://docs.sumsub.com/docs/webhook-manager
+
+On this page, you can learn how to create, configure, and manage a webhook based on your requirements in the Webhook manager section.
+
+> 📘 Mind the following:
+> 
+> - We do not send any information to endpoints using HTTP, only HTTPS.
+> - Supported versions of the TLS protocol are 1.2 or higher.
+> - Not receiving an answer from a webhook endpoint for more than 5 seconds is considered to be a timeout, and our service will try to resend the same webhook later.
+
+# Timing
+
+When a webhook HTTP request fails, we attempt to resend it four times. Resend delays depend on the webhook type:
+
+- The system resends the `applicantActionReviewed` , `applicantActionOnHold` , `applicantActionPending` webhooks after 30 seconds, then again after 30 seconds, 1 minute, and 5 minutes until the request succeeds.
+- All other webhooks are resent after 5 minutes, 1 hour, 5 hours, and 18 hours until the request succeeds.
+
+> 📘 Note
+> 
+> If a webhook is automatically disabled after continuous request failures, team members with Manage company settings enabled in their role configuration will receive an email notification.
+
+# Create webhooks
+
+To create a webhook:
+
+1. In the Dashboard, open Dev space, go to the Webhooks  → Webhook manager section, and click Create webhook.
+2. In the Name field, enter a preferable webhook name.
+3. Select a Webhook receiver type, which can be any HTTP address, Slack, Telegram, or email. This field determines where you will receive verification results.
+4. In the Target field, specify the target endpoint where webhooks are expected to be received. Based on the receiver type you selected in the previous step, you can provide an HTTP address, a Slack webhook URL, a Telegram API token with a Telegram chat ID after `@`, or an email address. To learn how to set up a webhook on Telegram, refer to this section.
+5. From the Webhook types drop-down list, select the webhook type. At this step, you define which type of events or triggers (such as applicant status change) you want to receive. For more details on webhook types, see User Verification, Transaction Monitoring, Case management, and Fraud Network Detection webhooks.
+6. In the Applicant types  section, select whether you want to receive these webhooks for Individual applicants, Companies, or both.
+7. In the Secret key field, our system automatically generates a secret key value for digest calculation using the HMAC algorithm. You can set your key value or use a generated one.
+8. Select a Signature algorithm to use for verifying the webhook sender. SHA256 is the default algorithm, but you can also switch to SHA512 if needed. This ensures that the webhook is sent by Sumsub and that the data has not been altered. Verifying the webhook sender is optional, but if you choose to do so, see this section.
+9. [Optionally] In HTTP Headers, click Add key value pair to create a custom header. This option is only available if HTTP address was selected as the webhook receiver type in Step 3.
+10. [Optionally] From the Source keys drop-down list, choose a source key if you have created it previously. In case there are no available source keys, refer to this article to learn how to set one up.
+11. Set the Resend failed webhooks several times checkbox to enable/disable sending failed webhooks repeatedly.
+12. Click Test webhook to see how it performs.
+13. Save your changes.
+
+## Verify webhook sender
+
+To make sure the webhook is sent to you by Sumsub, we sign it using the HMAC (Hash-based Message Authentication Code) algorithm.
+
+> 🚧 Important
+> 
+> To use this feature, set a Secret Key value when creating a webhook.
+
+We also send the additional `X-Payload-Digest-Alg` header that specifies one of the following algorithms to be used:
+
+- `HMACSHA256HEX` (default upon creating a new webhook)
+- `HMACSHA512HEX`
+- `HMACSHA1HEX` (legacy, deprecated)
+
+You can choose among these algorithms when setting up your webhooks. 
+
+To verify the webhook sender:
+
+1. Get a webhook `x-payload-digest` header value and the payload as it is, without any alteration or conversion to JSON.
+2. Receive the HTTP webhook body in bytes.
+3. Calculate the digest with the raw webhook payload in bytes and the HMAC algorithm specified in the `x-payload-digest-alg` header.
+4. Compare the `x-payload-digest` header value with the calculated digest.
+
+> 📘 Note
+> 
+> - Do not rely on our IP addresses for whitelisting them as the webhook sender as they may change.
+> - Make sure to test your webhooks before sending the URL to us. At a minimum, it should not return a 500 HTTP response or require any sort of authorization.
+
+To check that you compute the digest the same way we do, use the following `POST` method:
+
+```curl
+curl -X POST \
+  'https://api.sumsub.com/resources/inspectionCallbacks/testDigest?secretKey=SoMeSeCrEtKeY&digestAlg=HMACSHA1HEX' \
+  -H 'Content-Type: text/plain' \
+  -d 'someText'
+```
+
+| Name        | Type   | Required | Description                                                                                                                 | Default         |
+| :---------- | :----- | :------- | :-------------------------------------------------------------------------------------------------------------------------- | :-------------- |
+| `# {body}`  | Object | Yes      | Any payload.                                                                                                                | N/A             |
+| `secretKey` | String | Yes      | A secret key that can be used for signing.                                                                                  | N/A             |
+| `digestAlg` | String | No       | A signature algorithm that can be used for signing. Possible values: `HMACSHA1HEX`, `HMACSHA256HEX`, `HMACSHA512HEX`. | `HMACSHA1HEX` |
+
+Response
+
+```json
+{
+  "digest": "f6e92ffe371718694d46e28436f76589312df8db",
+  "digestAlg": "HMACSHA1HEX"
+}
+```
+
+Example request to the client endpoint
+
+```curl
+curl -X POST \
+  'https://callbackurl.com/kyc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "applicantId": "5cb56e8e0a975a35f333cb83",
+    "inspectionId": "5cb56e8e0a975a35f333cb84",
+    "correlationId": "req-ec508a2a-fa33-4dd2-b93d-fcade2967e03",
+    "externalUserId": "12672",
+    "type": "applicantReviewed",
+    "reviewResult": {
+        "reviewAnswer": "GREEN"
+    },
+    "reviewStatus": "completed",
+    "createdAtMs": "2020-02-21 13:23:19.111",
+    "clientId": "SumsubClient"
+}'
+```
+
+Example of computing the digest
+
+```javascript
+export function checkDigest(req): boolean {
+ const algo = {
+  'HMACSHA1HEX': 'sha1',
+  'HMACSHA256HEX': 'sha256',
+  'HMACSHA512HEX': 'sha512',
+ }[req.headers['X-Payload-Digest-Alg']]
+
+ if (!algo) {
+  throw new Error('Unsupported algorithm')
+ }
+
+ const calculatedDigest = crypto
+  .createHmac(algo, SUMSUBPRIVATEKEY)
+  .update(req.rawBody)
+  .digest('hex')
+
+ return calculatedDigest === req.headers['x-payload-digest']
+}
+```
+```javascript C#
+private async Task CheckDigest(HttpRequest request)
+{
+    using (var reader = new StreamReader(request.Body))
+    {
+        var body = await reader.ReadToEndAsync();
+        byte[] byteArray = Encoding.UTF8.GetBytes(body);
+        using (MemoryStream stream = new MemoryStream(byteArray))
+        {
+            string algo = request.Headers["x-payload-digest-alg"];
+            string calculateDigest = string.Empty;
+
+            switch (algo)
+            {
+                case "HMACSHA1HEX":
+                    using (var hmacsha1 = new HMACSHA1(Encoding.UTF8.GetBytes(verificationAccessor.SumSubPrivateKey)))
+                    {
+                        calculateDigest = hmacsha1.ComputeHash(stream).Aggregate("", (s, e) => s + String.Format("{0:x2}", e));
+                    }
+                    break;
+                case "HMACSHA256HEX":
+                    using (var hmacsha256 = new HMACSHA256(Encoding.UTF8.GetBytes(verificationAccessor.SumSubPrivateKey)))
+                    {
+                        calculateDigest = hmacsha256.ComputeHash(stream).Aggregate("", (s, e) => s + String.Format("{0:x2}", e));
+                    }
+                    break;
+                case "HMACSHA512HEX":
+                    using (var hmacsha512 = new HMACSHA512(Encoding.UTF8.GetBytes(verificationAccessor.SumSubPrivateKey)))
+                    {
+                        calculateDigest = hmacsha512.ComputeHash(stream).Aggregate("", (s, e) => s + String.Format("{0:x2}", e));
+                    }
+                    break;
+                default:
+                    using (var hmacsha256 = new HMACSHA256(Encoding.UTF8.GetBytes(verificationAccessor.SumSubPrivateKey)))
+                    {
+                        calculateDigest = hmacsha256.ComputeHash(stream).Aggregate("", (s, e) => s + String.Format("{0:x2}", e));
+                    }
+                    break;
+            }
+
+            return calculateDigest == request.Headers["x-payload-digest"];
+        }
+    }
+}
+```
+```php
+ 'sha1',
+      'HMACSHA256HEX' => 'sha256',
+      'HMACSHA512HEX' => 'sha512',
+      default => throw new \RuntimeException('Unsupported algorithm'),
+    };
+
+    $res = $digest === hashhmac(
+        $algo,
+        $return,
+        'secret'
+    );
+
+    echo $res ? "true" : "false";
+?>
+```
+
+## Get webhooks with Telegram
+
+To receive webhooks in Telegram:
+
+1. Create a Telegram bot with BotFather.
+2. Save the bot token.
+3. Create a new group and invite the bot to this group.
+4. Get the list of updates for your bot using: `https://api.telegram.org/bot/getUpdates`.
+5. Paste the bot token and `chatId` into the Target field of the webhook configuration and save it.
+
+> 📘 Note
+> 
+> The bot token and `chatId` should be pasted with `@` between them in the following format: `telegrambot_token@chatId`
+
+# Manage webhook settings
+
+You can manage your webhook settings in any of the following ways:
+
+- Edit webhook parameters. Modify webhook parameters at any time if you need to change any of the existing settings.
+- Remove webhooks. Remove a webhook configuration whenever you no longer need it.
+- Disable webhooks. Disable the existing webhook temporarily. You can re-enable it at any time.
+
+You can also search for webhooks by specifying filters such as webhook type, status, and receiver.
+
+================================================================================
+
+# Check webhook logs
+URL: https://docs.sumsub.com/docs/webhook-logs
+
+On this page, you can learn how to read and analyze webhook logs to monitor delivery and resolve issues. 
+
+> 📘 Mind the following:
+> 
+> Check the `createdAtMs` field of the webhook payload to make sure that you are getting the relevant applicant status.
+
+The following table describes each column in the Webhook logs section.
+
+[block:html]
+{
+  "html": "\n    .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 200px;\n    }\n\n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n\n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n        min-width: 200px;\n    }\n\n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n\n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n\n    \n      \n        \n          \n            Field\n          \n          \n            Description\n          \n        \n        \n          \n            \n              Triggered source\n            \n            \n              The Triggered source column displays a link to the applicant whose status update triggered the webhook.\n            \n          \n          \n            \n              Webhook\n            \n            \n              \n                In the Webhook column, you can see a name and type of the webhook that was triggered. For more details on webhook types, see User Verification, Transaction Monitoring, Case management, and Fraud Network Detection webhooks.\n              \n            \n          \n          \n            \n              Status\n            \n            \n              The Status column indicates the status of the webhook, whether it was successfully sent or if an error occurred.\n            \n          \n          \n            \n              HTTP code\n            \n            \n              In the HTTP code column, you get information about the response code from the receiving server-for example, 200 if the webhook was successfully delivered, or 400/500 if an error occurred.\n            \n          \n          \n            \n              First sent\n            \n            \n              The First sent column provides the date and time of the first attempt to send the webhook for this applicant.\n            \n          \n          \n            \n              Last sent\n            \n            \n              The Last sent column provides the date and time of the most recent attempt to send the webhook for this applicant, if a resend was needed.\n            \n          \n          \n            \n              Next Scheduled\n            \n            \n              In the Next Scheduled column, we specify the date and time of the next retry attempt, if the webhook was not delivered.\n            \n          \n        \n      \n  \n"
+}
+[/block]
+
+# View webhook logs
+
+You can view webhook logs in two sections in the Dashboard:
+
+1. Open the Dev space and go to the Webhooks → Webhook logs section to view the logs.
+2. Open the Applicants page, select the applicant of your interest and navigate to the Events block. On the  Webhooks tab, you can view all webhooks sent for that specific applicant. 
+
+Regardless of which section you are viewing the logs from, you can perform the following actions:
+
+- Use the Status and Webhook type filters to specify what type of webhook you want to find.
+- Click the Details  icon in the specific webhook log to learn more about this event. 
+  - In the popup window, you can also check the number of failures and view the payload (body of the webhook message) with all the details of the webhook event. 
+  - Additionally, the system provides the body of the error message, allowing you to copy it and investigate the error on your side.
+- Click Resend  in the webhook event or Details  pop-up if needed, for instance, if the webhook was not delivered.
+
+================================================================================
+
+# Receive verification results
+URL: https://docs.sumsub.com/docs/receive-verification-results
+
+During verification, we send you several types of webhooks, one of which is the applicantReviewed webhook containing the verification results.
+
+> 📘 Note
+> 
+> - For Production mode, it is required to configure a webhook endpoint to be called by us when necessary.
+> - We may send several final webhooks, so be prepared to change the applicant status on your side accordingly. A typical example is when an applicant got approved, but later on they were detected as a fraudster, and therefore we block them with a second `RED` webhook. For more information about rejection, see this article.
+
+# Check applicant status manually
+
+To manually check the applicant status, use this API method. 
+
+> We do not recommend using polling as a base method for getting verification results, but rather strongly encourage the webhook mechanism. 
+
+# Manage missed webhook
+
+If, for some reason, you missed the webhooks, do not worry — we make a note of everything that was attempted to be sent, and can resend failed webhooks at any point in time. If the webhook request fails, we attempt to resend it four times — after 5 minutes, 1 hour, 5 and 18 hours until the request succeeds. Check the `createdAt` field of the webhook payload to make sure that you are getting the relevant applicant status.
+
+# Check webhook statuses
+
+You can monitor webhook statuses and resend them manually on the API Health page.
+
+================================================================================
+
+# Customize links and notifications
+URL: https://docs.sumsub.com/docs/links-and-notifications
+
+When you send emails and SMS from our platform, your applicants will receive a link to our WebSDK. In the WebSDK settings, you can provide a redirect URL that will change the link domain and generate a `jwt` (JSON Web Token) query parameter to verify the link.
+
+To use this functionality, you need to initialize the WebSDK for a dynamic URL with a `jwt` query parameter and its confirmed value. The JWT value contains `externalUserId` (userId) and `clientId`, which defines a particular applicant on our platform. This will allow you to send requests and use the correct `accessToken`.
+
+The token is generated with the `HMACSHA256` algorithm, and it is used raw without any encoding to create a JWT signature.
+
+Custom link example:
+
+- Client applicant URL: ``
+- Secret key to sign the applicant link: `1`
+- `externalUserId`: `userId8`
+- `clientId`: `sumsub`
+
+```curl
+https://your-project.io/kyc?jwt=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MjAwNTI1MjcsImV4cCI6MTYyMDY1NzMyNywic3ViIjoidXNlcklkXzgiLCJhdWQiOiJzdW1zdWIifQ.qCR-4VMfCzOAN1hCtbjj9DJxmB6c0sEg7XD5Y8ZvvM
+```
+
+JWT data payload example:
+
+```json
+{
+  "iat": 1620052527, // Issued at (seconds since Unix epoch)
+  "exp": 1620657327, // Valid until (seconds since Unix epoch)
+  "sub": "userId8",
+  "aud": "sumsub"
+}
+```
+
+# Email notifications
+
+To customize email notifications with your brand, you will need to provide an icon, logo, and email sender (custom email address), as described in Branding.
+
+All email texts can be customized as well for each locale from the Dashboard.
+
+> 📘 Note
+> 
+> - To send email notifications to your applicants, enable this functionality in the verification level settings by selecting the necessary notification types.
+> - To ensure that Sumsub can send emails from your email domain, it is important to have SPF and DKIM records set up on your DNS server.
+
+## Configure > record
+
+Create or edit an SPF record to reference Sumsub and add a TXT record to your domain DNS settings. 
+
+We recommend using the following SPF record to ensure that it is set up correctly: `v=spf1 include:spf.sumsub.com ~all`
+
+If you have already set up an SPF record for another purpose, you can simply add a reference to Sumsub: `include:spf.sumsub.com`.
+
+> ❗️ Warning
+> 
+> Not setting up an SPF record will result in Sumsub emails being blocked for your applicants. Therefore, email sending will be disabled automatically.
+
+## Configure > record
+
+Edit your domain DNS settings to add CNAME records. The CNAME records should be as follows:
+
+```shell
+sumsub1.domainkey CNAME sumsub1.domainkey.sumsub.com.
+sumsub2.domainkey CNAME sumsub2._domainkey.sumsub.com.
+```
+
+> 👍 Tip
+> 
+> To check your SPF and DKIM records and identify any issues, use SuperTool and Dmarcian.
+
+# SMS notifications
+
+All SMS texts can be customized for each locale from the Dashboard. 
+
+> 📘 Note
+> 
+> For sending SMS with verification links, we use Twilio. If you have a personal Twilio account, see the this article for more information on how to start using it via Sumsub.
+
+================================================================================
+
+# About MobileSDK
+URL: https://docs.sumsub.com/docs/about-mobile-sdk
+
+Sumsub’s MobileSDK (Software Development Kit for mobile applications) is a set of tools that helps you integrate specific features into your mobile application with minimal coding.  Without MobileSDK, the integration process becomes much harder, as you need to manually build and test each step separately for iOS and Android. Instead of creating required tools from scratch, you can configure our MobileSDK to fit your particular workflow.
+
+# How Sumsub MobileSDK works
+
+Our MobileSDK allows you to verify applicants directly through your mobile application using a built-in Sumsub widget that you can customize based on your preferences. 
+
+Applicants go through all verification steps in your app on their mobile device, while Sumsub handles every stage by collecting, processing, and verifying all the provided data and documents. Once the verification is complete, you receive a final status update on the process. The MobileSDK also configures interaction with device hardware components, managing access to the camera, microphone, geolocation, and more. 
+
+With Sumsub MobileSDK solution, you can optimize conversion rates and enjoy effortless integration, with attention to every detail on our part.
+
+# MobileSDK configuration
+
+You can configure our MobileSDK solution for the following:
+
+- Native applications (MobileSDK for iOS, Android) — if you have separate versions of your app for iOS and Android, the MobileSDK is integrated for each platform individually.
+- Cross-platform applications (MobileSDK via a framework) — if you have a single codebase for your app that works on both iOS and Android (built using a cross-platform framework), the MobileSDK is integrated through a one mobile plugin for both platforms. 
+
+> 📘 Note
+> 
+> Make sure to review our MobileSDK updates policy to keep your integration up to date.
+
+# Get started with MobileSDK
+
+To get started with the MobileSDK integration:
+
+1. Set up a verification level.
+2. Generate an access token associated with:
+   1. `userId`— a user identifier in your system.
+   2. `levelName` — the verification level name that you set in Step 1. This restricts access to a specific applicant and informs the SDK what verification level will be used for the process.
+3. Choose a platform—iOS SDK or Android SDK—or use mobile frameworks, such as Cordova plugin, React native module, and Flutter plugin.
+
+================================================================================
+
+# iOS SDK customization
+URL: https://docs.sumsub.com/docs/customization
+
+With the iOS SDK, you can set your own customization for:
+
+- Themes
+- Font adjustments
+- Localization
+- Strings
+- Support items
+
+# Theme
+
+The `theme` allows you to customize things, such as fonts, colors, and images used across the SDK. The default theme is accessible once the SDK is initialized. So, depending on your needs, you either adjust the theme in place.
+
+```swift
+sdk.theme.colors.backgroundCommon = .white
+```
+
+or inherit from `SNSTheme` and apply your own theme at once.
+
+```swift
+sdk.theme = OwnTheme()
+
+class OwnTheme: SNSTheme {
+    override init() {
+        super.init()
+
+        colors.backgroundCommon = .white
+    }
+}
+```
+
+See iOS Theme API and iOS Theme guide for details.
+
+# Font adjustments
+
+By default, font sizes are automatically adjusted to respect the user's preference for Text Size.
+
+When the SDK is presented, it takes the user-selected Text Size by reading from `preferredContentSizeCategory` and adjusts the fonts accordingly. However, it will not reflect any changes made while the SDK is running until the next run.
+
+The maximum supported content category size is `.extraExtraExtraLarge` at the moment.
+
+You can opt out of the automatic font adjustments described above if it is not appropriate for some reason:
+
+```swift
+sdk.theme.metrics.respectsPreferredContentSizeCategory = false
+```
+
+# Localization
+
+You can customize or localize the texts used within the SDK through the MSDK Translations tool in the dashboard.
+
+The language of the texts will be set according to the system locale, but you could override it by setting `sdk.locale` to the locale you desire. Use the values in a form of `en` or `enUS`.
+
+```swift
+sdk.locale = Locale.current.identifier
+```
+
+Check the list of supported locales by SDK here.
+
+# Strings
+
+In addition to the MSDK Translations tool and `sdk.locale`, you can use the `sdk.strings` dictionary that allows you to define the strings locally. This could be helpful, for example, if you would like to avoid the Wordless Oops screen that could be rendered in case the network happens to be down during the SDK initialization and force the SDK to draw the Network Oops screen instead.
+
+```swift
+sdk.strings = [
+  "snsoopsnetworktitle": "Oops! Seems like the network is down.",
+  "snsoopsnetworkhtml": "Please check your internet connection and try again.",
+  "snsoopsactionretry": "Try again",
+]
+```
+
+Consider that `sdk.locale` does not affect these strings; thus, it is up to you to use the required localization.
+
+# Support items
+
+Support items define the ways in which your applicants will be prompted to contact you at the Support screen.  
+Initially, an email item would be created automatically using the `Support email` configured in your dashboard.
+
+Feel free to reconfigure support items as necessary. In order to do so, you can either assign an array of items to `sdk.supportItems` property directly, or use `sdk.addSupportItem` helper to add them one by one.
+
+```swift
+sdk.addSupportItem { (item) in
+    item.title = NSLocalizedString("URL Item", comment: "")
+    item.subtitle = NSLocalizedString("Tap me to open an url", comment: "")
+    item.icon = UIImage(named: "AppIcon")
+    item.actionURL = URL(string: "https://google.com")
+}
+
+sdk.addSupportItem { (item) in
+    item.title = NSLocalizedString("Callback Item", comment: "")
+    item.subtitle = NSLocalizedString("Tap me to get callback fired", comment: "")
+    item.icon = UIImage(named: "AppIcon")
+    item.actionHandler { (supportVC, item) in
+        print("[\(item.title)] tapped")
+    }
+}
+```
+
+Each item must have a mandatory `title`, an optional `icon`, `subtitle`, and an action expressed with `actionURL` or `actionHandler`. 
+
+If `actionHandler` is defined, it would be called when the item is tapped; otherwise, `actionURL` would be opened with UIApplication's `openURL:` method. 
+
+If no `actionURL` and no `actionHandler` are provided, then no action will be taken on tap.
+
+================================================================================
+
+# Theme API for iOS
+URL: https://docs.sumsub.com/docs/sdk-theme-api
+
+Theme options are named to express their semantic and used in many different places across the iOS SDK, so be aware that changing them may affect many elements at once.
+
+For convenience, the options are split into the corresponding sections:
+
+- Fonts
+- Colors
+- Images
+- Metrics
+
+## Fonts
+
+### headline1
+
+```swift
+theme.fonts.headline1: UIFont
+```
+
+Used for screen titles in conjunction with `colors.contentStrong` mostly.
+
+Default is System Bold, 24pt.
+
+### headline2
+
+```swift
+theme.fonts.headline2: UIFont
+```
+
+Used for section titles in conjunction with `colors.contentStrong` mostly.
+
+Default is System Bold, 20pt.
+
+### subtitle1
+
+```swift
+theme.fonts.subtitle1: UIFont
+```
+
+Used for subtitles in conjunction with `colors.contentStrong` mostly.
+
+Default is System Semibold, 18pt.
+
+### subtitle2
+
+```swift
+theme.fonts.subtitle2: UIFont
+```
+
+Used for subtitles in conjunction with `colors.contentNeutral` mostly.
+
+Default is System Regular, 16pt.
+
+### body
+
+```swift
+theme.fonts.body: UIFont
+```
+
+Used for paragraphs, text fields, and so on, in conjunction with `colors.contentNeutral` mostly.
+
+Default is System Regular, 14pt.
+
+### caption
+
+```swift
+theme.fonts.caption: UIFont
+```
+
+Used for minor captions in conjunction with `colors.contentWeak` mostly.
+
+Default is System Regular, 12pt.
+
+## Colors
+
+## Common
+
+### navigationBarItem
+
+```swift
+theme.colors.navigationBarItem: UIColor
+```
+
+Navigation bar items tinting color. Used for the close button only at the moment.
+
+Default is ● #94A0B8 and ● #FFFFFF with alpha 40% for the dark appearance.
+
+### alertTint
+
+```swift
+theme.colors.alertTint: UIColor
+```
+
+Used for the system alert actions and the toolbar buttons.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### toolbarTint
+
+```swift
+theme.colors.toolbarTint: UIColor
+```
+
+Used for the toolbars' buttons.
+
+Default is ● #5C6B8A and ● #FFFFFF with alpha 60% for the dark appearance.
+
+### toolbarBackground
+
+```swift
+theme.colors.toolbarBackground: UIColor?
+```
+
+Used as a background color for the toolbars.
+
+Default is `nil`, the system background color is applied.
+
+## Backgrounds
+
+### backgroundCommon
+
+```swift
+theme.colors.backgroundCommon: UIColor
+```
+
+Used for almost all the screens as the background color (the exception is the Camera Screen, see `cameraBackground`).
+
+Default is ● #FFFFFF and ● #1E232E for the dark appearance.
+
+### backgroundNeutral
+
+```swift
+theme.colors.backgroundNeutral: UIColor
+```
+
+Used as a background state color for the verification steps and as a main background color for the `.filled`-style cards.
+
+Default is ● #F6F7F9 and ● #FFFFFF with alpha 7% for the dark appearance.
+
+### backgroundInfo
+
+```swift
+theme.colors.backgroundInfo: UIColor
+```
+
+Not used at the moment.
+
+Default is ● #E8F4FD and ● #072F4B for the dark appearance.
+
+### backgroundSuccess
+
+```swift
+theme.colors.backgroundSuccess: UIColor
+```
+
+Used as a background state color for the verification steps and as a background color for the auto-generated `images.pictureSuccess`.
+
+Default is ● #18B494 with alpha 12% and ● #18B494 with alpha 30% for the dark appearance.
+
+### backgroundWarning
+
+```swift
+theme.colors.backgroundWarning: UIColor
+```
+
+Used as a background state color for the verification steps and as a background color for the auto-generated `images.pictureWarning` and `images.pictureSubmitted`.
+
+Default is ● #F2AA0D with alpha 13% and ● #F2AA0D with alpha 30% for the dark appearance.
+
+### backgroundCritical
+
+```swift
+theme.colors.backgroundCritical: UIColor
+```
+
+Used as a background state color for the verification steps and as a background color for the auto-generated `images.pictureFailure`.
+
+Default is ● #F05C5C with alpha 12% and ● #F05C5C with alpha 30% for the dark appearance.
+
+## Content
+
+### contentLink
+
+```swift
+theme.colors.contentLink: UIColor
+```
+
+Used for the text links.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### contentStrong
+
+```swift
+theme.colors.contentStrong: UIColor
+```
+
+Used as a foreground color for the headlines and some subtitles.
+
+Default is ● #333C4D and ● #FFFFFF with alpha 85% for the dark appearance.
+
+### contentNeutral
+
+```swift
+theme.colors.contentNeutral: UIColor
+```
+
+Used as a foreground color for the text body, some subtitles and the accessory elements.
+
+Default is ● #5C6B8A and ● #FFFFFF with alpha 60% for the dark appearance.
+
+### contentWeak
+
+```swift
+theme.colors.contentWeak: UIColor
+```
+
+Used as a foreground color for the minor captions and the light accessory elements.
+
+Default is ● #94A0B8 and ● #FFFFFF with alpha 40% for the dark appearance.
+
+### contentInfo
+
+```swift
+theme.colors.contentInfo: UIColor
+```
+
+Used for the Video Screen's viewport border only at the moment.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### contentSuccess
+
+```swift
+theme.colors.contentSuccess: UIColor
+```
+
+Used as a foreground state color for the verification steps and as a foreground color for the auto-generated `images.pictureSuccess`.
+
+Default is ● #18B494.
+
+### contentWarning
+
+```swift
+theme.colors.contentWarning: UIColor
+```
+
+Used as a foreground state color for the verification steps and as a foreground color for the auto-generated `images.pictureWarning` and `images.pictureSubmitted`.
+
+Default is ● #E6A00B.
+
+### contentCritical
+
+```swift
+theme.colors.contentCritical: UIColor
+```
+
+Used as a foreground state color for the verification steps and as a foreground color for the auto-generated `images.pictureFailure`.
+
+Default is ● #F05C5C.
+
+## Primary Button
+
+### primaryButtonBackground
+
+```swift
+theme.colors.primaryButtonBackground: UIColor
+```
+
+The primary button background color in the normal state.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### primaryButtonBackgroundHighlighted
+
+```swift
+theme.colors.primaryButtonBackgroundHighlighted: UIColor
+```
+
+The primary button background color in the highlighted state.
+
+Default is ● #1485D1 and ● #0B4A75 for the dark appearance.
+
+### primaryButtonBackgroundDisabled
+
+```swift
+theme.colors.primaryButtonBackgroundDisabled: UIColor
+```
+
+The primary button background color in the disabled state.
+
+Default is ● #A1D2F7 and ● #072F4B for the dark appearance.
+
+### primaryButtonContent
+
+```swift
+theme.colors.primaryButtonContent: UIColor
+```
+
+The primary button foreground color in the normal state.
+
+Default is ● #FFFFFF and ● #FFFFFF with alpha 85% for the dark appearance.
+
+### primaryButtonContentHighlighted
+
+```swift
+theme.colors.primaryButtonContentHighlighted: UIColor
+```
+
+The primary button foreground color in the highlighted state.
+
+Default is ● #FFFFFF and ● #FFFFFF with alpha 85% for the dark appearance.
+
+### primaryButtonContentDisabled
+
+```swift
+theme.colors.primaryButtonContentDisabled: UIColor
+```
+
+The primary button foreground color in the disabled state.
+
+Default is ● #FFFFFF and ● #0B4A75 for the dark appearance.
+
+## Secondary Button
+
+### secondaryButtonBackground
+
+```swift
+theme.colors.secondaryButtonBackground: UIColor
+```
+
+The secondary button background color in the normal state.
+
+Default is the clear color.
+
+### secondaryButtonBackgroundHighlighted
+
+```swift
+theme.colors.secondaryButtonBackgroundHighlighted: UIColor
+```
+
+The secondary button background color in the highlighted state.
+
+Default is ● #E8F4FD and ● #072F4B for the dark appearance.
+
+### secondaryButtonBackgroundDisabled
+
+```swift
+theme.colors.secondaryButtonBackgroundDisabled: UIColor
+```
+
+The secondary button background color in the disabled state.
+
+Default is the clear color.
+
+### secondaryButtonContent
+
+```swift
+theme.colors.secondaryButtonContent: UIColor
+```
+
+The secondary button foreground color in the normal state.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### secondaryButtonContentHighlighted
+
+```swift
+theme.colors.secondaryButtonContentHighlighted: UIColor
+```
+
+The secondary button foreground color in the highlighted state.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+### secondaryButtonContentDisabled
+
+```swift
+theme.colors.secondaryButtonContentDisabled: UIColor
+```
+
+The secondary button foreground color in the disabled state.
+
+Default is ● #A1D2F7 and ● #0B4A75 for the dark appearance.
+
+## Card
+
+### cardPlainBackground
+
+```swift
+theme.colors.cardPlainBackground: UIColor
+```
+
+Used as a background color for the cards with `.plain` card style.
+
+Default is `nil`.
+
+### cardBorderedBackground
+
+```swift
+theme.colors.cardBorderedBackground: UIColor
+```
+
+Used as a background color for the cards with `.bordered` card style.
+
+Default is `nil`.
+
+## Camera
+
+### cameraBackground
+
+```swift
+theme.colors.cameraBackground: UIColor
+```
+
+The Camera Screen background color.
+
+Default is ● #1E232E.
+
+### cameraBackgroundOverlay
+
+```swift
+theme.colors.cameraBackgroundOverlay: UIColor
+```
+
+The Camera Screen overlay background color.
+
+Default is ● #1E232E with alpha 75%.
+
+### cameraContent
+
+```swift
+theme.colors.cameraContent: UIColor
+```
+
+Used as a tint color for the elements placed on the Camera Screen such as the gallery button, the touch button, and so on.
+
+Default is ● #FFFFFF.
+
+## Fields
+
+### fieldBackground
+
+```swift
+theme.colors.fieldBackground: UIColor
+```
+
+The background color of the input fields. Used for text fields.
+
+Default is ● #F6F7F9 and ● #FFFFFF with alpha 7% for the dark appearance.
+
+### fieldBackgroundInvalid
+
+```swift
+theme.colors.fieldBackgroundInvalid: UIColor
+```
+
+The background color of the input fields marked as invalid. Used for text fields.
+
+Default is the `colors.backgroundCritical` color.
+
+### fieldBorder
+
+```swift
+theme.colors.fieldBorder: UIColor
+```
+
+The border color of the input fields. Used for text fields.
+
+Default is the clear color.
+
+### fieldPlaceholder
+
+```swift
+theme.colors.fieldPlaceholder: UIColor
+```
+
+The placeholder color of the input fields. Used for text fields.
+
+Default is ● #94A0B8 and ● #FFFFFF with alpha 40% for the dark appearance.
+
+### fieldContent
+
+```swift
+theme.colors.fieldContent: UIColor
+```
+
+The content color of the input fields. Used for text fields.
+
+Default is ● #333C4D and ● #FFFFFF with alpha 85% for the dark appearance.
+
+### fieldTint
+
+```swift
+theme.colors.fieldTint: UIColor
+```
+
+The tint color of the input fields. Used for text fields, checkboxes and radio buttons.
+
+Default is ● #1693E9 and ● #1485D1 for the dark appearance.
+
+## List
+
+### listSeparator
+
+```swift
+theme.colors.listSeparator: UIColor
+```
+
+The list separator color.
+
+Default is ● #D1D6E1 and ● #FFFFFF with alpha 20% for the dark appearance.
+
+### listSelectedItemBackground
+
+```swift
+theme.colors.listSelectedItemBackground: UIColor
+```
+
+The background color of the selected list item.
+
+Default is ● #F6F7F9 and ● #FFFFFF with alpha 7% for the dark appearance.
+
+## Bottom Sheet
+
+### bottomSheetHandle
+
+```swift
+theme.colors.bottomSheetHandle: UIColor
+```
+
+The foreground color of the bottom sheet handle.
+
+Note that the handle can be both inside (on `bottomSheetBackground` color) and outside (on the `backgroundCommon` color) of the bottom sheet.
+
+Default is ● #D1D6E1 and ● #FFFFFF with alpha 20% for the dark appearance.
+
+### bottomSheetBackground
+
+```swift
+theme.colors.bottomSheetBackground: UIColor
+```
+
+The background color of the bottom sheet.
+
+Default is ● #FFFFFF and ● #333C4D for the dark appearance.
+
+## Images
+
+## Icons
+
+### iconClose
+
+```swift
+theme.images.iconClose: UIImage
+```
+
+Used for the close bar button across all the screens.
+
+Default is a cross icon.
+
+### iconBack
+
+```swift
+theme.images.iconBack: UIImage?
+```
+
+Used for the back bar button.
+
+Default is a back arrow icon. Setting to `nil` forces the system back button to be used instead.
+
+### iconSearch
+
+```swift
+theme.images.iconSearch: UIImage
+```
+
+Used for the search bar.
+
+Default is a magnifying glass icon.
+
+### iconDisclosure
+
+```swift
+theme.images.iconDisclosure: UIImage
+```
+
+Used to indicate the disclosability.
+
+Default is a simple disclosing arrow icon.
+
+### iconDropdown
+
+```swift
+theme.images.iconDropdown: UIImage
+```
+
+Used for dropdown fields.
+
+Default is a down arrow icon.
+
+### iconCalendar
+
+```swift
+theme.images.iconCalendar: UIImage
+```
+
+Used for date fields.
+
+Default is a calendar icon.
+
+### iconAttachment
+
+```swift
+theme.images.iconAttachment: UIImage
+```
+
+Used for attachments fields when the field is empty.
+
+Default is a clip icon.
+
+### iconPicture
+
+```swift
+theme.images.iconPicture: UIImage
+```
+
+Used for attachments fields when the document is attached.
+
+Default is a picture icon.
+
+### iconBin
+
+```swift
+theme.images.iconBin: UIImage
+```
+
+Used for attachments fields when the document can be removed.
+
+Default is a trash bin icon.
+
+### iconTorchOn
+
+```swift
+theme.images.iconTorchOn: UIImage
+```
+
+Used for the turned-on flashlight button on the Camera Screen.
+
+Default is a filled flash icon.
+
+### iconTorchOff
+
+```swift
+theme.images.iconTorchOff: UIImage
+```
+
+Used for the turned-off flashlight button on the Camera Screen.
+
+Default is an outlined flash icon.
+
+### iconGallery
+
+```swift
+theme.images.iconGallery: UIImage
+```
+
+Used for the gallery button on the Camera Screen.
+
+Default is a photos stack icon.
+
+### iconCameraToggle
+
+```swift
+theme.images.iconCameraToggle: UIImage
+```
+
+Used for the camera toggle button on the VideoIdent Screen.
+
+Default is a rounded arrows icon.
+
+### iconRotate
+
+```swift
+theme.images.iconRotate: UIImage
+```
+
+Used for the rotation bar button on the Preview Screen.
+
+Default is a photo rotation icon.
+
+### iconMail
+
+```swift
+theme.images.iconMail: UIImage
+```
+
+Used for the default E-Mail support item.
+
+Default is a letter icon.
+
+### iconPlay
+
+```swift
+theme.images.iconPlay: UIImage
+```
+
+Used the play button on the Preview screen.
+
+Default is a play icon in the circle.
+
+### iconNotice
+
+```swift
+theme.images.iconNotice: UIImage
+```
+
+Used on the verification comment block at the Status Screen.
+
+Default is an exclamation mark in the triangle of 24x24 pixels.
+
+### iconCheckboxOff
+
+```swift
+theme.images.iconCheckboxOff: UIImage
+```
+
+Used for unmarked checkboxes.
+
+Default is an empty rectangle icon with `colors.contentWeak` border color.
+
+### iconCheckboxOn
+
+```swift
+theme.images.iconCheckboxOn: UIImage
+```
+
+Used for marked checkboxes.
+
+Default is a white checkmark icon on a background rectangle with `colors.fieldTint` color.
+
+### iconRadioButtonOff
+
+```swift
+theme.images.iconRadioButtonOff: UIImage
+```
+
+Used for unselected radio buttons.
+
+Default is an empty circle icon with `colors.contentWeak` border color.
+
+### iconRadioButtonOn
+
+```swift
+theme.images.iconRadioButtonOn: UIImage
+```
+
+Used for selected radio buttons.
+
+Default is a white circle icon on a background circle with `colors.fieldTint` color.
+
+### iconSuccess
+
+```swift
+theme.images.iconSuccess: UIImage
+```
+
+Used to compose the auto-generated `pictureSuccess`.
+
+Default is a checkmark icon.
+
+### iconWarning
+
+```swift
+theme.images.iconWarning: UIImage
+```
+
+Used for the warnings bottom sheet and to compose the auto-generated `pictureWarning`.
+
+Default is an exclamation mark in the triangle.
+
+### iconFailure
+
+```swift
+theme.images.iconFailure: UIImage
+```
+
+Used to compose the auto-generated `pictureFailure`.
+
+Default is a cross icon.
+
+### iconSubmitted
+
+```swift
+theme.images.iconSubmitted: UIImage
+```
+
+Used to compose the auto-generated `pictureSubmitted`.
+
+Default is an uploading-to-the-cloud icon.
+
+## Pictures
+
+Could be used if you would like to override the large images composed on the basis of the corresponding icons.
+
+### pictureSuccess
+
+```swift
+theme.images.pictureSuccess: UIImage?
+```
+
+The "success" image. Could be used if you would like to override the auto-generated one.
+
+The auto-generated image looks like the `iconSuccess` icon in the circles composed on the basis of the `colors.contentSuccess` and `colors.backgroundSuccess` colors.
+
+Default is `nil`.
+
+### pictureWarning
+
+```swift
+theme.images.pictureWarning: UIImage?
+```
+
+The "warning" image. Could be used if you would like to override the auto-generated one.
+
+The auto-generated image looks like the `iconWarning` icon in the circles composed on the basis of the `colors.contentWarning` and `colors.backgroundWarning` colors.
+
+Default is `nil`.
+
+### pictureFailure
+
+```swift
+theme.images.pictureFailure: UIImage?
+```
+
+The "failure" image. Could be used if you would like to override the auto-generated one.
+
+The auto-generated image looks like the `iconFailure` icon in the circles composed on the basis of the `colors.contentCritical` and `colors.backgroundCritical` colors.
+
+Default is `nil`.
+
+### pictureSubmitted
+
+```swift
+theme.images.pictureSubmitted: UIImage?
+```
+
+The "submitted" image. Could be used if you would like to override the auto-generated one.
+
+The auto-generated image looks like the `iconSubmitted` icon in the circles composed on the basis of the `colors.contentWarning` and `colors.backgroundWarning` colors.
+
+Default is `nil`.
+
+### pictureGeolocationOn
+
+```swift
+theme.images.pictureGeolocationOn: UIImage
+```
+
+Used as the image on the Geolocation Screen before the start of the geolocation detection.
+
+Default is a geolocation pin icon.
+
+### pictureGeolocationOff
+
+```swift
+theme.images.pictureGeolocationOff: UIImage
+```
+
+Used as the image on the Geolocation Screen when the app has no permissions to get the geolocation.
+
+Default is a crossed geolocation pin icon.
+
+### pictureAgreement
+
+```swift
+theme.images.pictureAgreement: UIImage?
+```
+
+Displayed at the top of the Agreement Screen.
+
+Default is a globe decorated.
+
+### pictureDocumentFlip
+
+```swift
+theme.images.pictureDocumentFlip: UIImage?
+```
+
+Displayed at the Camera Screen before the back side of a document is going to be captured.
+
+Default is an ID document with a rotating arrow below.
+
+## Content driven sets
+
+### verificationStepIcons
+
+```swift
+theme.images.verificationStepIcons: [SNSVerificationStepKey: UIImage]
+
+theme.images.setIcon(UIImage?, forVerificationStep: SNSVerificationStepKey, andState: SNSVerificationStepState)
+```
+
+Verification steps icons.
+
+One can assign an icon for a verification step either for all the verification states at once (as it is done by default) or more preciously if required.
+
+Default icons are defined for the following keys: `.identity`, `.selfie`, `.selfie2`, `.proofOfResidence`, `.proofOfResidence2`, `.applicantData`, `.emailVerification`, `.phoneVerification`, `.questionnaire` and `.ekyc`.  
+Also the `.default` key is filled with the `.identity` icon.
+
+### documentTypeIcons
+
+```swift
+theme.images.documentTypeIcons: [SNSDocumentTypeKey: UIImage]
+```
+
+Document types icons.
+
+Default icons are defined for the following keys: `.idCard`, `.passport`, `.drivers` and `.residencePermit`.  
+Also the `.default` key is filled with the `.idCard` icon.
+
+### instructionsImages
+
+```swift
+theme.images.instructionsImages: [String: UIImage]
+```
+
+Instructions pictures. When an image is referred with one of the following text keys:
+
+- `snsstep{STEP}{scene}instructionsimage`
+- `snsstep{STEP}{scene}instructionsdoImage`
+- `snsstep{STEP}{scene}instructionsdontImage`
+
+the sdk will look through `instructionsImages` for the corresponding image object.  
+At that it takes the value of the text key and uses it as a key for `instructionsImages` dictionary.
+
+Feel free to add your own pictures or use the predefined ones:
+
+- `default/videoident`
+- `default/facescan`
+- `default/doidCard`
+- `default/dontidCard`
+- `default/dopassport`
+- `default/dontpassport`
+- `default/doidCardbackSide`
+- `default/dontidCardbackSide`
+
+## Metrics
+
+## Content Size
+
+### respectsPreferredContentSizeCategory
+
+```swift
+theme.metrics.respectsPreferredContentSizeCategory: Bool
+```
+
+Defines whether the fonts, images, metrics and layouts should be adjusted in order to respect the user's preferred content size category.
+
+Default is `true`.
+
+## Common
+
+### commonStatusBarStyle
+
+```swift
+theme.metrics.commonStatusBarStyle: UIStatusBarStyle
+```
+
+The status bar style on all the screens.
+
+Default is `.default`.
+
+### activityIndicatorStyle
+
+```swift
+theme.metrics.activityIndicatorStyle: UIActivityIndicatorViewStyle
+```
+
+The loading spinner style.
+
+Default is `.medium` for iOS 13+ and `.gray` for previous ones.
+
+### preferredCloseBarItemStyle
+
+```swift
+theme.metrics.preferredCloseBarItemStyle: SNSCloseBarItemStyle
+```
+
+The preferred style of the close bar button. The options are `.icon` and `.text`.
+
+Default is `.icon`.
+
+### preferredCloseBarItemAlignment
+
+```swift
+theme.metrics.preferredCloseBarItemAlignment: SNSCloseBarItemAlignment
+```
+
+The preferred alignment of the close bar button. The options are `.right` and `.left`.
+
+Default is `.right`.
+
+## Content
+
+### screenHorizontalMargin
+
+```swift
+theme.metrics.screenHorizontalMargin: CGFloat
+```
+
+The horizontal margins of the screen content.
+
+Default is 16pt.
+
+## Buttons
+
+### buttonHeight
+
+```swift
+theme.metrics.buttonHeight: CGFloat
+```
+
+The primary and secondary buttons height.
+
+Default is 48pt.
+
+### buttonCornerRadius
+
+```swift
+theme.metrics.buttonCornerRadius: CGFloat
+```
+
+The primary and secondary buttons corner radius.
+
+Default is 8pt.
+
+### buttonBorderWidth
+
+```swift
+theme.metrics.buttonBorderWidth: CGFloat
+```
+
+The secondary button border width. Bordered primary buttons are not supported at the moment.
+
+Default is 1pt.
+
+## Camera
+
+### cameraStatusBarStyle
+
+```swift
+theme.metrics.cameraStatusBarStyle: UIStatusBarStyle
+```
+
+The status bar style on the Camera Screen. Not used at the moment.
+
+Default is `.default`.
+
+## Document Frame
+
+### documentFrameBorderWidth
+
+```swift
+theme.metrics.documentFrameBorderWidth: CGFloat
+```
+
+The document frame's border width.
+
+Default is 2pt.
+
+### documentFrameCornerRadius
+
+```swift
+theme.metrics.documentFrameCornerRadius: CGFloat
+```
+
+The document frame's corner radius.
+
+Default is 14pt.
+
+## Fields
+
+### fieldHeight
+
+```swift
+theme.metrics.fieldHeight: CGFloat
+```
+
+Used for the text input fields on Email/Phone Confirmation screens.
+
+Default is 48pt.
+
+### fieldBorderWidth
+
+```swift
+theme.metrics.fieldBorderWidth: CGFloat
+```
+
+The text input fields border width.
+
+Default is 0pt.
+
+### fieldCornerRadius
+
+```swift
+theme.metrics.fieldCornerRadius: CGFloat
+```
+
+The text input fields corner radius.
+
+Default is 8pt.
+
+## Viewport
+
+### viewportBorderWidth
+
+```swift
+theme.metrics.viewportBorderWidth: CGFloat
+```
+
+The selfie viewport border width.
+
+Default is 8pt.
+
+## Bottom Sheet
+
+### bottomSheetCornerRadius
+
+```swift
+theme.metrics.bottomSheetCornerRadius: CGFloat
+```
+
+The bottom sheet corners radius.
+
+Default is 16pt.
+
+### bottomSheetHandleSize
+
+```swift
+theme.metrics.bottomSheetHandleSize: CGSize
+```
+
+The bottom sheet handle size.
+
+Default is 36pt x 4pt.
+
+## Card Style
+
+### SNSCardStyle
+
+```swift
+enum SNSCardStyle {
+    case plain
+    case filled
+    case bordered
+}
+```
+
+- With `.plain` style neither border nor background will be rendered by default (see `colors.cardPlainBackground`).
+- With `.filled` style the background will be filled out.
+- With `.bordered` style a border will be rendered around the card (see also `colors.cardBorderedBackground`).
+
+### verificationStepCardStyle
+
+```swift
+theme.metrics.verificationStepCardStyle: SNSCardStyle
+```
+
+The verification steps card style.
+
+Default is `.filled`.
+
+### verificationCommentCardStyle
+
+```swift
+theme.metrics.verificationCommentCardStyle: SNSCardStyle
+```
+
+The style of a verification comment block that can be displayed when the applicant is temporarily declined.
+
+Default is `.bordered`.
+
+### supportItemCardStyle
+
+```swift
+theme.metrics.supportItemCardStyle: SNSCardStyle
+```
+
+The support items card style.
+
+Default is `.bordered`.
+
+### documentTypeCardStyle
+
+```swift
+theme.metrics.documentTypeCardStyle: SNSCardStyle
+```
+
+The document types card style.
+
+Default is `.filled`.
+
+### selectedCountryCardStyle
+
+```swift
+theme.metrics.selectedCountryCardStyle: SNSCardStyle
+```
+
+The selected country card style.
+
+Default is `.filled`.
+
+### cardCornerRadius
+
+```swift
+theme.metrics.cardCornerRadius: CGFloat
+```
+
+The cards' corners radius.
+
+Default is 8pt.
+
+### cardBorderWidth
+
+```swift
+theme.metrics.cardBorderWidth: CGFloat
+```
+
+The cards' border width. Used for the cards with the `.bordered` card style only.
+
+Default is 1pt.
+
+## Alignment
+
+### screenHeaderAlignment
+
+```swift
+theme.metrics.screenHeaderAlignment: NSTextAlignment
+```
+
+The alignment for the screen headers.
+
+Default is `.center`
+
+### sectionHeaderAlignment
+
+```swift
+theme.metrics.sectionHeaderAlignment: NSTextAlignment
+```
+
+The alignment for the section headers.
+
+Default is `.natural`_
+
+================================================================================
+
+# Localization
+URL: https://docs.sumsub.com/docs/localization
+
+The `.withLocale(Locale("en"))` method gives you the ability to switch between locales on initialization.
+
+You can customize or localize the texts used within the SDK through the MSDK Translations tool in the dashboard.
+
+For a complete list of supported locales, see this article.
+
+# Strings
+
+In addition to the MSDK Translations tool and the `.withLocale(Locale("en"))`, you can use the `withConf` builder method that allows you to define the strings locally.
+
+```kotlin
+val config = SNSInitConfig(
+  email = "user@domain.com",
+  phone = "+1 234 567890",
+  strings = mapOf(
+    "snsoopsnetworktitle" to "Oops! Seems like the network is down.",
+    "snsoopsnetworkhtml" to "Please check your internet connection and try again.",
+    "snsoopsactionretry" to "Try again",
+  )
+)
+snsSdkBuilder.withConf(config)
+```
+```Text Java
+Map strings = new HashMap<>();
+            strings.put("snsoopsnetworktitle", "Oops! Seems like the network is down.");
+            strings.put("snsoopsnetworkhtml", "Please check your internet connection and try again.");
+            strings.put("snsoopsactionretry", "Try again");
+
+SNSInitConfig config = new SNSInitConfig("user@email.com", "+11231234567", strings);
+SNSMobileSDK.SDK snsSdk = new SNSMobileSDK.Builder(requireActivity())
+        ...
+        .withConf(config)
+        .build();
+```
+
+Note that the `witLocale` method does not affect these strings; thus, it is up to you to use the required localization.
+
+# Terms and conditions and Private policy
+
+You can specify your Terms and Conditions and Privacy Policy by HTML or URL. 
+
+Use the following keys in MSDK Translations `snstosGTChtml` (Terms and Conditions) and `snstosPPhtml` (Privacy Policy) to specify HTML, and `snstosGTCurl` (Terms and Conditions) and `snstosPPurl` (Privacy Policy) to load from URL.
+
+================================================================================
+
+# MSDK updates policy
+URL: https://docs.sumsub.com/docs/msdk-updates-policy
+
+In our continuous effort to ensure the highest standards of security and performance, we have revised our policy to address the evolving threats posed by malicious actors who constantly devise new fraud techniques.
+
+# Key provisions
+
+The present policy is a proactive step towards maintaining a secure and robust digital ecosystem for our clients. We appreciate your cooperation and understanding in adhering to the guidelines below:
+
+- Each version of the MSDK is supported for one year from its release date. For example, version 1.29, which was released on December 22, 2023, will be available and supported until December 22, 2024. 
+- Starting September 1, 2024, all MSDK versions older than version 1.29, released in December 2023, will be deprecated and removed from our repositories. 
+- Deprecated versions can not be used to create new versions of client applications using the Sumsub MSDK.
+
+# Implications for clients
+
+The Sumsub clients must ensure that their applications are updated to a supported version of the SDK before the older versions are deprecated. 
+
+We recommend planning for SDK updates well before the deprecation dates to ensure a smooth transition.
+
+Failure to update to a current version may result in compatibility issues and a lack of support for the application.
+
+Our team is committed to assisting our clients through this transition. Should you have any queries or require technical support, please do not hesitate to contact us.

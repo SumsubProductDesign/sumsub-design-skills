@@ -1,0 +1,1480 @@
+# About Fraud Prevention
+URL: https://docs.sumsub.com/docs/about-fraud-prevention
+
+Fraud prevention is a critical component of safeguarding digital ecosystems against malicious actors that leverage increasingly sophisticated illicit techniques. An effective fraud prevention strategy employs a multi-layered defence framework to:
+
+- Detect suspicious behaviors.
+- Verify user identities.
+- Mitigate illicit activities.
+
+This section explores a range of advanced tools and technologies designed to identify and prevent fraudulent activity at multiple key points of the user experience. Together, these systems create a comprehensive shield that prevents unauthorised access and suspicious transactions, while continuously adapting to emerging threats across the digital landscape.
+
+# Get started with fraud prevention measures
+
+[block:html]
+{
+  "html": "\n    .box5 {\n        background: #ffffff;\n        border: 1px solid #e1e5ea;\n        border-radius: 12px;\n        align-items: top;\n        display: grid;\n        text-decoration: none !important;\n        grid-template-rows: min-content auto;\n        transition: 0.3s ease-in !important;\n    }\n    .box5 text-basic {\n        padding: 0px 24px 24px 24px;\n        font-style: normal;\n        font-weight: 400;\n        font-size: 14px;\n        line-height: 24px;\n        color: #586073;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 text-basic {\n            color: #fff;\n            opacity: 0.8;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 text-basic {\n        color: #fff;\n        opacity: 0.8;\n    }\n    .box5:hover {\n        box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1);\n        transition: 0.3s ease-in;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 {\n            background: #20252c;\n            border: 1px solid #333844;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 {\n        background: #20252c;\n        border: 1px solid #333844;\n    }\n    .text5-h1 {\n        font-style: normal;\n        font-weight: 500;\n        font-size: 15px;\n        line-height: 24px;\n        color: #377cf7;\n        transition: 0.3s ease-in;\n        padding: 16px 24px 8px 24px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .text5-h1 {\n            color: #fff;\n        }\n    }\n    [data-color-mode=\"dark\"] .text5-h1 {\n        color: #fff;\n    }\n    .box5:hover .text5-h1 {\n        color: #377cf7;\n        opacity: 0.8;\n        transition: 0.3s ease-in;\n    }\n    .img5 {\n        margin: 16px 0px -10px 0px !important;\n        width: 100%;\n        height: auto;\n    }\n    .line {\n        border-top: 1px solid #e1e5ea;\n        margin-bottom: 8px;\n        margin-top: 10px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            color: #fff;\n            opacity: 0.2;\n        }\n    }\n    [data-color-mode=\"dark\"] .line {\n        color: #fff;\n        opacity: 0.2;\n    }\n\n\n    \n        \n            Device Intelligence\n            Leverage Device Intelligence to identify anomalous device behavior and strengthen risk-based decision-making.\n        \n        \n            Digital footprint checks\n            Use digital footprint signals to assess applicant risk before verification.\n      \n        \n            Pre-KYC Fraud Risk Assessment\n            Integrate Fraud Risk Assessment to protect your platform from violations at sign-up and onboarding.\n        \n        \n            Advanced IP check\n            Use digital footprint as an extra protection level.\n        \n        \n            Fraud Network Detection\n            Stay one step ahead of fraud with the new AI-based solution from Sumsub.\n      \n        \n            IP geolocation\n            Use IP geolocation to add context to verification and risk analysis.\n        \n        \n            AI-powered Anomaly Detection\n            Use AI/ML to detect abnormal events for transaction monitoring and fraud prevention.\n      \n        \n            Account Takeover Prevention\n            Protect user accounts from unauthorized access.\n      \n      \n            Behavior Monitoring\n            Detect and react to suspicious behavior in real time.\n      \n    \n    \n"
+}
+[/block]
+
+================================================================================
+
+# Pre-KYC Fraud Risk Assessment
+URL: https://docs.sumsub.com/docs/pre-kyc-fraud-risk-assessment
+
+At the sign-up stage, you may have very limited information about a user. Typically, this includes only basic details such as an email address, phone number, and some technical session data.
+
+Even with this limited data, it is still possible to estimate fraud risk early. Sumsub Pre-KYC Risk Assessment solutions are specifically designed for the following cases:
+
+- Non-regulated industries where user verification (KYC) is not required.
+- Platforms that provide feature access before user verification.
+- Services with specific events that should trigger user verification (for example, before withdrawal transactions).
+- Businesses that need complex verification solutions to assign different checks based on a user’s risk profile.
+
+# Why early fraud detection matters
+
+By adding risk scoring at the sign-up and onboarding stages, you can spot fraud at the very beginning while keeping a smooth user experience. This brings the following benefits to your work:
+
+- Customizable verification steps based on risk.
+- Detection and prevention of suspicious user activity at early stages.
+- Simple onboarding for low-risk users.
+
+Once you start estimating the risk level of users with Pre-KYC Risk Assessment, you can allow them access to features, request more checks, send profiles for manual review, or block offenders. All of these measures help you to be aware of and be protected from:
+
+- Multi-accounting.
+- Fake or synthetic accounts.
+- Verified accounts created for passing to third parties (drop accounts, money mules, account farms, verification scams).
+- Suspicious device and network environments.
+- Links to previously blocked users who may try to access the platform again.
+
+# Use Risk assessment signals
+
+This section outlines the types of user data that can be used to detect suspicious activity and violations and explains how exactly it can help.
+
+## Email and phone
+
+Email and phone details are among the most valuable sources of information at early stages. Use the Email and phone risk assessment to detect suspicious or low-quality contact data:
+
+- Disposable or temporary emails.
+- Virtual phone numbers.
+- Risky mobile networks.
+- Mismatches with other data.
+
+## Digital footprint and Identity enrichment
+
+Digital footprint checks monitor a user account behavior online to verify whether it is a real person. The various details are taken into account to spot weak or inconsistent data that indicates fakes or profile takeover:
+
+- Account age.
+- Data match across various sources.
+- Similar data used across multiple accounts.
+- Consistency between the document data and footprint information.
+
+## Device and IP intelligence
+
+Device and IP data checks help to extend risk detection by recognizing odd patterns at another level — technical. 
+
+If you need to get started without any front-end integration, use the Advanced IP check to reveal risky network activity. To get more accurate and complex device associated insights, opt for the Device Intelligence JS SDK solution. 
+
+What patterns and behavior can be detected during the checks:
+
+- Multiple account activity coming from the same device.
+- Virtual devices and machines usage.
+- Anonymized environments (privacy-preserving browsers, VPN, Proxies, TOR).
+- Signs of tampering and spoofing (root access, jailbreaks, recent factory resets).
+- Use of multiple, distant devices during the onboarding process.
+
+## Applicant data and custom rules
+
+Applicant data collected during sign-up, such as platform—and business—specific metadata or data from questionnaires, can also be used to spot strange discrepancies and adjust verification measures by applying custom rules. 
+
+Applicant data and rules customization can help you to:
+
+- Detect inconsistencies.
+- Apply your own risk logic.
+- Customize scoring for your business.
+
+## Fraud Networks
+
+With Fraud Network Detection, you can spot coordinated fraud and multi-accounting. The following risky activities can be revealed:
+
+- Connections to blocked users.
+- Groups of related accounts.
+- Shared devices or similar patterns.
+
+## Applicant risk scoring
+
+Multiple signals can be considered and combined to work together as an evaluation system. The estimated applicant risk score is updated based on different factors such as verification session data, user actions, and transaction details. The risk scoring addresses the goals of:
+
+- Combining multiple signals into rules.
+- Setting thresholds and weights.
+- Updating the risk score over time.
+
+# Make decisions based on risk level
+
+When a risk score is estimated, you can determine what happens next. Our various solutions will help you take action suitable for different cases.
+
+## Risk-based tags
+
+You can assign your users a tag representing their risk score or any custom tag helping you to sort applicants properly. These tags can be used to build a risk-oriented verification flow in Workflow Builder, or in monitoring rules logic.
+
+## Dynamic onboarding flows
+
+You can tailor the onboarding flow to the detected risk level of your users. The flow for high-risk users may require additional checks to include, while low-risk users can be asked to go through more smooth and simple verification. 
+
+There is a list of solutions that can be included in verification depending on the case:  
+
+- Liveness check. Prevent automated activity, multi-accounting, and recurring abuse.
+- Payment Method Check Advanced. Detect and stop fraud and chargebacks that occur during financial operations.
+- Questionnaire. Collect more information about users whenever it is required, especially in edge cases.
+
+## Access restriction
+
+Block applicants who are high-risk users to limit their access to the features and services of your platform. This stops fraud, saves verification costs, and prevents offending users from appearing in your online community.
+
+## Manual review via Case Management
+
+To resolve complex cases that require more thorough consideration, conduct a manual review using the Case Management product. The main functionalities of the solution allow you to:
+
+- Review flagged applicants.
+- Investigate risk signals.
+- Make decisions manually.
+
+## Continuous monitoring
+
+Even if your user has passed onboarding successfully, you can keep track of their risk scoring to be aware of possible threats. Enable the following Sumsub products to protect your platform:
+
+- Behavior Monitoring. Oversee user actions within the platform and respond before risk escalates.
+- Transaction Monitoring. Monitor financial activity and take all related risk factors into account.
+
+# Integrate Pre-KYC Fraud Risk Assessment
+
+This section explains step-by-step how to set up the Sumsub pre-KYC risk scoring, from collecting data at sign-up to making decisions based on a received risk level.
+
+## Step 1. Define onboarding flow
+
+Establish your sign-up process before the pre-KYC risk scoring configuration. The following questions may help you to see a complete picture:
+
+- Do you use your own registration form?
+- Do you want Sumsub to handle email/phone verification or collect any other data using Sumsub’s SDKs?
+- At what stage do you want to evaluate risk (for example, right after sign-up)?
+
+## Step 2. Create sign-up verification level
+
+Add a verification level that will be used to collect and verify some of the user details at sign-up. Combine the following checks in your verification level: 
+
+- Email and phone verification to validate contact data.
+- Digital footprint checks to assess threats related to the online presence of email addresses and phone numbers.
+- Device and Advanced IP checks to estimate risks associated with networks and device behavior.
+
+Create and configure the sign-up verification level:
+
+1. In the Dashboard, go to Integrations→Individuals.
+2. Click Create level.
+3. Select the Standard level type and provide the name.
+4. Delete all default verification steps such as Identity document and Selfie.
+5. Add the Applicant data step and configure the fields:
+   1. Include the fields with information you want to collect at sign-up(for example, First name, Last name, Email, and others).
+   2. Select the Required checkbox next to the fields if necessary.
+6. If you are going to use the Sumsub Email and phone verification, you can add the Phone verification and/or Email verification steps.
+   1. Select the Lock email field and Lock phone number field checkboxes to verify the contact information provided within your own sign-up form.
+7. Go to the Configurations tab of your level and navigate to Fraud prevention.
+8. Select the checks you would like to perform.
+9. Click Create level.
+
+> 📘 Note
+> 
+> - You can find more detailed instructions on level configuration here.
+> - If you want to use Applicant risk scoring to calculate the overall risk of an applicant profile, make sure to set it up as per the documentation.
+
+## Step 3. Collect device data (recommended)
+
+To improve risk detection, collect device data using Device Intelligence. To enable the device data collection: 
+
+1. If you use the Sumsub WebSDK or MobileSDK to collect data:
+   1. Go to the previously created verification level.
+   2. Navigate to the Configurations tab→Fraud prevention.
+   3. Under the Device intelligence section, select the Capture device data checkbox.
+2. If you collect data on your own:
+   1. Integrate the Device Intelligence JS SDK into your sign-up page, following this guide. As a result, you will be able to link device data to a specific applicant profile using the access token.
+
+## Step 4. Create applicant via API
+
+When a user signs up, create an applicant in Sumsub using the Create applicant API method. 
+
+Send the user data from your sign-up form:
+
+- Email
+- Phone number
+- Device data via the `accessToken` field used in the previous step.
+  - If you use only Advanced IP Check, provide the collected IP address via `creationTrackingData`.
+  - In case of Device Intelligence, the IP address will be captured automatically together with the device data.
+- Any additional fields you collect and wish to use for risk assessment, using standard fields in `fixedInfo` or custom fields using the `metadata` parameter.
+
+> 📘 Note
+> 
+> At this stage, we also recommend to set up Source keys to be able to group together applicants coming from different sources (for example, from testing and production environments) and apply custom logic or access rights based on that.
+
+## Step 5. Request applicant check
+
+After creating the applicant and attaching data, complete the checks via the Request applicant check API method.
+
+At this point, Sumsub runs all checks, recognizes device data, calculates the risk score (if Applicant risk scoring is enabled), and detects hidden connections (if Fraud Network Detection is enabled).
+
+## Step 6. Receive verification results
+
+You can get the verification results in two ways: via webhooks or API. 
+
+The webhooks send you results automatically and react to changes in real time updating your verification process instantly. With API, you can request specific results manually and tailor the verification process to your backend-based flows. To learn how to use both of these options for receiving results, refer to this article.
+
+Use the various API endpoints to get results on specific checks:
+
+- Applicant risk scoring: Get applicant data
+- Email confirmation: Get email confirmation check results (includes risk assessment)
+- Phone confirmation: Get phone confirmation check results (includes risk assessment)
+- IP check: Get IP check results
+
+There are also several helpful webhook types specific to risk assessment, in addition to getting the general verification results:
+
+- applicantTagsChanged allows you to act considering custom tag changes you set up to track risk levels related to applicant via Applicant risk scoring or Workflow Builder.
+- Fraud Network Detection webhooks allow you to get alerts in real time on newly found links and patterns between applicants.
+
+## Step 7. Apply decision logic
+
+Define the next steps based on the received verification results. For example, you can stick to the logic suggested below or use your own decision-making flow. 
+
+- Low risk applicants→ allow access to the services and features of your platform
+- Medium risk applicants→ assign additional checks
+- High risk applicants→ restrict access to the platform or escalate a profile for manual review
+
+Implement the decision-making system using one of the following options:
+
+- Use your backend: get and utilize applicant tags via API and webhooks.
+- Use Workflow Builder (recommended): configure conditions based on specific risk assessment results and navigate applicants to additional verification levels.
+
+## Step 8. Implement additional verification via SDK (optional)
+
+Add an additional layer of protection by including additional checks (based on applicant actions) for risky applicants. What checks can be added to the verification flow:
+
+- Liveness check. It allows you to make sure a real human is present, protects you from automated activity, and captures biometric data for deduplication, blocklist, and fraud network detection logic.
+- Payment Method Check. It prevents payment-related fraud such as moving funds from stolen cards, resulting in chargebacks.
+- Questionnaires. Collects more data about applicants using customizable forms.
+
+> 📘 Note
+> 
+> - Integrate the Sumsub WebSDK or MobileSDK to run additional checks.
+> - You can perform these checks at the initial onboarding stage instead of later stages to be guarded against anonymous fraudulent activity and multi-accounting.
+
+## Step 9. Extend to monitoring (optional)
+
+Conduct continuous risk monitoring to update the risk score of profiles over time, combine it with behavioral data, and take action based on new events and transactions. 
+
+Use the following solutions to monitor risk without interruption:
+
+- Behavior Monitoring. Track actions like new logins, account changes, and various suspicious activities.
+- Transaction Monitoring. Monitor deposits, withdrawals, and overall financial behavior.
+
+## Step 10. Enable manual review (optional)
+
+Add the manual review option for edge cases and the escalation of high-risk profiles. Use the Case Management solution to:
+
+- Investigate suspicious users.
+- Review signals and history.
+- Make final decisions.
+
+# Best practices for Pre-KYC Fraud Risk Assessment
+
+This set of tips will help you to build a comprehensive verification flow to protect your platform at early stages: 
+
+- Use one applicant profile for the whole lifecycle. This ensures all signals, device data, and links are stored together and work correctly.
+- Keep your data in a single place. It helps to make confident decisions, see risky activity in the context, and quickly iterate on fraud protection logic.
+- Adjust verification based on risk level. For high-risk users, you can add more checks earlier, such as document verification or liveness.
+- Prefer additional verification when possible (for example, use Liveness or Payment Method Check) instead of blocking applicants right away. You will deter fraudsters while still keeping a way for your legitimate users to have access to the service.
+- Avoid final rejection logic based only on one specific risk signal. Take multiple risk factors into account to make confident decisions without making your onboarding experience too restrictive.
+- Use Source keys to separate different flows. For example, you can split production users, test users, or different products.
+
+================================================================================
+
+# Digital footprint checks
+URL: https://docs.sumsub.com/docs/digital-footprint-checks
+
+Digital footprint checks help you assess applicant risk before identity verification starts. The checks analyze contact data, such as email addresses and phone numbers, and return early risk signals during sign-up and other pre-KYC flows.
+
+This early signal layer helps you identify potentially risky users before document verification. You can use it to block clearly high-risk applicants, route applicants to a different verification flow, trigger step-up checks, or send cases to manual review.
+
+Digital footprint checks help detect early signs of:
+
+- Fake and synthetic identities
+- Identity takeover attempts
+- Anonymity-seeking behavior
+- Accounts created for resale or transfer
+- Drop accounts and money mule activity
+- Verification scams and social engineering
+
+The solution includes three components:
+
+- Email risk assessment — evaluates risk signals related to an email address.
+- Phone risk assessment — evaluates risk signals related to a phone number.
+- Identity enrichment — provides additional context and connections related to these identifiers.
+
+Together, they help you evaluate how trustworthy a digital identity looks before actual verification begins.
+
+Email addresses and phone numbers do not only provide contact details. They also reflect how a user created, used, and connected those identifiers over time. That history gives you a useful risk context early in the user journey.
+
+For example, an email address can show whether it looks disposable or was created for one-time use. A phone number can show whether it belongs to an actual mobile user or to a virtual number that someone can generate at scale.
+
+These identifiers also carry usage signals:
+
+- Long-term, consistent activity usually points to a more established digital identity.
+- A new, sparse, or fragmented footprint often increases risk, especially when it appears together with other suspicious signals.
+
+Consistency makes these checks much more useful. A phone country that does not match the user’s IP location, or contact data that does not align with identity data from documents, can point to identity theft, synthetic identities, or other fraud patterns.
+
+> 📘 Note
+> 
+> A weak digital footprint does not prove fraud on its own. A legitimate user may have limited online history, may use a recently issued number, or may deliberately keep a low digital profile. For that reason, digital footprint checks work best when you combine them with other risk signals rather than treat them as a standalone decision source.
+
+# How digital footprint checks work
+
+Digital Footprint Checks combine signals from global data sources into a unified risk assessment.
+
+## Basic (structural) signals
+
+At the most basic level, the checks look at the core properties of an email address or phone number:
+
+- For email, this includes domain type, validity, and deliverability.
+- For phone numbers, this includes number type, carrier, and country.
+
+These signals help detect straightforward fraud patterns, such as disposable emails or virtual phone numbers created in bulk.
+
+## Digital presence signals
+
+The checks also evaluate digital presence. This helps you understand whether:
+
+- Identifier has an established footprint across platforms.
+- It shows signs of continued use over time.
+
+A stronger footprint usually suggests long-term use, while a weak or missing footprint can point to a newly created or synthetic identity.
+
+## Identity enrichment signals
+
+Identity enrichment signals add more context by linking an email address or phone number to other publicly available or historically observed data. This can include:
+
+- Possible names
+- Related identity signals
+- Historical usage patterns.
+
+That context helps you judge whether the identifier behaves like part of a real identity.
+
+> 👍 Tip
+> 
+> The checks become even more useful when you compare these results with other applicant data. 
+> 
+> For example, if the phone country does not match the user IP-based location, or if the contact data does not align with the identity information collected later in the flow, the mismatch may indicate fraud. In practice, these consistency checks often provide stronger signals than any single attribute on its own.
+
+## What data checks return
+
+Digital Footprint Checks return both raw data and an aggregated risk score.
+
+The raw output includes detailed signals and attributes from email, phone, and enrichment checks. You can use this data to create custom rules, decision logic, or internal scoring models.
+
+The aggregated output combines multiple signals into a single risk indicator. This makes decisioning easier when you need a faster and more standardized way to assess risk. You can use this score directly or combine it with other risk inputs in your own model.
+
+## How we calculate email and phone risk level
+
+The risk calculation for a phone number and email address is based on several checks that help to assess whether they are trustworthy or potentially suspicious. Each factor contributes to an overall risk level that indicates whether the phone number or email address is safe, medium-risk, or high-risk.
+
+> 📘 Note
+> 
+> All check results can be displayed in 3 different states depending on the found information:
+> 
+> - Red indicator—an email/phone number has failed checks and might be considered risky.
+> - Green indicator—an email/phone number has passed verification and it has been confirmed that they are trustworthy/genuine, and so on.
+> - Yellow indicator—the system could not conduct verification and find information to verify a provided email/phone number.
+
+# How to use digital footprint signals
+
+You can integrate digital footprint checks into onboarding and pre-verification decisioning flows to identify risk before you ask the applicant to complete identity verification.
+
+Digital footprint сhecks work well together with email and phone verification. This allows you to:
+
+- Confirm that the user owns the contact data.
+- Assess the potential risk.
+
+You can also use digital footprint checks without verification by providing email addresses or phone numbers when creating an applicant via this API method.
+
+Request example:
+
+```curl
+curl -X POST \
+  'https://api.sumsub.com/resources/applicants?levelName=basic-kyc-level' \
+  -H 'Content-Type: application/json' \
+  -d '{
+          "externalUserId": "someUniqueUserId",
+          "email": "john.smith@example.com",
+          "phone": "+449112081223",
+          "fixedInfo": {
+              "country": "GBR",
+              "placeOfBirth": "London"
+          }
+      }'
+```
+
+> 📘 Note
+> 
+> For broader implementation guidance and decision flow examples, refer to this article.
+
+## Interpret results
+
+Digital Footprint Checks provide risk signals, not final conclusions. A weak signal may reflect fraud, but it may also reflect a legitimate user with limited digital history, a new phone number, a VoIP number, or a privacy-focused online presence.
+
+> 👍 Tip
+> 
+> Treat the results as part of a broader risk model. Compare them with device, behavior, identity, and transaction data. Pay close attention to mismatches between identifiers and other user attributes.
+
+You can use the results in several ways:
+
+- As a standalone, you can send an email address or phone number through API and act on the results directly.
+- In Applicant Risk Scoring, you can combine digital footprint outputs with device, behavioral, identity, or transaction signals and evaluate them in one scoring system.
+- In onboarding flows, you can use the results to define next steps, such as allowing the applicant to continue verification, adding new verification steps, routing the case to manual review, or blocking the flow.
+
+In many cases, the most effective response is not an immediate block but a stronger verification path. For example, when the footprint looks weak or inconsistent, you may want to request additional verification or collect more data before making a final decision. This approach helps reduce false positives while still catching meaningful risk early.
+
+================================================================================
+
+# Device Intelligence
+URL: https://docs.sumsub.com/docs/device-intelligence
+
+Device Intelligence is a powerful set of tools that enables the detection and analysis of device-based signals during verification, financial transactions and user interactions with the platform (sign-ups, logins, resetting passwords, and other significant actions). By identifying the specific devices interacting with your platform, it uncovers risky patterns that may indicate fraudulent behavior. These patterns include:
+
+- Account takeover
+- Multi-accounting schemes
+- Bot activity
+- Account sharing
+
+Device Intelligence is particularly effective at identifying sophisticated fraud attempts such as using spoofed or emulated devices, operating in incognito or privacy modes, running on rooted/jailbroken devices, using VPN applications, or attempting to spoof location. By flagging anomalies early, organizations can respond proactively, blocking high-risk activity before it escalates, and allow genuine users to proceed without unnecessary friction.
+
+Device Intelligence serves two core purposes:
+
+- Reliable device identification. This service generates stable, unique device identifiers that persist across sessions and, for mobile devices, across app reinstallation.
+- Suspicious environment detection. Device Intelligence identifies signs of tampered, emulated, or manipulated device environments that may indicate fraud attempts.
+
+When integrated with verification procedures, Transaction Monitoring, and other Fraud Prevention controls, Device Intelligence delivers a balance of security and usability, empowering businesses to protect their platforms without compromising the experience of legitimate users.
+
+# How Device Intelligence works
+
+Device Intelligence is powered by Fingerprint, a leading provider of advanced device identification technology. The system uses techniques for capturing low-level browser and device signals – for instance, device fingerprinting, which is one of the many techniques used in Device Intelligence. These methods work together with the goal of generating a stable, unique device identifier and detecting suspicious device activity such as:
+
+- Bot activity detection
+- VPN and proxy usage
+- Device spoofing and emulation
+- Privacy-focused software and incognito modes
+- Rooted/jailbroken devices
+- Location spoofing
+
+This identifier remains consistent even if the user changes browser settings, clears cookies, or uses incognito mode.
+
+The entire process of collecting device information happens immediately upon device access and does not require continuous tracking of user interactions with the platform. Importantly, this operates without requiring user permissions, meaning no intrusive prompts or interruptions for your users.
+
+## Web and mobile Device Intelligence
+
+Device Intelligence works differently depending on the platform. Understanding these differences will help you interpret device data correctly and tailor your risk response accordingly.
+
+In the following table, you can find a comparison of Web Device Intelligence and Mobile Device Intelligence across its key aspects.
+
+| Aspect                   | Web Device Intelligence                                                     | Mobile Device Intelligence                   |
+| :----------------------- | :-------------------------------------------------------------------------- | :------------------------------------------- |
+| Device ID representation | Browser instance                                                            | Physical device                              |
+| Identification method    | Probabilistic (fingerprinting)                                              | Deterministic (hardware-level signals)       |
+| ID persistence           | Stable identifier even when cookies are cleared or browser storage is reset | Persists across app reinstall and data clear |
+| Multiple browsers/apps   | Different browsers -> Different IDs                                         | Same device -> Same ID regardless of app     |
+| Collision probability    | Low but non-zero                                                            | No practical collisions                      |
+| Accuracy                 | High                                                                        | Very high (no false positives)               |
+
+Web Device Intelligence works via:
+
+- WebSDK – for verification flows.
+- JS SDK – for pre-KYC/sign-up pre-screening and Behavior Monitoring.
+
+It works in desktop and mobile browsers, and WebViews inside mobile apps.
+
+Mobile Device Intelligence works via native SDKs:
+
+- iOS SDK
+- Android SDK
+
+> 📘 Note
+> 
+> Device Intelligence requires MobileSDK integration in your app. Also, its module has to be enabled for Android and iOS.
+
+## Benefits of device ID
+
+Device IDs provide a more stable and precise way to identify returning devices than IP addresses, enabling more reliable risk decisions even when networks change or traffic is routed through VPNs or proxies.
+
+IP addresses are unreliable for device identification because they:
+
+- Change frequently (mobile networks, ISP reassignment).
+- Are shared across multiple users and devices (NAT, corporate networks).
+- Can be easily masked using VPNs or proxies.
+
+Device Intelligence device IDs overcome these limitations as they are:
+
+- Stable across network changes.
+- Device-specific (not shared).
+- Independent of IP rotation or VPN usage.
+
+They also provide much higher precision and lower collision rates.
+
+## Where Device Intelligence works
+
+Device Intelligence integration operates across key touchpoints in both verification flow and Transaction Monitoring processes, ensuring risk detection throughout the user journey.
+
+It operates across three stages: capturing device data, assessing risk, and taking decisions.
+
+### Capturing device data
+
+At this stage, Device Intelligence workflow depends on the verification stage or service you use:
+
+| Stage                                    | Method                                                                     | SDK                              |
+| :--------------------------------------- | :------------------------------------------------------------------------- | :------------------------------- |
+| Verification                             | Automatically during verification flow                                     | WebSDK 2.0, MobileSDK            |
+| Pre-KYC onboarding/sign-up pre-screening | Via JS SDK and Sumsub API | JS SDK, MobileSDK (experimental) |
+| Behavior Monitoring                      | Linked to user activity (logins, password changes)                         | JS SDK, MobileSDK (experimental) |
+| Transaction Monitoring                   | Linked to financial transactions                                           | JS SDK, MobileSDK (experimental) |
+
+### Assessing risk
+
+Device data feeds into multiple risk assessment mechanisms:
+
+- Behavior Monitoring – links devices to user activity patterns to detect anomalies.
+- Transaction Monitoring – links devices to financial transactions for fraud detection.
+- Applicant Risk Scoring – calculates comprehensive risk scores using device signals combined with other factors.
+
+> 👍 Tip
+> 
+> When applying Applicant Risk Scoring, combine other risk sources like email/phone risk assessment, risk labels, custom transaction monitoring and verification rules, with device signals for comprehensive risk assessment. You can use the following device signals:
+> 
+> - Device risk labels
+> - Reused devices
+> - New devices
+> - Multiple devices per session
+> 
+> Based on risk scores, trigger appropriate responses:
+> 
+> - Enable step-up checks.
+> - Route a case to Case Management for manual review.
+> - Enable enhanced monitoring by flagging a case for ongoing observation.
+
+### Taking decision
+
+Based on risk assessment, decisions can be made through:
+
+- Workflow Builder – automate verification decisions based on device signals.
+- Transaction Monitoring rules engine – define rules that trigger actions based on device risk.
+- Case Management – route flagged applicants for manual review. 
+- Applicant actions – apply actions directly to applicants based on device data.
+- Blocklists – block high-risk applicants from future interactions.
+
+## Device Intelligence data and risk signals
+
+The table below outlines the risk signals detected by the Device intelligence solution across different platforms and environments.
+
+## Risk labels
+
+Device Intelligence supports risk labels across web and mobile platforms.
+
+Device Intelligence also includes all signals from the Advanced IP Check module. For the complete list of IP-based signals, refer to this article.
+
+# How to enable Device Intelligence
+
+To enable Device Intelligence for your account, contact your Customer Success Manager or enable it yourself if you are a self-service client.
+
+> 👍 Tip
+> 
+> You can test your Device Intelligence integration by using Simulation. For more instructions on how to enable it, see this article.
+
+## Enable Device Intelligence for verification
+
+Complete the following actions to enable Device Intelligence during the onboarding process. The enablement process is the same for both WebSDK and MobileSDK verification flows.
+
+1. Enable Device Intelligence module (MobileSDK integration):
+   - For iOS
+   - For Android
+2. In the Dashboard, go to Integrations and select the level of interest.
+3. Open the Verification Level settings.
+4. In the Configurations section, open the Fraud prevention tab and select the Capture devices checkbox.
+
+This enables the system to automatically collect device signals when users begin the verification process.
+
+Note that device capture is:
+
+- Invisible to the end user.
+- Does not affect user experience.
+- Does not introduce noticeable latency.
+
+> ❗️ Important
+> 
+> The system collects device data only when both of the following conditions are met:
+> 
+> - The device capture is enabled for the verification level.
+> - The verification session is completed.
+
+## Enable Device Intelligence for Behavior Monitoring and Transaction Monitoring
+
+You can leverage Device Intelligence for Ongoing Monitoring by linking device data to specific events, such as logins, password changes, and financial transactions.
+
+- To enable web Device Intelligence for Behavior Monitoring and Transaction Monitoring, integrate the JS SDK and Sumsub API on your application frontend to collect device data and link it to behavioral events.  
+  For more information on how to integrate with Device Intelligence, see this article.
+- To enable mobile Device Intelligence for Behavior Monitoring and Transaction Monitoring, contact your Customer Success Manager about native SDK integration options for mobile Behavior Monitoring.
+
+# How to use Device Intelligence
+
+Device analytics can help identify patterns of suspicious activity, such as device re-use, high-risk configurations, or abnormal login behavior, across your user base. These insights support manual investigations and inform risk-based decisions without disrupting legitimate users.
+
+## View devices and device analytics
+
+You can view both the Devices and Device analytics in the Device Intelligence section in the Dashboard:
+
+- Devices section contains a list of all detected devices with their general information and risk labels.
+- Device analytics displays graphs showing the total number of devices, login attempts, and the number of risk labels, as well as a world map showing the device geolocation.
+
+## View device data
+
+Device data is collected and available in real time. You can access it from multiple locations:
+
+- In the Dashboard, go to the Device Intelligence section to view all devices and analytics. To monitor monitor device-specific activity, select the device of interest.
+- When viewing verification, a Device Check block appears in completed verifications, showing device information and any detected risk labels.
+- On the applicant profile, the Devices tab lists:
+  - All devices associated with the applicant.
+  - Suspicious labels highlighting device risks.
+- From the Overview on the applicant page. In the Dashboard, navigate to the Applicants section and select the applicant of interest. On the Overview tab, scroll down to the Devices section.
+- From the Transactions page. In the Dashboard, go to the Transactions and Travel Rule and select the transaction of interest. Scroll down to the Transaction antifraud section and click View device details in the Device info.
+
+## Interpret device signals
+
+Device signals are risk indicators, not definitive proof of fraud. You should use it as part of a broader risk assessment strategy.
+
+### Device reuse
+
+When the same Device ID appears across multiple applicants, it may indicate:
+
+[block:html]
+{
+  "html": "\n    \n        \n            .p-image2 {\n                margin: 0;\n                display: flex;\n                font-size: 12px;\n            }\n            .table-text {\n                margin: 24px 0;\n                border: 1px solid #e5e5e5;\n                border-radius: 8px;\n                overflow: hidden;\n            }\n            .wide-column {\n                min-width: 220px;\n            }\n            table {\n                border-collapse: collapse;\n                width: 100%;\n            }\n            th {\n                background-color: #f6f7f9;\n                border: 1px solid #e5e5e5;\n                padding: 8px;\n                font-weight: bold;\n                text-align: left;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] th {\n                    background-color: #303b42;\n                    border: 1px solid #e5e5e5;\n                }\n            }\n            [data-color-mode=\"dark\"] th {\n                background-color: #303b42;\n                border: 1px solid #e5e5e5;\n            }\n            td {\n                border: 1px solid #e5e5e5;\n                padding: 8px;\n                text-align: left;\n            }\n            tr:nth-child(odd) {\n                background-color: #fff;\n            }\n            tr:nth-child(even) {\n                background-color: #f8f8f8;\n            }\n            .table-text h2 {\n                font-size: 14px;\n                margin: 0px;\n                color: #384248;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text h2 {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text h2 {\n                color: #ffff;\n            }\n            .table-text p {\n                font-size: 14px;\n                margin: 0;\n                color: #414552;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text p {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text p {\n                color: #ffff;\n            }\n            .table-text a {\n                color: #377cf7;\n                text-decoration: underline;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text a {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text a {\n                color: #ffff;\n            }\n            .table-text tr:first-child {\n                margin-bottom: 20px;\n            }\n\n            .tag-green {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #d0f1e8;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #115242;\n                margin-top: 4px;\n            }\n\n            .tag-yellow {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #fff4c6;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #613400;\n                margin-top: 4px;\n            }\n\n            .tag-red {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #ffd2ce;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #5c0011;\n                margin-top: 4px;\n            }\n\n            .tag-grey {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #edeff2;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #373d4d;\n                margin-top: 4px;\n            }\n        \n    \n    \n        \n            \n                    \n                        \n                            Risk scenarios\n                        \n                        \n                            \n                                \n                                    Multi-accounting\n                                \n                                \n                                    Bonus/referral abuse\n                                \n                                \n                                    Trial abuse\n                                \n                                \n                                    Account farming\n                                \n                                \n                                    Money muling\n                                \n                                \n                                    Fraud networks/fraud rings\n                                \n                            \n                        \n                    \n                    \n                        \n                            Legitimate scenarios\n                        \n                        \n                            \n                                \n                                    Duplicate accounts are allowed by policy.\n                                \n                                \n                                    Users register across isolated projects.\n                                \n                                \n                                    Family members share a device.\n                                \n                                \n                                    Employees assist users from a shared device.\n                                \n                                \n                                    Offline/in-person verification is performed.\n                                \n                            \n                        \n                    \n                \n            \n        \n    \n"
+}
+[/block]
+
+> 📘 Note
+> 
+> Device reuse is a risk signal, not proof of fraud. Risk increases with the number of applicants sharing the device and speed/velocity of reuse (many accounts in a short time).
+
+### New devices and multiple devices
+
+When new device IDs appear for an applicant, or multiple device IDs are observed within a single session, it may indicate:
+
+[block:html]
+{
+  "html": "\n    \n        \n            .p-image2 {\n                margin: 0;\n                display: flex;\n                font-size: 12px;\n            }\n            .table-text {\n                margin: 24px 0;\n                border: 1px solid #e5e5e5;\n                border-radius: 8px;\n                overflow: hidden;\n            }\n            .wide-column {\n                min-width: 220px;\n            }\n            table {\n                border-collapse: collapse;\n                width: 100%;\n            }\n            th {\n                background-color: #f6f7f9;\n                border: 1px solid #e5e5e5;\n                padding: 8px;\n                font-weight: bold;\n                text-align: left;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] th {\n                    background-color: #303b42;\n                    border: 1px solid #e5e5e5;\n                }\n            }\n            [data-color-mode=\"dark\"] th {\n                background-color: #303b42;\n                border: 1px solid #e5e5e5;\n            }\n            td {\n                border: 1px solid #e5e5e5;\n                padding: 8px;\n                text-align: left;\n            }\n            tr:nth-child(odd) {\n                background-color: #fff;\n            }\n            tr:nth-child(even) {\n                background-color: #f8f8f8;\n            }\n            .table-text h2 {\n                font-size: 14px;\n                margin: 0px;\n                color: #384248;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text h2 {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text h2 {\n                color: #ffff;\n            }\n            .table-text p {\n                font-size: 14px;\n                margin: 0;\n                color: #414552;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text p {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text p {\n                color: #ffff;\n            }\n            .table-text a {\n                color: #377cf7;\n                text-decoration: underline;\n            }\n            @media (prefers-color-scheme: dark) {\n                [data-color-mode=\"auto\"] .table-text a {\n                    color: #ffff;\n                }\n            }\n            [data-color-mode=\"dark\"] .table-text a {\n                color: #ffff;\n            }\n            .table-text tr:first-child {\n                margin-bottom: 20px;\n            }\n\n            .tag-green {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #d0f1e8;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #115242;\n                margin-top: 4px;\n            }\n\n            .tag-yellow {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #fff4c6;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #613400;\n                margin-top: 4px;\n            }\n\n            .tag-red {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #ffd2ce;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #5c0011;\n                margin-top: 4px;\n            }\n\n            .tag-grey {\n                display: inline-block;\n                flex-direction: row;\n                align-items: center;\n                padding: 0px 4px;\n                gap: 0px;\n                height: 16px !important;\n                background: #edeff2;\n                border-radius: 4px;\n                font-weight: 500;\n                font-size: 10px;\n                line-height: 16px;\n                color: #373d4d;\n                margin-top: 4px;\n            }\n        \n    \n    \n        \n            \n                    \n                        \n                            Risk scenarios\n                        \n                        \n                            \n                                \n                                    Multiple devices used within a single session may indicate third-party account creation.\n                                \n                                \n                                    Appearance of new devices may indicate:\n                                    \n                                        Account takeover\n                                        Account transfer to unverified users\n                                        Shared account usage\n                                    \n                                    \n                            \n                        \n                    \n                    \n                        \n                            Legitimate scenarios\n                        \n                        \n                            \n                                \n                                    Users changing or upgrading devices is a normal behavior.\n                                \n                            \n                        \n                    \n                \n            \n        \n    \n"
+}
+[/block]
+
+> 📘 Note
+> 
+> Apply automated blocking or rejection only in high-confidence and high-risk scenarios:
+> 
+> - Large-scale fraud attacks
+> - Clear policy violations with multiple confirming signals
+
+Prefer setting up additional verification steps rather than outright blocking. Enable the following checks to secure your verification flow:
+
+- Liveness and Face match
+- Email and phone verification
+- Payment Method Check Advanced
+- Questionnaire
+
+# Device Intelligence — Bring Your Own Key (BYOK)
+
+If you already have an active contract with Fingerprint Pro, Sumsub supports a Bring Your Own Key integration that allows you to:
+
+- Capture and utilize devices within Sumsub-controlled flows — within the Sumsub WebSDK and MobileSDK verification flows, device signals are collected using your Fingerprint Pro credentials and linked to the applicant profile on the Sumsub side.
+- Link devices you are already collecting — use Fingerprint data you collect across your platform (for instance, at sign up, login or financial transaction) within the following Sumsub solutions:
+  - Transaction Monitoring
+  - Behavior Monitoring
+  - Rules engine
+  - Workflow Builder
+  - Applicant risk scoring
+
+> 📘 Note
+> 
+> To enable BYOK for your account, contact your Sumsub representative.
+
+================================================================================
+
+# Advanced IP check
+URL: https://docs.sumsub.com/docs/advanced-ip-check
+
+The Advanced IP check lets you extract the IP address of the device your applicant uses for verification and run it through our databases to ensure it is genuine and secure.
+
+With the Advanced IP check, you can:
+
+- Ensure that cybercriminals do not intercept your applicant traffic.
+- Reveal the applicant's location.
+- Find out if your applicant uses a VPN to connect to the internet.
+
+> 📘 Note
+> 
+> The Advanced IP check is available at an additional cost. Contact us to learn more.
+
+# How advanced IP check works
+
+An IP address—short for Internet Protocol address—is a unique numerical label assigned to each device connected to a computer network that uses the Internet Protocol for communication. It serves as an identifier for the source and destination of internet traffic.
+
+Your applicants' consent for personal data processing allows Sumsub to use built-in analytical tools to collect their IP addresses. 
+
+According to the internal logic, the system checks the data and returns a list of IP check parameters that represent the results of the check.
+
+## IP address check automation
+
+In the Dashboard, you can create a client list with a set of values to manage matching applicants or transactions. When you create an IP Ranges list, you can set up conditions for automatic IP address checks.
+
+The conditions of this check depend on the type of your list:
+
+- Blocklist — IP addresses from that list will be automatically assigned with a High risk label.
+- Whitelist — IP addresses from that list will be automatically assigned with a Low risk label.
+- Custom — the system will not perform any automatic actions.
+
+## Advanced IP check list
+
+The following table explains the available advanced IP checks.
+
+[block:html]
+{
+  "html": "\n    .line {\n        border-top: 1px solid rgb(0 0 0 / 10%);\n        margin-bottom: -32px;\n        margin-top: 50px;\n    }\n\n    [data-color-mode=\"dark\"] .line {\n        background-color: rgb(255 255 255 / 8%);\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            background-color: rgb(255 255 255 / 8%);\n        }\n    }\n\n    .footer-container {\n        display: grid;\n        grid-template-columns: repeat(2, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 500px;\n    }\n\n    .footer-container h3 {\n        font-size: 14px;\n    }\n\n    .footer-container basic {\n        font-size: 12px;\n        font-weight: 500;\n        color: #5f666c;\n        line-height: 24px;\n    }\n\n    .footer-container2 {\n        display: grid;\n        grid-template-columns: repeat(4, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 800px;\n    }\n\n    .footer-container2 h3 {\n        font-size: 14px;\n    }\n\n    .font-small-header {\n        font-size: 14px;\n        font-weight: 600;\n    }\n\n    --- .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 180px;\n    }\n\n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n\n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n    }\n\n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n\n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n    ul2 {\n        margin-left: -40px !important;\n    }\n    li2 {\n        margin-bottom: 10px;\n        display: flex;\n        align-items: top;\n    }\n    .icongreen {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n\n    .iconred {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n\n    .flag-container {\n        display: grid;\n        grid-template-columns: repeat(3, 1fr);\n        gap: 24px;\n        padding-top: 0px;\n    }\n\n    .flag-container basic {\n        font-size: 15px;\n        color: #384248;\n        line-height: 36px;\n    }\n\n    .flag-icon {\n        width: 20px;\n        height: 20px;\n        margin-right: 5px;\n    }\n\n    .tag-green {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #d0f1e8;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #115242;\n        margin-top: 4px;\n    }\n    .tag-red {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #ffd2ce;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #5e0214;\n        margin-top: 4px;\n    }\n    .tag-purple {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #eedbff;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #250960;\n        margin-top: 4px;\n    }\n    .tag-grey {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #edeff2;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #393f4e;\n        margin-top: 4px;\n    }\n    .tag-yellow {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #fff4c6;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #613400;\n        margin-top: 4px;\n    }\n\n\n    \n        \n            \n                \n                    \n                        Check parameter\n                    \n                    \n                        Description\n                    \n                \n                \n                    \n                        \n                            IP\n                        \n                        \n                            The IP address of the device used by the applicant.\n                        \n                    \n                    \n                        \n                            Risk level\n                        \n                        \n                            Labels the detected IP address as safe (GREEN), suspicious (YELLOW), or risky (RED).\n                        \n                    \n                    \n                        \n                            Abuse velocity\n                        \n                        \n                            Indicates frequent abusive behavior over the past 24-48 hours. Values can be High, Medium, Low, or an empty value.\n                        \n                    \n                    \n                        \n                            Connection type\n                        \n                        \n                            Indicates whether the connection is residential or business.\n                        \n                    \n                    \n                        \n                            Location\n                        \n                        \n                            The country and the city where the applicant is located.\n                        \n                    \n                    \n                        \n                            Timezone\n                        \n                        \n                            Timezone in which the applicant is located.\n                        \n                     \n                    \n                        \n                            Internet provider\n                        \n                        \n                            The company name of the applicant's internet provider.\n                        \n                    \n                    \n                        \n                            Organization\n                        \n                        \n                            The legal name of the applicant's internet provider.\n                        \n                    \n                    \n                        \n                            Proxy\n                        \n                        \n                            Indicates whether a proxy server is used and labels it as safe (GREEN), suspicious (YELLOW) risky (RED).\n                        \n                    \n                    \n                        \n                            VPN\n                        \n                        \n                            Indicates whether the VPN is used and labels it as safe (GREEN), suspicious (YELLOW), or risky (RED).\n                        \n                      \n                    \n                        \n                            TOR\n                        \n                        \n                            Indicates whether the detected IP address is tunnelled through other devices and labels the connection as safe (GREEN), suspicious (YELLOW), or risky (RED).\n                        \n                                     \n                \n            \n        \n    \n"
+}
+[/block]
+
+## Advanced IP check risk labels
+
+The following risk labels are assigned to applicant profiles during the Advanced IP check and indicate certain characteristics of an applicant.
+
+# Get started with advanced IP check
+
+You can perform advanced IP check during both KYC and Transaction Monitoring. The setup depends on the selected flow.
+
+## Advanced IP check during KYC
+
+To start using the advanced IP check during KYC, complete the following steps.
+
+### Step 1: Enable the setting
+
+1. In the Dashboard, navigate to the Verification levels in the Integrations section. 
+2. Select the level of interest. 
+3. On the Configurations tab of the verification level settings, open the [Fraud prevention]() section, and enable the IP insights checkbox.
+
+### Step 2: Verify applicants
+
+Verify your applicants using the WebSDK or MobileSDK.
+
+> 📘 Note
+> 
+> To perform advanced IP check during pre-KYC (e.g, on user sign up or login), create applicant via this API method and include the `creationTrackingData` object with the IP address.
+
+## Advanced IP check during Transaction Monitoring
+
+To start using the advanced IP check during the Transaction Monitoring, use one of the following methods:
+
+- Send IP address via this API method when submitting a transaction for an existing applicant.
+- Send IP address via this API method when submitting a transaction for a non-existing applicant.
+
+# Review advanced IP check results
+
+To view the Advanced IP check results:
+
+1. In the Dashboard, go to the Applicants page and open the profile that you need.
+2. Scroll down to the IP check section and review the results.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/0aaed2fa0fd920d93399257e2acbacbf021baf3ddfa3fd0c0eafc830227a3ae5-new-IP-check.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+Alternatively, you can use this API method to get the results, as the following example demonstrates.
+
+Request
+
+```curl
+curl -X GET \
+    'https://api.sumsub.com/resources/checks/latest?applicantId=6735ad170942f455a3711bf3&type=IPCHECK'
+```
+
+Response
+
+```json
+{
+    "checks": [
+        {
+            "answer": "GREEN",
+            "checkType": "IPCHECK",
+            "createdAt": "2025-05-28 15:42:24",
+            "id": "142965bb-6775-4d85-a6ed-39aa94f7726a",
+            "ipCheckInfo": {
+                "ip": "33.199.219.172",
+                "ipInfo": {
+                    "ip": "33.199.219.172",
+                    "countryCode2": "US",
+                    "countryCode3": "USA",
+                    "city": "Ashburn",
+                    "state": "Virginia",
+                    "stateCode": "US-VA",
+                    "lat": 39.04,
+                    "lon": -77.49,
+                    "asn": 14618,
+                    "asnOrg": "Amazon.com",
+                    "org": "Amazon.com",
+                    "riskyAsn": false,
+                    "riskScore": 75.0,
+                    "timezone": "America/New_York",
+                    "connectionType": "hosting",
+                    "proxy": true,
+                    "vpn": true
+                },
+                "internetServiceProvider": "Amazon.com",
+                "connectionType": "hosting",
+                "organization": "Amazon.com",
+                "proxy": "RED",
+                "vpn": "RED",
+                "tor": "GREEN",
+                "riskLevel": "GREEN",
+                "riskScore": 75.0
+            }
+        }
+    ]
+}
+```
+
+================================================================================
+
+# IP geolocation
+URL: https://docs.sumsub.com/docs/ip-geolocation
+
+IP geolocation estimates an applicant location from their IP address. Sumsub collects this signal automatically during verification. You can also pass it via API in other flows, such as pre-KYC sign-up verification, Transaction Monitoring, and Behavior Monitoring.
+
+Sumsub provides IP geolocation collection by default. You can strengthen it further with Advanced IP Check or Device Intelligence, which adds more network and device context.
+
+You can use IP geolocation to:
+
+- Spot fraud patterns, such as account sharing or location spoofing.
+- Identify compliance risks, such as activity from restricted jurisdictions.
+
+This signal does not require user permission and is always available, which makes it one of the most widely used inputs in risk analysis.
+
+# How IP geolocation works
+
+Every internet-connected device uses an IP address assigned by an Internet Service Provider (ISP). The IP address itself does not include location data. Instead, geolocation providers estimate location by matching IP ranges to network and infrastructure intelligence.
+
+To build that estimate, the following data sources are used:
+
+- IP allocation records.
+- ISP infrastructure data.
+- Network routing and latency patterns.
+- Observed usage and infrastructure mapping.
+
+IP data may be also correlated with stronger location sources from the device or network environment.
+
+For this reason, IP geolocation does not show an exact location. It shows an estimate. Accuracy changes with network conditions, infrastructure quality, and IP type.
+
+## IP geolocation and GPS
+
+IP geolocation and device-based location (GPS) solve different problems.
+
+IP geolocation works automatically, does not require user consent, and stays available for every request. At the same time, it offers lower accuracy, and users can change it with VPNs or proxies.
+
+Device-based geolocation uses signals such as GPS, Wi-Fi, and cellular data. It usually provides much higher accuracy, often within meters, but it requires user permission and may not always be available. Users can also manipulate it with GPS spoofing tools.
+
+> 👍 Tip
+> 
+> - Use IP geolocation as the baseline location signal in your flow.
+> - When you need stronger proof of location, rely on device-based geolocation.
+> - When you need to detect spoofing more effectively, combine IP geolocation with Device Intelligence or Advanced IP Check.
+
+## Geolocation accuracy
+
+IP geolocation accuracy changes from case to case. Network design, IP assignment, and traffic routing all affect the result.
+
+Sumsub returns a location estimate together with a confidence radius. You receive a latitude and longitude point plus an area where the applicant is likely located.
+
+Several factors reduce accuracy:
+
+- Mobile networks often share the same IPs across large areas, so one IP can represent users in different cities or regions.
+- Dynamic IP allocation also affects reliability because mappings change over time.
+- In other cases, traffic passes through centralized gateways, and the detected location reflects the gateway rather than the user.
+
+Accuracy usually improves on fixed broadband networks with static or semi-static IPs and well-mapped ISP infrastructure. In these environments, city-level estimates often provide useful location context.
+
+Do not treat IP geolocation as an exact point. Treat it as a probable area. This distinction matters when you make risk decisions.
+
+For example, when devices from distant IP locations appear in one session, the pattern may suggest account sharing, link sharing, account farming, or social engineering. At the same time, low geolocation accuracy or unstable networks can produce the same result, so you need to interpret this signal in context.
+
+# IP data collection in Sumsub
+
+IP addresses can enter the system from different sources, depending on your integration:
+
+- In WebSDK and MobileSDK flows, Sumsub collects the IP address automatically during verification, so you do not need extra setup.
+- You can pass the IP address when you create an applicant via this API method. This option helps when the session takes place outside the SDK flow. Request example:
+  ```curl
+  curl -X POST \
+    'https://api.sumsub.com/resources/applicants?levelName=basic-kyc-level' \
+    -H 'Content-Type: application/json' \
+    -d '{
+            "externalUserId": "someUniqueUserId",
+            "email": "john.smith@example.com",
+            "phone": "+449112081223",
+            "fixedInfo": {
+                "country": "GBR",
+                "placeOfBirth": "London"
+            }
+        }'
+  ```
+- In Transaction Monitoring and Behavior Monitoring, you can include IP addresses in events and track location changes over time.
+- With Device Intelligence enabled, Sumsub collects IP data automatically together with other device and network signals.
+
+To keep risk analysis reliable, collect IP data consistently and pass it across all relevant flows. Missing IP data weakens location-based checks and reduces the value of related risk signals.
+
+## Available data
+
+For each IP address, Sumsub provides enriched geolocation data, including country, region, predicted city, latitude, longitude, and confidence radius.
+
+Interpret this data in the following way:
+
+- Treat country as the most reliable baseline signal.
+- Treat city as indicative rather than certain.
+- Read the coordinates as the center of the estimated area.
+- Use the confidence radius to judge how precise that estimate is.
+
+# How to use IP geolocation
+
+IP geolocation works best as a consistency check, not as a standalone decision factor. Use it to assess whether:
+
+- Applicant location matches their profile.
+- Location fits the expected behavior.
+- Location remains stable over time.
+
+IP geolocation helps detect mismatches and suspicious patterns. For example, you can flag cases where devices from distant IP locations were used in one verification flow with risk labels.
+
+In Workflow Builder, IP geolocation supports country-based conditions, restricted-location checks, and step-up verification.
+
+In Applicant Risk Scoring, it adds context alongside other signals and helps reduce false positives.
+
+In Transaction Monitoring and Behavior Monitoring, it helps detect sudden location changes and abnormal behavior across sessions.
+
+Location mismatches often provide another useful signal. For example, the IP country may differ from the applicant address country, the ID document country, or the country where a photo was created. This pattern can suggest geo-restriction bypass, synthetic identities, or third-party identity usage. At the same time, legitimate travel can create the same result, so you should not treat a mismatch as conclusive evidence on its own.
+
+IP geolocation delivers the best results when you combine it with other signals rather than treat it as final proof on its own.
+
+## VPNs, proxies, and hosting IPs
+
+VPNs, proxies, and hosting providers reduce the reliability of IP geolocation because the visible IP address belongs to an intermediary service rather than the end user.
+
+In these cases, the detected location reflects the VPN exit node, proxy server, or data center, not the actual location. As a result, the location itself becomes less trustworthy.
+
+> 👍 Tip
+> 
+> When this happens, focus on the IP type rather than the reported location:
+> 
+> - VPN can show that the user is hiding their location.
+> - Proxy can show that traffic passes through another system.
+> - Hosting IP can point to automation or abuse.
+> 
+> These characteristics often matter more than the geolocation result itself.
+
+In most cases, you cannot reliably determine the real location behind a VPN. Some advanced methods attempt to infer it, but they do not provide stable coverage or consistent accuracy.
+
+## How to act on IP geolocation signals
+
+Use IP-based signals as one input in a broader decision system. You can include them in Applicant Risk Scoring and use them in Workflow Builder to trigger additional checks, adjust the onboarding flow, or route a case to manual review.
+
+IP geolocation helps you identify inconsistencies, prioritize review, and add context to other signals, but you should not make your decision based explicitly on those signals.
+
+================================================================================
+
+# Fraud Network Detection
+URL: https://docs.sumsub.com/docs/fraud-networks-detection
+
+Fraud Network Detection helps you uncover hidden connections between applicants using all data available within the Sumsub platform. Instead of reviewing accounts one by one, you can see how they relate to each other — through shared devices, IPs, cookies, document templates, selfie images and selfie backgrounds, liveness signals, behavioral patterns, and other technical attributes.
+
+The solution focuses on detecting coordinated or linked activity that would be impossible to identify at the single-applicant level. By analyzing both technical infrastructure and identity-level similarities, it surfaces patterns that indicate risks of organized or abusive behavior.
+
+Fraud Network Detection is especially effective for:
+
+- Detecting multi-accounting. Identify users who create multiple accounts to bypass rules and abuse the platform.
+- Exposing account farms. Uncover large-scale account creation driven by shared infrastructure, automation, or repeated document and selfie patterns.
+- Identifying money mules. Reveal networks of accounts created to be operated by third parties or used to move funds on behalf of others.
+- Uncovering organized fraud rings. Pinpoint groups of individuals coordinating fraudulent activity, even when they use different identities, devices, or environments.
+
+By shifting the focus from isolated applicant checks to relationship analysis across identity, behavioral, and technical signals, Fraud Network Detection enables proactive investigation of complex fraud schemes at scale.
+
+# How Fraud Network Detection works
+
+Fraud Network Detection analyzes data collected during user verification across connected Sumsub services, including ID verification, address verification, Liveness checks, and Device Intelligence. It continuously evaluates this information to identify meaningful patterns that indicate connections between applicants.
+
+As soon as the system detects a strong and reliable pattern — for example, shared device infrastructure, repeated document templates, similar selfie backgrounds, or behavioral overlaps — it links the relevant applicants into a network. More complex patterns may require additional data and time to accumulate before a confident connection can be established.
+
+Once a pattern is confirmed, a new applicant network is created automatically. These networks are dynamic: if new applicants exhibit the same signals or behavioral characteristics, they are added to the existing network in real time.
+
+You can review detected networks directly in the Dashboard or access it via API, allowing you to integrate network insights into your decision-making flows, automation logic, or investigation processes. 
+
+# Get started with Fraud Network Detection
+
+Almost nothing is needed to start detecting potential fraudulent patterns amongst your applicants:
+
+1. Contact your Customer Success Manager to implement Fraud Networks Detection in your verification process.
+2. Review the results on the criminal connections detected when verifying applicants.
+
+> 📘 Use WebSDK, MobileSDK and Device Intelligence
+> 
+> Fraud Network Detection becomes more powerful as more data is available. The broader the signal coverage, the more accurately the system can identify hidden relationships and coordinated activity. 
+> 
+> To maximize effectiveness, it is strongly recommended to enable Device Intelligence and use WebSDK or MobileSDK so that Sumsub can collect richer behavioral and technical signals during verification.
+
+# Review Fraud Network Detection results
+
+You can find the results on the Fraud Network Detection findings in the following ways:
+
+- Use the Sumsub API:
+  - To get the list of all fraud networks, use this method.
+  - To get the list of all fraud networks by `applicantId`, use this method.
+  - To get the fraud network by `networkId`, use this method.
+- In the Dashboard, go to the Applicants menu and select the Applicant Networks tab. Here, you can see the list of fraud networks associated with your applicants.
+- In an applicant profile, scroll down to the Applicant Networks block and find information on the fraud networks related to the applicant.
+
+The following table describes network properties available in the Dashboard:
+
+Results can be downloaded as a CSV report as well and will contain information on all applicants included in the network. The following data will be available in the report:
+
+# View network data as table, chart, or map
+
+When checking the network data, you can switch between the table and chart views:
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/8f4d839c346c0280d3398a2444ae9579ba4c79402affcff75fb277b33497df87-image1ed.png",
+        "",
+        "The table view shows the list of applicants with the links and all related information."
+      ],
+      "align": "center",
+      "border": true,
+      "caption": "The table view shows the list of applicants with the links and all related information."
+    }
+  ]
+}
+[/block]
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/4c03670efc7fea4bc10fea13d9a7aebc7bf54c7dd11af13d73140f3d95de231d-image2ed.png",
+        "",
+        "The chart displays applicants, their IP addresses, device fingerprints, and various templates as nodes connected by edges."
+      ],
+      "align": "center",
+      "border": true,
+      "caption": "The chart displays applicants, their IP addresses, device fingerprints, and various templates as nodes connected by edges."
+    }
+  ]
+}
+[/block]
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/6449faa6f0bba4ce1a609436981de08a8c7c2d37ff35ef243a4565c57f349420-image3ed.png",
+        "",
+        "The map view shows the applicants’ locations on a global map based on their detected IP addresses."
+      ],
+      "align": "center",
+      "border": true,
+      "caption": "The map view shows the applicants’ locations on a global map based on their detected IP addresses."
+    }
+  ]
+}
+[/block]
+
+================================================================================
+
+# AI-powered Anomaly Detection
+URL: https://docs.sumsub.com/docs/ai-powered-anomaly-detection
+
+Sumsub Anomaly Detection is designed to help you monitor transactions by detecting anomalies with remarkable accuracy. It utilizes AI and advanced machine learning algorithms like Isolation Forest to identify activities or transactions that deviate significantly from established applicant behavior patterns, indicating potential fraud.
+
+By continuously learning from transaction patterns, the system adapts to new types of anomalies, ensuring your financial operations remain secure.
+
+This means you can trust it to timely spot irregularities and do the following:
+
+- Identify potential fraud activities as they happen, allowing immediate action.
+- Prevent significant financial losses by catching fraud early.
+- Enhance customer trust by ensuring their transactions are secure.
+- Provide tailored protection regardless of business size or industry.
+- Let your business meet regulatory requirements related to fraud prevention.
+
+# How Anomaly Detection works
+
+Sumsub Anomaly Detection identifies unusual financial activities that may require immediate investigation, and sends you real-time alerts or creates a case, rejects, or puts the transaction on hold, adds tags, and so on.
+
+Our AI also provides insights into why a particular transaction was flagged. It examines various factors and highlights the specific reasons for its decision, clearly understanding potential issues.
+
+Each event or transaction gets an anomaly score: Low, Medium, or High, depending on the severity of the behavior deviation, which is defined based on the signal types. 
+
+# Use anomaly risk level in rules
+
+You can use the anomaly risk level as a condition in your rules that would put on hold or block the transaction. 
+
+For example, you can select to auto-reject all transactions with a high anomaly score:
+
+1. Create a rule as described in this article.
+2. Set up the rule action as Reject.
+3. Set up the rule condition as:  If   ->  Field  ->  anomalyExpressionData.anomalyRiskLevel   ->  equals   ->  Value  ->  high 
+4. Proceed with adjusting the rule as needed and click Save when done.
+
+# Review Anomaly Detection results
+
+The information about the anomaly score and the severity of the involved signals is available in the Anomaly Detector section of the target Transaction page. 
+
+The score is calculated based on the following signals.
+
+| Type of signal        | Description                                                                                                                                                                                                                             |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aggregate             | Signals based on calculating and comparing the applicant's transactional patterns and history. This includes calculating a specific counterparty's monthly/quarterly turnover, comparing applicants on the account to detect anomalies. |
+| Applicant             | Signals based on analyzing customer-provided details with the data from databases, documents, and third-party sources to detect anomalies.                                                                                              |
+| Finance               | Signals based on cross-checking the transaction data, such as the transaction method, institution, country, or amount, to detect anomalies.                                                                                             |
+| Counterparty          | Signals based on analyzing counterparty data with the data from databases, documents, and third-party sources to detect anomalies.                                                                                                      |
+| Device fingerprinting | Signals based on the device data, such as IP addresses, device fingerprints, or statistics, to detect anomalies.                                                                                                                        |
+| Other                 | Signals based on all remaining risk factors not included in the other factors.                                                                                                                                                          |
+
+================================================================================
+
+# Account Takeover Prevention
+URL: https://docs.sumsub.com/docs/account-takeover-prevention
+
+Account Takeover (ATO) is when an unauthorized individual gains access to someone else's account and takes control of it. This can happen through various methods, such as phishing, hacking, or using stolen credentials. 
+
+Once the attacker has control, they can make unauthorized transactions, change account settings, or perform other malicious activities.
+
+Our Account Takeover Prevention solution is based on device intelligence and KYC checks. It lets you minimize or eliminate double payouts or chargeback disputes.
+
+We offer you the checks to identify the following behavior:
+
+- Suspicious log-in. The fraudster uses an unknown device to log in to the account.
+- Changes to account information. Attackers may modify payment methods and details to prevent the legitimate owner from regaining access to the funds.
+- Unfamiliar transactions, such as withdrawals, deposits, or transfers.
+
+# How Account Takeover Prevention works
+
+Account takeover prevention is a security measure that combines automated detection mechanisms with user verification processes designed to detect and prevent unauthorized access to user accounts.
+
+Here is how it typically works:
+
+1. Monitoring user activity. The system monitors user activity for unusual patterns or behaviors that may indicate a potential account takeover. This could include login attempts from unfamiliar locations, multiple failed login attempts, or sudden changes in account settings.
+
+2. Anomaly detection. Advanced algorithms are used to analyze user behavior and detect anomalies. For example, if a user suddenly logs in from a different country or device, the system may flag this as suspicious activity.
+
+3. IP address tracking. Sumsub monitoring systems track the IP addresses used to access an account. If an account is accessed from an IP address that has not been used before or is associated with suspicious activity, it may trigger an alert.
+
+4. Device recognition. Sumsub can identify when a new or unrecognized device attempts to log in by tracking the devices used to access an account. 
+
+5. Payment method check. Sumsub checks the payment method on withdrawal to ensure it was used before within the specified period.
+
+6. Applicant action request (if applicable). Users may be required to verify their identity through additional steps.
+
+7. Transaction status assignment. Depending on the results of the checks, each transaction receives a status: 
+   - Normal — transaction is approved.
+   - Suspicious — transaction matched one of the selected rules and requires attention.
+
+# Explore Account Takeover checks
+
+The following table explains the checks performed when monitoring transactions to detect account takeover.
+
+| Check                      | Description                                                                                                                                                                 |
+| :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Device IP                  | The IP address of the applicant device used to log in.                                                                                                                      |
+| Coordinates                | The geographic location of the applicant device used to log in.                                                                                                             |
+| Device Fingerprint         | Information about the software and hardware used on the applicant device.                                                                                                   |
+| Payment method information | Information about the selected payment method. It depends on the method specifics and may include a unique hash string, IBAN, SWIFT, Card Number, Crypto wallet, and so on. |
+
+# Enable Account Takeover Prevention
+
+To enable account takeover prevention:
+
+1. In the Dashboard, open the Rules Library and install the following rules:
+   - Remitter address country does not match with IP countries used for the last month
+   - New payment method on withdrawal  
+   - Remitter device does not match with device used for the last 90 days 
+   - New IP country for remitter for the last 3 months 
+2. Open the Installed rules page and enable the installed rules, as described in this article.
+
+Once you enable the rules, each transaction that matches the rule conditions will be taken care of in accordance with the rule configuration.
+
+================================================================================
+
+# Behavior Monitoring
+URL: https://docs.sumsub.com/docs/behavior-monitoring
+
+Behavior Monitoring scores end-user behavior instantly based on how users interact with your platform. It helps you spot suspicious patterns early, apply fraud-prevention rules automatically, and respond dynamically before risk escalates.
+
+To assess user behavior, this service collects data about user platform events, which are the key interactions that reflect a user’s journey on a platform, such as:
+
+- Logins
+- Sign-ups
+- Settings changes
+- Password updates
+- Custom client-defined events (for instance, 2FA disable request or address change)
+
+These events build a live behavioral profile for each user and continuously update a risk score.
+
+In addition to direct platform interactions, we treat Verification sessions as behavioral signals too, even though users perform them through Sumsub onboarding and verification flows. In many cases they are equivalent to sign-up events, so we evaluate them alongside other platform signals for a fuller risk picture.
+
+# How Behavior Monitoring works
+
+Behavior Monitoring evaluates your platform’s signals that reach our system in real time. You have to structure payloads according to API specifications and populate key data fields that include core identifiers, for instance:
+
+- Captured device via Device Intelligence
+- IP data
+- Email or phone number used for settings updates
+- Custom properties
+
+After receiving user behavior data, our system evaluates those live signals with a powerful rules engine. You can use these signals together with KYC data, AML screening and Transaction Monitoring via applicant risk scoring to build a comprehensive risk profile of the user.
+
+> 📘 Note
+> 
+> If you already use Transaction Monitoring, you will have access to the same rules functionality.
+
+When risk crosses a threshold you set up with rules, we automatically send a response tailored to the situation. Actions required in the response may include:
+
+- Triggering manual case review.
+- Creating a new case in Case Management.
+- Prompting stronger authentication with additional steps such as liveness or email and phone verification.
+- Blocking or limiting a user's session.
+
+# Get started with Behavioral Monitoring
+
+To enable Behavioral Monitoring, contact our support team. Once enabled, you must complete a two-step setup process within the Sumsub interface.
+
+## Step 1: Send event data
+
+You can send event data using one of the following API methods:
+
+1. Submit transaction for non-existing applicant
+2. Submit transaction for existing applicant
+
+Request examples:
+
+```json Submit transaction for non-existing applicant
+{
+  "txnId": "general0001",
+  "txnDate": "2024-04-29 02:30:12+0000",
+  "type": "userPlatformEvent",
+  "applicant": {
+    "type": "individual",
+    "externalUserId": "PlatformEvent0001",
+    "fullName": "Users Fullname",
+    "placeOfBirth": "settlementName",
+    "dob": "1995-09-30",
+    "address": {
+      "country": "CAN",
+      "postCode": "123456",
+      "town": "usersAddressTown",
+      "state": "usersAddState",
+      "street": "usersAddSt",
+      "subStreet": "usersAddSbSt",
+      "flatNumber": "101",
+      "buildingNumber": "202",
+      "buildingName": "usersAddBuildName",
+      "formattedAddress": "postCode, town, state, street, buildingNumber"
+    },
+    "device": {
+      "coords": {
+        "lat": -1.7976931348623157,
+        "lon": " 1.7976931348623157",
+        "accuracy": "10"
+      },
+      "ipInfo": {
+        "ip": "242.1.1"
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10112) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+      "sessionId": "r-v3-812412m9e12d42",
+      "fingerprint": "usersDeviceFing",
+      "sessionAgeMs": 18,
+      "acceptLang": "en"
+    }
+  },
+  "userPlatformEventInfo": {
+    "type": "general"
+  },
+  "props": {
+    "customProperty": "Custom value",
+    "dailyOutLimit": "10000"
+  }
+}
+```
+```json Submit transaction for existing applicant
+{
+  "txnId": "general0001",
+  "txnDate": "2024-04-29 02:30:12+0000",
+  "type": "userPlatformEvent",
+  "applicant": {
+    "type": "individual",
+    "externalUserId": "PlatformEvent0001",
+    "fullName": "Users Fullname",
+    "placeOfBirth": "settlementName",
+    "dob": "1995-09-30",
+    "address": {
+      "country": "CAN",
+      "postCode": "123456",
+      "town": "usersAddressTown",
+      "state": "usersAddState",
+      "street": "usersAddSt",
+      "subStreet": "usersAddSbSt",
+      "flatNumber": "101",
+      "buildingNumber": "202",
+      "buildingName": "usersAddBuildName",
+      "formattedAddress": "postCode, town, state, street, buildingNumber"
+    },
+    "device": {
+      "coords": {
+        "lat": -1.7976931348623157,
+        "lon": " 1.7976931348623157",
+        "accuracy": "10"
+      },
+      "ipInfo": {
+        "ip": "242.1.1"
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10112) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+      "sessionId": "r-v3-812412m9e12d42",
+      "fingerprint": "usersDeviceFing",
+      "sessionAgeMs": 18,
+      "acceptLang": "en"
+    }
+  },
+  "userPlatformEventInfo": {
+    "type": "general"
+  },
+  "props": {
+    "customProperty": "Custom value",
+    "dailyOutLimit": "10000"
+  }
+}
+```
+
+Before submitting a transaction, you can also view supported event types.
+
+1. Open one of the API methods mentioned above.
+2. Scroll to the Body Params.
+3. In type, select userPlatformEvent.
+4. Then open userPlatformEventInfo to see the Event type sent within the transaction.
+
+## Step 2: Configure rules
+
+You can use prebuilt rule bundles from the Rules Library tuned to common fraud scenarios. Typical configurations combine:
+
+- Source-specific checks (for instance, Device Intelligence and advanced IP check)
+- Use-case logic (for instance, account takeover or multi-accounting)
+
+Alternatively, you can create custom rules to reflect your risk tolerance and workflows using various conditions, thresholds, and event patterns.
+
+> 📘 Note
+> 
+> For more information on how to install and activate rules, see this article.
+
+## Step 3: View results
+
+Results of behavior monitoring rules scoring will be available in response to the API call that you used to create the transaction. You can use it right away for an immediate action.
+
+Additionally, after submitting a transaction, you will receive a webhook indicating transaction status.
+
+You can also view the assessment results and react on Behavior Monitoring statuses using this API method.
+
+Request example:
+
+```curl
+curl --request GET \
+     --url https://api.sumsub.com/resources/kyt/txns/id/one
+```
+
+================================================================================
+
+# Fraud Network Detection webhooks
+URL: https://docs.sumsub.com/docs/fraud-network-detection-webhooks
+
+This section lists a collection of webhooks that you may receive during the fraud network detection.
+
+| Webhook                                                         | Description                                         |
+| :-------------------------------------------------------------- | :-------------------------------------------------- |
+| applicantFraudNetworkCreated   | New applicant fraud network has been created.       |
+| applicantFraudNetworkModified | Existing applicant fraud network has been modified. |
+
+> 📘 Note
+> 
+> Personal applicant information is not available in the webhook payload. To get this information, use  this API method.
+
+> 👍 Tip
+> 
+> If you are not receiving webhooks, try to check your endpoints using SSL Labs or Docker.
+
+# applicantFraudNetworkCreated
+
+The following example indicates that a new applicant fraud network has been found and created in the Sumsub system, so you can review its data.
+
+```json
+{
+  "correlationId": "da9564f4437c9fcd059f99e0b94fa04d",
+  "sandboxMode": false,
+  "type": "applicantFraudNetworkCreated",
+  "networkId": "6447b124728bf40939aa664f",
+  "createdAtMs": "2023-08-30 09:59:52.864"
+}
+```
+
+| Name            | Type    | Description                                                                                                                                                                                |
+| :-------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `correlationId` | String  | A shared identifier assigned to the originating request and propagated across all related events. Multiple events may share the same `correlationId` when triggered by the same operation. |
+| `sandboxMode`   | Boolean | Set to `true` if the webhook was sent from Sandbox.                                                                                                                    |
+| `type`          | String  | Webhook type. In this context, it is `applicantFraudNetworkCreated`.                                                                                                                       |
+| `networkId`     | String  | Unique identifier of the network.                                                                                                                                                          |
+| `createdAtMs`   | Date    | Date and time when the webhook was created, considering milliseconds (format `yyyy-MM-dd HH:mm:ss.fff`, e.g. `2021-05-14 16:00:25.032`) in UTC.                                            |
+
+# applicantFraudNetworkModified
+
+The following example indicates that an existing applicant fraud network has been modified. Triggered when a new applicant is added to the network.
+
+> 📘 Note
+> 
+> - Applicants can't be removed from fraud networks once added.
+> - You will receive separate webhooks for each fraud network an applicant is added to.
+
+```json
+{
+  "applicantId" : "6527f43421031b3dec978570",
+  "applicantType" : "individual",
+  "correlationId": "da9564f4437c9fcd059f99e0b94fa04d",
+  "sandboxMode": false,
+  "externalUserId" : "level-7781849b-229a-4a62-a3f6-7880d5b627ac",
+  "type": "applicantFraudNetworkModified",
+  "networkId": "6447b124728bf40939aa664f",
+  "createdAtMs": "2023-08-30 09:59:52.864"
+}
+```

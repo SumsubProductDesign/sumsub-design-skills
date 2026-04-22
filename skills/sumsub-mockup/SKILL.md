@@ -86,6 +86,22 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    Trigger is the user's task text, not your plan. If the user says "domain management with add flow", the task involves modals — re-read the Modal section before `use_figma` even if your plan doesn't mention it yet.
 
+   **Product-docs triggers — read the matching docs file from `${CLAUDE_PLUGIN_ROOT}/reference/products/` BEFORE writing code.** These are the canonical feature docs from docs.sumsub.com. Reading them gives you real feature names, correct flow steps, actual field labels instead of made-up ones.
+
+   | Task mentions / is about… | Read (from `${CLAUDE_PLUGIN_ROOT}/reference/products/`) |
+   |---|---|
+   | Dashboard overview, account, billing, **SSO, domain management**, verification levels overview, team roles | `sumsub-docs-overview.txt` |
+   | Applicant verification, KYC, ID docs, selfie, biometric, address, phone/email, questionnaire, payment checks, applicant flow, reusable identity | `sumsub-docs-user-verification.txt` |
+   | Fraud prevention, device intelligence, risk scoring, blocklists, IP check, antifraud | `sumsub-docs-fraud-prevention.txt` |
+   | KYB, business verification, company, UBO, ownership, AML watchlists, adverse media, corporate docs | `sumsub-docs-kyb.txt` |
+   | Transactions, transaction monitoring, rules, travel rule, crypto, VASP, wallet, payments flagging | `sumsub-docs-transaction-monitoring.txt` |
+   | Case management, queues, compliance officer, blueprints, SAR/STR, investigation | `sumsub-docs-case-management.txt` |
+   | Workflow builder, verification levels/steps, automation, marketplace, conditions, actions, review steps | `sumsub-docs-workflow.txt` |
+
+   These files are large (user-verification.txt is 12K lines). **Read with `limit: 2000` and navigate by keyword** — search for the specific feature (e.g. `Domain management`, `Workflow builder`, `Case blueprint`) and read that section. Don't try to ingest the whole file. Use `Grep` tool if Read won't find the right section.
+
+   Failure mode: building a "Domain management" mockup with invented field names, flow steps, and statuses — when docs-overview.txt has the exact spec. If you skip the read, you'll ship a mockup that doesn't match the actual product.
+
 3. **Never invent components for known Sumsub products, and never deliver a "bare" mockup as a workaround.** If the product exists in our design system, every major structural piece (Sidebar, Header, Flowbuilder Header, Canvas, Canvas Bars, AP page header) must be an instance of an actual DS component.
 
    **Forbidden patterns:**

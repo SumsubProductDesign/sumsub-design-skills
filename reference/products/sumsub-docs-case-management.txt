@@ -1,0 +1,1509 @@
+# About Case Management
+URL: https://docs.sumsub.com/docs/case-management
+
+Sumsub allows you to create cases for investigation using the selected criteria and assign them to dedicated compliance officers for further processing. 
+
+In a case, you can combine specific applicant data such as AML matches, payment methods, user platform events, similar transactions indicative of suspicious activity, and many more. 
+
+When a case is created, it is assigned a blueprint that outlines specific processes and workflows for it. 
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/40e8b401beb3128cdd5277b7f3f6b4014d0943939cfe54122960d95dc9ca54f6-4.3.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+# Benefits of Sumsub Case Management
+
+Our Case Management solution offers the following benefits: 
+
+- Automation. The data is combined into a case and sent to the selected officer’s queue automatically, which reduces operational costs and improves detection accuracy for various types of financial crimes.
+- Prioritization. Using blueprints allows high-risk cases to receive immediate attention from trained staff who can conduct a more in-depth review.
+- Data availability. All data is accumulated in one place, and all applicants' properties and context are stored on one page.
+- Escalation options. Cases can be escalated based on blueprints and transferred between the officers and teams without any errors or miscommunication.
+- Specialization. You can use blueprints to designate specialized teams for handling escalated cases. These teams may consist of experts in fraud detection or compliance who have the skills necessary to navigate complex situations and make informed decisions.
+- Record keeping. A well-structured blueprint includes documentation and reports of the case processing.  
+  Compliance. Blueprints can be quickly updated to ensure compliance with current laws and standards. 
+
+# How Sumsub Case Management works
+
+The case management process includes the following steps:
+
+1. Set up blueprints and assign the officers to work with them.
+2. Enable automated case creation in the Rule manager and/or Workflow Builder.
+3. Review and resolve cases and generate reports.
+
+> 📘 Note
+> 
+> AML cases are available in a separate dashboard. For more information, follow the Review AML Cases link below.
+
+[block:html]
+{
+  "html": "\n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n          \n         Review cases\n         Streamline transaction monitoring with Cases.\n      \n      \n         Review AML cases\n         Be aware of AML matches during monitoring.\n      \n       \n         Set up blueprints\n         Select the data to be displayed to your compliance officers.\n      \n   \n   \n"
+}
+[/block]
+
+# Create regulatory reports
+
+================================================================================
+
+# Migrate to Case Management 2.0
+URL: https://docs.sumsub.com/docs/migrate-to-case-management-20
+
+The fundamental difference between Case Management 1.0 and Case Management 2.0 is the use of blueprints instead of queues.
+
+Blueprints are much more flexible compared to queues and provide a huge field for customization. Also, blueprints allow for faster and more focused case investigation, as they let you select the type and amount of data analyzed for the specific blueprint.
+
+> 📘 Note
+> 
+> This guide is valid only for customers using Case Management V1. If you already use the new version or do not use Case Management at all, the migration is not required.
+
+# Transition to Case Management 2.0
+
+## Analyze your queues
+
+The migration is a perfect time for refactoring your methodology and approach:
+
+1. In the Dashboard, go to Case Management 1.0 and open queue settings.
+2. Check your queues and make a decision on creating blueprints. You can create a blueprint for each queue or utilize more advanced logic.
+
+## Create blueprints
+
+Now, it is time to create blueprints:
+
+1. Navigate to Blueprints settings.
+2. Create the needed blueprints, as described in this article. 
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/5545cf6558b1c372875b77031539e37852df514d69c011e64f3064a0bfaddf74-Frame2085664768.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+## Add blueprints to rules
+
+After creating the blueprints, you must update all the rules that affect case creation:
+
+1. Navigate to your Installed rules list. 
+2. Open a rule that affects case creation and attach the right blueprint to it. All blueprints you created are available in the list for attachment.
+3. Select the Group by option: Rule and applicant or just Applicant for proper case creation.
+
+When this step is complete, all new cases will be generated using the blueprints you set up.
+
+## Use blueprints in Workflow Builder
+
+If you want to use actions with blueprints to generate cases in the Workflow builder, you should introduce the blueprints to your workflows. 
+
+Contact your Customer Success Manager at csm@sumsub.com, and the Sumsub team will add a dedicated block with the Create case type of action and the selected blueprints to the Builder.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/46f7633ba0d0e93bbc75409a5254d5f24975cb5c11f249751fa804b434e3c391-Frame2085664772.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+## Utilize blueprints for AML Monitoring
+
+If you generate cases for Ongoing AML Monitoring:
+
+1. Navigate to Configurations.
+2. Select the needed blueprint from the Blueprints drop-down menu.
+
+## Migrate existing cases
+
+There are two ways to migrate your unresolved cases:
+
+- If you have fewer than 25 unresolved cases, you must resolve them manually without any additional actions.
+- If you have more than 25 unresolved cases, you can either resolve them manually or request automated migration from your Customer Success Manager.
+
+For the automated migration of the unresolved cases, provide the table in the following format to your Customer Success Manager:
+
+| Queue name        | Blueprint name |
+| :---------------- | :------------- |
+| Applicants queue  | Applicants     |
+| Transaction queue | Transactions   |
+| AML queue         | AML            |
+
+## Disable Case Management 1.0
+
+After completing the steps above, contact your Customer Success Manager to disable Case Management 1.0.
+
+================================================================================
+
+# Set up blueprints
+URL: https://docs.sumsub.com/docs/setting-up-blueprints
+
+Blueprints allow you to define the investigation flow for the selected cases and decide which data will be displayed on the case page. 
+
+You can use one of four preset blueprints located on the Blueprints page or create your own blueprint.
+
+Preset blueprints allow you to:
+
+| Blueprint           | Description                                              |
+| :------------------ | :------------------------------------------------------- |
+| Screening hit       | Manage watchlist alerts and PEP screening results.       |
+| AML investigation   | Investigate potential money laundering cases.            |
+| Suspicious activity | Prevent fraud and resolve flagged behavior situations.   |
+| KYC                 | Ensure regulatory compliance during customer onboarding. |
+
+You can enter the selected blueprint template by clicking on it and adjust it to your needs by changing its name, adding assignees, or escalating the case to another blueprint.
+
+# Create custom blueprints
+
+To create a new blueprint:
+
+1. Navigate to Blueprints.
+2. Click Create new blueprint.  You will be directed to the Queue settings tab.
+3. Enter the blueprint’s name and description (optional).
+4. Select the blueprint for case escalation. This will let the officer use another blueprint to process the case if more information is needed.
+5. Select how the case assignment will be done. You can either manually pick compliance officers from your list or use the automated (load-based) assignment feature. 
+6. If you selected, load-based assignment, pick officers from the list and set the number of cases that make automated assignment applicable. For example, you can decide to assign cases with a specific blueprint to the officers with fewer than 10 active cases. Then, the system will pick an officer from this group with the fewest cases and assign the next case to them. If the number of cases assigned to all selected officers exceeds the limit, new cases will be placed in a queue and assigned to an officer whose load falls below the limit first. These cases will also be available for manual assignment.
+
+> 📘 Note
+> 
+> If the operator you selected for load-based assignment is offline, they will not get any cases regardless of their current workload.
+
+7. Switch to the Case page content tab.
+8. Activate the Overview by Summy toggle if you want the AI case overview to be displayed.
+9. Activate the Checklist toggle to create a Case checklist. Add checklist items as described in this article. 
+10. Select the data to be displayed on the case page and click Create to use the blueprint in your rules and levels. 
+
+You can include the following data:
+
+[block:html]
+{
+  "html": "\n    .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 200px;\n    }\n\n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n\n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n        min-width: 200px;\n    }\n\n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n\n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n\n\n    \n        \n            \n                \n                    \n                        Preset\n                    \n                    \n                        Data\n                    \n                \n            \n            \n                \n                    \n                        Identity\n                    \n                    \n                        \n                            \n                                Personal information\n                            \n                            \n                                Contact information\n                            \n                            \n                                Risk overview\n                            \n                            \n                                PoI documents\n                            \n                            \n                                PoA documents\n                            \n                        \n                    \n                \n\n                \n                    \n                        Reporting\n                    \n                    \n                        \n                            Regulatory reports generated for the case.\n                        \n                    \n                \n                \n                    \n                        Verifications\n                    \n                    \n                        Applicant verification summary.\n                    \n                \n                \n                    \n                        AML Control\n                    \n                    \n                        AML screening results.\n                    \n                \n                \n                    \n                        Financial data and sources\n                    \n                    \n                        \n                            \n                                Payment methods\n                            \n                            \n                                Financial transactions\n                            \n                        \n                    \n                \n            \n        \n    \n\n"
+}
+[/block]
+
+================================================================================
+
+# Case Checklist
+URL: https://docs.sumsub.com/docs/case-checklist
+
+Case Checklist is a functionality that allows you to determine case resolution steps and make these steps obligatory for your officers if needed. 
+
+It helps you streamline case handling by:
+
+- Providing your officers with a clear roadmap and ensuring that all essential steps for resolution are followed.
+- Establishing a consistent operational procedure.
+- Making it easy to track actions taken and hold team members accountable for their decisions.
+- Ensuring that cases are not closed too early or without all necessary information.
+
+# How Case Checklist works
+
+The Case Checklist is configured within the blueprint settings and serves as a template for a case handler's behavior. 
+
+For example, you can require them to do the following:
+
+- Review the case trigger and customer profile.
+- Verify the applicant's document authenticity.
+- Confirm customer risk level.
+- Review the previous case history.
+- Document internal notes and actions taken.
+- Escalate the case if a policy violation is detected
+- Finalize the resolution decision.
+
+Each checklist is assigned to the corresponding blueprint and cannot be changed independently or used independently.
+
+> 📘 Note
+> 
+> If you have no blueprints set up, the checklist feature will not be available.
+
+# Get started with Case Checklist
+
+To create a new Case Checklist:
+
+1. Navigate to Blueprints.
+2. Select the blueprint to edit or click Create blueprint.
+3. Set up the blueprint, as described in this article.
+4. Activate the Checklist toggle to create a checklist.
+5. Select the Make checklist optional for case resolution checkbox to let your officers resolve the case without completing the list.
+6. In the Checklist section, add and define your checklist items. You may add 5-7 items for optimal clarity and usability. Each item should represent a distinct, actionable step in the case resolution process.
+7. Click Add field to create more items; click on the bin to remove items.
+
+Items will be automatically numbered and displayed in the case interface for users assigned to the case. You can also drag and drop items to change their order and adjust the case resolution flow.
+
+> 📘 Note
+> 
+> If you adjust the checklist configuration, the changes will only apply to new cases created under the modified blueprint.
+> 
+> Existing cases will not be retroactively updated.
+
+You can view the applied checklist on the right side of the selected case page.
+
+================================================================================
+
+# Review cases
+URL: https://docs.sumsub.com/docs/review-cases
+
+Cases help you streamline monitoring by allowing officers to consolidate multiple alerts for one applicant into a single case. The feature aids in managing workload efficiently and enables the analysis of transaction patterns to support and enhance decision-making.
+
+In the main page view, you can find three tabs dividing the cases into different stages:
+
+- All cases — all cases that are currently active.
+- My cases — all cases that are currently assigned to you.
+
+# Case statuses
+
+There are the following statuses in which a case may be:
+
+- Open — a case has been created and is waiting for an officer’s review.
+- Under review — a case is being reviewed by an officer.
+- Awaiting user — an applicant’s response/action has been requested.
+- On hold — a case has been postponed for some reason.
+- Resolved — a case that has been considered and either approved or rejected.
+
+## Case page
+
+You can open a case page by clicking on the case name. The page contains the following information. 
+
+| Section        | Data                                                                                                                                |
+| :------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| Overview       | The information about the applicant collected in accordance with the blueprint selected for this case. |
+| AML            | The AML screening results (if available).                                                                      |
+| Related cases  | Links to other cases created for this applicant.                                                                                    |
+| Financial data | Applicant payment methods.                                                                                                          |
+| Events         | Case processing history.                                                                                                            |
+| FIU reports    | Reports generated for the case.                                                                                                     |
+
+> 📘 Note
+> 
+> Currently, we have two distinct flows for AML case management: the new flow and the legacy flow. To learn more about these flows, refer to this article.
+
+# AI overview
+
+Sumsub allows you to generate an AI summary of the selected case. The summary contains an intelligent overview of the case, which you can use to accelerate decision-making and help your team work faster.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/daf4a930cf8f9805e4f48399d31032c1a0de50da03c7513968d6f6ad9e243c85-COVER_01.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+The summary contains the case and initiation context, including the applicant's background, transaction history, and behavior based on existing data.
+
+## Get started with AI overview
+
+To display the AI summary, you need to activate the Overview by Summy when setting up your blueprint. 
+
+You can copy the AI summary or refresh the data when needed.
+
+# Change case status
+
+The status of a case can be changed at the top of the page. For example, in the beginning, you click Start case review and its status goes from Open to Under review.
+
+You can also generate a regulatory report for this case or escalate it to another blueprint.
+
+If none of the above is needed, and the decision has been made, you should select Resolve and identify the results.
+
+Once everything is done and the decision has been made, you should select Resolve and identify the results. Select an option in Resolution (False positive or Valid threat) and leave a resolution note if needed.
+
+# Change transaction status
+
+During case management, you can also change the status for each individual transaction. To do so, you should select the checkbox on the left of the transaction name and select Approve, Reject, or Pending. You can also sign the transaction as confirmed in case of confirmation of the status that has been given to it automatically. 
+
+# Conduct post-monitoring
+
+The main business solution offered and provided via Sumsub’s Cases is post-monitoring. The essence of the feature is that you can analyze your applicants’ patterns by analyzing their transactions for a particular period of time, conduct a complex review, and make a decision.
+
+================================================================================
+
+# Manage case lifecycle
+URL: https://docs.sumsub.com/docs/manage-cases
+
+Our case management flow is designed to seamlessly take each case from its initial point to resolution.
+
+Most steps of the flow, such as case creation and assignment, are automated. However, if manual interference is required, you have all the options for it.
+
+For example, you can simplify and enhance your work in Case Management by adding transactions to your investigations and assigning cases  in bulk to a dedicated officer.
+
+Once a case is created, it appears on the My cases  and the Overview pages.
+
+You can  also simplify and enhance your work in Case Management by adding transactions to your investigations and assigning cases to dedicated compliance officers individually or in bulk.
+
+# Overview cases
+
+Once a case is created, it appears on the My cases  and the Overview pages.
+
+You can  also simplify and enhance your work in Case Management by adding transactions to your investigations and assigning cases to dedicated compliance officers individually or in bulk.
+
+The Majestic Overview functionality allows you and your compliance officers to evaluate the current workload and prioritize cases wisely. 
+
+On the Overview page you can find the following data:
+
+1. The number of cases to resolve.
+2. The number of cases awaiting a user.
+3. Resolved cases.
+4. Open cases per blueprint (assigned to user and all cases)
+5. Cases where an FIU report has been generated.
+
+With these options, you will always be aware of your teams productivity and identify blockers early on.
+
+# Create cases manually
+
+If needed, you can add cases for the selected transaction or applicant manually.
+
+To create a case for an applicant:
+
+1. Navigate to the Applicants page and select an applicant.
+2. Click on the three-dot menu in the upper right corner of the screen and select Create case.
+3. Add the case title and the blueprint to be applied.
+4. Click Create case again to be redirected to the case page
+
+To create a case for a transaction:
+
+1. Navigate to the Transactions page and select a transaction.
+2. Click Add to case.
+3. Select Create new case.
+4. Add the case title and the blueprint to be applied.
+5. Click Create case again to be redirected to the case page.
+
+# Add transaction to case
+
+Transactions can be added to a case manually or via transaction monitoring rules.
+
+## Add transactions manually
+
+To add transactions manually, do any of the following:
+
+- In the Dashboard, go to Transactions and Travel Rule, select the checkbox on the left of the transaction name, and click Add to case.
+- In the Dashboard, go to Transactions and Travel Rule, open any transaction from the list, and click Add to case in the upper-right corner.
+- Open an applicant profile and go to the Transaction monitoring tab, select a transaction from the Applicant Transactions list, and click Add to case.
+
+## Add transactions via rules
+
+To add transactions via rules:
+
+1. In the Dashboard, open the Rules page.
+2. Select a rule from the list and click Edit.
+3. In the Create case block, select the Create with the matched transaction checkbox.
+
+When done, all transactions triggering the rule will be added to a case for further review. For example, you can set up this process with the Multiple transactions with the same amount for the last 1 day rule and review the similar amount transactions more thoroughly via Cases.
+
+> 🚧 Important
+> 
+> Transactions related to different applicant profiles cannot be added to the same case.
+
+# Assign cases
+
+Typically, cases are assigned to compliance officers automatically, based on the selected blueprint. However, you can manually designate an officer to consider a case or all cases awaiting review. 
+
+To assign a case:
+
+1. Navigate to the Cases page.
+2. Filter the cases by a specific parameter if needed, and select the cases to be assigned by ticking the respective boxes (for bulk assign tick the box at the top of the list).
+3. Pick the assignee from the drop-down menu.
+
+> 📘 Note
+> 
+> You can only apply bulk assign to the cases that belong to a single blueprint.
+
+================================================================================
+
+# Create new case
+URL: https://docs.sumsub.com/docs/create-new-case
+
+Create new cases automatically and conduct investigations thanks to the complementary functionality of Case Management and other Sumsub products, such as Workflow Builder and AML Screening.
+
+# Create cases via Workflow Builder
+
+Add cases using Workflow Builder: 
+
+1. Go to Integrations→Workflow Builder and navigate to Active workflow.
+2. Add a verification level for individuals or companies as a starting step.
+3. Include additional nodes with level steps or conditions if needed.
+4. To create a case, include the Action node in your flow and configure its settings:
+   1. Select type of action—Create case.
+   2. Choose a required blueprint from the list.
+
+As per the settings, a new case will be created once an applicant triggers the Action node branch while passing verification.
+
+# Create cases from Ongoing AML hits
+
+Create a new case once an applicant receives new watchlist matches during Ongoing AML monitoring.
+
+1. Go to Integrations→AML Screening and navigate to the Configurations tab.
+2. Configure Ongoing AML monitoring:
+   1. Make sure that the Enable auto-screening AML box is checked.
+   2. Check the Create cases from ongoing monitoring hits box.
+3. Set up case creation — select blueprints for the cases created from ongoing AML hits.
+4. Save changes.
+
+# Create cases via custom rules
+
+Generate a new case every time your custom rule is triggered to conduct further investigation. 
+
+1. Follow the Get started with custom rules instructions to create and configure a new rule.
+2. Adjust case creation from triggering the rule:
+   1. Set up grouping:
+      1. Select grouping By applicant if you want all the alerts about the rules triggered for a specific applicant combined in one case.
+      2. Select grouping By rule and applicant if you want a separate case created for each rule triggered for an applicant.
+   2. Pick the blueprint for the case to be sent to a dedicated investigators team.
+   3. Add conditions that will be used to add more transactions to the case. This will let your officers process the transaction matching together with the transactions that trigger the rule you are editing.
+
+================================================================================
+
+# Export case data
+URL: https://docs.sumsub.com/docs/export-case-data
+
+The case data export feature lets you download structured case data as a CSV file. Export includes relevant case attributes that can be analyzed by the client officer. This feature also allows you to import the file in a machine-readable format into the customer’s internal system.
+
+# How to export case data
+
+The process of importing CSV reports depends on the version of the Case Management you use. 
+
+## Export case data in Case Management 1.0
+
+To download a CSV file, perform the following steps:
+
+1. In the Dashboard, navigate to Case Management 1.0 and open My cases. Apply filters if needed.
+2. Click the Menu button in the top right corner.
+3. Download the selected cases. 
+
+The table below describes the fields in the CSV-file generated during the CSV export in Case Management 1.0.
+
+> 📘 Note
+> 
+> - The total number of rows in the report is limited by 10000 rows.
+> - Applicable status means that the field is applicable for this specific Case Management version.
+
+| Column Name                                    | Data type | Applicable | Description                                                   |
+| :--------------------------------------------- | :-------- | :--------- | :------------------------------------------------------------ |
+| `id`                                           | ObjectId  | Yes        | Case Id.                                                      |
+| `name`                                         | String    | Yes        | Case name.                                                    |
+| `applicantReference.applicantId`               | ObjectId  | Yes        | Applicant's Id from the case.                                 |
+| `applicantReference.inactive`                  | Boolean   |            | Applicant's inactive status.                                  |
+| `txnIds`                                       | List      | Yes        | Id of the transaction associated with the case.               |
+| `createdByType`                                | String    | Yes        | Trigger for the case creation.                                |
+| `groupByType`                                  | String    |            | Type of the case.                                             |
+| `createdByRule.id`                             | ObjectId  | Yes        | Id of the rule that triggered the case creation.              |
+| `createdByRule.name`                           | String    | Yes        | Name of the rule that triggered the case creation.            |
+| `createdByRule.title`                          | String    | Yes        | Title of the rule that triggered the case creation.           |
+| `createdByRule.revision`                       | String    | Yes        | Revision of the rule that triggered the case creation.        |
+| `createdByRule.tags`                           | LIst      |            | Tags of the rule that triggered the case creation.            |
+| `createdByLevelRef.id`                         | ObjectId  |            | Id of the level that triggered the case creation.             |
+| `createdByLevelRef.name`                       | String    |            | Name of the level that triggered the case creation.           |
+| `createdByOfficer`                             | String    | Yes        | Officer's name or service created the case.                   |
+| `createdByWorkflowRef.id`                      | ObjectId  |            | Id of the workflow that triggered the case creation.          |
+| `createdByWorkflowRef.title`                   | String    |            | Title of the workflow that triggered the case creation.       |
+| `createdAt`                                    | Date      | Yes        | Date when the case was created.                               |
+| `updatedAt`                                    | Date      | Yes        | Date when the case was updated.                               |
+| `totalAmountInDefaultCurrency`                 | Double    | Yes        | Total amount of transactions in the case in default currency. |
+| `review.reviewId`                              | ObjectId  | Yes        | Id of the review.                                             |
+| `review.attemptId`                             | ObjectId  | Yes        | Id of the  specific review attempt.                           |
+| `review.attemptCnt`                            | Integer   | Yes        | Total number of review attempts.                              |
+| `review.elapsedSincePendingMs`                 | Long      | Yes        | Time since the case got the Pending status.               |
+| `review.elapsedSinceQueuedMs`                  | Long      | Yes        | Time since this case has been queued for the review.          |
+| `review.reprocessing`                          | Boolean   | Yes        | Mark of the reprocessing.                                     |
+| `review.levelName`                             | String    | Yes        | Name of the level an applicant passed for the verification.   |
+| `review.createDate`                            | Date      | Yes        | Date when case moved to pending status.                       |
+| `review.reviewDate`                            | Date      | Yes        | Date when review was completed.                               |
+| `review.startDate`                             | Date      | Yes        | Date when a case moved to queued status.                      |
+| `review.expireDate`                            | Date      | Yes        | Date when review should be unassigned from the officer.       |
+| `review.reviewReasonCode`                      | List      | Yes        | Reason code of the review.                                    |
+| `review.reviewResult.moderationComment`        | String    | Yes        | Moderation comment of the review.                             |
+| `review.reviewResult.originalAnswer`           | String    | Yes        | Original answer of the review.                                |
+| `review.reviewResult.reviewAnswer`             | String    | Yes        | Review answer of the review.                                  |
+| `review.reviewResult.reviewRejectType`         | String    | Yes        | Reject type of the review.                                    |
+| `review.reviewResult.requiredAdditionalIdDocs` | List      | Yes        | List of required documents.                                   |
+| `review.reviewStatus`                          | String    | Yes        | Status of the review.                                         |
+| `review.officerName`                           | String    | Yes        | Officer's name assigned to the case.                          |
+| `review.confirmed`                             | Boolean   | Yes        | Mark of confirmation.                                         |
+| `review.priority`                              | Integer   | Yes        | Priority of the review.                                       |
+| `tags`                                         | List      | Yes        | Tags attached to the case.                                    |
+| `applicantInfo.firstName`                      | String    | Yes        | First name of the applicant.                                  |
+| `applicantInfo.firstNameEn`                    | String    | Yes        | First name of the applicant in English.                       |
+| `applicantInfo.middleName`                     | String    | Yes        | Middle name of the applicant.                                 |
+| `applicantInfo.middleNameEn`                   | String    | Yes        | Middle name of the applicant in English.                      |
+| `applicantInfo.lastName`                       | String    | Yes        | Last name of the applicant.                                   |
+| `applicantInfo.lastNameEn`                     | String    | Yes        | Last name of the applicant in English.                        |
+| `applicantInfo.dob`                            | Date      | Yes        | Date of birth of the applicant.                               |
+| `applicantInfo.country`                        | String    | Yes        | Country of the applicant.                                     |
+| `lastReportInfo.id`                            | ObjectId  | Yes        | Id of the last FIU report.                                    |
+| `lastReportInfo.name`                          | String    | Yes        | Name of the last FIU report.                                  |
+| `lastReportInfo.createdAt`                     | Date      | Yes        | Date of creation of the last FIU report.                      |
+| `lastReportInfo.createdBy`                     | Date      | Yes        | Source of creation of the last FIU report.                    |
+| `lastReportInfo.jurisdictionCountryCode`       | String    | Yes        | Country code of the country the report was created for.       |
+| `lastReportInfo.reportCode`                    | String    |            | Report code of the last FIU report.                           |
+| `blueprintReference.name`                      | String    |            | Name of the blueprint used for the case.                      |
+| `blueprintReference.blueprintId`               | ObjectId  |            | Id of the blueprint used for the case.                        |
+| `masterCaseId`                                 | ObjectId  |            | Id of the master case.                                        |
+| `caseReview.checklistState.checklist`          | List      |            | Blueprint of the review.                                      |
+| `caseReview.resolvedAt`                        | Date      |            | Date of the case resolution.                                  |
+| `amlCases`                                     | List      |            | List of the AML cases attached to the case.                   |
+| `priority`                                     | Integer   |            | Priority of the case.                                         |
+| `caseSummary.aiSummary`                        | String    |            | Case summary generated by Sammy AI.                           |
+| `caseSummary.aiSummaryCreatedAt`               | Date      |            | Date of the case summary generated by Sammy AI.               |
+
+## Export case data in Case Management 2.0
+
+To download a CSV file, perform the following steps:
+
+1. In the Dashboard, navigate to the Case Management 2.0 and open All cases. Apply filters if needed.
+2. Click the Menu button in the top right corner.
+3. Download the selected cases. You can download all selected cases report or SLA report filtered by assignee and case creation date. 
+
+The table below describes the fields in the all cases report generated during the CSV export in Case Management 2.0.
+
+> 📘 Note
+> 
+> - The total number of rows in the report is limited by 10000 rows.
+> - Applicable status means that the field is applicable for this specific Case Management version.
+
+| Column Name                              | Data type | Applicable | Description                                                   |
+| :--------------------------------------- | :-------- | :--------- | :------------------------------------------------------------ |
+| `id`                                     | ObjectId  | Yes        | Case Id.                                                      |
+| `name`                                   | String    | Yes        | Case name.                                                    |
+| `applicantReference.applicantId`         | ObjectId  | Yes        | Applicant's Id from the case.                                 |
+| `applicantReference.inactive`            | Boolean   |            | Applicant's inactive status.                                  |
+| `txnIds`                                 | List      | Yes        | Id of the transaction associated with the case.               |
+| `createdByType`                          | String    | Yes        | Trigger for the case creation.                                |
+| `groupByType`                            | String    |            | Type of the case.                                             |
+| `createdByRule.id`                       | ObjectId  | Yes        | Id of the rule that triggered the case creation.              |
+| `createdByRule.name`                     | String    | Yes        | Name of the rule that triggered the case creation.            |
+| `createdByRule.title`                    | String    | Yes        | Title of the rule that triggered the case creation.           |
+| `createdByRule.revision`                 | String    | Yes        | Revision of the rule that triggered the case creation.        |
+| `createdByRule.tags`                     | LIst      |            | Tags of the rule that triggered the case creation.            |
+| `createdByLevelRef.id`                   | ObjectId  |            | Id of the level that triggered the case creation.             |
+| `createdByLevelRef.name`                 | String    |            | Name of the level that triggered the case creation.           |
+| `createdByOfficer`                       | String    | Yes        | Officer's name or service created the case.                   |
+| `createdByWorkflowRef.id`                | ObjectId  | Yes        | Id of the workflow that triggered the case creation.          |
+| `createdByWorkflowRef.title`             | String    | Yes        | Title of the workflow that triggered the case creation.       |
+| `createdAt`                              | Date      | Yes        | Date when the case was created.                               |
+| `updatedAt`                              | Date      | Yes        | Date when the case was updated.                               |
+| `totalAmountInDefaultCurrency`           | Double    | Yes        | Total amount of transactions in the case in default currency. |
+| `review.reviewId`                        | ObjectId  |            | Id of the review.                                             |
+| `review.attemptId`                       | ObjectId  |            | Id of the  specific review attempt.                           |
+| `review.attemptCnt`                      | Integer   |            | Total number of review attempts.                              |
+| `review.elapsedSincePendingMs`           | Long      |            | Time since the case got the Pending status.               |
+| `review.elapsedSinceQueuedMs`            | Long      |            | Time since this case has been queued for the review.          |
+| `tags`                                   | List      | Yes        | Tags attached to the case.                                    |
+| `applicantInfo.firstName`                | String    | Yes        | First name of the applicant.                                  |
+| `applicantInfo.firstNameEn`              | String    | Yes        | First name of the applicant in English.                       |
+| `applicantInfo.middleName`               | String    | Yes        | Middle name of the applicant.                                 |
+| `applicantInfo.middleNameEn`             | String    | Yes        | Middle name of the applicant in English.                      |
+| `applicantInfo.lastName`                 | String    | Yes        | Last name of the applicant.                                   |
+| `applicantInfo.lastNameEn`               | String    | Yes        | Last name of the applicant in English.                        |
+| `applicantInfo.dob`                      | Date      | Yes        | Date of birth of the applicant.                               |
+| `applicantInfo.country`                  | String    | Yes        | Country of the applicant.                                     |
+| `lastReportInfo.id`                      | ObjectId  | Yes        | Id of the last FIU report.                                    |
+| `lastReportInfo.name`                    | String    | Yes        | Name of the last FIU report.                                  |
+| `lastReportInfo.createdAt`               | Date      | Yes        | Date of creation of the last FIU report.                      |
+| `lastReportInfo.createdBy`               | Date      | Yes        | Source of creation of the last FIU report.                    |
+| `lastReportInfo.jurisdictionCountryCode` | String    | Yes        | Country code of the country the report was created for.       |
+| `lastReportInfo.reportCode`              | String    |            | Report code of the last FIU report.                           |
+| `blueprintReference.name`                | String    | Yes        | Name of the blueprint used for the case.                      |
+| `blueprintReference.blueprintId`         | ObjectId  | Yes        | Id of the blueprint used for the case.                        |
+| `masterCaseId`                           | ObjectId  |            | Id of the master case.                                        |
+| `caseReview.status`                      | String    | Yes        | Status of case review.                                        |
+| `caseReview.assignee`                    | String    | Yes        | Assignee to the case.                                         |
+| `caseReview.checklistState.checklist`    | List      |            | Blueprint of the review.                                      |
+| `caseReview.resolvedAt`                  | Date      |            | Date of the case resolution.                                  |
+| `amlCases`                               | List      |            | List of the AML cases attached to the case.                   |
+| `priority`                               | Integer   |            | Priority of the case.                                         |
+| `caseSummary.aiSummary`                  | String    |            | Case summary generated by Sammy AI.                           |
+| `caseSummary.aiSummaryCreatedAt`         | Date      |            | Date of the case summary generated by Sammy AI.               |
+
+The table below describes the fields in the SLA report generated during the CSV export in Case Management 2.0.
+
+| Column name                                          | Data type | Applicable | Description                                                                   |
+| :--------------------------------------------------- | :-------- | :--------- | :---------------------------------------------------------------------------- |
+| `caseSummary.id`                                     | ObjectId  | Yes        | Case id.                                                                      |
+| `caseSummary.masterCaseId`                           | ObjectId  | Yes        | Master case id.                                                               |
+| `caseSummary.name`                                   | String    | Yes        | Case name.                                                                    |
+| `caseSummary.blueprintReference.name`                | String    | Yes        | Name of the case blueprint.                                                   |
+| `caseSummary.blueprintReference.blueprintId`         | ObjectId  | Yes        | Id of the case blueprint.                                                     |
+| `caseSummary.createdAt`                              | Date      | Yes        | Creation date of the case.                                                    |
+| `caseSummary.resolvedAt`                             | Date      | Yes        | Resolution date of the case.                                                  |
+| `caseSummary.applicant.applicantId`                  | ObjectId  | Yes        | Id of the applicant associated with the case.                                 |
+| `caseSummary.applicant.inactive`                     | Boolean   |            | Inactive status of the applicant associated with the case.                    |
+| `caseSummary.status`                                 | String    | Yes        | Status of the applicant associated with the case.                             |
+| `caseSummary.assignId`                               | ObjectId  | Yes        | Identificator of the assigned officer.                                        |
+| `caseSummary.assigneeFullName`                       | String    | Yes        | Full name of the assigned officer.                                            |
+| `caseSummary.tags`                                   | List      | Yes        | List of tags attached to the case.                                            |
+| `caseSummary.lastReportInfo.id`                      | ObjectId  | Yes        | Id of the last FIU report.                                                    |
+| `caseSummary.lastReportInfo.name`                    | String    | Yes        | Name of the last FIU report.                                                  |
+| `caseSummary.lastReportInfo.createdAt`               | Date      | Yes        | Date of creation of the last FIU report.                                      |
+| `caseSummary.lastReportInfo.createdBy`               | String    | Yes        | Source of creation of the last FIU report.                                    |
+| `caseSummary.lastReportInfo.jurisdictionCountryCode` | String    | Yes        | Country code of the country the report was created for.                       |
+| `caseSummary.lastReportInfo.reportCode`              | String    | Yes        | Report code of the last FIU report.                                           |
+| `caseSummary.source.createdByType`                   | String    | Yes        | Entity type that triggered the case creation (rule, workflow, level, officer) |
+| `caseSummary.source.createdBy`                       | String    | Yes        | Officer's name or service that created the case.                              |
+| `caseSummary.source.ruleReference`                   | Object    | Yes        | Summarized rule data.                                                         |
+| `caseSummary.source.workflowReference`               | Object    |            | Summarised workflow data.                                                     |
+| `caseFirstTxn.txnId`                                 | ObjectId  | Yes        | Id of the transaction that triggered the case creation.                       |
+| `caseFirstTxn.txnDirection`                          | String    | Yes        | Direction of transaction that triggered the case creation.                    |
+| `caseFirstTxn.txnDate`                               | Date      | Yes        | Date of transaction that triggered the case creation.                         |
+| `caseFirstTxn.txnCounterpartyApplicantId`            | ObjectId  | Yes        | Id of the counterparty from the transaction that triggered the case creation. |
+| `elapsedSinceOpenedMs`                               | Long      | Yes        | Duration between the case creation and the case resolution.                   |
+| `elapsedSinceOpened`                                 | String    | Yes        | Duration between the case creation and the case resolution.                   |
+| `notes`                                              | List      | Yes        | Notes from the case.                                                          |
+
+================================================================================
+
+# Automate regulatory reporting
+URL: https://docs.sumsub.com/docs/automate-regulatory-reporting
+
+When a financial or other institution detects suspicious or potentially illegal activity, they file a Suspicious Activity Report (SAR) with the local regulator.
+
+Such a report includes detailed information about the detected activity, the parties involved, and all relevant supporting documentation.
+
+While SARs are widely recognized as a primary form of reporting to Financial Intelligence Units, they are part of a larger framework of reports that financial institutions may need to submit based on the specifics of a transaction. These include: 
+
+- Suspicious Transaction Reports (STRs)
+- Cash Transaction Reports (CTRs)
+- Threshold Transaction Reports (TTRs)
+- Unusual Transaction Reports (UTRs)
+- International Funds Transfer Reports (IFTs)
+- Cross-Border Reports
+- Terrorism Financing Reports (TFRs)
+
+As part of our Transaction Monitoring solution, we offer the functionality that allows you to automate the creation of the STR and CTR reports based on the existing cases.  
+
+> 📘 Note
+> 
+> Regulatory reporting is an add-on to Transaction Monitoring. You can clarify the billing rules with your Customer Success Manager.
+
+# How report generation works
+
+The reports can be generated manually or automatically as XML files with all the fields auto-populated based on the cases, combining one or several transactions.
+
+The STR/CTR reports include specific details such as:
+
+- The nature of the suspicious activity
+- The date(s) of the transactions
+- The individuals or entities involved
+- Relevant account numbers
+- A description of how the activity was detected
+
+The scheme below explains the case processing flow:
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/39dc7023f1b221dd56f5ee5098a13b6fd8de2b602a79808008010d5362214e47-KYT_Diagram.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+## Available jurisdictions
+
+Currently, you can generate reports for 50 countries worldwide:
+
+> Soon, the list will be expanded to include new locations and formats.
+
+## Available report types
+
+Available report types depend on transaction counterparties and include the following:
+
+- My client to My client
+- My client to Third party
+- Third party to My client
+
+# Generate reports using report template builder
+
+Report builder allows you not only to generate reports for Finance Intelligence Units but also to save them as templates to avoid duplicate data input.
+
+To generate a report template in Case Management 1.0, you should start from the Reports page. In Case Management 2.0 start from the FIU Report Templates page:
+
+1. Click Create Report Template and select the jurisdiction and report type.
+2. Select and fill in the fields to be included in the report by ticking boxes in the sidebar. Some of the fields are obligatory and cannot be excluded. These fields contain static info that will be validated before report generation. The fields that are not obligatory allow you to use any transaction GoAML schema field in your report. For example, you can combine the obligatory transaction data with more detailed involved parties and currency info.
+3. Click Validate fields to have obligatory fields validated. 
+4. If validation is successful, click Finalize report template. 
+
+The table below contains a brief description of all available fields.
+
+| Field                | Obligatory | Description                                                                                                                                                                    | Input                |
+| :------------------- | :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------- |
+| Rentity ID           | Yes        | A unique identifier assigned to the reporting entity. It helps the FIU track and manage reports from various entities.                                                         | Text                 |
+| Rentity branch       | No         | The location of the branch of the reporting entity that is submitting the report.                                                                                              | Text                 |
+| Submission code      | Yes        | The code that identifies the type of report being submitted. It lets the FIU categorize the submissions for processing.                                                        | Drop-down list       |
+| Report code          | Yes        | The code that categorizes the nature of the report, such as money laundering, terrorist financing, or other suspicious activities.                                             | Drop-down list       |
+| Entity reference     | No         | A reference number or code assigned by the reporting entity for internal tracking purposes.                                                                                    | Number               |
+| FIU reference number | No         | The reference number of the Financial Intelligence Unit that processes the report.                                                                                             | Number               |
+| Submission date      | Yes        | The date when the report was submitted to the FIU.                                                                                                                             | Automated generation |
+| Currency code local  | Yes        | The code representing the currency of the reported transaction or activity.                                                                                                    | Drop-down list       |
+| Reporting person     | No         | The individual who is responsible for submitting the report on behalf of the reporting entity.                                                                                 | Drop-down list       |
+| Location             | No         | The geographical location where the transaction or suspicious activity occurred.                                                                                               | Text                 |
+| Reason               | No         | A brief explanation of why the transaction or activity was considered suspicious.                                                                                              | Text                 |
+| Action               | Yes        | Actions taken by the reporting entity in response to the suspicious activity, such as freezing accounts, conducting internal investigations, or filing additional reports.     | Text                 |
+| Transactions         | Yes        | The specific transaction data to be added to the report, including amounts, dates, parties involved, and any relevant transaction identifiers.                                 | Drop-down list       |
+| Activity             | No         | Activities related to the reported transaction(s), which may include patterns of behavior, previous transactions, or other contextual information that can assist in analysis. | Automated generation |
+| Report indicators    | No         | Transaction or activity indicators that help in assessing the level of risk associated with the issue.                                                                         | Drop-down list       |
+
+> 📘 Note
+> 
+> You must collect most information only once per regulation, as it will be saved for further reports.
+
+To use your saved templates: 
+
+1. Navigate to your cases list.
+2. Select a case, and click Generate report at the upper right corner of the screen. 
+3. Ensure the jurisdiction, the type of the report, and the submission date are correct, and click Generate report again. 
+4. The report file will be automatically downloaded to your computer and saved both in the Generated Reports section of the selected case and in the FIU reports tab.
+5. Deliver reports to the regulator by uploading them via the regulatory portal in a few clicks—they are structured in accordance with the FIU’s requirements.
+
+> 📘 Note
+> 
+> You can indicate multiple jurisdictions if you operate with different report types.
+
+You can also enable automated generation of the reports when setting up a blueprint for managing selected cases.
+
+To do so, activate the Reporting toggle and select the STR Reports box.
+
+================================================================================
+
+# Case Analytics
+URL: https://docs.sumsub.com/docs/case-analytics
+
+The Case Analytics dashboard provides aggregated data on the number of cases your team reviewed during the selected period.
+
+# Case Analytics benefits
+
+Analyzing case stats lets you transform case queue management from a reactive, manual, and checklist-driven process into a proactive, data-driven strategic function:
+
+- Identify suspicious patterns and anomalies, such as spikes in transactions, before they escalate into costly incidents or legal liabilities.
+- Introduce additional case grouping factors based on severity, potential impact, and exposure instead of treating them with the same urgency.
+- Reduce administrative burdens by replacing labor-intensive manual analysis.
+- Translate complex data into clear trends and KPIs to make evidence-based decisions. 
+
+# How Case Analytics works
+
+On the Case Analytics tab, you will find a graph representing the cases created and reviewed by your team and a set of tables where these cases are displayed by source, blueprint, status, and assigned officer. 
+
+You can view the following tables:
+
+| Table                                  | Description                                      |
+| :------------------------------------- | :----------------------------------------------- |
+| Case Management - Officer              | Cases sorted by the assigned compliance officer. |
+| Case Management - Blueprint            | Cases sorted by blueprints.                      |
+| Case Management - Case Creation Source | Cases sorted by creation source.                 |
+| Case Management - Total                | Case stats sorted by case statuses.              |
+
+All the tables are set up by Sumsub analytics to display the data for all time or a selected period.
+
+In the tables, you can find the following data (the data may vary depending on the dashboard section).
+
+| Column                              | Description                                                                |
+| :---------------------------------- | :------------------------------------------------------------------------- |
+| officer                             | Dedicated officer email.                                                   |
+| Created cases                       | The number of cases created during the selected period.                    |
+| Case creation source                | The number of cases created by the rule or the officer.                    |
+| Assigned cases                      | The number of cases assigned during the selected period.                   |
+| Resolved cases                      | The number of cases resolved during the selected period.                   |
+| kytCaseBlueprintid                  | The ID of the blueprint associated with the cases.                         |
+| Case name                           | The name of the specific case.                                             |
+| Resolved cases                      | The number of resolved cases with the specific parameter.                  |
+| Resolved cases—Potential Treat Rate | The Threat Rate, determined for resolved cases displayed in %.             |
+| Resolved cases—False Positive Rate  | The False Positive Rate, determined for the resolved cases displayed in %. |
+| Unresolved cases                    | The number of cases that were not resolved within the selected period.     |
+| Reassignment Rate                   | The percentage of the cases that were reassigned.                          |
+| Escalation Rate                     | The percentage of cases that were escalated.                               |
+| Avg. assign time                    | Average time required to assign a case, displayed in hours.                |
+| Avg. resolve time                   | Average time required to resolve a case, displayed in hours.               |
+| Avg. case handling time             | Average time required to process a case, displayed in hours.               |
+
+# Manage Case Analytics data
+
+You can replot the analytics graph to display the data for the selected period, expand it for a more detailed view, turn it into a pie or line chart, and download the data as a CSV file:
+
+- To select the period for data display, pick the date from the drop-down calendar in the upper-right corner of the graph. 
+- To expand the graph, change its format, or download the data, click the dedicated icon in the upper-left corner of the graph. 
+
+You can also select the time period for any of the tables. To do so, pick the date from the drop-down calendar in the upper-right corner of the table. 
+
+To download the data from the tables or graph, click the dedicated button in the upper-left corner of the table. 
+
+To clear all filters and have the data displayed for all time, click Clear filters in the upper-left corner of the graph or table.
+
+================================================================================
+
+# User verification webhooks
+URL: https://docs.sumsub.com/docs/user-verification-webhooks
+
+User verification webhooks are used during verification of your applicants.
+
+The flowchart below outlines the general procedure of applicant verification with webhooks being sent at certain verification steps. 
+
+> Note that the order and existence of the steps may vary depending on the verification level settings.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/5934ab6-6b960a8-scheme.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]
+
+| Webhook                                                                                         | Description                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| applicantCreated                             | Applicant is created.                                                                                                                                                                                                    |
+| applicantPending                             | Applicant has uploaded the required documents and their status changed to `pending`.                                                                                  |
+| applicantReviewed                           | Verification is complete. Contains verification result .                                                                                                                    |
+| applicantOnHold                               | Further processing of the applicant profile is put on hold.                                                                                                                                                              |
+| applicantActionPending                 | Applicant action status changed to `pending`.                                                                                                                                                                            |
+| applicantActionReviewed               | Applicant action verification has been completed.                                                                                                                                                                        |
+| applicantActionOnHold                   | Applicant action verification has been paused.                                                                                                                                                                           |
+| applicantActionLevelChanged       | Applicant action level has changed during the verification flow.                                                                                                                                                         |
+| applicantPersonalInfoChanged     | Applicant personal information has been changed, or the applicant is in the `completed`, `onHold`, `awaitingUser`, or `awaitingService`  status, and information in the applicant documents has also been changed.       |
+| applicantTagsChanged                     | Applicant tags have been modified.                                                                                                                                                                                       |
+| applicantActivated                         | Applicant profile has been set to active.                                                                                                                                                                                |
+| applicantDeactivated                     | Applicant profile has been deactivated.                                                                                                                                                                                  |
+| applicantDeleted                             | Applicant has been permanently deleted.                                                                                                                                                                                  |
+| applicantReset                                 | Applicant has been reset  — applicant status changed to `init` and all documents were set as inactive.                                                                                     |
+| applicantPrechecked                       | Primary data processing is complete.                                                                                                                                                                                     |
+| applicantLevelChanged                   | Applicant level has been changed.                                                                                                                   |
+| applicantWorkflowCompleted         | Workflow has been successfully completed for an applicant.                                                                                                                                                               |
+| applicantWorkflowFailed                                             | Workflow failed for an applicant.                                                                                                                                                                                        |
+| videoIdentStatusChanged               | Sent on Video Ident status change. Once you receive this webhook, you can get the video call media within the next 10-30 minutes.                                                            |
+| videoIdentCompositionCompleted | Video ident call recording has been successfully uploaded to the Dashboard.                                                                                                                                              |
+| applicantAwaitingService             | Verification has been paused due to a long-running external process.                                                                                                                                                     |
+| applicantAwaitingUser                   | Verification has been paused because user action is required. This does not include the Documents requested or Resubmission requested statuses, for which you will receive dedicated webhooks. |
+| applicantStepsReset                       | Applicant previously completed  verification step is reset and they can go through the verification flow again.                                                                                                          |
+| applicantPersonalDataDeleted     | Applicant personal data is deleted in the system.                                                                                                                                                                        |
+| companyStructureChanged               | Company structure has been updated (for instance, changes to ownership, management, or related entities). Applies only to companies.                                                                                 |
+
+> 📘 Note
+> 
+> Personal applicant information is not available in the webhook payload. To get this information, use  this API method.
+
+> 👍 Tip
+> 
+> If you are not receiving webhooks, try to check your endpoints using SSL Labs or Docker.
+
+# applicantCreated
+
+```json
+{
+  "applicantId": "5c9e177b0a975a6eeccf5960",
+  "inspectionId": "5c9e177b0a975a6eeccf5961",
+  "correlationId": "req-63f92830-4d68-4eee-98d5-875d53a12258",
+  "levelName": "basic-kyc-level",
+  "externalUserId": "12672",
+  "type": "applicantCreated",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-02-21 13:23:19.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantPending
+
+```json
+{
+  "applicantId": "5c7791f80a975a1df426b9e9",
+  "inspectionId": "5c7791f80a975a1df426b9ea",
+  "applicantType": "individual",
+  "correlationId": "req-4af54c06-6a50-4cb9-a7dc-b94b2f5b07eb",
+  "levelName": "liveness-level",
+  "externalUserId": "12672",
+  "type": "applicantPending",
+  "sandboxMode": false,
+  "reviewStatus": "pending",
+  "reviewMode": "ongoingAml", // Optional. See the table below for details.
+  "createdAtMs": "2020-02-21 13:23:19.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantReviewed
+
+```json Final rejection
+{
+  "applicantId": "5cb744200a975a67ed1798a4",
+  "inspectionId": "5cb744200a975a67ed1798a5",
+  "correlationId": "req-fa94263f-0b23-42d7-9393-ab10b28ef42d",
+  "externalUserId": "userIdOnYourSide",
+  "levelName": "basic-kyc-level",
+  "type": "applicantReviewed",
+  "reviewResult": {
+    "moderationComment": "We could not verify your profile. If you have any questions, please contact the Company where you try to verify your profile ${clientSupportEmail}",
+    "clientComment": "Verification rejected due to excessive file uploads.",
+    "reviewAnswer": "RED",
+    "rejectLabels": [
+      "SCREENSHOTS",
+      "UNSATISFACTORYPHOTOS",
+      "SPAM"
+    ],
+    "reviewRejectType": "FINAL",
+    "buttonIds": [
+      "selfiebadFaceComparison",
+      "badPhoto",
+      "additionalPages",
+      "badDocument",
+      "additionalPagesanotherSide",
+      "badDocumentwithoutFace",
+      "badPhotoscreenshot",
+      "selfie",
+      "spam",
+      "badPhotodataNotVisible"
+    ]
+  },
+  "reviewStatus": "completed",
+  "reviewMode": "ongoingDocExpired", // Optional. See the table below for details.
+  "createdAtMs": "2020-02-21 13:23:19.001"
+}
+```
+```json Temporary rejection
+{
+  "applicantId": "5cb744200a975a67ed1798a4",
+  "inspectionId": "5cb744200a975a67ed1798a5",
+  "correlationId": "req-fa94263f-0b23-42d7-9393-ab10b28ef42d",
+  "externalUserId": "userIdOnYourSide",
+  "levelName": "basic-kyc-level",
+  "type": "applicantReviewed",
+  "reviewResult": {
+    "moderationComment": "The required fields of the document are not readable. Please upload a clear photo or another suitable document to continue your verification . Make sure that all corners of the document are visible.",
+    "clientComment": "Required fields of the document are not readable or visible. A new photo has been requested.",
+    "reviewAnswer": "RED",
+    "rejectLabels": [
+      "UNSATISFACTORYPHOTOS"
+    ],
+    "reviewRejectType": "RETRY",
+    "buttonIds": [
+      "badPhoto",
+      "badPhotodataNotVisible"
+    ]
+  },
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-02-21 13:23:19.001"
+}
+```
+```json Success
+{
+  "applicantId": "5cb56e8e0a975a35f333cb83",
+  "inspectionId": "5cb56e8e0a975a35f333cb84",
+  "correlationId": "req-a260b669-4f14-4bb5-a4c5-ac0218acb9a4",
+  "externalUserId": "userIdOnYourSide",
+  "levelName": "basic-kyc-level",
+  "type": "applicantReviewed",
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-02-21 13:23:19.321"
+}
+```
+
+# applicantOnHold
+
+```json
+{
+  "applicantId": "5c7791f80a975a1df426b9e9",
+  "inspectionId": "5c7791f80a975a1df426b9ea",
+  "applicantType": "individual",
+  "correlationId": "req-4af54c06-6a50-4cb9-a7dc-b94b2f5b07eb",
+  "levelName": "liveness-level",
+  "externalUserId": "12672",
+  "type": "applicantOnHold",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "onHold",
+  "reviewMode": "ongoingAml", // Optional. See the table below for details.
+  "createdAtMs": "2020-02-21 13:23:19.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantActionPending
+
+```json
+{
+  "applicantId": "5dc158b109494c3cbf431e28",
+  "applicantActionId": "5dc2d80ce3cc9b1c1e389c4c",
+  "externalApplicantActionId": "id122424234-random-r7otyykndi",
+  "inspectionId": "5dc158b109494c3cbf431e29",
+  "applicantType": "individual",
+  "correlationId": "req-8fbf5a81-339f-43b6-a9a7-290080e9039c",
+  "levelName": "basic-action-level",
+  "externalUserId": "pid122424235",
+  "type": "applicantActionPending",
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-02-21 13:23:16.001"
+}
+```
+
+# applicantActionReviewed
+
+```json
+{
+  "applicantId": "5dc158b109494c3cbf431e28",
+  "applicantActionId": "5dc2d80ce3cc9b1c1e389c4c",
+  "externalApplicantActionId": "id122424234-random-r7otyykndi",
+  "inspectionId": "5dc158b109494c3cbf431e29",
+  "correlationId": "req-c9041677-e8dc-446b-ab8f-50b438a40aa8",
+  "levelName": "basic-action-level",
+  "externalUserId": "id122424234",
+  "type": "applicantActionReviewed",
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-02-21 13:23:19.001"
+}
+```
+
+# applicantActionOnHold
+
+```json
+{
+  "applicantId": "5ea867a9772e27d66728c64b",
+  "applicantActionId": "5ea867c2772e27d66728c64f",
+  "inspectionId": "5ea867a9772e27d66728c64c",
+  "correlationId": "req-2c3cce19-c723-4fd0-a2f2-527789f95bcc",
+  "levelName": "basic-action-level",
+  "externalUserId": "random-4gguvx1oha",
+  "type": "applicantActionOnHold",
+  "reviewStatus": "init",
+  "createdAtMs": "2020-04-28 18:16:09.001"
+}
+```
+
+# applicantActionLevelChanged
+
+```json
+{
+  "applicantId": "696929a8b27d2a0277812936",
+  "applicantActionId": "69a5440cdbd0ab0c1aac97f3",
+  "externalApplicantActionId": "preview-action-random-LFXu9-v15",
+  "inspectionId": "696929a8b27d2a0277812936",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eads",
+  "levelName": "actionLevelActualName",
+  "sandboxMode": false,
+  "externalUserId": "level-19a01a4c-5552-4552-ae24-8a4ed9e3b43e",
+  "type": "applicantActionLevelChanged",
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "createdAt": "2026-03-30 16:37:52+0000",
+  "createdAtMs": "2026-03-30 16:37:52.266",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantPersonalInfoChanged
+
+```json
+{
+  "applicantId": "5ede51230a975a19a19ba5c1",
+  "inspectionId": "5ede51230a975a19a19ba5c2",
+  "applicantType": "individual",
+  "correlationId": "req-60103dee-79f1-43f4-bdcc-eb2554556afa",
+  "levelName": "id+liveness",
+  "externalUserId": "12672",
+  "type": "applicantPersonalInfoChanged",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-06-08 19:39:29.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantTagsChanged
+
+```json
+{
+  "applicantId": "5ede51230a975a19a19ba5c1",
+  "inspectionId": "5ede51230a975a19a19ba5c2",
+  "applicantType": "individual",
+  "correlationId": "req-60103dee-79f1-43f4-bdcc-eb2654556afa",
+  "levelName": "basic-kyc-level",
+  "externalUserId": "12672",
+  "type": "applicantTagsChanged",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "createdAtMs": "2023-06-08 19:39:29.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantActivated
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eada",
+  "levelName": "phone-level",
+  "externalUserId": "12672",
+  "type": "applicantActivated",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-07-23 11:18:33.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantDeactivated
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eada",
+  "levelName": "phone-level",
+  "externalUserId": "12672",
+  "type": "applicantDeactivated",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-07-23 11:18:33.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantDeleted
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eada",
+  "levelName": "phone-level",
+  "externalUserId": "12672",
+  "type": "applicantDeleted",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-07-23 11:18:33.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantReset
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-57fed49a-07b8-4413-bdaa-a1be903769e9",
+  "levelName": "basic-kyc-level",
+  "externalUserId": "12672",
+  "type": "applicantReset",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "init",
+  "createdAtMs": "2021-03-01 11:34:51.104",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantPrechecked
+
+```json
+{
+  "applicantId": "5d1f2914c2d75a1c14130bd2",
+  "inspectionId": "5d1f2914c2d75a1c14130bd3",
+  "applicantType" : "individual",
+  "correlationId": "req-e9d77142-59e6-4713-9b07-9b342cc51dda",
+  "levelName": "kyc",
+  "externalUserId": "12672",
+  "type": "applicantPrechecked",
+  "sandboxMode": false,
+  "reviewStatus": "queued",
+  "reviewMode": "ongoingAml", // Optional. See the table below for details.
+  "createdAtMs": "2020-02-21 13:23:19.002",
+  "clientId": "SumsubClient"
+}
+```
+
+# applicantLevelChanged
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eadd",
+  "levelName": "basic-kyc-level",
+  "externalUserId": "12672",
+  "type": "applicantLevelChanged",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-07-23 11:19:33.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantWorkflowCompleted
+
+```json
+{
+  "applicantId": "64106d6b7d5a2d5159e6b01a",
+  "inspectionId": "64106d6b7d5a2d5159e6b01b",
+  "applicantType": "individual",
+  "correlationId": "req-57fed49a-07b8-4413-bdaa-a1be903769e9",
+  "levelName": "basic-kyc-level",
+  "sandboxMode": false,
+  "externalUserId": "12672",
+  "type": "applicantWorkflowCompleted",
+  "reviewResult": {
+    "reviewAnswer": "RED",
+    "rejectLabels": [
+      "AGEREQUIREMENTMISMATCH"
+    ],
+    "reviewRejectType": "FINAL",
+    "buttonIds": []
+  },
+  "reviewStatus": "completed",
+  "createdAt": "2023-03-14 12:50:27+0000",
+  "createdAtMs": "2023-03-14 12:50:27.238",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantWorkflowFailed
+
+```json
+{
+  "applicantId": "64106d6b7d5a2d5159e6b01a",
+  "inspectionId": "64106d6b7d5a2d5159e6b01b",
+  "applicantType": "individual",
+  "correlationId": "req-57fed49a-07b8-4413-bdaa-a1be903769e9",
+  "levelName": "id-and-liveness",
+  "sandboxMode": false,
+  "externalUserId": "12672",
+  "type": "applicantWorkflowFailed",
+  "reviewResult": {
+    "reviewAnswer": "RED",
+    "rejectLabels": [
+      "AGEREQUIREMENTMISMATCH"
+    ],
+    "reviewRejectType": "FINAL",
+    "buttonIds": []
+  },
+  "reviewStatus": "completed",
+  "createdAt": "2023-03-14 12:50:27+0000",
+  "createdAtMs": "2023-03-14 12:50:27.238",
+  "clientId": "coolClientId"
+}
+```
+
+# videoIdentStatusChanged
+
+```json Initialized
+{
+  "applicantId": "5f8993f93324610009e5885e",
+  "inspectionId": "5f8993f93324610009e5885f",
+  "applicantType": "individual",
+  "correlationId": "req-5a570d5d-e27c-484b-94a9-0f1e9fb2764c",
+  "levelName": "kycvideo",
+  "externalUserId": "flow-feb1f7ad-b2e2-479a-a4d5-bca5486f7b85",
+  "type": "videoIdentStatusChanged",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "videoIdentReviewStatus": "pending",
+  "createdAtMs": "2020-10-16 12:37:26.002",
+  "clientId": "SumsubClient"
+}
+```
+
+# videoIdentCompositionCompleted
+
+```json
+{
+  "applicantId": "596928690a975a137c5b207e",
+  "inspectionId": "596928690a975a137c5b207a",
+  "correlationId": "req-a7812631-2c40-4f13-8407-fd42a516f0b0",
+  "levelName": "basic-kyc",
+  "type": "videoIdentStatusChanged",
+  "sandboxMode": "false",
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "completed",
+  "compositionMediaId": "596928690a975a137",
+  "createdAtMs": "2020-10-16 12:34:25.003",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantAwaitingService
+
+```json
+{
+  "applicantId": "5c7791f80a975a1df426b9e9",
+  "inspectionId": "5c7791f80a975a1df426b9ea",
+  "applicantType": "individual",
+  "correlationId": "req-4af54c06-6a50-4cb9-a7dc-b94b2f5b07eb",
+  "levelName": "basic-kyb-level",
+  "externalUserId": "12672",
+  "type": "applicantAwaitingService",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "awaitingService",
+  "createdAtMs": "2025-02-21 13:23:19.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantAwaitingUser
+
+```json
+{
+  "applicantId": "5c7791f80a975a1df426b9e9",
+  "inspectionId": "5c7791f80a975a1df426b9ea",
+  "applicantType": "individual",
+  "correlationId": "req-4af54c06-6a50-4cb9-a7dc-b94b2f5b07eb",
+  "levelName": "basic-kyb-level",
+  "externalUserId": "12672",
+  "type": "applicantAwaitingUser",
+  "sandboxMode": false,
+  "reviewResult": {
+    "reviewAnswer": "GREEN"
+  },
+  "reviewStatus": "awaitingUser",
+  "createdAtMs": "2025-02-21 13:23:19.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantStepsReset
+
+```json
+{
+  "applicantId": "5f194e74040c3f316bda271c",
+  "inspectionId": "5f194e74040c3f316bda271d",
+  "applicantType": "individual",
+  "correlationId": "req-d34c974c-5935-41b8-a0a9-cedd2407eadd",
+  "levelName": "id-and-liveness",
+  "externalUserId": "12672",
+  "type": "applicantStepsReset",
+  "sandboxMode": false,
+  "reviewStatus": "init",
+  "createdAtMs": "2020-07-23 11:19:33.002",
+  "clientId": "coolClientId"
+}
+```
+
+# applicantPersonalDataDeleted
+
+```json
+{
+  "applicantId": "5ede51230a975a19a19ba5c1",
+  "inspectionId": "5ede51230a975a19a19ba5c2",
+  "applicantType": "individual",
+  "correlationId": "req-60103dee-79f1-43f4-bdcc-eb2554556afa",
+  "levelName": "id+liveness",
+  "externalUserId": "12672",
+  "type": "applicantPersonalDataDeleted",
+  "sandboxMode": false,
+  "reviewStatus": "completed",
+  "createdAtMs": "2020-06-08 19:39:29.002",
+  "clientId": "coolClientId"
+}
+```
+
+# companyStructureChanged
+
+```json
+{
+  "applicantId": "5ede51230a975a19a19ba5c1",
+  "inspectionId": "5ede51230a975a19a19ba5c2",
+  "applicantType": "individual",
+  "correlationId": "req-60103dee-79f1-43f4-becc-eb2554556afa",
+  "levelName": "basic-kyb-level",
+  "externalUserId": "12672",
+  "type": "companyStructureChanged",
+  "sandboxMode": false,
+  "reviewStatus": "pending",
+  "createdAtMs": "2025-01-09 19:39:29.002",
+  "clientId": "coolClientId"
+}
+```
+
+================================================================================
+
+# Track verification activity
+URL: https://docs.sumsub.com/docs/track-verification-activity
+
+The presented flow chart describes the internal logic of passing a verification level within the Sumsub Dashboard, your applicant’s side, and the messages you receive from the WebSDK. The number of steps and their types may vary depending on the level settings. 
+
+Verification begins once the applicant initiates it via customer UI on your website or through the application, then Sumsub initializes the steps and sends information about the checks to your side. 
+
+Some of the steps may have not a linear, but branched structure which means the applicant will be transferred to a certain step, depending on the received results. For example, see the Identity verification or Selfie step. 
+
+Once verification is done, you receive a message with the applicant's status, and the applicant sees a screen showing the results of their verification.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/6471d533393f91c535380763602539251df5fca3a25f119b26ee141ad04a7f14-tva.png",
+        "",
+        ""
+      ],
+      "align": "center"
+    }
+  ]
+}
+[/block]

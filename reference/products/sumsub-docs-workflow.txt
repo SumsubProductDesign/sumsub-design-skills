@@ -1,0 +1,2392 @@
+# About automation in Sumsub
+URL: https://docs.sumsub.com/docs/about-automation-in-sumsub
+
+Configure your environment to perform effective applicant verification in a user-friendly manner with Sumsub. Use our no-code Workflow Builder to quickly build your own verification scenario with minimal effort. Generate a unique verification link or use the Self-service solution to conduct checks without complex integration. Customize SDK texts to match your business needs and make the process clear for the applicant. Additionally, manage applicant verification efficiently with Case management and ensure compliance by storing applicant data locally. You can also create lists to customize fraud protection and reduce risks.
+
+# Get started with Sumsub AI Copilot
+
+# Set up and customize verification stages
+
+[block:html]
+{
+  "html": "\n    .box5 {\n        background: #ffffff;\n        border: 1px solid #e1e5ea;\n        border-radius: 12px;\n        align-items: top;\n        display: grid;\n        text-decoration: none !important;\n        grid-template-rows: min-content auto;\n        transition: 0.3s ease-in !important;\n    }\n    .box5 text-basic {\n        padding: 0px 24px 24px 24px;\n        font-style: normal;\n        font-weight: 400;\n        font-size: 14px;\n        line-height: 24px;\n        color: #586073;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 text-basic {\n            color: #fff;\n            opacity: 0.8;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 text-basic {\n        color: #fff;\n        opacity: 0.8;\n    }\n    .box5:hover {\n        box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1);\n        transition: 0.3s ease-in;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 {\n            background: #20252c;\n            border: 1px solid #333844;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 {\n        background: #20252c;\n        border: 1px solid #333844;\n    }\n    .text5-h1 {\n        font-style: normal;\n        font-weight: 500;\n        font-size: 15px;\n        line-height: 24px;\n        color: #377cf7;\n        transition: 0.3s ease-in;\n        padding: 16px 24px 8px 24px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .text5-h1 {\n            color: #fff;\n        }\n    }\n    [data-color-mode=\"dark\"] .text5-h1 {\n        color: #fff;\n    }\n    .box5:hover .text5-h1 {\n        color: #377cf7;\n        opacity: 0.8;\n        transition: 0.3s ease-in;\n    }\n    .img5 {\n        margin: 16px 0px -10px 0px !important;\n        width: 100%;\n        height: auto;\n    }\n    .line {\n        border-top: 1px solid #e1e5ea;\n        margin-bottom: 8px;\n        margin-top: 10px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            color: #fff;\n            opacity: 0.2;\n        }\n    }\n    [data-color-mode=\"dark\"] .line {\n        color: #fff;\n        opacity: 0.2;\n    }\n\n\n    \n        \n            Workflow Builder\n            Build unique verification flows with fully automated decision-making processes.\n        \n        \n            Verification links\n            Create verification links to share with your applicants, while no complex integration is required.\n        \n        \n              Self-service\n              Use the Sumsub Self-service automated solution to simplify basic verification process.\n        \n        \n          SDK translations\n          Customize SDK verification instructions to match your business needs.\n      \n\n    \n    \n"
+}
+[/block]
+
+# Explore available solutions
+
+# Ensure compliance and manage risk
+
+================================================================================
+
+# Summy AI Copilot
+URL: https://docs.sumsub.com/docs/summy-ai-copilot
+
+Summy AI Copilot is a cutting-edge tool designed to streamline the process of retrieving and visualizing analytical and compliance data and simplify the user guide search.
+
+# Benefits of using Summy AI Copilot
+
+Our LLM-based assistant is able to find all kinds of internal documentation, answer questions related to the product and its functionalities, and generate comprehensive and insightful reports. 
+
+Here are a few ways you can benefit from it:
+
+- Learn how to migrate your complex compliance rules to Sumsub.
+- Get a bird’s-eye view of what is happening within your integration.
+- Speed up the generation of the regulatory reports.
+- Optimize your SDK setup and make the most of the functionalities you use based on real-time data.
+
+# How Summy AI Copilot Works
+
+Our AI Copilot works as a dialogue-based multilingual assistant that uses Kapa.ai and OpenAI to detect and respond to the natural language queries you enter in the chat box. 
+
+It is automatically enabled for all users at no cost:
+
+1. Click on the Ask Summy AI button at the header of any product page to open the chat box.
+2. Enter your question in the chat box in the free form and wait for the answer.
+
+## Questions you can ask
+
+Most of our users who had already tried Summy AI Copilot were interested in generating various kinds of charts and graphs and exploring the product features.
+
+Here are some of the queries they made:
+
+- Show me the approved, pending, and rejected applications based on the month they were created (number of applications listed, not percentages).
+- Show me how much time it takes the user to pass the verification, starting from the verification token creation until they receive the final status of their verification, as a graph.  
+  Which watchlist screenings can I do in Sumsub?
+
+> 📘 Other Sumsub AI-powered functionalities
+> 
+> Apart from the chat with the Sumsub AI Copilot, Sumsub utilizes AI to provide you with case summaries. To learn more, refer to this article.
+
+# Summy AI Copilot FAQ
+
+[block:html]
+{
+  "html": "\n    .rm-Guides #content-head h1 {\n        font-size: 32px;\n        font-weight: 700;\n        line-height: 40px;\n        margin-top: 32px;\n        margin-bottom: 12px;\n    }\n\n    .rm-Guides .markdown-body .heading.heading-2 {\n        font-weight: 700;\n        font-size: 18px;\n        line-height: 24px;\n    }\n\n    .rm-Guides .details-list {\n        margin-bottom: 44px;\n        border-radius: 12px;\n        border: 1px solid #e1e5ea;\n        overflow: hidden;\n    }\n\n    .rm-Guides .details-list details:not(:last-child) {\n        border-bottom: 1px solid #e1e5ea;\n    }\n\n    .rm-Guides .details-list details {\n        padding: 16px;\n        font-size: 14px;\n        line-height: 24px;\n    }\n\n    .rm-Guides .details-list details *:last-child {\n        margin-bottom: 0px !important;\n    }\n\n    .rm-Guides .details-list summary {\n        padding-right: 32px;\n        font-size: 16px;\n        font-weight: 500;\n        line-height: 24px;\n    }\n\n    .rm-Guides .details-list summary:after {\n        top: 0px;\n    }\n\n    .rm-Guides .details-list details[open] summary {\n        margin-bottom: 16px;\n    }\n\n    .rm-Guides .details-list details[open] {\n        background: #f6f7f9;\n    }\n\n    .rm-Guides .details-list details[open] code {\n        border-radius: 3px;\n        background: #e1e5ea;\n        font-weight: 600;\n    }\n\n    .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 200px;\n    }\n\n    table {\n        background-color: #fff;\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #e1e5ea;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n        min-width: 200px;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n\n    \n        What languages are supported?\n        Sumsub AI Copilot can speak all supported SDK languages.\n    \n    \n        Is there any risk of \"black-box\" decisions when using Summy AI Copilot?\n        No, all the answers you get are strictly based on the data retrieved from the product.\n    \n    \n        Can I save dialogues with Summy?\n        Not yet (but we are working on it). Currently, you need to open a new tab for each dialogue or continue in the same tab.\n    \n    \n        What types of queries can Summy AI process?\n        Summy AI can currently build graphs based on applicant data and retrieve information from the User Guide articles. However, it cannot answer questions about AML, payment methods, cases, or transactions. More capabilities are coming soon.\n    \n    \n        What should I do if Summy AI hallucinates or provides incorrect information?\n\n        If you encounter inaccuracies, escalate the issue to our support team.\n    \n    \n        Is Summy trained on real applicant data?\n        \n            No, we do not train our models on applicant data. Instead, we use LLM as an auto-analyst to execute SQL queries.\n        \n    \n"
+}
+[/block]
+
+================================================================================
+
+# Applicant overview by Summy AI
+URL: https://docs.sumsub.com/docs/applicant-overview-by-summy-ai
+
+Applicant overview by Summy AI Copilot is an LLM-powered summarization tool integrated into the applicant profile page.
+
+To generate an overview, our system automatically analyzes the applicant profile, pulling data from various background checks, different settings, and verification logs, and then uses external large language models to generate a clear, readable text explanation.
+
+# Benefits of using applicant overview by Summy AI
+
+The main goal of the applicant overview is to enhance your user experience and reduce the time needed to retrieve crucial information, such as: 
+
+- Current applicant status.
+- Rejection reasons.
+- Next steps for this profile review.
+
+The tool eliminates the need to manually dig through complex verification logs and various settings to understand the specific reasons behind the decision. You instantly see summarized details about the decision, such as specific forgery markers, blurred fields, or face mismatches, without deciphering raw system tags. This allows you to resolve cases faster without escalating the tickets to compliance officers.
+
+# Accessing applicant overview
+
+Overview by Summy AI is free for all Sumsub clients, as well as other AI-powered features, such as AI-Copilot and case summaries. 
+
+To access it, navigate to any applicant profile page and click the Generate overview button at the top of the page.
+
+================================================================================
+
+# Local Data Processing
+URL: https://docs.sumsub.com/docs/local-data-processing
+
+The Local Data Processing (LDP) infrastructure enables the storage and processing of your applicants' personal data and transactions within specific regions to comply with regulatory requirements, such as the GDPR, reduce latency, and lower network costs.
+
+## Benefits of Local Data Processing
+
+Sumsub lets you determine the physical location where data is stored and processed, providing you with a future-ready infrastructure and the following benefits:
+
+- Compliance with local and regional data handling and processing regulations.
+- Automated selection of the appropriate regional environment.
+- Centralized data storage for billing and analytics purposes.
+- Reduced complexity related to cross-border data transfers by minimizing reliance on mechanisms such as Standard Contractual Clauses (SCCs) and Binding Corporate Rules (BCRs) and Support for API, Web, and Mobile SDK.
+
+# How Local Data Processing works
+
+With Local Data Processing enabled, your data will be stored and processed in the following way:
+
+- Inspection results, transactions, and other verification-related data will be stored in the central region for the v1 processing level or locally in a particular region for the v2 processing level. Applicant data, images, videos, and other binary files will be stored locally in a particular region.
+- License keys, user accounts, company information, logos, and document examples will be accessible from all regions and stored in the central region.
+- Billing information will be prepared and stored in the central region, while invoices will be accessible from all regions.
+
+> 📘 Note
+> 
+> Using the regional environment will not require any additional actions on your part, such as manually navigating between different domains.
+
+## Available services
+
+The following Sumsub solutions are available to use with Local Data Processing:
+
+- Identity verification (KYC)
+- Transaction Monitoring (KYT)
+- Fraud Prevention
+- Business verification (KYB)
+
+## Supported regions
+
+Currently, the Local Data Processing solution supports all regions available through Amazon Web Services for the v1 processing level.
+
+We are also working to expand support to include non-AWS data centers such as Huawei Cloud and AliCloud.  
+For the v2 processing level, we currently support the following regions:
+
+- UAE
+- Singapore
+
+If you have a country to be added, contact your Customer Success Manager or via ldp@sumsub.com.
+
+# Get started with Local Data Processing
+
+To start using Local Data Processing, email us at ldp@sumsub.com and proceed with the API, Web or Mobile SDK integration.
+
+> 📘 Note
+> 
+> When generating Access Token, use the regional domain. For example, `api.uae.sumsub.com`.  Further processing will be carried out in the region, which is guaranteed by our SDKs.
+
+# Local Data Processing FAQ
+
+| Question                                                             | Answer                                                                                                                                                                                                                                                |
+| :------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What problem does Local Data Processing solve?                       | Local Data Processing helps organizations meet regulatory or contractual requirements that require applicant data to be stored and processed within a specific country or region.                                                                     |
+| Which data is stored locally, and which is stored centrally?         | Applicant personal data, verification data, images, transactions, and inspection results are stored and processed within the selected region. Platform-level data, such as user accounts, configuration, billing, and analytics, is stored centrally. |
+| Does Local Data Processing guarantee regulatory compliance?          | No. Local Data Processing supports compliance with data localization and data protection regulations, but customers remain responsible for meeting their specific legal and regulatory obligations.                                                   |
+| Do I need to rebuild my integration to enable Local Data Processing? | No. Existing API, Web SDK, and Mobile SDK integrations can be reused. You only need to use the regional API domain and access token for the selected region.                                                                                          |
+| How do I enable Local Data Processing?                               | Local Data Processing is enabled on request. Contact your Customer Success Manager or email ldp@sumsub.com  to request activation for a specific country or region.                                                          |
+
+================================================================================
+
+# Self-service
+URL: https://docs.sumsub.com/docs/self-service
+
+Use the Sumsub Self-service automated solution to cover the basic applicant verification needs right away and simplify all related processes. 
+
+Self-service is carefully developed for cases where there is no need to build a complex verification scheme and handle a big number of applicants at once, so we consider all the weak points and implement the most effective automation tools.
+
+When getting started with Self-service, you will be ready to verify your applicants with minimal effort:
+
+- Explore the services via the 14-day trial period, including 50 free checks
+- Activate new features right in the Dashboard
+- Select the most suitable plan to meet your needs
+- Pay with the added bank card once a month
+- Get the automated invoices
+
+# How Self-service works
+
+To verify your applicants, you will need to choose a plan, provide the required information on your company and billing details, and set up a verification logic. 
+
+Once done, you will have access to the Dashboard, a pack of services included in your plan, and a chance to conduct checks immediately. Depending on the selected option, there will be solutions for applicant verification available for you:
+
+- ID Verification
+- Liveness & Face match
+- AML Screening
+- Questionnaire
+- Ongoing AML Monitoring
+- Address Verification
+- Face authentication
+- Email and Phone Verification
+
+There are Production and Sandbox modes in the Dashboard for both testing verification and conducting real checks accompanied by the system decision. 
+
+# Get started with Self-service
+
+Get started with Self-service by setting up your account and going live. The setup procedure allows you to activate a free trial; the first 50 real checks are free of charge.
+
+## Set up your account
+
+Provide account and billing information:
+
+1. Log in to the Dashboard.
+2. Click Activate free trial in the header or banner on the main page.
+3. Check out the Pricing plans and click Start free trial.
+4. Fill in the Billing contact, Bank card details, and Company information forms.
+5. Click Activate free trial.
+
+## Go live
+
+Configure the front-end integration and adjust your verification flow:
+
+1. Generate an app token and configure WebSDK and MobileSDK integration.
+2. Set up verification levels and customizations.
+3. Adjust global settings to customize the main metrics of your verification process and indicate supported ID documents.
+4. Create webhooks to receive verification results. The results are sent to you in the form of an applicant status with explanatory comments.
+5. Generate a verification link that can be sent directly to your applicants or add a QR code to your website. 
+6. Customize widget translations.
+7. Conduct verification and handle verification results.
+
+# Work with applicants
+
+When checks are done, you can select applicants for review, manage verification results, and interpret them according to the rejection tags. 
+
+# Activate trial period
+
+Sumsub free trial is a 14-day period giving you the opportunity to obtain the first usage experience and try out our product features before making a purchase. 
+
+The free trial includes the following:
+
+- Full access to the Production functionality, all plans, and the ability to switch between them at any time.
+- Free 50 checks. Only completed checks are taken into account when applicants upload documents and get the final decision.
+
+> 📘 Note
+> 
+> You will be charged while using the extra services of your plan. Find them in pricing marked with a + $ sign.
+
+## Get free trial
+
+To get the free trial period, set up your account according to the steps provided in the Get started section. 
+
+## Free trial expiration
+
+On the 14th day or after performing all 50 checks, you will be notified by email that your trial period expires.  Once the trial ends, you will be switched to the Production mode and charged for the services included in your plan.
+
+> 📘 Note
+> 
+> After moving to production mode, you will have the last selected plan and extra services, if any.
+
+## Cancel trial
+
+To cancel the trial period, follow the steps of canceling the plan.
+
+> 🚧 Mind the following when canceling the trial period:
+> 
+> - You will not be charged for anything, except using extra services.
+> - The trial period will be canceled immediately; you will not be able to perform checks hereafter.
+
+# Understand your bill
+
+Normally, you will be charged for your plan and services on the first day of the month. However, if your subscription begins on May 14th, the first payment will only be taken for the period between May 14th and May 31st. After that, you will be charged on the first day of each following month.
+
+Note that if your payment fails, you will be switched to the Sandbox mode. We will be trying to withdraw money from your account until the 5th of the month, inclusive. If no result, there will be only test checks available on your account. To switch your access to the Production mode again, contact business-support@sumsub.com.
+
+> 📘 Note
+> 
+> All taxes are VAT exclusive and will be applied accordingly, depending on where your company is registered. Tax rates vary from country to country and are subject to change. For UK-based companies, taxes are always applied.
+
+## What checks will I be charged for?
+
+You will only have to pay for completed checks. Therefore, you will not be charged for instances when applicants upload documents but do not proceed with verification.
+
+## What is commitment?
+
+The commitment is a minimum amount that you pay each month. Once you exceed this amount, you will be charged for all additional checks.
+
+The commitment also includes key features of a certain plan. Check out verification solutions included in the plans.
+
+================================================================================
+
+# Manage your subscription
+URL: https://docs.sumsub.com/docs/manage-your-subscription
+
+Since you are in charge of your verification processes, you can naturally cancel or switch between your plans, go back to the checks, and change information about your company. 
+
+# Cancel plan
+
+To cancel your current plan:
+
+1. Go to Billing and navigate to Overview.
+2. Under your current plan indication, click Cancel plan.
+3. When the pop-up window appears, indicate the reasons for cancellation and share your experience with us.
+4. Select Cancel plan.
+
+> 📘 Note
+> 
+> - Your access will remain valid until the first day of the next month. You will have to pay for the services not included in your plan until the 5th day of the next month.
+> - You will be able to perform checks until your subscription period ends. Once it is over, your access will be limited to Sandbox, and only test checks will be available.
+
+# Resubscribe to plan
+
+If you want to start performing real checks again, you will need to resubscribe to the plan:
+
+1. Go to the Billing menu.
+2. Open the Overview section.
+3. Click Select plan.
+4. Check out the Pricing plans and click Select plan.
+5. When the pop-up window appears, read the terms and click Activate plan.
+
+Your plan will be activated immediately, and you will be able to perform checks right away. Find out how your subscription will work going forward.
+
+# Change plan
+
+When you switch to a new plan, its pricing and features will be immediately available. You can also change your plan during the trial period, the first 50 real checks are free of charge.
+
+To change your plan:
+
+1. Go to Billing and navigate to Overview.
+2. Under your current plan indication, click Change plan.
+3. Check out the Pricing plans and click Select plan.
+4. When the pop-up window appears, read the terms and confirm them by clicking Change plan.
+
+> 📘 Note
+> 
+> You are able to change your plan only 3 times within a month (also applies to the trial period).
+
+## How changing plan affects payment calculations
+
+You can change your plan, and your further payment calculation will depend on the chosen plan's price:
+
+- If you upgrade your plan — you will be immediately charged the difference between your current plan and the new one. The amount of payment will be calculated in proportion to the number of days left in the month +1 (the payment day is counted).
+- If you downgrade your plan — your current plan will remain until the end of the month. You will be switched to a new plan from next month and will be charged accordingly. 
+
+> 🚧 If your payment fails
+> 
+> If you don’t have enough money on your account to pay for a plan upgrade, the upgrade will be applied anyway. The calculated difference amount will be considered as debt and you will be charged on the second day of next month.
+
+# Change billing and bank card information
+
+To update billing or bank card details:
+
+1. Go to the Billing menu.
+2. Navigate to the Overview page .
+3. Click Update payment method.
+4. Enter bank card details and select Change card.
+
+> 📘 Note
+> 
+> The above instructions are strictly for switching information and payment methods. If you want to delete a card, contact us at business-support@sumsub.com.
+
+================================================================================
+
+# Workflow Builder
+URL: https://docs.sumsub.com/docs/workflow-builder
+
+Workflow Builder is a comprehensive orchestration solution for building visual verification flows code-free. It simplifies and speeds up the process of creating custom verification logic, allowing you to work with clients from multiple countries, staying compliant and keeping conversion high.
+
+> 👍 Tip
+> 
+> Learn more in our Workflow Builder webinar.
+
+# How Workflow Builder works
+
+The entire visualization is based on a set of nodes that are placed upon the canvas and tied up among each other in the right sequence. You can build flows consisting of the following nodes:
+
+| Node            | Description                                                                                                                                                                                                             |
+| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Level step  | Automatically switch between different verification levels based on specific scenarios and events, such as different countries, risk levels, email or phone scoring, and many more. |
+| Condition   | Define conditions to determine when particular verification levels should be triggered.                                                                                                                                 |
+| Action      | Automatically assign applicants a risk level, apply tags, and add notes based on specific conditions.                                                                                                                   |
+| Review step | Configure rules to block applicants automatically or assign them for manual review.                                                                                                                                     |
+
+> 📘 Note
+> 
+> - You can manage verification flows on your own or request a ready-made flow setup by contacting your Customer Success Manager or our support team. Once configured, the established flow with the adjusted settings becomes available in the Dashboard and is ready for use.
+> - Verification level steps that include Selfie with a document, Web camera photo, or Video ident will be run on WebSDK 1.0 regardless of the selected SDK version.
+
+================================================================================
+
+# Get started with Workflow Builder
+URL: https://docs.sumsub.com/docs/get-started-with-workflow-builder
+
+Build custom verification logic with no-code and integrate with Sumsub easily:
+
+1. Navigate to Workflow Builder and set the canvas type. 
+2. Add level steps, build conditions, set up review steps, and configure actions according to your needs.
+3. Create multiple versions of your flow and test them.
+4. Publish your flow to make it available in production.
+5. Set up WebSDK or MobileSDK integration that will handle the whole verification process.
+6. Review verification results.
+
+# Define flow type
+
+With Workflow Builder, you can create flows based on two types of verification levels: Standard and Applicant actions. Depending on your choice, you'll need to set up your verification flows in the corresponding tabs.
+
+To start building a verification flow: 
+
+1. Go to Workflow Builder and select Active workflow.
+2. Navigate to either the Standard Workflow or Action Workflow tab, depending on the type of your initial step.
+3. Go to the Draft view.
+4. Proceed to add the level step.
+
+# Add level step
+
+A level node always goes first and is always required to start your workflow, as it will be responsible for initiating a process of collecting information about your applicants. Without this node, the verification flow will not run.
+
+You can map a level node to any Standard verification level that obtains necessary information about your applicants, such as, for example:
+
+- Country/State
+- Age
+- Gender
+- IP address
+- Data from applicant documents
+- Data from Questionnaire
+- Metadata
+- Other details: high-risk applicants, large transactions
+- Internal fraud score results
+- External databases results
+- Company type
+
+You can also start you verification flow with an Applicant action verification level that requires additional verification:
+
+- Liveness check
+- Questionnaire
+- Payment method check
+
+To add a level node:
+
+1. Set up a verification level.
+2. In Workflow Builder, navigate to either the Standard Workflow or Action Workflow tab, depending on the type of your initial step.
+3. Right-click anywhere on the canvas and select Level step.
+4. Specify the name of the node and select a level that you have configured at step 1.
+5. Click Choose next level to continue building your flow by adding such nodes as Level step, Condition, Action, and Terminal step.
+
+> 🚧 Important
+> 
+> - While setting up an applicant workflow, you cannot use the same verification level more than once within a single workflow. If a level is already used, it becomes unavailable for selection. To avoid conflicts in your verification logic, structure your workflow using conditional nodes and separate branches.
+> - If two levels are configured in the workflow one after another, the system will transfer both approved and rejected applicants to the next level, resetting the verification state. At the second level, rejected applicants may become approved if they meet this level’s requirements. To prevent this, you can add a [conditional node]() between the levels that checks the applicant’s status and allows only approved applicants to pass through.
+> - All verification levels must use the same WebSDK version.
+
+# Build conditions
+
+A conditional node is an optional node directing applicants further down the flow, depending on the specified criteria.
+
+For example, you may want to ask applicants from the USA and Canada to go through identity verification, and by that check, you obtain information about their age, country, and so on. Then you decide to decline applicants whose age is less than 16, and for the rest cases, you need to additionally direct applicants to different checks, depending on their country.
+
+To set up a conditional node:
+
+1. Select whether to approve or reject applicants.
+2. Set up a logical condition `IF`, ` IF NOT`, `OR`, `OR NOT`, `IS IN`, and `EQUALS` and add necessary values in accordance with your scenario. For example, you can use blocklists to form a list of suspicious applicants and auto-reject each of them by defining a condition.
+3. Add a new conditional branch for another group of applicants, depending on the obtained information.
+4. For every branch, proceed with the next step, which can be: Level step, Action, Terminal step.
+
+> 👍 Tip
+> 
+> You can use regular expressions to check if a field matches certain conditions. There are some of the expressions that might be useful: 
+> 
+> - `.[0-9].` and `.\d.` allow you to define whether a field contains a single digit number, e.g. `5`.
+> - `.\d+.` should be used to check if a field contains only digits—`123456`, but not `12345a`. 
+> 
+> When using expressions, ensure the following conditions:
+> 
+> - Use the expressions for matching fields (the 'contains' logic) in the `.\example.` format. The `\example` expression does not cover the entire field. 
+> - Code the `\ `symbol as `\\`.
+
+> 📘 Note
+> 
+> `IS IN` and  `EQUALS` conditions are both used for comparison. The first one is used for comparing entities, such as client lists, and the second one — for comparing specific values.
+
+## Conditions logic
+
+The same applicant can trigger only one condition branch at a time and will follow that scenario. Therefore, when adding a conditional node, keep the following logic in mind:
+
+- If you create two branches with similar condition settings but different subsequent steps, only the first branch will execute. Instead of duplicating similar condition branches, add multiple subsequent steps to the same branch.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/11d9dabaa83684fc6f998b8900c8fb4552f8db87e54f35365ba305dec703cfe8-Conditionslogic1.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+- If you check multiple different conditions at the same time using separate branches, only one branch will be triggered and its scenario will run. To evaluate multiple conditions at once, use `AND/OR` operators to create a combined condition within a single branch. Alternatively, for more complex cases, you can use additional conditional nodes to evaluate information step by step and define the next steps accordingly.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/3aae5961046b76c145580c4a70fe5f5079ec0cbd772d07de7174eb38983f94bd-Conditionslogic2.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+# Set up review steps
+
+You can use the review step node to send applicants for manual review or block them automatically—for example, due to non-compliant personal data—with the final rejection decision. Applicants who got a final rejection will not be allowed to even upload documents.
+
+To set up a review step node:
+
+1. Select the type of node, which can be Final reject or Manual review.
+2. Specify the corresponding assignment: 
+   - For the final review, choose from the list of rejection labels as necessary. 
+   - In case of manual review, applicants are automatically assigned the Requires action status and queued for manual processing by compliance officers.  You can also use this functionality to create Queues. Then you will also need to specify the tag you want to add to the applicant when configuring the action.
+
+# Configure actions
+
+An action node adds certain information to applicant profiles for further filtering. 
+
+To set up an action node:
+
+1. Add an action type that you want to be performed. You can set the following: 
+   - Tag —  to assign a tag (or several tags) to the applicant.
+   - Note — to leave a note in the applicant profile.
+   - Source key — to add or delete the applicant source key and change their level accordingly.
+   - Case — to create a case for investigation based on a specific criteria.
+2. Proceed with the next step if necessary, or leave as it is for defining the end of the flow.
+
+# Review flow history
+
+Every time you make changes to your flow and publish it, the previous state is saved as an archived version, allowing you to revert to any of the available versions at any time.
+
+To see the available versions, in the top-right corner, open the menu and select Version history.
+
+# Create multiple versions of your workflow
+
+Before putting your flow into operation, you may want to improve it or create one or several alternatives. 
+
+To copy your flow and experiment with changing different steps:
+
+1. Click Copy to Test Workflow.
+2. Switch to the Test Workflow tab.
+3. Change your flow as needed.
+4. Click Run flow. 
+5. Click Generate to get the permalink to your flow.
+6. Pass verification by checking every step.
+7. Click Copy to Active Workflow to replace your previous flow.
+8. Return to the Active Workflow tab and proceed with publishing your flow.
+
+# Publish your flow and go live
+
+When the whole logic is built and tested, do not forget to save and publish your draft. The created flow will then be shown in the Published view.
+
+To initiate your flow from the Dashboard, click Run and generate a permalink for passing verification in the SDK.
+
+# Review verification results
+
+Once the check is performed, you will receive the applicantReviewed webhook with the verification status. This webhook is triggered in the following cases:
+
+- Applicant completes the flow (either receives a final approval or a final rejection at any stage)
+- Applicant receives the Resubmission requested status while completing the flow
+
+To review results via applicant profiles, go to the Applicants page, select an applicant, and check on Summary, which is a comprehensive report that includes the applicant data, check results, and uploaded documents.
+
+================================================================================
+
+# Conditional node variables
+URL: https://docs.sumsub.com/docs/conditional-node-variables
+
+The Workflow builder's conditional nodes help you easily manage verification flows depending on a certain criteria. 
+
+This article lists all the conditional node variables available for selection. Some of the variables have nested attributes and elements.
+
+> 📘 Note
+> 
+> Fields correlating to the products that you did not enable on your account will not be available.
+
+# Root variables
+
+The table below outlines root variables that are the most essential fields of the conditional nodes. 
+
+| Field                                                                      | Description                                                                                                                                                 |
+| :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| applicant                      | Branch of items related to information about an applicant.                                                                                                  |
+| poi, poi2, poi3, poi4 | Fields identifying the proof of identity document conditions.                                                                                               |
+| poa, poa2                       | Items associated with the proof of address document.                                                                                                        |
+| device                            | Fields including information about an applicant's device.                                                                                                   |
+| deviceStats                  | Applicant device statistics.                                                                                                                                |
+| `questionnaires`                                                           | Questionnaire item values nested by questionnaire, section, and then item id. For example,  `questionnaire["myQuestionnaireId"]["mySectionId"]["myItemId"]` |
+| `clientLists`                                                              | Field identifying client lists by name.                                                                                                                     |
+| checks                            | Items including the Background checks information.                                                                                                          |
+| action                            | Applicant action information.                                                                                                                               |
+| `random`                                                                   | Field standing for a random value from `0.0` to `1.0`.                                                                                                      |
+
+## applicant
+
+| Field                                                                        | Description                                                                                                                                                                                                                                                                                |
+| :--------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                                                         | Applicant ID.                                                                                                                                                                                                                                                                              |
+| `externalUserId`                                                             | Value you passed to `externalUserId` during applicant creation, usually the applicant id on your side.                                                                                                                                                                                     |
+| `createdAt`                                                                  | Applicant creation date.                                                                                                                                                                                                                                                                   |
+| `fullName`                                                                   | Applicant's full name.                                                                                                                                                                                                                                                                     |
+| `country`                                                                    | Applicant's country as per ISO 3166-1 alpha-3.                                                                                                                                                                                                                                             |
+| `countryOfBirth`                                                             | Applicant's country of birth as per ISO 3166-1 alpha-3.                                                                                                                                                                                                                                    |
+| `info`                                                                       | Information extracted from documents or external databases.                                                                                                                                                                                                                                |
+| fixedInfo | Basic applicant information provided to the Sumsub SDK/API when an applicant passes a verification level. To use these fields in Workflow Builder conditions, they must be marked as required in the level settings. |
+| review                    | Applicant's review.                                                                                                                                                                                                                                                                        |
+| `sourceKey`                                                                  | Applicant's source key.                                                                                                                                                                                                                                                                    |
+| derivatives           | Various information derived from an applicant.                                                                                                                                                                                                                                             |
+| `metadata`                                                                   | Applicant's metadata.                                                                                                                                                                                                                                                                      |
+| riskLabels             | Applicant risk labels.                                                                                                                                                                                                                                                                     |
+| `tags`                                                                       | Applicant tags.                                                                                                                                                                                                                                                                            |
+| assessment             | Applicant assessment.                                                                                                                                                                                                                                                                      |
+| `email`                                                                      | Applicant's email information.                                                                                                                                                                                                                                                             |
+| phone                                | Applicant's telephone data.                                                                                                                                                                                                                                                                |
+| `emailDomain`                                                                | Applicant email's domain name.                                                                                                                                                                                                                                                             |
+| type                         | Applicant entity type: individual or company.                                                                                                                                                                                                                                              |
+| `allMemberRoles`                                                             | Roles of the applicant.                                                                                                                                                                                                                                                                    |
+
+## poi, poi2, poi3, poi4
+
+| Field                                                           | Description                                                              |
+| :-------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `country`                                                       | Country where an identity document was issued (ISO 3166-1 alpha-3).      |
+| `idDocType`                                                     | Identity document type.                                                  |
+| `number`                                                        | Identity document number.                                                |
+| `additionalNumber`                                              | Identity document additional number.                                     |
+| `dob`                                                           | Date of birth of an identity document owner.                             |
+| `nationality`                                                   | Nationality of an identity document owner.                               |
+| `placeOfBirth`                                                  | Place of birth of an identity document owner.                            |
+| `issuedDate`                                                    | Date of an identity document.                                            |
+| `issueAuthority`                                                | Authority that issued an identity document.                              |
+| `issueAuthorityCode`                                            | Unique code of the authority that issued an identity document.           |
+| `validUntil`                                                    | Validity date of an identity document.                                   |
+| validityPeriod | Validity period of an identity document.                                 |
+| `firstIssuedDate`                                               | Date of an identity document's first issue.                              |
+| `metadata`                                                      | Metadata related to an identity document.                                |
+| address               | Address specified in an identity document.                               |
+| `category`                                                      | Identity document category, for example, category of a driver's license. |
+| nfc                       | NFC information on an identity document.                                 |
+| `fullMrz`                                                       | Machine-Readable Zone lines separated by the (\\n) symbol.               |
+
+## poa, poa2
+
+| Field                                                      | Description                                                                                                      |
+| :--------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| `country`                                                  | Country where the proof of address document was issued (ISO 3166-1 alpha-3).                                     |
+| `idDocType`                                                | Document type.                                                                                                   |
+| `number`                                                   | Document number.                                                                                                 |
+| `metadata`                                                 | Metadata related to a proof of address document.                                                                 |
+| address          | Address specified in a proof of address document.                                                                |
+| `issuedDate`                                               | ID Document issue date.                                                                                          |
+| `detectedLanguages`                                        | List of languages detected in a proof of address document specified in the format of 2-letter codes (ISO 639-1). |
+| image | Image's technical details.                                                                                       |
+
+## device
+
+| Field         | Description                                  |
+| :------------ | :------------------------------------------- |
+| `ipCountry`   | An IP Address country (ISO 3166-1 alpha-3).  |
+| `ipStateCode` | A code of the state or region pointed by IP. |
+
+## deviceStats
+
+| Field                                                          | Description                  |
+| :------------------------------------------------------------- | :--------------------------- |
+| minutes5 | Running 5-minute statistics. |
+| `hours1`                                                       | Running 1-hour statistics.   |
+| `days1`                                                        | Running 1-day statistics.    |
+| `days7`                                                        | Running 7-day statistics.    |
+
+## checks
+
+| Field                                                                   | Description                                       |
+| :---------------------------------------------------------------------- | :------------------------------------------------ |
+| all                         | Aggregated information about all checks by type.  |
+| poa              | Proof of address information (UTILITYBILL).      |
+| `poa2`                                                                  | 2nd proof of address information (UTILITYBILL2). |
+| company                 | Business verification information.                |
+| personWatchlist | Watchlists matching an applicant.                 |
+| email                     | Email confirmation                                |
+| phone                     | Phone confirmation.                               |
+| ip                           | IP information.                                   |
+
+## action
+
+| Field                                                                 | Description                                                                                                                                                 |
+| :-------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                                                  | Action ID.                                                                                                                                                  |
+| `externalActionId`                                                    | External action ID.                                                                                                                                         |
+| `createdAt`                                                           | Action creation date.                                                                                                                                       |
+| review | Action review.                                                                                                                                              |
+| `metadata`                                                            | Action metadata.                                                                                                                                            |
+| `questionnaires`                                                      | Questionnaire item values nested by questionnaire, section, and then item id. For example,  `questionnaire["myQuestionnaireId"]["mySectionId"]["myItemId"]` |
+
+## date
+
+| Field        | Description                                              |
+| :----------- | :------------------------------------------------------- |
+| `timestamp`  | Unix timestamp in milliseconds.                          |
+| `yyyymmdd`   | Numeric day in YYYYMMDD format, for example, `20230123`. |
+| `year`       | Year.                                                    |
+| `month`      | Months of the year (start from 1).                       |
+| `dayOfMonth` | Day of the month (starts from 1).                        |
+| `ageInYears` | Time delta in years between this date and now.           |
+| `ageInDays`  | Time delta in days between this date and now.            |
+
+## applicant.info, applicant.fixedInfo
+
+| Field                 | Description                                            |
+| :-------------------- | :----------------------------------------------------- |
+| `country`             | Applicant's country (ISO 3166-1 alpha-3).              |
+| `countryOfBirth`      | Applicant's country of birth (ISO 3166-1 alpha-3).     |
+| `firstName`           | Applicant's first name.                                |
+| `firstNameEn`         | Transliterated first name.                             |
+| `middleName`          | Applicant's middle name.                               |
+| `middleNameEn`        | Transliterated middle name.                            |
+| `lastName`            | Applicant's last name.                                 |
+| `lastNameEn`          | Transliterated last name.                              |
+| `gender`              | Applicant's gender (M or F).                           |
+| `nationality`         | Applicant's nationality (ISO 3166-1 alpha-3).          |
+| `taxResidenceCountry` | Applicant's Tax Residence Country (ISO 3166-1 alpha-3) |
+| `residenceCountry`    | Applicant's Residence Country (ISO 3166-1 alpha-3)     |
+| `age`                 | Applicant's age.                                       |
+| `address`             | Applicant's address.                                   |
+| `companyInfo`         | Company information (Business verification).           |
+| `tin`                 | Applicant's Individual Taxpayer Identification Number. |
+| `phone`               | Applicant's telephone data.                            |
+
+## applicant.review, action.review
+
+| Field          | Description               |
+| :------------- | :------------------------ |
+| `levelName`    | Applicant level.          |
+| `decision`     | Review of the decision.   |
+| `reviewAnswer` | Review of the answer.     |
+| `attemptCnt`   | Number of attempts.       |
+| `rejectLabels` | List of rejection labels. |
+| `buttonIds`    | List of button ids.       |
+
+## applicant.derivatives
+
+| Field          | Description                |
+| :------------- | :------------------------- |
+| `estimatedAge` | Applicant's estimated age. |
+
+## applicant.riskLabels
+
+| Field        | Description              |
+| :----------- | :----------------------- |
+| `email`      | Email risk labels.       |
+| `phone`      | Phone risk labels.       |
+| `device`     | Device risk labels.      |
+| `crossCheck` | Cross-check risk labels. |
+| `selfie`     | Selfie risk labels.      |
+| `aml`        | AML risk labels.         |
+| `person`     | Person risk labels.      |
+| `company`    | Company risk labels.     |
+
+## applicant.assessment
+
+| Field    | Description                                                                                                              |
+| :------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `scores` | Applicant's risk assessment score that is calculated via the transaction monitoring tags. |
+
+## phone
+
+| Field     | Description               |
+| :-------- | :------------------------ |
+| `number`  | Applicant's phone number. |
+| `country` | Phone number's country.   |
+
+## applicant.type
+
+| Field        | Description           |
+| :----------- | :-------------------- |
+| `individual` | Individual applicant. |
+| `company`    | Company applicant.    |
+
+## validityPeriod
+
+| Field     | Description                                    |
+| :-------- | :--------------------------------------------- |
+| `millis`  | Validity period of a document in milliseconds. |
+| `days`    | Validity period of a document in days.         |
+| `hours`   | Validity period of a document in hours.        |
+| `minutes` | Validity period of a document in minutes.      |
+| `seconds` | Validity period of a document in seconds.      |
+
+## address
+
+| Field              | Description                                 |
+| :----------------- | :------------------------------------------ |
+| `country`          | Country code (ISO 3166-1 alpha-3).          |
+| `formattedAddress` | Address in a human-readable format.         |
+| `state`            | Name of the state or region, if applicable. |
+| `town`             | Name of the town, if applicable.            |
+| `street`           | Name of the street, if applicable.          |
+| `subStreet`        | Name of the sub-street, if applicable.      |
+| `postCode`         | Post code if applicable.                    |
+
+## nfc
+
+| Field     | Description    |
+| :-------- | :------------- |
+| `fullMrz` | Full MRZ data. |
+
+## poa.image, poa2.image
+
+| Field         | Description           |
+| :------------ | :-------------------- |
+| `softwareTag` | Software information. |
+
+## deviceStats.minutes5
+
+| Field                      | Description                                                                                                          |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `deviceCount`              | Number of devices of an applicant within a period.                                                                   |
+| `sameDeviceApplicantCount` | Number of applicants that share any device with this applicant within a period (0 if no one else shares any device). |
+| `riskLabels`               | All risk labels associated with the applicant's devices within a period.                                             |
+| `deviceIds`                | Applicant device ids.                                                                                                |
+
+## checks.all
+
+| Field | Description                      |
+| :---- | :------------------------------- |
+| `ip`  | Aggregated IP check information. |
+
+## checks.poa, checks.poa2
+
+| Field                    | Description                                                                                                              |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `companyType`            | Proof of address, company type.                                                                                          |
+| `subType`                | Proof of address subtype if applicable.                                                                                  |
+| `unconventionalProvider` | Indicates whether PoA was obtained via an unconventional provider, for example, a neo-bank if companyType equals "bank". |
+
+## checks.company
+
+| Field    | Description                                                                                                                       |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `answer` | Answer on the business verification results. The possible items for the field are: `GREEN`, `RED`, `YELLOW`,  `IGNORED`, `ERROR`. |
+
+## checks.personWatchlist
+
+| Field           | Description                                                                                                                                         |
+| :-------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `matchStatuses` | Watchlist match statuses for the person. The possible statuses are: `unknown`, `nomatch`, `potentialmatch`, `falsepositive`, or `truepositive`. |
+
+## checks.email
+
+| Field             | Description                    |
+| :---------------- | :----------------------------- |
+| `confirmedViaOtp` | Email OTP confirmation answer. |
+| `nonDisposable`   | Non-disposable email answer.   |
+| `blacklisted`     | Blocklisted email answer.      |
+
+## checks.phone
+
+| Field             | Description                    |
+| :---------------- | :----------------------------- |
+| `confirmedViaOtp` | Phone OTP confirmation answer. |
+| `blacklisted`     | Blocklisted phone answer.      |
+
+## checks.ip
+
+| Field           | Description                                                                                                                  |
+| :-------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| `riskLevel`     | Labels the detected IP address as safe (GREEN), suspicious (YELLOW), risky (RED), IGNORED, or ERROR.                         |
+| `abuseVelocity` | Indicates frequent abusive behavior over the past 24-48 hours. Could be High, Medium, or Low.                                |
+| `country`       | IP Address country.                                                                                                          |
+| `proxy`         | Indicates whether a proxy server is used and labels it as safe (GREEN), suspicious (YELLOW), risky (RED), IGNORED, or ERROR. |
+| `vpn`           | IP Address VPN answer.                                                                                                       |
+| `tor`           | IP Address TOR answer.                                                                                                       |
+
+## applicant.info.companyInfo, applicant.fixedInfo.companyInfo
+
+## applicant.review.decision, action.review.decision
+
+| Field          | Description                                                                |
+| :------------- | :------------------------------------------------------------------------- |
+| `approved`     | Decision identifying that an applicant has been approved.                  |
+| `rejected`     | Decision identifying that an applicant has been rejected.                  |
+| `resubmission` | Decision identifying that an applicant has been returned for resubmission. |
+
+## reviewAnswer
+
+| Field     | Description                                                      |
+| :-------- | :--------------------------------------------------------------- |
+| `IGNORED` | Check was skipped.                                               |
+| `GREEN`   | Successful result of the verification and/or check.              |
+| `YELLOW`  | There are some warnings regarding the verification and/or check. |
+| `RED`     | Violations were found.                                           |
+| `ERROR`   | Error occurred during verification.                              |
+
+## Elements of applicant.review.rejectLabels, Elements of action.review.rejectLabels
+
+| Field                                     | Description                                                                                                                           |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `FORGERY`                                 | Forgery attempt was recognized.                                                                                                       |
+| `CRIMINAL`                                | Applicant is involved in illegal actions.                                                                                             |
+| `DOCUMENTTEMPLATE`                       | Submitted documents are templates downloaded from the internet.                                                                       |
+| `LOWQUALITY`                             | Documents have low quality that does not allow definitive decisions to be made.                                                       |
+| `SPAM`                                    | Applicant was created by mistake or is just a spam user (irrelevant images were supplied).                                            |
+| `NOTDOCUMENT`                            | Submitted documents are not relevant for the verification procedure.                                                                  |
+| `SELFIEMISMATCH`                         | Applicant's photo (profile image) does not match a photo on the provided documents.                                                   |
+| `IDINVALID`                              | Document that identifies a person (like a passport or an ID card) is not valid.                                                       |
+| `DOCUMENTDEPRIVED`                       | Applicant has been deprived of the document                                                                                           |
+| `FOREIGNER`                               | Rejection label associated with the applicants from an unsupported country or, for example, for example, without a residence permit.  |
+| `DUPLICATE`                               | Applicant has multiple accounts while duplicates are not allowed by the regulations.                                                  |
+| `BADAVATAR`                              | Applicant's avatar does not meet the client's requirements.                                                                           |
+| `WRONGUSERREGION`                       | Applicant from a region/country that is not allowed to be registered.                                                                 |
+| `WRONGADDRESS`                           | Address from the applicant's documents does not match the address entered by them manually.                                           |
+| `INCOMPLETEDOCUMENT`                     | Some information is missing from the document, or it is partially visible.                                                            |
+| `BLOCKLIST`                               | Applicant is blocklisted by a client.                                                                                                 |
+| `OTHER`                                   | There is some unclassified reason for rejection.                                                                                      |
+| `UNSATISFACTORYPHOTOS`                   | There were problems with the photos during verification, like poor quality or masked information.                                     |
+| `GRAPHICEDITOR`                          | Document has been edited by a graphical editor.                                                                                       |
+| `DOCUMENTPAGEMISSING`                   | Some pages of a document are missing (if applicable).                                                                                 |
+| `DOCUMENTDAMAGED`                        | Document is damaged.                                                                                                                  |
+| `DIGITALDOCUMENT`                        | Document is digital and cannot be accepted                                                                                            |
+| `REGULATIONSVIOLATIONS`                  | Some violations of the regulations were found.                                                                                        |
+| `INCONSISTENTPROFILE`                    | Data or documents of different persons were uploaded to one applicant.                                                                |
+| `PROBLEMATICAPPLICANTDATA`              | Applicant data does not match the data in their documents.                                                                            |
+| `GPSASPOASKIPPED`                      | GPS as PoA option was skipped, and no image was uploaded instead.                                                                     |
+| `ADDITIONALDOCUMENTREQUIRED`            | Additional documents are required to pass the check for image review.                                                                 |
+| `MOREDOCUMENTSREQUIRED`                 | Additional documents required to pass the check for applicant review.                                                                 |
+| `AGEREQUIREMENTMISMATCH`                | Age requirement is not met (for example, cannot rent a car to a person below 25yo).                                                   |
+| `REQUESTEDDATAMISMATCH`                 | Provided information does not match the data recognized from a document.                                                              |
+| `EXPERIENCEREQUIREMENTMISMATCH`         | Applicant does not have enough experience (for example, driving experience is not enough).                                            |
+| `COMPROMISEDPERSONS`                     | Applicant does not correspond to Compromised Person Politics.                                                                         |
+| `PEP`                                     | Applicant belongs to the PEP category.                                                                                                |
+| `ADVERSEMEDIA`                           | Applicant was found in the adverse media.                                                                                             |
+| `FRAUDULENTPATTERNS`                     | There was fraudulent behavior detected during the verification.                                                                       |
+| `SANCTIONS`                               | Applicant was found on the sanction lists.                                                                                            |
+| `NOTALLCHECKSCOMPLETED`                | Not all of the checks were completed.                                                                                                 |
+| `FRONTSIDEMISSING`                      | Front side of the document is missing.                                                                                                |
+| `BACKSIDEMISSING`                       | Back side of the document is missing.                                                                                                 |
+| `SCREENSHOTS`                             | Applicant uploaded screenshots.                                                                                                       |
+| `BLACKANDWHITE`                         | Applicant uploaded black and white photos of their documents.                                                                         |
+| `INCOMPATIBLELANGUAGE`                   | Document's translation is required.                                                                                                   |
+| `EXPIRATIONDATE`                         | Applicant uploaded an expired document.                                                                                               |
+| `UNFILLEDID`                             | Applicant uploaded the document without signatures and stamps.                                                                        |
+| `BADSELFIE`                              | Applicant uploaded a selfie in poor quality.                                                                                          |
+| `BADVIDEOSELFIE`                        | Applicant uploaded a video selfie in poor quality.                                                                                    |
+| `BADFACEMATCHING`                       | Face check between a document and a selfie was failed.                                                                                |
+| `BADPROOFOFIDENTITY`                   | Applicant uploaded a poor quality ID document.                                                                                        |
+| `BADPROOFOFADDRESS`                    | Applicant uploaded a poor quality proof of address.                                                                                   |
+| `BADPROOFOFPAYMENT`                    | Applicant uploaded a poor quality proof of payment.                                                                                   |
+| `SELFIEWITHPAPER`                       | Special selfie is required (for example, selfie with a piece of paper and the date on it).                                            |
+| `FRAUDULENTLIVENESS`                     | There was an attempt to bypass the liveness check.                                                                                    |
+| `OK`                                      | Custom reject label.                                                                                                                  |
+| `COMPANYNOTDEFINEDSTRUCTURE`           | Entity's control structure was not defined.                                                                                           |
+| `COMPANYNOTDEFINEDBENEFICIARIES`       | Entity's beneficial owners weren't identified and duly verified.                                                                      |
+| `COMPANYNOTVALIDATEDBENEFICIALOWNERS` | Not all beneficial owners have passed the identity verification procedure.                                                            |
+| `COMPANYNOTVALIDATEDBENEFICIARIES`     | Entity's Beneficiaries were not validated.                                                                                            |
+| `COMPANYNOTVALIDATEDDIRECTORS`         | Not all directors have passed the identity verification procedure.                                                                    |
+| `COMPANYNOTDEFINEDREPRESENTATIVES`     | Entity's representatives were not defined.                                                                                            |
+| `COMPANYNOTVALIDATEDREPRESENTATIVES`   | Entity's representatives were not validated.                                                                                          |
+| `UNSUITABLEDOCUMENT`                     | Document either does not fit the required type or lacks obligatory elements, like seal, apostille, or notary certification.           |
+| `OUTDATEDDOCUMENTVERSION`               | Based on the publicly available state company register, not the most recent version was provided.                                     |
+| `COMPANYNOTDEFINEDOWNERSHIPSTRUCTURE` | Company ownership structure has not been specified or differs from the one declared by the corporate documents.                       |
+| `COMPANYINACTIVEENTITY`                 | According to the publicly available state company registry, the entity is inactive / dissolved / deregistered.                        |
+| `COMPANYINCORRECTDATA`                  | Provided company attributes like Name, Registration, or Tax Number do not match the provided documents or the state company registry. |
+| `COMPANYPROBLEMATICSTRUCTURE`           | There are officials in the control and ownership structure who got rejected.                                                          |
+| `COMPANYDATAMISMATCH`                   | Company attributes like Name, Registration on provided documents do not match the state company registry data.                        |
+| `APPLICANTINTERRUPTEDINTERVIEW`         | Applicant refused to finish the interview on the video ident call.                                                                    |
+| `DOCUMENTMISSING`                        | Applicant refused to show or did not have required documents on the video ident call.                                                 |
+| `UNSUITABLEENV`                          | Applicant is either not alone or nor visible on the video ident call.                                                                 |
+| `CONNECTIONINTERRUPTED`                  | Video Ident call connection was interrupted.                                                                                          |
+| `UNSUPPORTEDLANGUAGE`                    | Video Ident' applicant does not speak the language common to the operator.                                                            |
+| `THIRDPARTYINVOLVED`                    | Video Ident applicant trying to pass verification to pass the account to a third party.                                               |
+| `INCORRECTSOCIALNUMBER`                 | Incorrect TIN/SSN was provided to perform the check.                                                                                  |
+| `CHECKUNAVAILABLE`                       | External database service is not available at the moment.                                                                             |
+| `DBDATANOTFOUND`                       | Data not found in the external database.                                                                                              |
+| `DBDATAMISMATCH`                        | Input/document data does not match data from the external database.                                                                   |
+| `RESTRICTEDPERSON`                       | Person is found in a restricted list (for example, Prohibited from betting).                                                          |
+
+## Elements of applicant.riskLabels.email
+
+| Field                | Description                                                                                                    |
+| :------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `mediumRisk`         | Medium-risk email address.                                                                                     |
+| `highRisk`           | High-risk email address.                                                                                       |
+| `disposable`         | Temporary email address, which is provided by a disposable email service and usually expires in a few minutes. |
+| `noWebRegistrations` | Email registration is not detected.                                                                            |
+| `noWebsiteExists`    | Email domain does not exist.                                                                                   |
+| `nonDeliverable`     | Messages fail to be delivered to this email address.                                                           |
+| `invalidEmail`       | Email address is invalid.                                                                                      |
+
+## Elements of applicant.riskLabels.phone
+
+| Field                | Description                                                                                                         |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `mediumRisk`         | Medium-risk phone number.                                                                                           |
+| `highRisk`           | High-risk phone number.                                                                                             |
+| `virtual`            | Virtual phone that allows a user to make calls through the internet and is not associated with a physical location. |
+| `noWebRegistrations` | Phone number registration is not detected.                                                                          |
+| `disposable`         | Disposable phone.                                                                                                   |
+
+## Elements of applicant.riskLabels.device
+
+| Field                       | Description                                                                                     |
+| :-------------------------- | :---------------------------------------------------------------------------------------------- |
+| `vpnUsage`                  | VPN usage is detected.                                                                          |
+| `torUsage`                  | TOR usage is detected.                                                                          |
+| `highRiskIp`                | High risk of used IP addresses.                                                                 |
+| `multipleDevices`           | Multiple devices were used.                                                                     |
+| `multipleMobileDevices`     | Multiple mobile devices were used.                                                              |
+| `lengthySession`            | Session is too long.                                                                            |
+| `failedSessionContinuation` | Session was interrupted.                                                                        |
+| `distantIpLocations`        | Login from different and distant IP addresses for a short time interval.                        |
+| `thirdPartyLinkAccess`      | Link access via external source, for example, WhatsApp or Telegram.                             |
+| `riskySessionContinuation`  | Session continued from a risky IP after the link could not be opened or accessed via messenger. |
+
+## Elements of applicant.riskLabels.crossCheck
+
+| Field                                          | Description                                                                                |
+| :--------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| `diverseIdDocCountries`                        | Identity documents issued in different countries.                                          |
+| `manyAccountDuplicates`                        | Lots of account duplicates are created.                                                    |
+| `accountsInManyServices`                       | Same account is registered in different services.                                          |
+| `addressCountryVsIpCountryMismatch`            | Physical address in the country mismatches the country IP address.                         |
+| `idDocCountryVsIpCountryMismatch`              | Identity document country mismatches the country IP address.                               |
+| `exifCountryVsIdDocCountryOrIpCountryMismatch` | Country detected by EXIF mismatches either the document country or the country IP address. |
+
+## Elements of applicant.riskLabels.selfie
+
+| Field                       | Description                                                                                                     |
+| :-------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `asleep`                    | Person in the selfie is actually asleep.                                                                        |
+| `estimatedAgeMismatch`      | Estimated age mismatches the age in documents.                                                                  |
+| `virtualCameraPresent`      | Virtual (a software-based) camera that simulates a physical camera is detected.                                 |
+| `manyAttempts`              | Numerous attempts of passing a selfie check.                                                                    |
+| `sameFaceWithDifferentData` | The same face on documents with different data.                                                                 |
+| `thirdPartyInvolved`        | There are signs that another person may be assisting or present during the selfie or Liveness capture process.  |
+| `phone`                     | There are indications that a phone or similar device may be used during the selfie or Liveness capture process. |
+
+## Elements of applicant.riskLabels.aml
+
+| Field            | Description                                                                                                                                                                                                  |
+| :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pep`            | Applicant belongs to the PEP (Politically Exposed Person) category.                                                                                                                                          |
+| `sanctions`      | Applicant was found on sanctions lists.                                                                                                                                                                      |
+| `terrorism`      | Applicant  is suspected of terrorism.                                                                                                                                                                        |
+| `crime`          | Applicant is suspected of criminal activity.                                                                                                                                                                 |
+| `adverseMedia`   | Applicant compromising published information that is related to the user was found in the media.                                                                                                             |
+| `fitnessProbity` | Applicant does not comply with Fitness and Probity regime. The core function of the Fitness and Probity Regime is to ensure that individuals in key and customer facing positions are competent and capable. |
+
+## Elements of applicant.riskLabels.person
+
+| Field                              | Description                                                       |
+| :--------------------------------- | :---------------------------------------------------------------- |
+| `famousPerson`                     | Applicant is supposedly a famous person.                          |
+| `strangeName`                      | Applicant has a strange name that does not seem to be a real one. |
+| `noPhoneNamesFromWebServices`      | No phone names are found in web services.                         |
+| `phoneNameMismatchFromWebServices` | Name mismatch with the names associated with the phone number.    |
+| `noEmailNamesFromWebServices`      | No email names are found in web services.                         |
+| `emailNameMismatchFromWebServices` | Name mismatch with the names associated with the email address.   |
+
+## Elements of applicant.riskLabels.company
+
+| Field                           | Description                                    |
+| :------------------------------ | :--------------------------------------------- |
+| `companyAdditionalDataNotFound` | Company data not found in the database.        |
+| `companyDataMismatch`           | Company data does not match the database data. |
+
+## Elements of applicant.assessment.scores
+
+| Field   | Description      |
+| :------ | :--------------- |
+| `tag`   | Applicant tag.   |
+| `score` | Applicant score. |
+
+## checks.all.ip
+
+| Field        | Description                                                 |
+| :----------- | :---------------------------------------------------------- |
+| `ips`        | List of all detected IP addresses.                          |
+| `stateCodes` | Detected state codes from all IP checks.                    |
+| `countries`  | Detected countries from all IP checks (ISO 3166-1 alpha-3). |
+| `vpns`       | VPN answers from all IP checks.                             |
+| `tors`       | TOR answers from all IP checks.                             |
+
+## checks.poa.companyType, checks.poa2.companyType
+
+There are the main types of companies that issue proof of address documents. New values cannot be added. 
+
+| Field                    | Description                           |
+| :----------------------- | :------------------------------------ |
+| `governmentOrganization` | Government organization company type. |
+| `utilityProvider`        | Utility provider company type.        |
+| `bank`                   | Bank company type.                    |
+| `mobileOperator`         | Mobile operator company type.         |
+
+## subType, Elements of possibleSubTypes
+
+There are extended POA subtypes listed in the table below. New values creation is available as an additional service: `ADVANCEDPOATYPE_DETECTION`.
+
+| Field               | Description                                  |
+| :------------------ | :------------------------------------------- |
+| `statement`         | Statement proof of address subtype.          |
+| `voterRegistration` | Voter registration proof of address subtype. |
+| `taxBill`           | Tax bill proof of address subtype.           |
+| `telecom`           | Telecom proof of address subtype.            |
+| `utilityBill`       | Utility bill proof of address subtype.       |
+| `bankStatement`     | Bank statement proof of address subtype.     |
+| `bankLetter`        | Bank letter proof of address subtype.        |
+| `lease`             | Lease proof of address subtype.              |
+
+## applicant.info.companyInfo.beneficiaries, applicant.fixedInfo.companyInfo.beneficiaries
+
+| Field          | Description                                                                                                         |
+| :------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `rejectLabels` | A list of labels associated with a beneficiary (UBO, Shareholder, or Director) that indicate reasons for rejection. |
+
+================================================================================
+
+# Verify applicants from different countries via Workflow Builder
+URL: https://docs.sumsub.com/docs/verify-applicants-from-different-countries-via-workflow-builder
+
+In certain jurisdictions, it is required to verify applicants in accordance with the specific requirements and local regulations.
+
+The Workflow Builder flows allow you to create and configure the verification procedure tailored even to the most complex cases, including verification of applicants from different countries. 
+
+Depending on the applicant’s country, you can transfer them to certain verification levels, reject the profile, send them to manual review, or request passing additional verification.
+
+# How Workflow Builder flows work
+
+The Workflow Builder flows are designed to facilitate the process of setting up verification and creating different scenarios involving multiple groups of applicants.  
+
+There are four types of nodes that you place within the canvas and configure the verification flow connecting them between each other in a necessary way. Then you can test your flow and go live.
+
+# Create flow for verifying applicants from different countries
+
+Set up a verification flow via Workflow Builder for working with applicants from different countries.
+
+## Step 1. Create verification level
+
+In the first step, you must create an initial node that will include a verification level that collects information about the applicant’s country:
+
+1. Add a verification level. 
+2. Include the Country field in the Applicant data verification step.
+
+## Step 2. Create client list with restricted countries
+
+When working with applicants from different countries, you may want to decline some of them, depending on the selected country. To do so, you will need to create a client list that defines the restricted countries and place this list on the flow’s canvas:
+
+1. Create a custom client list with the Key entry type.
+2. Add items for restricting specific countries using the alpha-3 code.
+
+## Step 3. Go to Workflow Builder and add level step node
+
+Start building a verification flow by adding the initial node to the Workflow Builder canvas: 
+
+1. In the Dashboard, go to Workflow builder and select Active workflow.
+2. Navigate to the Standard Workflow  tab and go to the Draft view.
+3. Add a level step to the canvas.
+4. From the Level name drop-down list, select the configured verification level.
+
+## Step 4. Configure nodes to reject applicants from high-risk countries
+
+Once you get the picture of the verification process that you want to set up, you can add more nodes to your canvas and adjust them by the logic that is suitable for each case—request additional checks or reject applicants.
+
+Add a verification flow branch that will reject applicants if their country is on the list of restricted ones:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.country` parameter.
+   3. Set a logical condition—select is in.
+   4. Identify the name of the created client list. In the second Field drop-down—enter the name in the following format: `client.Lists.yourname`.
+3. Within the created condition branch, click Choose next step and select Review step.
+4. Adjust the Review step node:
+   1. In the review step configuration, identify the type of terminal step—select Final reject.
+   2. Specify reasons or add labels that will explain the decision.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/49cd7076cf69998649624517b7a4bc3e9a3271ce2832e8a7d8fb83208e88afc4-applicantsfromdiffcounties1.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 5. Add nodes to manage applicants from specific countries
+
+Besides the restriction, you may need to assign different checks to applicants from particular countries and states. For example, you can transfer applicants from Brazil to the Non-Doc Verification level (the CPF check) to increase conversion rates and request passing additional checks for applicants from certain states of the US that you consider risky:
+
+1. Go back to the condition node and add a new branch.
+2. Configure the created condition branch:
+   1. From the Field drop-down list, select the `applicant.country` parameter.
+   2. Set a logical condition—select equals.
+   3. Specify the country in Value.
+3. Add the level step node as the next step after the brunch and select the CPF check level from the list.
+4. To manage applicants from the US, add another branch in the condition node.
+5. Set up the branch:
+   1. From the Field drop-down list, select the `poi.address.state parameter`.
+   2. Set a logical condition—select equals.
+   3. Specify the state in Value.
+   4. Add the level step node as the next step after the brunch and select the verification level for the risky US states.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/1f66d0727431367ec092e80857c940585c5f9aeadf1ecc73403fe808ef16f052-applicantsfromdiffcounties2.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 6. Cover all other cases
+
+Include one more branch to manage any other case where the applicant’s country is not considered high-risk and does not require specific verification:
+
+1. Go back to the condition node and add a new branch.
+2. Configure the created condition branch:
+   1. From the Field drop-down list, select the `applicant.country` parameter.
+   2. Set a logical condition—select isn’t in.
+   3. In the second Field drop-down, enter the name of the list of restricted countries that you have included in the flow before.
+3. Add the level step node as the next step after the brunch and select the basic verification level suitable for all other cases.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/93a26c240ed53915d6ef1558f7ac7ec21b00f9f918bec907ce0dfa647fda4d96-applicantsfromdiffcounties_3.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 7. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 8. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Manage applicants via Workflow Builder based on their age
+URL: https://docs.sumsub.com/docs/manage-applicants-via-workflow-builder-based-on-their-age
+
+Use Workflow Builder to set limitations for your applicants and create a verification flow that considers their age and determines further actions—sending for manual review or declining the profile.
+
+# Build flow for managing applicants based on their age
+
+Design a verification flow that will take into account the applicants’ age, and transfer them to the next step according to the provided data and flow settings.
+
+## Step 1. Create verification level and add level step node
+
+At the first step, you need to create a verification level that collects data about the applicant’s age and add it to the Workflow Builder’s canvas:
+
+1. Add a verification level including the Full name and Date of birth fields in the Applicant data verification step. The Date of birth field should be marked as required.
+2. In the Dashboard, go to Workflow builder and select Active workflow.
+3. Navigate to the Standard Workflow  tab and go to the Draft view.
+4. Add a level step to the canvas, and attach the created verification level by selecting it from the list.
+
+## Step 2. Add nodes to delegate profiles for manual review
+
+At the second step, include the condition node that considers the applicant’s age and sends profiles for the manual review. For example, if you want to delegate for manual review the applicants who are older than 70, do the following:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.info.age` parameter.
+   3. Set a logical condition (in our case, we use greater than) and specify the age value.
+3. Add the final Review step node to complete your verification flow and set up delegation of the applicant profiles:
+   1. Within the created condition branch, click Choose next step and select Review step.
+   2. In the review step configuration, identify the type of terminal step—select Manual review.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/f75ef1a71c455989d4174ee94e8431aefc060de513cc371228735e7ba37b0bfc-1step.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 3. Include nodes to reject applicants
+
+Add the branch that will reject applicants who are younger than a certain age:  
+
+1. Go back to the created condition node and add a new branch.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.info.age` parameter.
+   3. Set a logical condition—select less than and specify the age value.
+3. Adjust the Review step node to decline applicant profiles:
+   1. Within the created condition branch, click Choose next step and select Review step.
+   2. In the review step configuration, identify the type of terminal step—select Final reject.
+   3. Specify reasons or add labels that will explain the decision.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/1fadee69932f948cac219e0b58aa53578b5a9d417ed3a200d315b7f6ea2717d3-2step.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 4. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 5. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Combine non-document and standard verification via Workflow Builder
+URL: https://docs.sumsub.com/docs/combine-non-document-and-standard-verification-via-workflow-builder
+
+At Sumsub, we have a few complex identity verification solutions that can be easily combined within one verification flow—a standard documentary identity verification and Non-Doc Verification, which is a document-free approach.
+
+# Why do you need to combine Non-Doc and standard verification
+
+Combination of two verification methods in one flow allows you to secure your entire verification process in case something goes wrong during the checks: 
+
+- Technical issues on the Non-Document verification source’s side—the government databases might not be available to retrieve and validate the data for a certain period of time.
+- Unexpected errors due to the incorrectly provided data—applicants may make spelling errors while entering their personal data.
+
+Therefore, if an applicant fails the Non-Doc Verification, they can be sent to the basic-kyc-verification level, so they could attempt verification for one more time by providing the required documents.
+
+# Create versatile verification flow
+
+Add a verification flow that combines two verification types to maintain the highest conversion rate and make verification more user-friendly for your applicants.
+
+## Step 1. Create verification levels
+
+Create and configure verification levels to be added to the Workflow Builder’s canvas. In this case, you will need to create two different verification levels—the non-doc and documentary-based ones.
+
+1. Add a non-doc verification level:
+   1. Create a verification level including the Non-doc verification step.
+   2. Configure the level settings and save them.
+2. Add a standard verification level:
+   1. Create another verification level and add any steps that your applicants will be asked to complete. These may include proving their identity with a passport or ID card, or providing proof of address, applicant data, and so on.
+   2. Configure the level settings and save your changes.
+
+## Step 2. Add initial node to Workflow builder
+
+Once all the levels are created, go to Workflow Builder and start working on the flow:
+
+1. In the Dashboard, go to Workflow builder and select Active workflow.
+2. Navigate to the Standard Workflow  tab and go to the Draft view.
+3. Add a level step to the canvas.
+4. From the Level name drop-down list, select the Non-Doc verification level you have created before.
+
+## Step 3. Include alternative verification step
+
+To provide the ability to proceed with standard verification, configure the Condition node and add one more verification level to the flow:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.review.decision` parameter.
+   3. Set a logical condition—choose equals.
+   4. From the Value drop-down list, select rejected and resubmission.
+3. Within the created condition branch, click Choose next step and select Level step.
+4. In the level step configuration, identify the documentary verification step that you created earlier.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/70981837c495f28481f3c11a9e306017c96cd769fa333d40847d2f222b33ab25-Screenshot2026-04-01161637.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 4. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 5. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Assign tags using Workflow Builder
+URL: https://docs.sumsub.com/docs/assign-tags-using-workflow-builder
+
+With Workflow Builder, you can add tags to your applicant profiles way too much faster to divide them into groups according to common features, such as a particular industry (crypto, gambling, banking, and so on), level of risk, or AML hits.
+
+# How tags work
+
+Applicant tags at Sumsub is a functionality that allows you to create labels and assign them to applicants for classification and filtering. 
+
+Tags can be added to profiles manually via the applicant page in the Dashboard or assigned via Workflow Builder. 
+
+Assigned tags do not affect verification results, but still help you distinguish several groups of applicants on the basis of common features.
+
+# Implement tags in verification flow via Workflow Builder
+
+Create tags and add a verification flow that will assign these tags, depending on the verification result.
+
+## Step 1. Create tags
+
+Create applicant tags to classify your applicants: 
+
+1. In the Dashboard, go to the Applicant tags tab and select Create tag at the bottom of the tag list.
+2. Provide a name for the new tag and select a tag color.
+3. Select the Include tag to applicant summary report checkbox if you want to see tags in your reports.
+
+## Step 2. Create verification level and add level step node
+
+Build a verification level to conduct required checks and add it to the Workflow Builder’s canvas:
+
+1. Create a verification level and add verification steps.
+2. Configure the level settings and save them.
+3. In the Dashboard, go to Workflow builder and select Active workflow.
+4. Navigate to the Standard Workflow  tab and go to the Draft view.
+5. Add a level step to the canvas, and attach the created verification level by selecting it from the list.
+
+## Step 3. Add nodes to determine common features
+
+Add the Condition step node that considers verification results and regulates the further steps. For example, you create a verification level including the Questionnaire step and design a logic that takes into account the questionnaire score to attribute applicants to a particular group:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `questionnaireName.score` parameter.
+   3. Set a logical condition (in our case, we use equals) and specify the score value.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/15c421bf36ea273389857f437e786276b1821c57f2a39dfb01f6b27a211402dd-1st.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 4. Include tags assignment
+
+Assign tags according to the received verification results: 
+
+1. Within the created condition branch, click Choose next step and select Action.
+2. Configure the Action node settings:
+   1. From the Type of action drop-down list, select Add/Remove tags.
+   2. Identify tags that will be assigned to profiles with the established questionnaire score—select one or several tags.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/a2f4dc645e610d5b67619ad9c2d970f5bb57187b3c60d946df03e0c6115aa645-2st.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 5. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 6. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Delegate rejected applicants for manual review
+URL: https://docs.sumsub.com/docs/delegate-rejected-applicants-for-manual-review
+
+At Sumsub, applicants might be declined with a Rejected or Resubmission requested status, depending on the nature of violation.
+
+# Why do you need to review rejected applicants manually
+
+Some of the cases may require more thorough consideration of the applicant profile. For example, you may need to check the applicants rejected by the Watchlists-related tags manually to make sure that the refusal is fair.
+
+# Create verification flow considering rejection reasons
+
+Add a verification flow that takes into account the reasons for rejection and delegates particular applicants for manual review.
+
+## Step 1. Create verification level and add level step node
+
+Create a new verification level or add an existing one to the Workflow Builder’s canvas:
+
+1. Create a verification level and add verification steps
+2. Configure the level settings and save them.
+3. In the Dashboard, go to Workflow builder and select Active workflow.
+4. Navigate to the Standard Workflow  tab and go to the Draft view.
+5. Add a level step to the canvas, and attach the created verification level by selecting it from the list.
+
+## Step 2. Configure nodes to consider rejection labels
+
+Add the Condition and Review step nodes to complete the verification flow and send rejected applicants for hand-operating review:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Choose the rejected and resubmission options from the Review decision drop-down list.
+   2. Select the If logical operator.
+   3. From the Field drop-down list, select the `applicant.review.rejectLabels` parameter.
+   4. Set the contains any logical condition.
+   5. From the Value list, select the rejection labels.
+3. Within the created condition branch, click Choose next step and select Review step.
+4. Configure the Review step node settings:
+   1. Identify the type of terminal step—select Manual review.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/46312650e85148fadd01bef48ec654a6fd7c50ab84294b7bea4b43caab14676a-delegaterejectedapplicants.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 3. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 4. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Reject applicants for using VPN
+URL: https://docs.sumsub.com/docs/reject-applicants-for-using-vpn
+
+Build a verification flow to restrict applicant profiles that use a VPN connection while passing verification.
+
+# How Sumsub detects VPN usage
+
+Sumsub offers the Advanced IP check solution to extract the IP address of the device that your applicant uses for verification, and get all the related information, including data about their VPN connection status.
+
+# Why do you need to reject applicants using VPN
+
+If it is a significant matter for your business to know the exact IP address of the applicant’s device, you can detect the VPN usage that covers this information and reject such profiles.
+
+# Create verification flow to reject applicants who use VPN
+
+Add a Workflow Builder verification flow that will help you find and decline applicant profiles that use a VPN connection.
+
+## Step 1. Create verification level and add level step node
+
+Build a verification level, including an Advanced IP check, and place it on the Workflow Builder’s canvas:
+
+1. Create a verification level and add verification steps
+2. Configure the level settings and save them.
+3. Enable the Advanced IP check — on the Configurations tab of the verification level settings, open the [Fraud prevention]() section, and enable the IP insights checkbox.
+4. In the Dashboard, go to Workflow builder and select Active workflow.
+5. Navigate to the Standard Workflow  tab and go to the Draft view.
+6. Add a level step to the canvas, and attach the created verification level by selecting it from the list.
+
+## Step 2. Configure profiles rejection
+
+Add the Condition and Review step nodes to complete the verification flow and reject applicants using VPN:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.riskLabels.device` parameter.
+   3. Set the contains logical condition.
+   4. From the Value list, select the `vpnUsage` risk label.
+3. Within the created condition branch, click Choose next step and select Review step.
+4. Configure the Review step node settings:
+   1. Identify the type of terminal step — select Final reject.
+   2. Specify reasons or add labels that will explain the decision.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/b8d2081a66b72818be7c148867e52ff3a0c2887b9c16e3806665992f612c1b8c-vpn_usage.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 3. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 4. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Handle applicants based on their IP address
+URL: https://docs.sumsub.com/docs/handle-applicants-based-on-their-ip-address
+
+By using Workflow Builder and Client lists with IP addresses, you can design a seamless process that considers Advanced IP check results and determines the next steps accordingly.
+
+The main use cases for an IP-based flow are:
+
+- Building a whitelisting flow. Ignore risk labels for specific IP addresses and assign appropriate tags to applicant profiles.
+- Managing risky IP addresses. Send certain profiles for manual review or require additional verification if their IP addresses are on your list of suspicious ones.
+- Rejecting applicants automatically. Decline applicant profiles if their IP addresses are on your client list of risky addresses.
+
+# How we detect IP address
+
+The IP address of the applicant’s device is extracted during the Advanced IP check along with other data like location, Internet provider, risk level, VPN, connection type, and so on. 
+
+The check includes the following steps:
+
+1. An applicant starts verification, and their IP address is detected and monitored during the verification process.
+2. The system checks the data and returns the result as labels.
+
+# Build verification flow to manage applicants based on their IP address
+
+To manage applicant profiles based on their IP data, you need to create a verification level, configure its settings, add a client list with IP ranges, and design the flow using Workflow Builder.
+
+For example, let's create a Workflow Builder flow that updates tags for applicant profiles with specific IP addresses and adds extra checks for another group whose IP addresses are considered risky.
+
+## Step 1. Create verification level
+
+Add a verification level including an Advanced IP check:
+
+1. Create a verification level and add verification steps.
+2. Configure the level settings and save it.
+3. Enable the Advanced IP check — on the Configurations tab of the verification level settings, open the [Fraud prevention]() section, and enable the IP insights checkbox.
+
+## Step 2. Create client list with IP Ranges
+
+Add a new client list with the IP Ranges entry type to include IP addresses that will trigger further actions within the flow:
+
+1. In the Dashboard, go to the Client lists page.
+2. Provide a list title and optional description.
+3. Select the IP Ranges entry type.
+4. Set the Custom list type.
+5. Click Create.
+6. Add applicant IP addresses in the CIDR format and save the changes.
+
+Depending on the case, you may need to create one or few separate client lists to cover scenarios involving tag changes and the assignment of extra checks.
+
+## Step 3. Go to Workflow Builder and add initial node
+
+Start building a verification flow by adding the initial node to the Workflow Builder canvas:
+
+1. In the Dashboard, go to Workflow builder and select Active workflow.
+2. Navigate to the Standard Workflow  tab and go to the Draft view.
+3. Add a level step to the canvas.
+4. From the Level name drop-down list, select the configured verification level.
+
+## Step 4. Configure nodes to add tags
+
+Add a verification flow branch that will add particular tags to applicant profiles if their IP address is on the list. For instance, you can use this for whitelisting specific IP addresses by changing the tags:
+
+1. Click on the initial node created earlier and select Condition as the next step.
+2. Configure the condition branch:
+   1. Set Review decision—rejected, resubmission, approved.
+   2. Select the If logical operator.
+   3. Identify the name of the created client list. In the Field drop-down—enter the name in the following format: `client.Lists.yourname`.
+   4. Set a logical condition—select contains any.
+   5. From the second Field drop-down list, select the `checks.all.ip.ips` parameter.
+3. Within the created condition branch, click Choose next step and select Action.
+4. Configure the Action node:
+   1. Set the type of action—Add/Remove tags.
+   2. From the Value drop-down list, select the tags.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/92c9d6b65bf7644ff21697191f9cc62ed81d8a66e9454911816a7612fee59afe-ip1.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 5. Include additional checks
+
+In addition to the tags, you can include additional checks for the profiles that have suspicious IP addresses mentioned in another one of your client lists:
+
+1. Go back to the condition node and add a new branch.
+2. Configure the condition branch:
+   1. Set Review decision—rejected, resubmission, approved.
+   2. Select the If logical operator.
+   3. Identify the name of the created client list. In the Field drop-down—enter the name in the following format: `client.Lists.yourname`.
+   4. Set a logical condition—select contains any.
+   5. From the second Field drop-down list, select the `checks.all.ip.ips` parameter.
+3. Within the created condition branch, click Choose next step and select Level step.
+4. From the Level name drop-down list, select the verification level.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/2b31790e00567babf22d17b9a2f5ac2ff835a599098660060b1c5fb9bf5897f9-ip2.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 6. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 7. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Design age verification flow for gaming and social platforms
+URL: https://docs.sumsub.com/docs/design-age-verification-flow-for-gaming-and-social-platforms
+
+Some jurisdictions may require gaming and social platforms to set various age limitations to restrict access to the entire platform or to certain content intended only for specific age groups.
+
+At Sumsub, at the most basic level we offer a secure verification flow that includes both a Liveness check and identity verification via documents to perform a face match, confirm that there is a real person present, and verify their proof of identity.
+
+Alternatively, we provide a more flexible option designed to boost your conversion while staying on the safe side. With Workflow Builder, you can combine both the documentary flow and Age Estimation via Liveness to create a comprehensive scenario that considers different conditions and performs further actions, such as rejection or additional age verification.
+
+# Create Age Estimation-based verification scenario
+
+Add verification steps to determine the applicant’s age using Liveness technology and make further decisions based on the estimated value: reject the profile or request additional age confirmation.
+
+## Step 1. Enable Age Estimation product
+
+Contact Sumsub business support at business-support@sumsub.com to get started with the Age Estimation solution. Once enabled, you will be able to detect the applicant's age via Liveness and include this step in the age verification flow.
+
+## Step 2. Create verification levels
+
+You will need to add two verification levels serving different goals:
+
+- The first level should include the Selfie step only to perform Liveness and estimate the applicant’s apparent age. This level allows you to reject applicants who clearly violate the established age restrictions.
+- The second level should include both the Identity document and Selfie steps to request documents for age approval if the applicant’s apparent age may meet the allowed age defined in the restrictions.
+
+> 📘 Note
+> 
+> Applicants will not be asked to pass Liveness again during age approval if they have already completed this step earlier. 
+> 
+> The biometric data will be reused, and they will only need to provide an identity document to confirm their age and verify that they are the same person as in the Liveness check.
+
+To add the initial age estimation level:
+
+1. Create a verification level including the Selfie step (select the Advanced liveness check option).
+2. Configure the level settings and save the changes. 
+
+To add the verification level for age approval:
+
+1. Create and configure another verification level.
+2. Include the Selfie (select the Advanced liveness check option) and Identity document steps.
+
+## Step 3. Add nodes to reject profiles based on estimated age
+
+Navigate to the Workflow Builder canvas to add a sequence of steps that reject profiles whose apparent age seems clearly inappropriate.
+
+To build this branch:
+
+1. Add the initial Level step node:
+   1. In the Dashboard, go to Workflow builder and select Active workflow.
+   2. Navigate to the Standard Workflow tab and go to the Draft view.
+   3. Add a level step to the canvas and attach the previously created verification level with the Selfie step by selecting it from the list.
+2. Configure conditions:
+   1. Click on the initial node created earlier and select Condition as the next step.
+   2. Within the new node, select the If logical operator.
+   3. From the Field drop-down list, select the `applicant.derivatives.estimatedAge` parameter.
+   4. Set a logical condition (for instance, less than or equal) and specify the age value.
+3. Add and set up the Review step node to reject applicants with insufficient apparent age:
+   1. Within the Condition node, select the Review step as the next step.
+   2. In the Review step configuration, identify the type of terminal step—select Final reject.
+   3. Specify reasons or add labels that will explain the decision.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/2e9205ced47ad78b29aa8cdaa15b4caf591857843dc185e29d87b79a88d0f156-1.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 4. Add nodes to request age approval
+
+Create another branch on the canvas to request documentary age approval if the applicant’s apparent age possibly meets the allowed age defined in the restrictions.
+
+To add another branch:
+
+1. Navigate to the Condition node created earlier and click Add new branch.
+2. Configure conditions:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.derivatives.estimatedAge` parameter.
+   3. Set a logical condition (for instance, less than or equal) and specify the age value.
+   4. Within the created condition branch, click Choose next step and select Level step.
+3. Adjust the level node settings:
+   1. From the Level name field, select the verification level that includes both the Identity document and Selfie steps.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/b09fa658ca79761b9cd341ace4fd71b0732ffcf872f97a05ec4c140e1eddbea6-2.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 5. Add nodes to reject profiles whose age is inappropriate
+
+Include one more branch to verify the applicant’s age based on the documents and reject the applicants if their age does not meet the value set in restrictions.
+
+To add the branch:
+
+1. Navigate to the Level step node created earlier and click Choose next step.
+2. Select Condition.
+3. Configure the Condition node:
+   1. Select the If logical operator.
+   2. From the Field drop-down list, select the `applicant.createdAt.ageInYears` parameter.
+   3. Set a logical condition (for instance, less than) and specify the age value.
+4. Add and set up the Review step node to reject applicants of insufficient age:
+   1. Within the Condition node, select the Review step as the next step.
+   2. In the Review step configuration, identify the type of terminal step—select Final reject.
+   3. Specify reasons or add labels that will explain the decision.
+
+[block:image]
+{
+  "images": [
+    {
+      "image": [
+        "https://files.readme.io/705ccd7f50b77ba6b55aec59a745fe0bc53143ff2775e5730126e646658a18b0-3.png",
+        "",
+        ""
+      ],
+      "align": "center",
+      "border": true
+    }
+  ]
+}
+[/block]
+
+## Step 6. Start using flow
+
+Once the flow is created and configured, you can save the draft, perform test verification, and publish the flow to run the checks:
+
+1. Save the draft and experiment with your flow — create copies and conduct tests.
+2. Publish the flow to go live once the flow configuration is tested.
+
+## Step 7. Receive verification results
+
+Get verification results via the webhooks or view them in applicant profiles.
+
+================================================================================
+
+# Marketplace
+URL: https://docs.sumsub.com/docs/marketplace
+
+The Sumsub Marketplace is a comprehensive platform for exploring and managing partner integrations. It showcases all available integration options and allows you to easily configure each one.
+
+Here, you will find a list of solutions that can be enabled based on your business needs. Each solution includes a brief description and a status label. Depending on the current status, one of the following labels will be shown:
+
+- Active — product is enabled and fully configured.
+- Set up required — product is enabled but needs configuration.
+- Disabled — product is not yet active.
+
+# Add new external integration
+
+Enable more integrations available on the Marketplace page:
+
+1. Navigate to the desired solution and click Request.
+2. Contact our support team via chat in the Dashboard and ask them to set up a specific integration.
+3. Wait for a reply. 
+
+> 📘 Note
+> 
+> In some cases, processing may take time and you will receive the reply via email.
+
+# Configure external integrations
+
+[block:html]
+{
+  "html": "\n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n       \n         Twilio\n         Communicate with your applicants via SMS using Twilio.\n      \n      \n         Chainalysis\n         Empower your crypto transactions monitoring with Chainalysis analytics.\n      \n     \n         ComplyAdvantage\n         Connect Sumsub to your Comply Advantage account.\n      \n     \n         World-Check One\n         Connect Sumsub to your World-Check One account.\n      \n     \n         Elliptic\n         Improve your crypto transactions monitoring using Elliptic.\n      \n      \n         TRM Labs\n         Enable TRM Labs to detect crypto and digital asset fraud and financial crime.\n      \n   \n   \n"
+}
+[/block]
+
+================================================================================
+
+# Twilio
+URL: https://docs.sumsub.com/docs/twilio
+
+Twilio is an SMS provider responsible for sending SMS with verification links to your applicants. By default, we send SMS using our personal Twilio account.
+
+# Get started with Twilio
+
+To use a Twilio account of your own:
+
+1. In the Dashboard, go to the Marketplace page and navigate to Twilio. 
+
+2. Сlick Settings.
+
+3. Submit your credentials: 
+   - Sid — a string identifier (SID) which acts as a username of your Twilio account.
+   - Auth token — a unique key that acts as a password to your Twilio account.
+   - Twilio phone number — a phone number generated in your Twilio account to send verification links from.
+
+4. Click Save.
+
+> 📘 Note
+> 
+> - Make sure that target regions are enabled in your Twilio account.
+> - SMS messages are only delivered via a digital channel, and not directly from Sumsub. We send SMS notifications via Twilio and SMSAPI, Lanck Telecom, and Prelude. 
+> - All countries are available and dynamically distributed between these providers, so there is no separate list of preset countries for each of them.
+
+================================================================================
+
+# ComplyAdvantage
+URL: https://docs.sumsub.com/docs/comply-advantage
+
+ComplyAdvantage is a watchlist screening provider used by Sumsub to perform real-time sanctions and watchlist screening using global lists and other governmental, law enforcement, and regulatory databases.
+
+By default, all your applicants will be screened by this provider, and then the matches will be processed using both ComplyAdvantage’s and Sumsub’s internal algorithms and techniques.
+
+# Get started with ComplyAdvantage
+
+We offer the bring-your-own-key (BYOK) option for those who want to use one of our integrated services with their existing corporate accounts.
+
+The BYOK option lets you submit your own API key to directly make requests to the ComplyAdvantage API:
+
+1. In the Dashboard, go to the Marketplace page and navigate to ComplyAdvantage.
+2. Click Settings.
+3. In the API key field, enter a key to authenticate requests.
+4. Click Save.
+
+> 🚧 Important
+> 
+> In order for integration to succeed, make sure to add an `applicantId` tag in your ComplyAdvantage dashboard.
+
+================================================================================
+
+# ComplyAdvantage Mesh
+URL: https://docs.sumsub.com/docs/complyadvantage-mesh
+
+ComplyAdvantage is a watchlist screening provider used by Sumsub to provide real-time sanctions and watchlist screening using global lists and other governmental, law enforcement, and regulatory databases.
+
+# Get started with ComplyAdvantage Mesh
+
+If you have a personal ComplyAdvantage account, you can use it to directly make requests to the ComplyAdvantage Mesh API:
+
+> 📘 Note
+> 
+> You can only use a service account with API-only access to your Mesh.
+
+1. In the Sumsub Dashboard, go to the Marketplace page and navigate to the ComplyAdvantage Mesh settings.
+2. Enter the following credentials: 
+   - Username
+   - Password
+   - Realm
+3. Click Save.
+4. Once the settings are saved, you will see the webhook URL to copy and use in the ComplyAdvantage Mesh dashboard for the case creation event to receive ongoing updates.
+
+# Obtain data for integration
+
+Below you will find the steps and clarifications on where to find the data needed to set up your ComplyAdvantage Mesh API integration with Sumsub.
+
+## Get Mesh Realm and credentials
+
+Your Mesh Realm is essentially your organization's unique environment within the ComplyAdvantage platform:
+
+- Username is the email address of your nominated API user.
+- Password is the password specifically created by that API user.
+- Realm is your organization's name. You can find it in the welcome email sent during your onboarding.
+
+## Create service account
+
+To create a service account:
+
+1. Log in to your ComplyAdvantage Mesh dashboard.
+2. Navigate to Settings -> Users.
+3. Invite a new user using a generic/shared email address, such as api-service@yourcompany.com.
+4. Assign this user a dedicated role with API permissions, typically located in the Roles and Permissions section.
+
+> 📘 Note
+> 
+> ComplyAdvantage recommends using a dedicated service account rather than an individual person account for API integrations to avoid service interruptions if an employee leaves.
+
+## Set up webhook for case creation
+
+To receive ongoing updates, such as hits from continuous monitoring, you must instruct Mesh where to send the data:
+
+1. In the Mesh dashboard, go to the Settings menu.
+2. On the left-hand sidebar, select Webhooks.
+3. Click New.
+4. Configure the webhook by adding the following information: 
+   - Name. Give it a clear name, for example, Sumsub Integration.
+   - Event. Select `CASE_CREATED` from the drop-down menu.
+   - Target URL. Paste the webhook URL you copied from the Sumsub Marketplace dashboard.
+5. Click Create or Save.
+
+================================================================================
+
+# World-Check One
+URL: https://docs.sumsub.com/docs/world-check-one
+
+World-Check One is a screening platform with a database of politically exposed persons (PEPs) and heightened risk individuals and companies. This platform is used around the world and helps identify and manage financial, regulatory, and reputational risk.
+
+# Get started with World-Check One
+
+If you have a World-Check One account and want to use it for the screening of your applicants instead of ComplyAdvantage, submit your credentials as follows:
+
+1. In the Dashboard, visit the Marketplace page and go to World-Check-One. 
+
+2. Click Settings and submit your World-Check One credentials.
+
+3. Click Save.
+
+> 👍 Tip
+> 
+> See World-Check One documentation or contact World-Check One support service if you have credentials-related questions.
+
+================================================================================
+
+# Quantifind
+URL: https://docs.sumsub.com/docs/quantifind
+
+Quantifind is a platform that uses artificial intelligence to identify and mitigate risks associated with financial crime and money laundering.
+
+It enables comprehensive searches and entity resolution across various sources, including negative news, corporate information, sanctions, politically exposed persons, and watchlists, as well as court and arrest records.
+
+It also ensures that no personally identifiable information (PII) from clients is stored or transmitted to offshore teams outside of governance jurisdiction.
+
+# Get started with Quantifind
+
+If you have a personal Quantifind account, you can submit your own API key to directly make requests to the Quantifind API:
+
+1. In the Dashboard, go to the Marketplace page and navigate to Quantifind.
+2. Click Settings.
+3. In the API key field, enter a key to authenticate requests.
+4. Click Save.
+
+================================================================================
+
+# Auth0
+URL: https://docs.sumsub.com/docs/auth0
+
+Auth0 is a cloud-based Identity-as-a-Service platform that lets you integrate advanced authentication and authorization mechanics into your applications. 
+
+Sumsub and Auth0 integration enables automated KYC/AML flows during user registration or login, allowing you to check user identity before granting them permissions and access to your product. 
+
+# Get started with Auth0 integration
+
+Auth0 is a plugin that automatically directs your users to Sumsub for identity verification during their first login attempt. 
+
+After their identity is confirmed, they can continue with the login process.
+
+To connect it to your Sumsub account, you need to create an Auth0 account and a Sumsub account with API access and do the following: 
+
+## Obtain Sumsub token and secret key
+
+To get a Sumsub token and secret key:
+
+1. Generate a new access token, as described in this article. Once the token is created, the dedicated secret key will be generated automatically.
+2. Open your Sumsub Dashboard, navigate to the Dev Space → App tokens, and copy both the token and the key. 
+
+## Configure KYC verification level
+
+To configure a verification level:
+
+1. Navigate to Individuals → Levels.
+2. Copy the name of the level you want to use for verification with Auth0. This level name will be used in the integration configuration.
+
+> 📘 Note
+> 
+> If you do not have a dedicated level, refer to this article for the instructions on how to create one.
+
+## Add and configure integration
+
+1. Open .
+2. Log in using your Auth0 account.
+3. Navigate to the Marketplace, find Sumsub, and click Add integration.
+4. Configure the integration by filling in the dedicated fields with the data you obtained before: 
+   - Sumsub App Token
+   - Sumsub Secret Key
+   - Sumsub Level Name
+5. Select Create to add the integration to your library.
+6. In the modal dialog that appears, select the Add to flow link. The Action will be automatically added to your login flow.
+7. Select Apply Changes.
+
+For more details on each step, refer to the Auth0 installation instructions.
+
+================================================================================
+
+# Salesforce
+URL: https://docs.sumsub.com/docs/salesforce
+
+Salesforce is a CRM system used to store and manage customer data and interactions.  
+If you use Salesforce as your CRM system, you can trigger KYC and KYB verification flows directly from it for existing applicants and company entities.
+
+The integration can be used in the following cases:
+
+- You already use Salesforce and want to trigger KYC or KYB verifications from this system.
+- You already use our platform and want to move existing verification flows into Salesforce.
+
+> 🚧 Important
+> 
+> The integration is built and maintained by T1A (a certified Salesforce partner), not Sumsub, and is provided by T1A as a paid service. All technical implementation is handled by T1A, including integration logic, Salesforce plugin performance, and any Salesforce-side issues.
+> 
+> Sumsub is responsible only for providing verification results and delivering data via the API.
+
+# How Salesforce integration works
+
+The following flow applies when an applicant or company already exists in Salesforce:
+
+1. Verification is initiated from Salesforce.
+2. A verification link is generated.
+3. The link is sent to the applicant:
+   1. via Salesforce (if applicable), or
+   2. via email.
+4. The applicant completes verification via the Sumsub platform.
+5. Verification results are returned to Salesforce and become available in the dashboard.
+
+> 📘 Note
+> 
+> For Salesforce integration setup and configuration, contact your Customer success manager (CSM).
+
+================================================================================
+
+# Verification links
+URL: https://docs.sumsub.com/docs/verification-links
+
+Verification links allow your applicants to access the verification flow without complex integration. You create a link and share it with the applicant to complete verification.
+
+# Get started with verification links
+
+[block:html]
+{
+  "html": "\n    .box5 {\n        background: #ffffff;\n        border: 1px solid #e1e5ea;\n        border-radius: 12px;\n        align-items: top;\n        display: grid;\n        text-decoration: none !important;\n        grid-template-rows: min-content auto;\n        transition: 0.3s ease-in !important;\n    }\n    .box5 text-basic {\n        padding: 0px 24px 24px 24px;\n        font-style: normal;\n        font-weight: 400;\n        font-size: 14px;\n        line-height: 24px;\n        color: #586073;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 text-basic {\n            color: #fff;\n            opacity: 0.8;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 text-basic {\n        color: #fff;\n        opacity: 0.8;\n    }\n    .box5:hover {\n        box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1);\n        transition: 0.3s ease-in;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .box5 {\n            background: #20252c;\n            border: 1px solid #333844;\n        }\n    }\n    [data-color-mode=\"dark\"] .box5 {\n        background: #20252c;\n        border: 1px solid #333844;\n    }\n    .text5-h1 {\n        font-style: normal;\n        font-weight: 500;\n        font-size: 15px;\n        line-height: 24px;\n        color: #377cf7;\n        transition: 0.3s ease-in;\n        padding: 16px 24px 8px 24px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .text5-h1 {\n            color: #fff;\n        }\n    }\n    [data-color-mode=\"dark\"] .text5-h1 {\n        color: #fff;\n    }\n    .box5:hover .text5-h1 {\n        color: #377cf7;\n        opacity: 0.8;\n        transition: 0.3s ease-in;\n    }\n    .img5 {\n        margin: 16px 0px -10px 0px !important;\n        width: 100%;\n        height: auto;\n    }\n    .line {\n        border-top: 1px solid #e1e5ea;\n        margin-bottom: 8px;\n        margin-top: 10px;\n    }\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            color: #fff;\n            opacity: 0.2;\n        }\n    }\n    [data-color-mode=\"dark\"] .line {\n        color: #fff;\n        opacity: 0.2;\n    }\n\n\n    \n        \n            Use unilinks\n            Generate unilinks associated with a specific applicant and share them with applicants to complete verification.\n        \n        \n            Use permalinks\n            Create a single permalink or a set of permalinks and share them with applicants to complete verification.\n        \n    \n    \n"
+}
+[/block]
+
+================================================================================
+
+# SDK translations
+URL: https://docs.sumsub.com/docs/sdk-translations
+
+With SDK translations, you can change the default text displayed to your applicants. Customizable elements include text, country names, document errors, email templates, custom phrases, and so on, which let you:
+
+- Tailor verification instructions to your business needs.
+- Add extra explanations and comments where needed.
+- Align the text your applicants see with your company's tone of voice. 
+
+> 🚧 Important
+> 
+> All Self-service clients are required to pass Customer Due Diligence (CDD) before they can create new translations or edit the default translations.
+
+# Customize default translation
+
+To change the default text:
+
+1. In the Dashboard, go to the SDK Translations page and open the translation that you need.
+2. Select a section for which you want to change the default text:  
+   1. MSDK — all texts displayed in your MobileSDK, such as instructions, statuses that depend on the applicant’s current step, and actions.
+   2. WebSDK — all texts displayed in your WebSDK, including prompts, labels, and instructions based on the applicant’s current step and actions.
+   3. WebSDK 2 — updated version of WebSDK that also contains prompts, labels, and instructions based on the applicant’s step and actions. To learn more about WebSDK 2.0 migration, see this article.
+   4. Common — shared texts used across both Web and MobileSDKs, such as error codes, country codes, general labels, and more.
+   5. Email — templates for email notifications, such as status updates, informational messages, or applicant action guidance.
+   6. Reject review comments — comments displayed to applicants when they receive a final rejection. For more information on rejection reasons, refer to this article.
+
+> ❗️ Warning
+> 
+> By modifying the text of Reject review comments you agree and acknowledge that you are solely responsible for the information shared with the end user. It is strictly prohibited to include any details that may expose sensitive verification details or any elements that could compromise regulatory obligations or result in tipping off.
+
+3. In the Language field, select the supported language that you want to change by using the two-letter ISO 639-1 code. By default, the English language (`en`) is selected. Below the Language field, you will find the JSON code made up of key-value pairs. The first element of the pair (key) represents an object within the system, such as a button, label, heading of different types, and so on. The second (value) is the UI text that you can change. 
+4. Use the search shortcut (`Ctrl + F` for Windows and `Command + F` for macOS) to find the key and make changes in values as necessary.
+5. Click Save changes.
+
+> 🚧 Important
+> 
+> Always click Save changes before you switch to another language or section to keep the changes you have made.
+
+# Create translation sets
+
+To create a new translation set:
+
+1. In the Dashboard, go to the SDK Translations page and click Create translation. 
+2. Give a new name to your translation. Mind that the name cannot be changed later.
+3. Repeat steps 2-5, as described above.
+
+# Attach translations to verification levels
+
+To attach a translation to a verification level:
+
+1. In the Dashboard, go to the Applicant levels page and open a verification level to which you want to add the translation.
+2. On the Steps tab, scroll down to SDK Translations and from the drop-down list, select the translation.
+3. Save your changes.
+
+> 📘 Note
+> 
+> You can specify a translation name when setting up the WebSDK integration to override the level translation for a specific SDK run. To use the option, the Sumsub library should be version 2.3.9 or higher.
+
+================================================================================
+
+# Client lists
+URL: https://docs.sumsub.com/docs/client-lists
+
+With client lists, you can manage flexible sets of keys to create verification flows and transaction monitoring rules, blocklist or whitelist applicants, manage workflows in Workflow builder, and many others.
+
+# How client lists work
+
+Lists can be categorized based on their purpose and type:
+
+- Lists by type:
+  - Keys. Refers to the trigger configured in the applicant workflow, such as the country, age, or previous verification results. Applicants with defined keys will be processed in accordance with the list type. Mind that key-based list types are only available if the applicant flow is enabled and configured.
+  - Applicant IDs. Include 24-character alphanumeric Sumsub applicant IDs.
+  - Emails. Include email addresses.
+  - Fingerprints. Include unique blockchain identifiers or device distinctive marks.
+  - IP Ranges. Include applicants' IP addresses. Data for this type must be added in CIDR format.
+- Lists by purpose:
+  - Custom lists — multipurpose lists for exclusive or duplicate profiles.
+  - Blocklists — for applicants to be blocked within your project.
+  - Whitelists — for applicants that cannot be blocklisted within your project.
+
+The key type and purpose you select will be used to create a unique identifier for the list.
+
+Each time you create a transaction monitoring rule or verification flow, you can use items from client lists as triggers for auto-decline, switching between verification levels, delegation, and many other.
+
+> 📘 Note
+> 
+> If the Advanced IP check is enabled for your applicants and their IP address is in the IP Ranges list, it might be automatically marked as High risk or Low risk. For more information, see this article.
+
+# Default lists
+
+Sumsub offers the following ready-made empty lists that allow you to either block or allow certain actions:
+
+- Dangerous BTC wallets. A Bitcoin wallet address is a combination of letters and numbers used to perform Bitcoin transactions.
+- Dangerous currencies. Money launderers often use cryptocurrencies to buy Credit, Virtual Chips, or In-Game Currency and cash it after a couple of transactions. So you can create a rule that would put transactions involving assets from your list on hold and assign a human expert to review these.
+- Risky payment details. Some payment methods are more vulnerable in terms of fraud than others. Creating a list of the ones you want to double-check will help you reduce chargebacks while keeping the friction low.
+
+# Custom lists
+
+You can create your own lists that contain items of a specific type of information, such as:
+
+- Lists of custom keys — string-based or key-based lists that can contain case-sensitive strings, Card BINs, country names (specified in ISO 3166-1 alpha-3 format), and so on.
+- Applicant ID lists that include 24-character alphanumeric Sumsub applicant IDs.
+- Email lists that include email addresses.
+- Device fingerprints lists that include unique blockchain identifiers.
+- IP ranges that include IP addresses (specified in CIDR format).
+
+These lists can be used to automatically reject any activities for a specific group of applicants (blocklists), to create groups of applicants that cannot be blocklisted (whitelists), or for any other purpose you can think of (custom).
+
+# Create list
+
+To create a new list:
+
+1. In the Dashboard, go to the Client lists page.
+2. Click Create list and provide a list title and optional description.
+3. Select a key type to be used as a trigger and choose a list type.
+4. Click Create.
+5. Populate your list by entering a reference key, depending on the list type. For example, an applicant ID, email address, and so on.
+
+> 📘 Note
+> 
+> After creating a list, you cannot change its Type or Entry type. You can only update the description for custom lists. To add or edit the description, click the Edit list (pencil icon). If the Edit button is not available, the list is a default one and cannot be modified.
+
+## Create High Risk Countries list
+
+1. Click Create list on the Client lists page.
+2. Enter a list title, for example, High Risk Countries, and an optional description.
+3. From the Entry type dropdown list, select Keys.
+4. Click Create. After you create it, the list will appear on the Client lists page.
+5. Click on the list title to open it.
+6. Click Create item and provide a country that should be considered risky using the following format:
+   1. Set the Key  as the country’s Alpha-3 code (for example, DEU, GBR, ARE). The system matches only this format.
+   2. Add a Description with the country name or any helpful information.
+7. Use the Import list button to upload a CSV file with multiple countries instead of adding them manually.
+
+You can implement the created list in your verification flow or transaction monitoring rules by setting up a condition to apply country-specific logic and block transactions originating from those countries.
+
+# Manage lists
+
+You can manage lists as follows:
+
+- Import lists. Lets you import an existing list from a CSV file. When uploading a file, choose either a comma or a semicolon as the separator type. If there is more than one separator in a line, the remaining columns will be ignored.
+- Edit list description. Lets you adjust your existing list description.
+- Remove any list that you have configured previously. Lets you declutter your environment by removing lists that are no longer in use.

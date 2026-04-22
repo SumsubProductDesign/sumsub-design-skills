@@ -1,0 +1,1047 @@
+# About Business Verification
+URL: https://docs.sumsub.com/docs/business-verification
+
+# Get full control over business verification
+
+[block:html]
+{
+  "html": "\n   .box5 {\n   background: #FFFFFF;\n   border: 1px solid #E1E5EA;\n   border-radius: 12px;\n   align-items: top;\n   display: grid;\n   text-decoration: none !important;\n   grid-template-rows: min-content auto;\n   transition:  0.3s ease-in !important;\n   } \n   .box5 text-basic {\n   padding: 0px 24px 24px 24px;\n   font-style: normal;\n   font-weight: 400;\n   font-size: 14px;\n   line-height: 24px;\n   color: #586073;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 text-basic {\n   color: #fff;\n   opacity: 0.8;\n   } \n   .box5:hover {\n   box-shadow: 0px 2px 6px 1px rgba(4, 29, 47, 0.1); \n   transition:  0.3s ease-in;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }\n   }\n   [data-color-mode=\"dark\"] .box5 {\n   background: #20252C;\n   border: 1px solid #333844;\n   }  \n   .text5-h1 {\n   font-style: normal;\n   font-weight: 500;\n   font-size: 15px;\n   line-height: 24px;\n   color: #377CF7;\n   transition:  0.3s ease-in;\n   padding: 16px 24px 8px 24px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .text5-h1 {\n   color: #fff;\n   }\n   }\n   [data-color-mode=\"dark\"] .text5-h1 {\n   color: #fff;\n   } \n   .box5:hover .text5-h1 {\n   color: #377CF7;\n   opacity: 0.8;\n   transition:  0.3s ease-in;\n   }  \n   .img5 {\n   margin: 16px 0px -10px 0px !important;\n   width: 100%;\n   height: auto;\n   }  \n   .line {\n   border-top: 1px solid #E1E5EA;\n   margin-bottom: 8px;\n   margin-top: 10px;\n   }\n   @media (prefers-color-scheme: dark) {\n   [data-color-mode=\"system\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   }\n   }\n   [data-color-mode=\"dark\"] .line {\n   color: #fff;\n   opacity: 0.2;\n   } \n\n\n   \n      \n         Perform screening for legal entities\n         Use AML screening for sanctioned and compromised persons upon onboarding and on an ongoing bases.\n      \n      \n         Collect and verify company and beneficiaries information\n         Verify information about the company and its beneficiaries through the global and local registries.\n      \n      \n         Establish company structure, approve ownership and verify identity\n         Determine the full company structure, percentages of ownership and verify all beneficiaries using KYC checks.\n      \n   \n   \n"
+}
+[/block]
+
+================================================================================
+
+# How Business Verification works
+URL: https://docs.sumsub.com/docs/how-business-verification-works
+
+Business verification is divided into several parts:
+
+- Auto KYB checks. Include the Corporate AML Screening and Automated Corporate Registry Check. They are performed to collect information about both companies and their beneficiaries, screen them for sanctions, adverse media mentions, watchlists presence, and other databases.  You can also enable the Automated Company Document Reading (ACDR) feature to extract and cross-check data from uploaded company documents. Additionally, there is an option to conduct only the Corporate AML Screening as part of the Auto KYB  verification. 
+- Full KYB checks. Customizable and complete verification processes for legal entities. The Full KYB includes the Auto KYB checks along with the Manual company documents review and Ownership and Management Structure Check. They are performed to determine the full company structure, percentages of ownership, and verify all beneficiaries using KYC checks.
+
+# Automated corporate registry check
+
+Automated Corporate Registry is an additional business check verifying (collecting) information about the company and its beneficiaries through the global and local registries. The check is performed during onboarding and can be run manually to keep information up-to-date.
+
+As for the database source, Sumsub extracts data from some global and local registries. To request the detailed list, contact your Customer Success Manager.
+
+# Company tax check
+
+The Company tax сheck is a business verification solution that confirms company tax data. For example, it can verify that the identified Employer Identification Number (EIN) belongs to a company by matching it with data from the country’s tax authority.
+
+The Company tax check runs in parallel with the Automated Corporate Registry Check and complements its results when tax information is not available through corporate registries. In some countries, tax information can be fully verified through the Automated Corporate Registry Check, while in others a separate Company tax check is required.
+
+> 📘 Note
+> 
+> - Currently, the Company tax check is available only for the United States and is used to confirm that the provided EIN matches the company’s name.
+> - The Company tax check cannot be performed without the Automated Corporate Registry Check.
+
+# Automated Company Document Reading
+
+Automated Company Document Reading (ACDR) is an AI-powered solution that provides automatic data extraction and cross-checking of company data from corporate documents in over 50 languages. It automates the Company documents step in the KYB process, helping reduce manual effort and speed up verification.
+
+ACDR can recognize and extract data from all 12 standard document types available within the Company Documents step. This data is then cross-checked — both between multiple uploaded documents (if more than one is provided) and against registry data collected during the Company check. Additionally, the recognized data is automatically added to the Extracted Company Data section, enriching the sourced Corporate registry details. If the system detects discrepancies in critical fields such as Сompany name or Registration number, a document re-upload will be requested automatically. For mismatches in non-critical fields, the system assigns a company risk label instead.
+
+For the Full KYB level, Automated Company Document Reading is included by default as part of the level configuration. To enable this feature for the Auto KYB level, please contact your Customer Success Manager.
+
+> 📘 Notes
+> 
+> - ACDR does not provide document type detection, fraud detection, and ownership structure prefill.
+> - Documents categorized as Custom or Other are not supported by this feature.
+> - In ACDR, the AllDocs model is used. For details on retrieving OCR fields from company documents via API, see Get OCR fields from company documents.
+
+# Corporate AML screening check
+
+Corporate AML screening is the watchlist screening for legal entities. A company is screened for sanctioned and compromised persons upon onboarding and on an ongoing bases.
+
+There are two options from which you can choose when setting up a database for screening:
+
+- Comply advantage
+- Refinitiv World-check one
+
+To request the detailed list of sources for each database, contact your Customer Success Manager.
+
+# Ownership and management structure check
+
+The Ownership and Management Structure Check includes establishing the company structure, approving ownership, and verifying the identity of associated parties.
+
+The check is divided into the Basic and Advanced types depending on the documents provided for verification of a legal entity.
+
+## Basic ownership and management structure check
+
+The Basic check is a main service for the manual check of a legal entity's corporate documents. It includes the following document types available for processing:
+
+- Shareholder registry
+- Incorporation certificate
+- State registry
+- Incorporation articles
+- Proof of address
+- Directors registry Information
+
+> 📘 Information
+> 
+> If there is another legal entity in a company's ownership structure to verify, you will be additionally charged for the main service cost (Ownership and Management Structure).
+
+## Advanced ownership and management structure check
+
+The Advanced check type is a service for the manual check of a legal entity's corporate documents package, which includes any additional document type (Trust agreement, Good standing certificate, and Others).
+
+## Associated party roles
+
+When establishing the company structure, you can add associated parties to be included in the scheme. Some roles will require verification, while others can be added for internal use only.
+
+Associated party roles verified by Sumsub (Full KYB):
+
+- UBOs. Individuals, who represent Ultimate beneficial owners of the company.
+- Shareholders. Individuals or legal entities that hold shares of the company.
+- Representatives. Individuals or entities entitled to act on the company’s behalf, which involves completing business verification.
+- Directors. Individuals or legal entities appointed to manage the company’s business.
+- Secretaries. Individuals or legal entities responsible for administrative tasks and regulatory compliance of the company.
+- Founders. Individuals or legal entities who established the company or contributed to its initial creation.
+- Legal advisors. Professionals or organisations who provide legal guidance to the company.
+- Authorized signatories. Individuals who are officially authorized to sign documents and contracts on behalf of the company.
+- Trustees. Individuals or entities that hold assets in a trust for the benefit of beneficiaries.
+- Beneficiaries. Individuals or entities entitled to benefit from assets held in a trust.
+- Settlors. Individuals or entities that create a trust and transfer assets into it.
+- Protectors. Appointed individuals or entities that oversee the administration of a trust to safeguard the interests of beneficiaries.
+
+Associated party roles for internal use (not verified by Sumsub):
+
+- Company officers. Individuals who hold an executive position within the company (e.g., CEO, CFO, COO).
+- Investors. Individuals or entities that provide capital to the company without necessarily holding controlling shares.
+
+# Companies and associated individuals status synchronization
+
+There are main principles of the status synchronization logic within Business Verification that move a company to a certain status and ensure consistency of the company data according to the linked company, beneficiaries, and representatives. 
+
+Status synchronization should be enabled in Global settings and can be customized to adjust the system's behavior.
+
+- The verified company may be configured to consider or not consider the approval of the entire Control and Ownership structure. If turned on, any associated entity that remains in a non-final status (e.g. Resubmission requested), switches the company to the Awaiting user status with the Not all the beneficiaries verified tag.  
+- Once all the associated entities are approved, the company is automatically switched to Approved.
+- The verified company may take into account the final rejection of any associated individual in the Control and Ownership structure. If enabled, a failed verification of any related applicant profile sets the company to the Rejected status with the Problematic company structure tag.
+- If a company is rejected solely due to the rejection of the associated individual or entity, and that applicant is later approved, the system will automatically approve the company as well—unless there are other rejection reasons.
+- If any of the intermediate entities or individuals in the Control and Ownership structure get new AML hits during ongoing monitoring and obtain the Awaiting user status, the main company receives the same status with the Not all checks succeeded tag.
+
+Once the company is approved, any changes in the company structure (linking, unlinking, or deactivating associated individuals and intermediate entities) do not impact the status of the main company. Similarly, deactivating the company does not affect the status of its beneficiaries; their KYC accounts will remain in the same status and can be reused for further applications.
+
+> 📘 Note
+> 
+> This logic does not apply when associated parties are manually linked or unlinked to the company.
+
+# Linking verified applicants to new company profile
+
+While adding beneficiaries to a new company, previously verified applicant profiles, both companies and individuals, can be linked to this company automatically. This system behavior prevents duplicates by reusing data that you already have on your key.
+
+When you create beneficiaries for the company, the system checks for similar applicant profiles within the key. If there is a match in the applicant profile data, that profile is verified, and the verification level requirements are equal to or less strict, those profiles will be reused and linked to the company.
+
+The following conditions should be satisfied for a profile to be considered similar:
+
+- Both applicants have the same phone number or email, along with the full name.
+- Both companies have the same registration number and country.
+
+> 📘 Note
+> 
+> The linking logic is enabled by default. To disable this functionality, go to Global settings and unselect the Don't link verified associated parties to new companies checkbox.
+
+# Document requirements
+
+A set of required documents for a particular jurisdiction is stipulated by the anti-money laundering laws that are applicable in that jurisdiction.
+
+Normally, Sumsub obtains and verifies the following legal entity documents:
+
+- A document confirming the legal existence of the company, such as:
+  - Certificate of incorporation/registration.
+  - Recent excerpt from a state company registry.
+  - Certificate of incumbency.
+  - Certificate of good standing.
+  - Memorandum/articles of incorporation/association/registration.
+  - Other similar documents.
+
+- A document enabling the identification of all the UBOs of a company, such as:
+  - Shareholder registry.
+  - Statement of information.
+  - Recent excerpt from a state company registry.
+  - Certificate of incumbency.
+  - Memorandum/articles of incorporation/association/registration.
+  - Trust agreement; other similar documents.
+
+The provided documents must, in any event, contain the company name, registration number, legal form (type), address, and the date of incorporation.
+
+If the entity has several corporate layers, that is, intermediary holding companies, the relevant documents should be provided in respect of each company.
+
+## Jurisdictional specifics
+
+- For US-based companies, the registration number is the EIN (Employer Identification Number). If you do not have an EIN, provide evidence that you have applied for the EIN.
+- For Australia-based companies, both the legal address and the principal place of business address are required; the registration number is either ACN or ARBN.
+- For Austria-based companies, full names of the legal representatives are required.
+- For Cyprus-based companies, the following additional information is required: names of the members of the Board of Directors; names of the persons that are duly authorized to act on behalf of the company.
+- For Estonia-based companies, the names of the directors, members of the management board, other bodies replacing the management board, are required.
+- For Finland-based companies, the following additional information is required: field of activity, full name, date of birth and citizenship of members of the statutory bodies and the person(s) representing the legal entity.
+- For Germany-based companies, names of the members of its representative body or of its legal representative board are required.
+- For Ireland-based companies, the following additional information is required: both the legal address and the principal place of business address, a document iterating the nature of the business, and the names of the company’s directors.
+- For Latvia-based companies, names of the persons authorized to represent the company are required.
+- For Malta-based companies, names of the company’s directors (or members of another representative body) are required.
+- For Mexico-based companies, the following additional information is required: a document iterating the economic activity or social activity of a business; Code of Taxpayer Registration (“RFC”); the serial number of the Advanced Electronic Signature; full names of the company’s legal representatives.
+- For Singapore-based companies, names of the company’s directors or partners are required.
+- For Sweden-based companies, names of the persons authorized to represent the company are required.
+
+# Legal processing
+
+Sumsub Legal Team takes part in the business verification to ensure the safety, speed up the process on all levels, and make decisions on the check results. 
+
+The team may be involved in performing the company checks in the following way:
+
+1. Getting requirements for a company verification.
+2. Performing the corporate registry check — extracting and collecting data.
+3. Checking for the signs of fraud on provided documents — the documents undergo automated checks for modifications in graphic editors and all sorts of similar tampering.
+4. Comparing information about shareholders and representatives in documents and registries.
+5. Comparing the provided company data in the applicant profile, corporate documents, and registries. 
+6. Performing a corporate AML screening check.
+7. Making sure that all individuals have passed user verification.
+8. Making a final decision on an applicant or delegating it to your team.
+9. Drawing a company report.
+
+================================================================================
+
+# Get started with Business Verification
+URL: https://docs.sumsub.com/docs/verify-businesses
+
+To get started with business verification:
+
+1. Set up a business verification level.
+2. Create an applicant for company verification using one of the following methods:
+   1. Use Verification links (no integration required).
+   2. Set up the WebSDK integration.
+   3. Use the Sumsub REST API integration.
+   4. Create a new applicant profile manually via the Dashboard.
+3. Perform the following checks:
+   1. Automated corporate registry check
+   2. Company documents review (automatic or manual)
+   3. Ownership and management structure check
+   4. AML screening check
+
+> 📘 Note
+> 
+> During KYB checks, all languages are supported. Country availability depends on the selected Corporate Registry Sources pack at the contract stage. If you need to make changes, please contact your Customer Success Manager. For more details, refer to this article.
+
+# Set up business verification level
+
+A business verification level regulates the process of collecting information about your applicants. A business verification level structure is similar to the individual verification level structure, with some exceptions specifically related to verifying organizations.
+
+In the Dashboard, go to the Companies page and select Create level to configure a new level for business verification.
+
+> 📘 Note
+> 
+> The ID document settings tab is not used when configuring a business verification level.
+
+## Step 1. Set up general settings
+
+On the Steps tab, you can configure general level settings, as well as add and customize all the steps required for your particular business verification scenario.
+
+To configure settings in the General section:
+
+1. In the Level name field, provide a name for the level. Mind that once you save the level, you will not be able to change its name.
+2. [Optionally] Click Add description to enter additional information for level identification.
+3. Select the Enable WebSDK 2.0 for this level toggle if you want to utilize all the capabilities of our latest UI. WebSDK 2.0 is the default for all new clients. For more information on WebSDK 2.0, see this article.
+4. From the KYB Type drop-down list, choose one of the following level types:
+   1. Full KYB — verifies the company registry, performs AML screenings, and includes manual review of applicants and submitted documents. To learn how Full KYB verification works, refer to this article.
+   2. Registry and AML Check — inspects the company registry and performs AML screenings. The applicant is declined if registry data is missing, the company has an inactive status, or AML matches are found.
+   3. AML Check — performs AML screenings only. The applicant is declined if AML matches are found.
+5. [Not available for AML Check KYB type] In the Company search & pre-fill section, use a toggle to enable a company search and data pre-fill from corporate registry databases. When enabled, you can select pre-filled fields in the Company Data and Associated parties steps. Switch the toggle off if your regulations restrict data exposure.
+6. From the SDK translations drop-down list, select the preferred SDK translation if you have previously created a custom one. If not, you can always choose the Default translation. To modify a translation, click Edit. To learn more about configuring SDK translations, refer to this article.
+7. In the Customization section, select visual customizations from the WebSDK and MobileSDK drop-down lists. To modify a customization, click Edit. For more information about customizing the appearance of your SDKs, see this article.
+
+## Step 2. Configure verification steps
+
+The business verification steps may include the following: Company Data, Associated parties, Company documents, Questionnaire , Email verification, and Phone verification.
+
+To add a new step to your verification flow, click Add new step and select a step from the pop-up menu:
+
+1. Set up the Company Data step by defining the company data to be collected and verified. This information is pre-populated from Government Corporate registries if the Pre-fill from data source checkbox is selected; otherwise, it can be entered manually by applicants. By default, three fields are already included in this step: Country, Company name, and Registration number.
+   1. In the Select field drop-down list, choose all necessary fields that should be collected as company data.
+   2. Click Add field to create a new field, and set the Required checkbox to make it mandatory if needed.
+2. In the Company documents step, identify which documents should be provided for business verification.
+   1. Click Add group to add one or more document groups for confirming various legal details about the company, such as Legal presence, Company details, Ownership structure, or Representatives authorization. You can add as many groups as you need. Additionally, select the Other 1, Other 2, and Other 3 document groups if you have more aspects to verify. Group names can be edited on the Default translation page.
+   2. Within the added group, use the drop-down list to select the documents to be provided. Applicants will be able to upload one document from the selected options.
+   3. Set the Required checkbox to make the group mandatory if needed.
+3. Configure Associated parties to get information on the associated individuals and companies:
+   1. Click Add beneficiary to add a beneficiary type. By default, when you add this step, the system creates the UBOs beneficiary type, but you can remove it using the trash bin icon and add the required types. The following roles are available to add:
+      1. Associated party roles verified by Sumsub (Full KYB): UBOs, Shareholders, Representatives, Directors, Secretaries, Founders, Legal advisors, Authorized signatories, Trustees, Beneficiaries, Settlors, and Protectors.
+      2. Associated party roles for internal use (not verified by Sumsub): Company officers and Investors.
+   2. From the Select level drop-down list, choose the KYC verification level that an individual must complete during verification. Click Edit if you want to make changes to the chosen verification level. Make sure the Enabled checkbox is selected to apply KYC verification to associated parties. If unchecked, only specified fields are collected, without running a verification process.
+   3. Specify data that should be collected, such as first name, last name, date of birth, and so on. This information is pre-populated from Government Corporate registries if the Pre-fill from data source checkbox is selected; otherwise, it can be entered manually by applicants. Click Add field to configure as many fields as you need. You can also create a custom field by clicking the Add custom field button for beneficiary verification.
+   4. For some roles you can enable a toggle in the Individual or Company section to specify whether you are collecting data from an individual or a company. You can enable both toggles if needed.
+   5. Select the Allow to skip checkbox in case they cannot be identified (for example, public share companies, complex trust structures, and so on). You can do it for any role.
+
+> 📘 Note
+> 
+> Mind that the options to skip UBOs and shareholders are mutually exclusive. If both are selected, you will still be required to provide at least one ownership type when completing the company profile.
+
+4. Add the Questionnaire step to collect additional data within your business verification process. Choose the required questionnaire type in the Questionnaire drop-down list if you have set it up in advance. If not, refer to this article to create your custom set of questions. Click Edit to add or remove questions in the existing questionnaire.
+5. Configure the Phone verification and Email verification steps to confirm the reliability of the contact information. This step does not require any settings. For more information, see this article.
+6. Include the Payment method step to verify payment methods for companies and select the required types: Bank cards or Bank accounts. 
+
+You can manage both verification steps and the fields within those steps in any of the following ways:
+
+- Use the trash bin icon to remove a step or field from the created verification flow.
+- Reorder steps or fields by clicking and holding the six dots icon.
+
+> 📘 Note
+> 
+> When attaching an applicant level to a beneficiary who is an individual, mind the conditions outlined below:
+> 
+> - The Applicant Data fields at the applicant level should include at least those defined in the Associated parties step to enable data reuse and pre-fill within the Individuals verification process.
+> - If you do not define fields in the beneficiary settings, the attached applicant level should still include the following fields in the Applicant Data step — First name, Last name, Email, and Phone number.
+
+## Step 3: Adjust level configurations
+
+On the Configurations tab, set up the additional level settings:
+
+## Location settings
+
+Adjust the location-related settings for your business verification level:
+
+1. In the Country restriction for verification steps section, choose whether you want to accept applicants from all countries, or define countries that should be supported or restricted. For example, use the Accept applicants from selected counties drop-down list to add the relevant countries. If you define the list of accepted countries, the company will be rejected if its country of registration is not on the list. If no countries are explicitly accepted, you can add them in the Rejected from selected countries list — in this case, companies registered in those countries will be rejected, and all others will be allowed.
+2. Set up the location requirements in the IP settings section. Just as in the previous step, specify which IP addresses should be accepted and which should be rejected.
+3. In the USA resident settings, select the Reject USA residents if they confirm US residency in SDK checkbox to identify whether you want to reject the USA as a company registration country.
+4. Configure the VPN detection settings. Check the related box to pause verification if VPN is turned on.
+
+## Business Verification
+
+Establish level-based rules for companies. In the Owners roles identification thresholds section, set thresholds to identify UBOs and Shareholders: 
+
+1. In the UBOs field, specify the ownership percentage threshold to identify UBOs (Ultimate Beneficial Owners). Individuals whose ownership meets or exceeds the specified threshold will be classified as UBOs. The UBO verification level will be applied accordingly.
+2. In the Shareholders field, specify the ownership percentage threshold to identify shareholders. Individuals whose ownership exceeds the specified threshold but is below the UBO threshold will be classified as shareholders and will be required to complete the shareholder verification level. Entities having below the shareholder threshold percentage will be ignored.
+
+## Fraud prevention
+
+Configure the use of email, phone, IP, geo, and device data to detect fraud at the very beginning:
+
+1. In the Device intelligence section, check the Enable device fingerprinting during onboarding box to collect signals from applicants’ devices for suspicious activity detection.
+2. Set the Applicant insights checkboxes to understand the applicant’s risk profile better:
+   1. Email insights— to enable advanced email risk assessment.
+   2. Phone insights— to enable advanced phone risk assessment.
+   3. IP insights — to enable advanced IP checks.
+   4. Identity enrichment — to enable in-depth insights based on the applicant’s email and phone number.
+   5. AI suspicious name check — to enable AI checks of applicant names to detect suspicious patterns. If the applicant's name meets certain AI criteria, the applicant profile receives any of the following risk labels: Famous person, Strange name.
+
+## AML Screening
+
+In the AML Screening section, decide whether you need AML checks and configure the screening criteria:
+
+1. Check the Enable AML screening box to conduct AML checks.
+2. In the Custom AML screening section, define if you want to adjust custom AML settings for this level. By default, global AML screening settings are applied.
+3. From the Choose the provider you’d like to use for AML screening drop-down list, select a provider for your custom AML screening settings.
+4. In the Search configuration section, select the type of search and adjust its settings:
+   1. If you select the Search by warning types option, use the checkboxes to select the categories you want to include in the screening, such as Sanctions, Warnings, Fitness & Probity, and Politically Exposed Persons (PEPs).
+   2. From the Adverse Media General dropdown list, select the types of adverse media to be considered.  
+      When proceeding with the Use custom search profile option, enter a profile identifier. Set the configuration as described in this article.
+5. Configure Name matching criteria — select how strictly names should be matched during AML screening at this level.
+6. From the Choose whether to enable auto-screening for AML drop-down list, select whether the auto-screening should be enabled, disabled, or set to default. If enabled, you can select the Delegate manual review tasks for ongoing monitoring box to send all approved applicants found in AML lists to your compliance officers for manual review.
+
+## Advanced settings
+
+Use Advanced settings to manage notifications, environment, and data processing preferences:
+
+1. From the Source key drop-down list, select a source key if you have previously configured one. If not, refer to this article to learn how to create a source key. This drop-down list is available only if at least one source key exists in your environment.
+2. In the Email notifications section, choose the verification statuses to notify your applicants about using the Select options drop-down list. You can select multiple options, including all if needed:
+   1. Send when applicant is approved.
+   2. Send when applicant requires resubmission.
+   3. Send when applicant is rejected.
+3. In the Applicant scoring section, enable the checkbox to calculate the risk score of your applicants.
+4. Set Visibility configuration — check the Level should only be available on production environment checkbox to make the level available only in Production mode.
+5. In Review settings, enable the Disable automatic checks checkbox to prevent automatic verification. Mind that this option stops all automatic checks, including AML screening/monitoring and Company check against Corporate Registries. You will have to enable checks manually using the Request check button on the applicant page. 
+6. Check the Skip consent screen box to let applicants proceed without accepting the terms and conditions in the Web and Mobile SDKs. This option is only available for the Questionnaire and/or Applicant Data steps in user verification, and for the Company Data, Questionnaire, and/or Associated Parties steps in business verification. If your verification level includes other steps, this option will not appear, and the consent screen will be shown.
+7. In the Data processing agreement section, choose how to present your agreement to applicants:
+   1. Default — Displays the standard system agreement without any additional consent link or text.
+   2. Link — Allows you to display a custom link for data processing on the agreement screen in the WebSDK.
+   3. Text — Lets you add custom text for data processing to display directly on the agreement screen in the WebSDK.
+
+# Configure global business verification settings
+
+Adjust additional business verification settings to control common KYB solution logic and behavior.
+
+## Status synchronization
+
+1. Check the main Synchronize company status with associated parties box to enable Status synchronization.
+2. Adjust Reject settings:
+   1. Select the Reject company if any associated party is rejected option to automatically decline a company profile, if at least one related applicant fails verification. If disabled, the company remains in the Awaiting user status until all associated parties are processed.
+   2. Enable the Progress only after all associated parties are verified box to allow a final company decision only after all associated parties have completed verification. Combined with the previous setting, this enables a more balanced decision-making process, but may slow down verification.
+3. Configure Additional roles:
+   1. Check the Include additional roles in verification status box to include non-mandatory roles in the company verification level. These roles may be optional ones or added after the main company verification process is completed.
+
+## General settings
+
+Set up general configurations:
+
+1. Select the Don’t link previously verified applicants with identical primary data as Associated parties checkbox to disable automatic matching with existing verified beneficiaries and associated parties. When enabled, the system will not attempt to link applicants based on matching primary data, like phone number or email address for Individuals and company registration number for Companies.
+
+> 📘 Note
+> 
+> If you enable this option, make sure to allow duplicates on your source keys. Otherwise, a new applicant with the same data will be blocked.
+
+2. Use the Account for additional and skipped roles checkbox to include all provided associated parties in the company structure, even if they are marked as optional within the level settings. When enabled, the verification status of any manually added or skipped roles will impact the overall company verification result.
+3. From the Default level for intermediate companies in ownership structure dropdown list, select a level that will be automatically assigned when intermediate beneficial companies are created in the ownership structure.
+4. From the Associated parties verification link expiry dropdown list, set the expiration time for verification links sent to associated parties. The available options range from 5 minutes to 1 month. This setting applies only to applicants created via the Associated parties step and does not affect global verification link settings.
+5. Save changes.
+
+# Collect and verify company and beneficiaries information
+
+To conduct the automated corporate registry check:
+
+1. Create a business verification level with the Company name, Registration number, and Country fields to provide. 
+2. Submit the Company name, Registration number, and Country details by one of the following methods:
+   1. Create an applicant profile in the Dashboard or with this API method.
+   2. Generate a verification link and send it to the applicant for collecting data in the WebSDK.
+3. Conduct verification:
+   1. When adding the data via the Dashboard or API, go to the created applicant profile and click Request check.
+   2. When collecting details via the WebSDK, the Corporate AML screening is performed automatically.
+4. Review verification results.
+
+## Review results
+
+To check the verification results:
+
+1. Go to the Companies page and open the necessary applicant profile.
+2. Go to the Company check section. 
+
+The report may contain the following information:
+
+| Type of results                  | Provided information                                                                                                                                                                                                 |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Company information              | Company name, Employer Identification Number (EIN) (if any), Registration number, Status (Active / Inactive), Company Type, Nature of business, Date of incorporation, Registered office address, Company structure. |
+| Company officers                 | Full name, Date of birth, Nationality, Country, Occupation, Appointed on, Correspondence address, Role, Status.                                                                                                      |
+| Persons With Significant Control | Full name, Date of birth, Nationality, Country, Occupation, Appointed on, Correspondence address, Nature of control, Status.                                                                                         |
+| Source of Information            | Link to a registry from which data is taken.                                                                                                                                                                         |
+
+> Alternatively, use this API method to review the results.  You can also obtain the verification status results and applicant data.
+
+# Perform Company tax check
+
+The Company tax check will be completed along with the Automated Corporate Registry Check if some tax information is not available through corporate registries.
+
+## Review results
+
+To check the verification results:
+
+1. Go to the Companies page and open the necessary applicant profile.
+2. Go to the Company tax check section.
+
+This section displays whether tax data has been confirmed using color indicators:
+
+- `GREEN` — verification is successful, as the provided information is correct for the company.
+- `RED` — verification has failed due to a mismatch or other issues. 
+
+> Alternatively, you can use the Get company tax check results API method to get the verification results.
+
+> 📘 Note
+> 
+> The Company tax check does not affect the approval or rejection of an applicant profile. If you want to manage applicants based on this parameter, use Workflow Builder to create a suitable verification flow.
+
+# Enable automated reading of company documents
+
+To add an Automated Company Document Reading (ACDR) feature to your business verification flow:
+
+1. Create a business verification level and configure the Company documents step to collect and process essential data from uploaded corporate documents.
+2. Add the ACDR option to the created level:
+   1. Full KYB — ACDR is included by default in all Full KYB levels free of charge.
+   2. Auto KYB — You can enable ACDR for Auto KYB levels by contacting your Customer Success Manager.
+3. Upload required documents by one of the following methods:
+   1. Create an applicant profile in the Dashboard or with this API method.
+   2. Generate a verification link and send it to the applicant for collecting data in the WebSDK.
+4. Conduct verification:
+   1. When adding the data via the Dashboard or API, go to the created applicant profile and click Request check.
+   2. When collecting details via the WebSDK, the Automated Company Document Reading is performed automatically.
+5. Review verification results.
+
+## Review results
+
+To check the verification results:
+
+1. Go to the Companies page and open the necessary applicant profile.
+2. Below the Add documents section, observe the recognized and extracted data fields from the uploaded documents. These fields are also appended to the Extracted Company Data.
+
+> 📘 Note
+> 
+> Data extracted from documents is considered less reliable than the outputs from the Corporate Registry Check. In case of conflicting values, the latter will take precedence.
+
+3. Expand the Checks and Regulations section to view the cross-validation results.
+4. Go to the Risk labels section to see which company risk label was assigned during the verification.
+
+> Alternatively, use the Sumsub API to obtain the verification status results and applicant data.
+
+# Establish company structure, approve ownership and verify identity
+
+To configure ownership and management structure check:
+
+1. Create a business verification level to collect information about the company and its beneficial owners, request documents confirming the entity's legal existence, and perform user verification of the UBOs, shareholders, and representatives.
+2. Generate verification links.
+3. Review the verification results.
+
+## Review results
+
+The check results are shown in the company profile and indicated in the company report. Both contain the company structure, company details, and beneficiaries details.
+
+To review the verification results:
+
+1. Go to the Companies page and open the necessary applicant profile.
+2. Select Company report, or navigate to the Company Structure and Control and Ownership structure sections. 
+
+The company report is available for downloading in PDF, including the results of the Intermediate Shareholders Check.
+
+> Alternatively, use the Sumsub API to obtain the verification status results and applicant data.
+
+# Perform screening for legal entities
+
+To run a corporate AML screening check:
+
+1. Create a business verification level with the following required fields: Company name, Country. 
+2. Provide the company name by one of the following methods:
+   1. Create an applicant profile in the Dashboard or with this API method.
+   2. Generate a verification link and send it to the applicant for collecting data in the WebSDK.
+3. Conduct verification:
+   1. When adding the company name via the Dashboard or API, go to the created applicant profile and click Request check.
+   2. When collecting details via the WebSDK, the Corporate AML screening is performed automatically.
+4. Review verification results.
+
+## Review results
+
+To check the verification results:
+
+1. Go to the Companies page and open the necessary applicant profile.
+2. Go to the Watchlists section and click View report . The report contains the profile data, search settings, and the list of sources where matches have been found.
+
+If matches have been found, a final decision can be made by the Sumsub legal officer or delegated to your team. The report is available for downloading in PDF.
+
+> Alternatively, use the Sumsub API to obtain the verification status results and applicant data.
+
+================================================================================
+
+# Migrate Business verification levels to SDK 2.0
+URL: https://docs.sumsub.com/docs/migrate-business-verification-levels-to-sdk-20
+
+The migration process to SDK 2.0 also requires adjusting your business verification levels. The main change affects the all-in-one Company step which is now replaced by a few separate steps—Company data, Company documents, and Associated parties.
+
+The entire migration process of business verification levels involves several stages, including configuring basic level settings, removing outdated steps, and applying new configurations.
+
+# Perform initial edits
+
+To minimize errors related to the service running, duplicate the existing levels and give them new names:
+
+1. In the Dashboard, go to Applicant levels → Companies.
+2. Find a required level in the list, click a three-dot menu, and select Duplicate.
+3. Enter a new level name and click Duplicate.
+
+# Adjust general settings of level
+
+Set up the general settings related to WebSDK 2.0: 
+
+1. Select a business verification level and go to the Steps tab.
+2. Switch on the Enable WebSDK 2.0 for this level toggle.
+3. Configure the Company search & pre-fill setting:
+   1. Switch on the toggle to find companies by name and pre-fill the Company Data and Associated parties steps. This increases form submission conversion and reduces the risk of errors related to the company data mismatches.
+   2. Switch the toggle off if your regulations restrict data exposure.
+
+# Add new verification steps
+
+Remove the old step supported only in SDK 1.0 and replace it with new ones: 
+
+1. Select a business verification level and go to the Steps tab.
+2. Scroll down to the Verification steps section.
+3. Delete the Company (old SDK) step as it is no longer supported.
+4. Depending on your needs, add the Company Data, Company documents, and Associated parties steps.
+
+> 📘 Note
+> 
+> The Questionnaire, Email/Phone verification steps may remain unchanged.
+
+# Configure Company Data
+
+Add a new form and adjust company fields as needed:
+
+1. Add fields and mark them as required, if applicable.
+2. Use the drag-and-drop functionality to compose the order.
+3. Check the Pre-fill from data source box to automatically populate fields if matching data is found during the company search.
+
+# Set up Company documents step
+
+Instead of listing documents individually, create document groups united by common legal aspects:
+
+1. Add document groups and include required documents.
+2. If you have multiple legal aspects to verify, use the additional groups named Other 1/2/3, and rename them via SDK Translations.
+
+# Manage Associated parties step
+
+Add and configure company roles with more flexible settings: 
+
+1. Click Add beneficiary to include a required role—UBOs, Shareholders, Directors, Representatives.
+2. Set up verification for each role:
+   1. If verification is required, check the Enabled box and select a verification level from the list. A nested applicant profile will be created.
+   2. If there is no need for verification, uncheck the box.
+3. Define the impact on company status:
+   1. Check the Allow to skip box to make a particular form optional in the SDK. Associated parties marked this way will not affect the verification results.
+   2. To consider the skipped roles anyway, go to the Business Verification page and check the Account for additional and skipped roles in the Company structure checkbox.
+
+> 📘 Useful information
+> 
+> The Shareholders and Directors roles can be both Individual or Company and require likewise configuration of the fields and verification levels.
+
+# Adjust Configurations tab
+
+Сonfigure ownership percentages for UBOs and shareholders identification in WebSDK and Registry exports. This step is extra and does not affect the migration process:
+
+1. Go to the settings of the required business verification level.
+2. Navigate to the Configurations tab, go to Business verification, and locate the Owners roles identification thresholds setting.
+3. Identify the percentage for both roles.
+
+# Adapt customizations and translations
+
+Update the look and feel of your interface and texts to the latest version, as all SDK 1.0 setups are no longer supported. 
+
+1. Convert your customizations to the new format: 
+   1. Go to Customizations and create a new SDK 2.0 customization. 
+   2. In the top-right corner, select Import styles and choose Import styles from WebSDK 1.0. 
+   3. Select a customization from the list.  
+2. If you have added custom translations, transfer them to the new SDK version: 
+   1. In the Dashboard, go to the SDK Translations page and open an existing translation or create a new one. 
+   2. Navigate to the WebSDK 2 section and apply all the necessary changes.
+   3. Click Save changes.
+
+================================================================================
+
+# Auto KYB 2.0
+URL: https://docs.sumsub.com/docs/use-auto-kyb-20
+
+With our Auto KYB 2.0, you can increase conversion rate with coverage of more than 200 countries and lower the number of required fields while getting the company data. 
+
+The verification includes Automated corporate registry check and Corporate AML check where both the applicant flow and the interface have been improved — the company name search is already available to implement in your business verification journey.
+
+# How Auto KYB 2.0 works
+
+The Auto KYB 2.0 verification includes submitting the data, processing it by the system, and receiving the results:
+
+1. The applicant selects a country (and a state if required) and fills in the company name.
+2. The platform searches against aggregated corporate registries in the selected country and suggests a list of options. If nothing is found, the applicant enters the company data manually and runs the search again.
+3. When the company is found, the applicant picks it, enriches the company data if needed, and confirms the application.
+4. The application is being verified online and the result screen is shown in a couple of seconds.
+
+> 🚧 Important
+> 
+> With Auto KYB, documents are only collected and not verified. To verify documents, select Full KYB for your verification process.
+
+# Get started with Auto KYB 2.0
+
+To get started with Auto KYB 2.0 verification:
+
+1. Set up the WebSDK integration.
+2. Add a business verification level and set the type of check in the KYB Type dropdown—Registry and AML Check or AML Check.
+3. Include the Company Data step (required), and specify the fields to be submitted, such as Company type, Registration number, Legal address, and so on. 
+4. Add and configure the Company documents step (optional):
+   1. Add Document groups to identify legal aspects of verification. 
+   2. For each group, select the Document types to be accepted.
+5. In Associated parties (optional), configure the set of attributes you need to verify and set up verification levels for Individuals and Companies. If available, ownership data is pulled from the Company Check in the Company Data step and used to pre-fill the Associated parties information.
+6. Run verification and handle the results.
+
+# Handle Auto KYB verification results
+
+To check the verification results:
+
+1. Go to the Companies page and open the applicant profile.
+2. Go to the Company check section.
+
+> 📘 Note
+> 
+> If no information is found on the company, the profile will be declined with the Not found in external database tag. 
+> 
+> You can set up delegation rules for such cases in Workflow Builder. For example, you can configure the following scenarios:
+> 
+> 1.  Delegating rejected applicants for manual review with the Requires actions status, which can be handled via Case management.
+> 2. Sending rejected applicants for Full KYB verification. 
+> 
+> [block:image]{"images":[{"image":["https://files.readme.io/14d2d28add593c7fb96a8ae58850badce79514584bb7522eabee491c3ec50516-image1.png","",""],"align":"center","border":true}]}[/block]
+> 
+> [block:image]{"images":[{"image":["https://files.readme.io/a679b4280c1b76d4fd2af339826c91260ac9defd8ef0f5e0bbcc318e03f1376b-image.png","",""],"align":"center","border":true}]}[/block]
+
+# Report details
+
+The report may contain the following information:
+
+- Data provided by applicant
+- Data extracted from corporate registry
+
+## Data provided by applicant
+
+The following is a list with details provided by the applicant:
+
+- Company name
+- Registration number
+- Company Type
+- Country
+- Incorporated on
+- Legal address
+- Tax ID and other fields (Location of registration, Postal address, Applicant position, and so on)
+
+## Data extracted from corporate registry
+
+[block:html]
+{
+  "html": "\n    .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n\n    .wide-column {\n        min-width: 200px;\n    }\n\n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n\n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n\n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n\n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n        min-width: 200px;\n    }\n\n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n\n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n\n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n\n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n\n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n\n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n\n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n\n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n\n\n    \n        \n            \n                \n                    \n                        Type of results\n                    \n                    \n                        Provided information for Advanced corporate registry pack\n                    \n                    \n                        Provided information for Global + Ownership insights\n                    \n                \n                \n                    \n                        \n                            Company check\n                        \n                        \n                            \n                                Company name\n                                Registration number\n                                Registered office address\n                                Status\n                                Incorporated on\n                                Registered on\n                                Type\n                                Nature of business\n                                Start date\n                                Source\n                            \n                        \n                        \n                            \n                                Company name\n                                Alternative names\n                                Registration numbers\n                                Expiry date\n                                Status\n                                Type\n                                Nature of business\n                                Legal form\n                                Start date\n                                Incorporated on\n                                Registered office address\n                                Web page\n                                Telephone\n                                Source\n                            \n                        \n                    \n                    \n                        \n                            Company officers\n                        \n                        -\n                        \n                            \n                                Full name\n                                Date of birth\n                                Nationality\n                                Country\n                                Occupation\n                                Appointed on\n                                Correspondence address\n                                Role\n                                Status\n                            \n                        \n                    \n                    \n                        \n                            Persons with significant control\n                        \n                        -\n                        \n                            \n                                Name\n                                Type\n                                Direct ownership percentage\n                                Indirect ownership percentage\n                                Beneficial ownership percentage\n                                Address\n                            \n                        \n                    \n                \n            \n        \n    \n"
+}
+[/block]
+
+Additionally, there will be a Company structure informational block designed in accordance with the data found on the company.
+
+================================================================================
+
+# Full KYB 2.0
+URL: https://docs.sumsub.com/docs/full-kyb-20
+
+The Full KYB 2.0 includes the Auto KYB 2.0 checks, such as the Automated corporate registry check, Corporate AML check, and Associated Individuals Verification, and also verification of the uploaded Company Documents and Ownership and Management Structure Check. 
+
+All the new versions of the verification steps are provided with an updated appearance and the company search-by-name ability for ensuring the smooth work of business verification on all levels. 
+
+Also, multiple features have been improved within the new version of Full KYB verification: 
+
+- Associated individuals' roles merging. From now on, a person who holds multiple positions in the company management has to pass KYC verification once if the identity verification requirements for their roles are similar.
+- Company structure. The structure has become more transparent, clear, and functional—a new panel for editing the control structure and a pop-up window for managing the elements have been added.
+  - If we find referral information on the Ownership structure in registries, the second tab with the Registry data is shown in the Company Structure scheme.
+- Mapped resubmission comments. In SDK 2.0, detailed explanations have been added to specific screens and fields to assist applicants in filling in the data and boost navigation within the verification process.
+- Company Data view. The new verification result report has been split into two groups of the data received during the check—there are Extracted data obtained from the registries and documents and Provided data reflecting the information that has been filled out by an applicant.
+
+# How Full KYB 2.0 works
+
+The Full KYB 2.0 verification process includes submitting the data, processing it, and receiving the results:
+
+1. The applicant selects a country (and a state if required) and fills in the company name.
+2. The platform searches against aggregated corporate registries in the selected country and suggests a list of options. If nothing is found, the applicant enters the company data manually and runs the search again.
+3. When the company is found, the applicant picks it, enriches the company data if needed, and confirms the application.
+4. The application is being processed by the legal team in accordance with the Full KYB requirements. This may take up to one business day and the results will be shown in the applicant profile.
+
+# Get started with Full KYB 2.0
+
+To get started with Full  KYB 2.0 verification:
+
+1. Set up the WebSDK integration.
+2. Ask your Customer Success Manager or Support team to enable Full KYB 2.0.
+3. Add a business verification level with the Full KYB level type chosen and the WebSDK 2.0 toggle enabled.
+4. Configure business verification steps—Company data, Associated parties, Company documents and add the Questionnaire, Email verification, and Phone verification steps if needed.
+5. Set up configurations of the business verification level.
+
+> 🚧 Important
+> 
+> If you use Notes to provide additional details before requesting or performing a manual review of an applicant, keep in mind that this section should not be used to upload documents for verification. Upload all required documents through the Documents section.
+
+# Receive Full KYB verification results
+
+The results of the Full KYB verification will be displayed in the applicant profile: 
+
+1. In the Dashboard, go to the Companies page and open the necessary applicant profile.
+2. Navigate to the Watchlists, Company check, and Company Structure and Control and Ownership structure tabs to view the results of the check. 
+
+Additionally, there will be information on the Company data tab of the applicant profile. The data within the tab is split into two tables—Extracted Data and Provided Data. 
+
+The Extracted Data table shows the information received from the registries and attached documents. This may include the following: 
+
+- Company name
+- Registration number
+- Country and Location of registration
+- Date of incorporation
+- Tax/VAT number
+- Legal address
+
+The details in Provided Data are the information specified by the applicant in the fields manually. There will be only the data from the fields that you set up in the business verification level.
+
+================================================================================
+
+# Full KYB regulations
+URL: https://docs.sumsub.com/docs/full-kyb-regulations
+
+This page describes how the business verification process is conducted at Sumsub—the regulations we comply with, the KYB process's goals and significant components, and the types of business checks offered within the solution. In the article, we thoroughly collected all the information that you need to know about the Sumsub KYB service regarding legal entities verification, confirmation of the documents, and facilitating the steps they undertake during onboarding. Find the details structured in the following way:
+
+- Checks that conducted during business verification
+- KYB service description
+- Types of business verification
+- Legal entities' check
+- Identification of ultimate beneficial owner
+- Verification of corporate documents within Full KYB
+- Confirmation of ownership and control structure
+- Correction of information
+
+> 📘 Legal disclaimer
+> 
+> This notice applies to all the recipients of this document; please note that we reserve the right to alter and update it.
+> 
+> This notice is provided on an "as-is" basis and for general informational purposes only; none of its contents shall be interpreted as creating an attorney-client relationship. Sumsub shall not under any circumstances be held liable for any damages incurred as a result of actions taken or not taken based on the information contained in this document.
+> 
+> This document is a result of the work of our professionals and constitutes the intellectual property of Sumsub. It may not be disclosed, whether as-is or in any way modified, to any third party without prior authorization by Sumsub. In the event of such a disclosure, Sumsub shall be entitled to equitable relief under applicable law.
+
+# Checks that we do
+
+In accordance with the FATF Recommendation 10, legal entities must be identified in the following manner:
+
+(a) Identifying the customer and verifying that customer’s identity using reliable, independent source documents, data, or information.
+
+(b) Identifying the beneficial owner, and taking reasonable measures to verify the identity of the beneficial owner, such that the financial institution is satisfied that it knows who the beneficial owner is. For legal persons and arrangement,s this should include financial institutions understanding the ownership and control structure of the customer.
+
+# Know Your Business (KYB) service
+
+We provide identification and verification of legal entities as customers and assist in their KYB process for our clients. In order to identify and verify the entity, we usually collect the required information about the entity, such as business name, type of legal entity, registry code, details, and address of the entity, as well as names of entities managers and owners (UBOs). This information may be provided via an officially-issued document or questionnaires. This flow is fully customisable and depends on the client's requirements.
+
+The provided information is subject to screening against government databases, where available, and sanction lists, PEP lists, and other databases if it is included in the scope of service.
+
+# Types of KYB services available
+
+- The FULL KYB level includes verification of legal existence, details, ownership, and control structure through analysis of corporate documents and review of corporate registries, where available, according to the client's requirements or to Sumsub's default.  
+  Sumsub performs this check. If you would like to make a final decision, please write to kyb@sumsub.com. 
+- The AML + Autocheck level includes automated checks against sanctions lists, watchlists, blacklists, adverse media (OFAC, UN, HMT, EU, DFT, and so on) and automated verification of the company details (company name, registration number, and so on.) of a given legal entity through government corporate registry databases and other public records, where available.  
+  The client's team performs the analysis of potential match results.
+- The AML level only includes automated checks against sanctions lists, watchlists, blacklists, adverse media (OFAC, UN, HMT, EU, DFT, and so on).  
+  The client's team performs the analysis of potential match results.
+
+These checks do not make any final decisions on whether to onboard a given legal entity. Such decisions are made by the Customer at their own discretion.
+
+The average time of completing the FULL KYB checks with the involvement of the Sumsub team normally does not exceed 24 hours. In rare cases, the verification could take up to 72 hours.
+
+The average time of completing automated checks normally does not exceed 3 minutes.
+
+# Legal entities’ check
+
+In order to identify and verify the entity under the applicable laws, Sumsub usually collects the following information about the entity:
+
+1. The name or business name of the entity;
+2. The registry code or registration number and the date of registration;
+3. The names of the director, members of the management board or other body replacing the management board, and their authorization in representing the legal person;
+4. The other details of the entity in accordance with the client’s request;
+5. The ultimate beneficial owner.
+
+# Identification of ultimate beneficial owner
+
+For KYB purposes, a beneficial owner is the individual who ultimately owns or controls a legal entity through direct or indirect ownership of a sufficient percentage of the shares or voting rights or ownership interest in that entity, including through bearer shareholdings, or through control via other means.
+
+Direct ownership is a manner of exercising control whereby the beneficial owner holds a shareholding of 25 (in some jurisdictions, 10) percent plus one share or an ownership interest of more than 25 (in some jurisdictions, 10) percent in a company.
+
+Indirect ownership is a manner of exercising control over a company through another company or multiple companies in the same proportion. Where, after all, possible means of identification have been exhausted, the beneficial owner cannot be identified, and there is no doubt that such a person exists, or where there are doubts as to whether the identified person is a beneficial owner, the natural person who holds the position of a senior managing official is deemed as a beneficial owner. We identify and verify the ultimate beneficial owner as an individual.
+
+# Corporate document verification within full KYB process
+
+The verification of corporate documents includes the following steps:
+
+- first of all, the documents undergo automated checks for modifications in graphic editors and all sorts of similar tampering;
+- all the provided documents are reviewed manually by our compliance team and checked for any internal inconsistencies, deviations from standard templates (where available), missing data, and so on;
+- company details are cross-checked against publicly available state registries and other independent databases (where possible).
+
+To ensure that Sumsub conducts due diligence of legal entities (KYB) in accordance with your company's AML policy and procedures, we require completing the Questionnaire before proceeding. Completing the Questionnaire will help meet regulatory compliance requirements and enhance the usability of Sumsub for you and your customers.
+
+# Confirmation of ownership and control structure
+
+By default, Sumsub uploads printouts/screenshots or extracts corporate documents from the state corporate registry, if available, to the application and doesn’t request additional documents.
+
+Please note that if the registry has a filing history and data can be pulled automatically, Sumsub only indicates the registry's name in the "Source" field without uploading screenshots.
+
+Individuals who must pass an identity verification (KYC) procedure
+
+If the level settings from the dashboard include UBOs, by default, all ultimate beneficial owners (natural persons owning, directly or indirectly, more than 25% of the company or otherwise exercising significant control over it) have to pass the identity verification (KYC) procedure.
+
+The company’s senior managing official has to pass the identity verification (KYC) procedure in case there are no ultimate beneficial owners who own, directly or indirectly, more than 25% of the Company.
+
+Sumsub accepts an extract from the UBO registry or another similar document disclosing all the UBOs of the company and doesn’t verify the structure, if the flow settings include only the UBOs step.
+
+If the level settings from the dashboard include representatives, by default, the "representatives" step is not required. However, if the application has the "representatives" step and the requirements weren't specified, Sumsub will identify any representative, such as a director/board member/CEO, or a natural person so authorized by power of attorney.
+
+If the level settings from the dashboard include directors, by default, the "directors" step is not required. However, if the application has the “directors" step and the requirements aren't specified, Sumsub will identify any natural person who holds a director’s position.
+
+If the level settings from the dashboard include shareholders (not UBOs), by default, the "shareholders" step for individuals is not required. However, if the application has the "shareholders" step and the requirements weren't specified, Sumsub will identify all the shareholders owning, directly or indirectly, more than 25% of the Company.
+
+If the parent/intermediate company undergoes the KYB procedure, the parent or intermediate company will be created with the level (company_zero) that includes 2 required documents that allow to establish an ownership structure and corporate details of the company. If you need a more complicated review of the parent or intermediate company, please set up the required level in the dashboard.
+
+If the corporate structure includes nominee shareholders, they do not have to pass the identity verification (KYC) procedure.
+
+# Correction of information
+
+By default, Sumsub makes corrections where an applicant fills in an outdated company name or a minor (1-2 digits/letters) error in the company number (as demonstrated by a publicly available state registry or the attached documents). Likewise, the country field changes to the correct option according to the submitted documents. If the applicant does not fill in the registration number field or the company name field, Sumsub makes the fields according to the submitted documents by default.
+
+If the EIN Number (for USA applicants) or any other secondary company-related numbers were indicated in the “Registration number” line, Sumsub indicates the primary registration number in accordance with the attached documents.
+
+If the applicant does not fill the registration number field or company name field, or jurisdiction, Sumsub completes the fields according to the submitted documents by default.
+
+Sumsub removes such applicants from the corporate structure to speed up the verification. Also, we leave their applicant IDs in the notes.
+
+================================================================================
+
+# Full KYB requirements
+URL: https://docs.sumsub.com/docs/full-kyb-requirements
+
+Here, we have gathered all the information on the requirements for business verification documents and some specific types of business entities. In the article, the details on the Full KYB requirements placed as follows:
+
+- Documents required for business verification
+- Acceptability criteria for required documents
+- Full KYB requirements regarding trusts
+- Full KYB requirements regarding sole proprietorships
+
+# Required documents
+
+By default, Sumsub requests a bundle of documents that confirm the legal existence and corporate details of the company and enable establishing the ownership and control structure.
+
+Until the questionnaire is completed, Sumsub will perform KYB verification following the rules below. See the Questionnaire here.
+
+- certificate of incorporation/registration;
+- recent excerpt from a state company registry;
+- certificate of incumbency;
+- certificate of good standing;
+- articles of incorporation /association/registration;
+- memorandum of association/bylaws;
+- statement of information;
+- partnership agreement.
+- The provided documents must, in any event, contain the company's name, registration number, legal form (type), address, and date of incorporation.
+
+The documents Sumsub normally accepts in order to establish the beneficial ownership and control structure of a legal entity include:
+
+- recent excerpt from a state company registry;
+- recent excerpt from a UBO registry;
+- certificate of incumbency;
+- shareholder/member registry;
+- director registry;
+- operating agreement;
+- statement of information;
+- articles of incorporation/association/registration;
+- memorandum of association/bylaws;
+- partnership agreement;
+- trust agreement/deed;
+- declaration of trust.
+
+Where one of the above documents cannot be provided for reasons related to jurisdictions or legal entity types, an analogous document is requested as an alternative by default.
+
+# Acceptability criteria for required documents
+
+By default, Sumsub accepts documents with the following criteria:
+
+- documents disclosing beneficial ownership and control structure of a legal entity issued no more than 12 months prior to verification or the most recent according to the publicly available state registry, and specific documents regardless of the date of issue in case they include validity period, for example, Power of Attorney, or in case they are issued for an unlimited period of time (until recall), for example, Trust Agreement, Trust Deed, Memorandum and Articles, and so on;
+- documents intended to confirm legal existence and corporate details issued no more than 12 months prior to verification or the most recent according to the publicly available state registry;
+- documents in all languages may be accepted so long as the document is presented in the OCR format;
+- plain copies of uncertified, non-notarized, and non-apostilled documents;
+- e-documents / documents generated in electronic form;
+- photos of documents (screenshots of documents are not acceptable);
+- black and color scans of documents;
+- documents with handwritten signatures and e-signatures created using digital signature service providers;
+- Sumsub does not validate signing certificates;
+- Sumsub does not accept internal forms or structure charts related to UBO status as sufficient proof of ownership;
+- shareholder/member/director registries, certificates of incumbency, and other similar documents if they are issued by a state company register or signed by a registered agent, another independent third-party organization, or a natural person, such as a public notary, solicitor, and so on. If there are no such documents, Sumsub can accept shareholder/member/director registries, extracts from a state registry, certificates of incumbency, and other similar documents if they are signed by the company's director or secretary and, if possible, feature the company's seal.
+
+# Specific requirements regarding trusts
+
+By default, Sumsub verifies the following natural and legal persons:
+
+- if the settlor is an individual, the KYC procedure is required;
+- If the settlor is an entity, documents confirming the legal existence and ownership structure will be requested, and natural persons owning, directly or indirectly, more than 25% of the company or otherwise exercising significant control over it should undergo the KYC procedure.
+- if the trustee(s) is an individual, the KYC procedure is required;
+- If the trustee(s) is an entity, documents confirming the legal existence and ownership structure will be requested, and natural persons owning, directly or indirectly, more than 25% of the company or otherwise exercising significant control over it should undergo the KYC procedure.
+- if the protector is an individual, the KYC procedure is required;
+- If the protector is an entity, documents confirming the legal existence and ownership structure will be requested, and natural persons owning, directly or indirectly, more than 25% of the company or otherwise exercising significant control over it should undergo the KYC procedure.
+- the beneficiaries, or where the individuals benefiting from the legal arrangement or entity have yet to be determined, the class of persons in whose main interest the legal arrangement or entity is set up or operates;
+- any other natural person exercising ultimate control over the trust by means of direct or indirect ownership or by other means.
+
+Sumsub can verify a beneficiary child under the age of 16-18. All other names of beneficiaries below the age of 16 will be recorded in notes without the KYC procedure.
+
+# Specific requirements regarding sole proprietorships
+
+The documents we normally accept in order to verify it:
+
+- recent excerpt from a state company registry;
+- annual return;
+- bank statement;
+- certificate of registration/incorporation
+- registration form/statement;
+- annual return;
+- business/trade license;
+- tax form/certificate.
+
+================================================================================
+
+# Business verification sources
+URL: https://docs.sumsub.com/docs/business-verification-sources
+
+This page lists the supported countries and their respective verification data sources. Sumsub currently offers five different levels of data coverage. All these levels can be combined together as required:
+
+- Local & Regional — local integrations in particular countries that can be used for conducting Auto KYB or Full KYB, and coverage for regions that have specific terms and prices.
+- Basic — cached, normalized company registration data for over than 200 countries, complemented by business size estimations and contact details.
+- Advanced — provides advanced coverage for more than 100+ countries for using with Auto KYB 1.0 or 2.0.
+- Global — offers the best coverage for Auto KYB 2.0. available for company data, including company structure and ownership insights, with 200+ countries covered.
+- Manual — sources are used by our compliance officers for manual KYB verification.
+
+[block:html]
+{
+  "html": "\n    .line {\n        border-top: 1px solid rgb(0 0 0 / 10%);\n        margin-bottom: -32px;\n        margin-top: 50px;\n    }\n  \n    [data-color-mode=\"dark\"] .line {\n        background-color: rgb(255 255 255 / 8%);\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"system\"] .line {\n            background-color: rgb(255 255 255 / 8%);\n        }\n    }\n  \n    .footer-container {\n        display: grid;\n        grid-template-columns: repeat(2, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 500px;\n    }\n  \n    .footer-container h3 {\n        font-size: 14px;\n    }\n  \n    .footer-container basic {\n        font-size: 12px;\n        font-weight: 500;\n        color: #5f666c;\n        line-height: 24px;\n    }\n  \n    .footer-container2 {\n        display: grid;\n        grid-template-columns: repeat(4, 1fr);\n        gap: 0px;\n        margin-bottom: 0px;\n        padding-top: 0px;\n        max-width: 800px;\n    }\n  \n    .footer-container2 h3 {\n        font-size: 14px;\n    }\n  \n    .font-small-header {\n        font-size: 14px;\n        font-weight: 600;\n    }\n  \n    --- .table-text {\n        margin: 24px 0;\n        border: 1px solid #e5e5e5;\n        border-radius: 8px;\n        overflow: hidden;\n    }\n  \n    .wide-column {\n        min-width: 180px;\n    }\n  \n    table {\n        border-collapse: collapse;\n        width: 100%;\n    }\n  \n    th {\n        background-color: #f6f7f9;\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        font-weight: bold;\n        text-align: left;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] th {\n            background-color: #303b42;\n            border: 1px solid #e5e5e5;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] th {\n        background-color: #303b42;\n        border: 1px solid #e5e5e5;\n    }\n  \n    td {\n        border: 1px solid #e5e5e5;\n        padding: 8px;\n        text-align: left;\n    }\n  \n    tr:nth-child(odd) {\n        background-color: #fff;\n    }\n  \n    tr:nth-child(even) {\n        background-color: #f8f8f8;\n    }\n  \n    .table-text h2 {\n        font-size: 14px;\n        margin: 0px;\n        color: #384248;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text h2 {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text h2 {\n        color: #ffff;\n    }\n  \n    .table-text p {\n        font-size: 14px;\n        margin: 0;\n        color: #414552;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text p {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text p {\n        color: #ffff;\n    }\n  \n    .table-text a {\n        color: #377cf7;\n        text-decoration: underline;\n    }\n  \n    @media (prefers-color-scheme: dark) {\n        [data-color-mode=\"auto\"] .table-text a {\n            color: #ffff;\n        }\n    }\n  \n    [data-color-mode=\"dark\"] .table-text a {\n        color: #ffff;\n    }\n  \n    .table-text tr:first-child {\n        margin-bottom: 20px;\n    }\n  \n    ul2 {\n        margin-left: -40px !important;\n    }\n    li2 {\n        margin-bottom: 10px;\n        display: flex;\n        align-items: top;\n    }\n    .icongreen {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .iconred {\n        margin-right: 10px;\n        margin-top: 3px;\n        min-width: 16px;\n        height: 16px;\n    }\n  \n    .flag-container {\n        display: grid;\n        grid-template-columns: repeat(3, 1fr);\n        gap: 24px;\n        padding-top: 0px;\n    }\n  \n    .flag-container basic {\n        font-size: 15px;\n        color: #384248;\n        line-height: 36px;\n    }\n  \n    .flag-icon {\n        width: 20px;\n        height: 20px;\n        margin-right: 5px;\n    }\n  \n    .tag-green {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #d0f1e8;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #115242;\n        margin-top: 4px;\n    }\n    .tag-red {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #ffd2ce;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #5e0214;\n        margin-top: 4px;\n    }\n    .tag-purple {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #eedbff;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #250960;\n        margin-top: 4px;\n    }\n    .tag-grey {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #edeff2;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #393f4e;\n        margin-top: 4px;\n    }\n    .tag-yellow {\n        display: inline-block;\n        flex-direction: row;\n        align-items: center;\n        padding: 1px 4px;\n        gap: 0px;\n        background: #fff4c6;\n        border-radius: 4px;\n        font-weight: 500;\n        font-size: 12px;\n        line-height: 16px;\n        color: #613400;\n        margin-top: 4px;\n    }\n  \n    .App {\n    --hub-toc-width: 0px;\n    --hub-main-max-width: 1138px;\n  }\n  \n  .content-toc {\n    display: none;\n  }\n  "
+}
+[/block]
+
+================================================================================
+
+# Global corporate registry check tiers
+URL: https://docs.sumsub.com/docs/global-corporate-registry-check-tiers
+
+> Global Corporate Registry Services checks can be performed only for the countries listed below.
+
+[block:html]
+{
+  "html": "\n  .table-text {\n      margin: 24px 0;\n      border: 1px solid #e5e5e5;\n      border-radius: 8px;\n      overflow: hidden;\n  }\n\n  .wide-column {\n      min-width: 200px;\n  }\n\n  table {\n      border-collapse: collapse;\n      width: 100%;\n  }\n\n  th {\n      background-color: #f6f7f9;\n      border: 1px solid #e5e5e5;\n      padding: 8px;\n      font-weight: bold;\n      text-align: left;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] th {\n          background-color: #303b42;\n          border: 1px solid #e5e5e5;\n      }\n  }\n\n  [data-color-mode=\"dark\"] th {\n      background-color: #303b42;\n      border: 1px solid #e5e5e5;\n  }\n  \n  .tiers-table td:nth-child(1) {\n  \tvertical-align: middle;\n  }\n\n  td {\n      border: 1px solid #e5e5e5;\n      padding: 8px;\n      text-align: left;\n      min-width: 200px;\n  }\n\n  tr:nth-child(odd) {\n      background-color: #fff;\n  }\n\n  tr:nth-child(even) {\n      background-color: #f8f8f8;\n  }\n\n  .table-text h2 {\n      font-size: 14px;\n      margin: 0px;\n      color: #384248;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text h2 {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text h2 {\n      color: #ffff;\n  }\n\n  .table-text p {\n      font-size: 14px;\n      margin: 0;\n      color: #414552;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text p {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text p {\n      color: #ffff;\n  }\n\n  .table-text a {\n      color: #377cf7;\n      text-decoration: underline;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text a {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text a {\n      color: #ffff;\n  }\n\n  .table-text tr:first-child {\n      margin-bottom: 20px;\n  }\n\n  .tag-green {\n    display: inline-block;\n    flex-direction: row;\n    align-items: center;\n    padding: 0px 4px;\n    gap: 0px;\n    height: 16px !important;\n    background: #D0F1E8;\n    border-radius: 4px;\n    font-weight: 500;\n    font-size: 10px;\n    line-height: 16px;\n    color: #115242;\n    margin-top: 4px;\n  }\n\n\n  \n      \n          \n              \n                  \n                      Tier\n                  \n                  \n                      Countries\n                  \n              \n              \n                  \n                      \n                        Tier 1\n                      \n                      \n                          United Kingdom, Ireland, Channel Islands.\n                      \n                  \n                  \n                      \n                        Tier 2\n                      \n                      \n                          \n                              Andorra, Austria, Belgium, Bosnia and Herzegovina, Denmark, Faroe Islands, France, French Guiana, Germany, Greece, Greenland, Guadeloupe, Italy, Liechtenstein, Luxembourg, Martinique, Monaco, Netherlands, New\n                              Caledonia, Norway, Portugal, Puerto Rico, Reunion Island, Saint Pierre and Miquelon, San Marino, Spain, Sweden, Switzerland, Wallis and Futuna Islands, Albania, Armenia, Belarus, Bulgaria, Estonia, Georgia,\n                              Kazakhstan, Latvia, Lithuania, Macedonia, Moldova, Montenegro, Romania, Russian Federation, Serbia, Ukraine, Croatia, Czech Republic, Finland, Gibraltar, Hungary, Iceland, Malta, Poland, Slovakia, Slovenia,\n                              Canada, United States of America.\n                          \n                      \n                  \n                  \n                      \n                        Tier 3\n                      \n                      \n                          \n                              Anguilla, Antigua, Antigua and Barbuda, Argentina, Aruba, Bahamas, Barbados, Belize, Bermuda, Bolivia, Brazil, British Virgin Islands, Cayman Islands, Chile, Costa Rica, Dominica, Dominican Republic, Ecuador,\n                              El Salvador, Ghana, Grenada, Guatemala, Guyana, Haiti, Honduras, Jamaica, Mexico, Aruba, Saint Martin, Curaçao, Nicaragua, Panama, Paraguay, Peru, Saint Kitts and Nevis, Saint Lucia, Saint Vincent and Grenadines,\n                              Suriname, Trinidad and Tobago, Turks and Caicos Islands, Uruguay, Venezuela, Afghanistan, Azerbaijan, Bahrain, Cyprus, Egypt, Fiji, French Polynesia, French Polynesia / Tahiti, Guam, Iraq, Israel, Lebanon,\n                              Marshall Islands, New Zealand, Papua New Guinea, Tunisia, Turkey, Vanuatu, Yemen, Algeria, Angola, Benin, Botswana, Burkina Faso, Burundi, Cameroon, Cape Verde, Colombia, Democratic Republic of the Congo\n                              (ISO), Côte d’Ivoire, Djibouti, Ethiopia, Gabon, Gambia, Guinea, Kenya, Lesotho, Liberia, Madagascar, Malawi, Mali, Mauritania, Mauritius, Morocco, Mozambique, Niger, Nigeria, Peoples Repulic of Benin,\n                              Republic of Congo, Senegal, Seychelles, Somalia, South Africa, Swaziland, Tanzania, Togo, Uganda, Zambia, Zimbabwe.\n                          \n                      \n                  \n                  \n                      \n                        Tier 4\n                      \n                      \n                          \n                              China, Japan, Malaysia, Singapore, South Korea, Taiwan Republic of China, Vietnam, Australia, Bangladesh, Brunei, Cambodia, Hong Kong, India, Indonesia, Jordan, Cambodia, Kuwait, Kyrgyzstan, Laos, Macao SAR\n                              China, Maldives, Myanmar, Nepal, Oman, Pakistan, Philippines, QatarSaudi Arabia, Sri Lanka, Thailand, Turkmenistan, United Arab Emirates, Uzbekistan.\n                          \n                      \n                  \n              \n          \n      \n  \n"
+}
+[/block]
+
+# DISCLAIMER
+
+This Disclaimer is addressed to any legal entity maintaining a commercial agreement (the “MSA”) with any legal entity forming part of Sumsub Group (the “Service Provider”) for the purpose of purchasing and/or redistributing Sumsub’s products and services (the “Customer”).
+
+By acquiring or otherwise commencing to use any of the services listed below (the “List Service(s)”), namely:
+
+- Automated Corporate Registry Check (Global) (Tier1 Countries)
+- Automated Corporate Registry Check (Global) (Tier2 Countries)
+- Automated Corporate Registry Check (Global) (Tier3 Countries)
+- Automated Corporate Registry Check (Global) (Tier4 Countries)
+- Ownership Insights (Global) (Tier1 Countries)
+- Ownership Insights (Global) (Tier2 Countries)
+- Ownership Insights (Global) (Tier3 Countries) 
+- Ownership Insights (Global) (Tier4 Countries)
+
+– the Customer accepts and agrees that:
+
+- The Customer must use the List Services solely for its internal business purposes and not for inclusion in any product and/or service that the Customer sells. The Customer’s right to use the List Services is non-exclusive, non-transferable (unless otherwise expressly indicated in the MSA), and revocable.
+- Unless required by law, the Customer shall not request or make available the List Services or any data derived therefrom for the use of third parties (whether for commercial or any other purpose), including (without limitation) any of the Customer’s affiliates.
+- The Customer may only use information derived from its usage of the List Services in connection with the transaction for which such information was originally requested.
+- The Customer shall not copy, download, batch harvest, or in any other way reproduce any information derived from its usage of the List Services for the purpose of aggregating it, save that a copy of such information may be retained solely to keep an internal archive or comply with regulatory requirements. Except for the aforementioned copy, the Customer may be required to delete all such information upon instruction from the Service Provider or its third-party supplier, ensuring the performance of the List Services.
+- The Customer shall not use the List Services in connection with providing advice or recommendations to third parties. Additionally, no information derived from the Customer’s usage of the List Services may be published in news media, incorporated or used in any kind of database or marketing list to be provided to a third party, used to generate any statistical or other data to be provided to a third party, or produced in judicial or administrative proceedings, including discovery proceedings, without the Service Provider’s prior written consent, unless required by law and where the Customer has notified the Service Provider of such legal requirement.
+- The Customer shall not use the List Services or any data derived therefrom as a factor in establishing an individual’s eligibility for (i) credit or insurance to be used primarily for personal, family,  or household purposes, or (ii) employment. In addition, the Customer shall not use the List Services to engage in any unfair,  anti-competitive or deceptive practices and will use the List Services only in compliance with the applicable laws or regulations.
+- The Customer shall not use any information derived from its usage of the List Services to “benchmark” against similar products offered by other suppliers for the purpose of generating any statistical or other derived output or commercial product based thereon.
+- The Customer warrants and represents that it is not incorporated and will not use the Services in any of the following countries: Cuba, Iran, Libya, Myanmar (Burma), North Korea, Sudan, Russia, Syria.
+- In respect of any personal data as may be contained in the information derived from the Customer’s usage of the List Services:
+  - the Customer acts as a processor of such personal data;
+  - the Customer shall ensure that appropriate technical measures (including encryption) and organizational measures are taken to avoid unauthorized or unlawful processing of, and against accidental loss or destruction of or damage to, such personal data (including adequate back-up and disaster recovery systems);
+  - the Customer shall not transfer such personal data to any country outside of the EEA unless it has (where required) adopted an appropriate EU transfer mechanism in accordance with the GDPR;  
+    the Customer shall promptly carry out any request from the Service Provider requiring it to amend, transfer or delete all or any such personal data so long as it does not contradict the MSA or any laws or regulations applicable to the Customer;
+  - the Customer shall take reasonable steps to ensure the reliability of any employees who have access to such personal data, including ensuring that all such employees have received training in applicable privacy laws. The Customer shall limit access to such personal data (including when in a test environment) to those of its employees who have a business need for access;
+  - the Customer shall notify the Service Provider promptly if it receives any enquiry or complaint from a local data protection regulator or data subject about any such personal data. The Customer shall co-operate with the Service Provider to ensure the prompt investigation of, and response to, any such enquiry or complaint;
+  - if the Customer becomes aware of the loss or compromise of, or any damage to, any such personal data, it shall: (i) promptly notify the Service Provider of the details of the incident; (ii) promptly initiate a full investigation into the circumstances surrounding the incident and make any reports of notes of the investigation available to the Service Provider; and (iii) provide such reasonable cooperation and assistance as may be requested by the Service Provider in order to investigate the incident.
+
+The Customer agrees to indemnify, defend and hold the Service Provider and its third-party supplier ensuring the performance of the List Services harmless from any claim or cause of action arising out of or relating to the use of the List Services by: (i) individuals or entities which have not been authorized by the MSA to have access to and/or use the List Services; and (ii) the Customer, except where such use by the Customer was in accordance with the MSA and this Disclaimer.
+
+In case of a breach of any of the above provisions by the Customer, the Service Provider reserves the right to: (i) immediately suspend the provision of List Services and/or (ii) terminate the MSA.
+
+Additionally, the Customer accepts and agrees that:
+
+- There are no warranties with respect to the List Services, express or implied, including any warranties of accuracy, completeness,  currentness,  merchantability,  or fitness for a particular purpose. To the extent permitted by law, the Service Provider and its counterparties shall not be liable for any loss or injury arising out of, in whole or in part, their or the Customer’s conduct in procuring, compiling, collecting, and interpreting the List Services.
+- The List Services are provided to the Customer on an "as is" basis and may contain a degree of error. The Customer accepts that it (i) is responsible for determining whether the List Services are sufficient for the Customer’s use and (ii) must rely entirely upon its own skill and judgment when using the List Services;
+- The List Services (or access to any data derived therefrom) may be, in part or in their entirety, limited, suspended or discontinued at any time by the Service Provider’s third-party supplier ensuring the performance of the List Services, with or without prior notice.
+
+Any limitations of liability as may be set out in the MSA shall not apply to the Customer’s obligations under this Disclaimer. Terms not defined in this Disclaimer shall be interpreted in accordance with the MSA.
+
+================================================================================
+
+# Asia corporate registry check tiers
+URL: https://docs.sumsub.com/docs/asia-corporate-registry-check-tiers
+
+> The following is a list of countries and their tiers that can be verified through the Asia Registry Services.
+
+[block:html]
+{
+  "html": "\n  .table-text {\n      margin: 24px 0;\n      border: 1px solid #e5e5e5;\n      border-radius: 8px;\n      overflow: hidden;\n  }\n\n  .wide-column {\n      min-width: 200px;\n  }\n\n  table {\n      border-collapse: collapse;\n      width: 100%;\n  }\n\n  th {\n      background-color: #f6f7f9;\n      border: 1px solid #e5e5e5;\n      padding: 8px;\n      font-weight: bold;\n      text-align: left;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] th {\n          background-color: #303b42;\n          border: 1px solid #e5e5e5;\n      }\n  }\n\n  [data-color-mode=\"dark\"] th {\n      background-color: #303b42;\n      border: 1px solid #e5e5e5;\n  }\n  \n  .tiers-table td:nth-child(1) {\n  \tvertical-align: middle;\n  }\n\n  td {\n      border: 1px solid #e5e5e5;\n      padding: 8px;\n      text-align: left;\n      min-width: 200px;\n  }\n\n  tr:nth-child(odd) {\n      background-color: #fff;\n  }\n\n  tr:nth-child(even) {\n      background-color: #f8f8f8;\n  }\n\n  .table-text h2 {\n      font-size: 14px;\n      margin: 0px;\n      color: #384248;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text h2 {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text h2 {\n      color: #ffff;\n  }\n\n  .table-text p {\n      font-size: 14px;\n      margin: 0;\n      color: #414552;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text p {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text p {\n      color: #ffff;\n  }\n\n  .table-text a {\n      color: #377cf7;\n      text-decoration: underline;\n  }\n\n  @media (prefers-color-scheme: dark) {\n      [data-color-mode=\"auto\"] .table-text a {\n          color: #ffff;\n      }\n  }\n\n  [data-color-mode=\"dark\"] .table-text a {\n      color: #ffff;\n  }\n\n  .table-text tr:first-child {\n      margin-bottom: 20px;\n  }\n\n  .tag-green {\n    display: inline-block;\n    flex-direction: row;\n    align-items: center;\n    padding: 0px 4px;\n    gap: 0px;\n    height: 16px !important;\n    background: #D0F1E8;\n    border-radius: 4px;\n    font-weight: 500;\n    font-size: 10px;\n    line-height: 16px;\n    color: #115242;\n    margin-top: 4px;\n  }\n\n\n  \n      \n          \n              \n                  \n                      Tier\n                  \n                  \n                      Countries\n                  \n              \n              \n                  \n                      \n                        Tier 1\n                      \n                      \n                          China, India, Japan, New Zealand, Singapore, Taiwan, Thailand, Vietnam.\n                      \n                  \n                  \n                      \n                        Tier 2\n                      \n                      \n                          Hong Kong, Indonesia, Malaysia, Philippines, South Korea.\n                      \n                  \n                  \n                      \n                        Tier 3\n                      \n                      \n                          Australia.\n                      \n                  \n              \n          \n      \n  \n"
+}
+[/block]
