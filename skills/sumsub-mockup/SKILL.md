@@ -399,17 +399,45 @@ These are non-negotiable. Violating any of them is treated as a bug:
      "Label", "Placeholder", "Button", "Text in cell", "Table cell",
      "Subheader text", "Caption text", "Page title",
    ];
+   // Default phrases that appear as substrings in component texts (Alert, Toast,
+   // Header, Modal, Drawer). These are THE Dirty-Harry-quote filler copy and
+   // similar, shipped as component defaults. If you see them in a delivered
+   // mockup, the component wasn't customized.
+   const defaultPhrases = [
+     "Life was like a box of chocolates",
+     "Hey, what's up, dude",
+     "Hi, I'm sabtitle",
+     "It's modal basic",
+     "You've got to ask yourself one question",
+     "Do I feel lucky",
+     "Well, do you, punk",
+     "You're gonna need a bigger boat",
+     "I'll be back",
+     "May the Force be with you",
+   ];
    const defaultTextCounts = {};
+   const defaultPhraseHits = {};
    for (const n of all) {
      if (n.type !== "TEXT") continue;
      if (!n.characters) continue;
      if (!isVisible(n)) continue; // skip hidden component slots
+     // Exact match (default property values like "Label", "Button")
      if (defaultTexts.includes(n.characters)) {
        defaultTextCounts[n.characters] = (defaultTextCounts[n.characters] || 0) + 1;
+     }
+     // Substring match (Dirty-Harry-style component filler copy)
+     for (const phrase of defaultPhrases) {
+       if (n.characters.includes(phrase)) {
+         defaultPhraseHits[phrase] = (defaultPhraseHits[phrase] || 0) + 1;
+         break;
+       }
      }
    }
    for (const [txt, count] of Object.entries(defaultTextCounts)) {
      issues.push(`${count} VISIBLE TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
+   }
+   for (const [phrase, count] of Object.entries(defaultPhraseHits)) {
+     issues.push(`${count} VISIBLE TEXT node(s) containing default filler "${phrase}…" — replace Alert/Toast/Modal title/description via setProperties on the component's TEXT property`);
    }
 
    // 7.12. Target page — Rule #0. Root must live on a "Drafts" page unless
