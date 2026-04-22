@@ -26,6 +26,25 @@ These are non-negotiable. Violating any of them is treated as a bug:
 
    **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
 
+   **Page-level placement inside the file.** Once the file is chosen, pick the target PAGE by this rule:
+   1. If the user named a specific page — use it.
+   2. Else, find an existing page whose name contains "Drafts" (case-insensitive) — use it. Typical name: `🛠 Drafts`.
+   3. Else, create a new page called `🛠 Drafts` and use it.
+
+   ```js
+   const targetPage =
+     figma.root.children.find(p => /drafts/i.test(p.name))
+     ?? (() => {
+       const p = figma.createPage();
+       p.name = "🛠 Drafts";
+       return p;
+     })();
+   await targetPage.loadAsync();
+   await figma.setCurrentPageAsync(targetPage);
+   ```
+
+   Never build mockups on a page with production frames unless the user explicitly told you to. "Current page" is not a default — always resolve the target page via the rule above.
+
 1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
 
    | Product | Required libraries |
@@ -316,6 +335,16 @@ These are non-negotiable. Violating any of them is treated as a bug:
    }
    for (const [txt, count] of Object.entries(defaultTextCounts)) {
      issues.push(`${count} VISIBLE TEXT node(s) with default value "${txt}" — Rule #7: set real content via setProperties or setInstanceText`);
+   }
+
+   // 7.12. Target page — Rule #0. Root must live on a "Drafts" page unless
+   // the user explicitly pointed to another page. Walks up to find the PAGE.
+   {
+     let p = root.parent;
+     while (p && p.type !== "PAGE") p = p.parent;
+     if (p && p.type === "PAGE" && !/drafts/i.test(p.name)) {
+       issues.push(`Root is on page "${p.name}" — expected a page with "Drafts" in its name (Rule #0). If the user didn't specify another page, move to the Drafts page or create one.`);
+     }
    }
 
    // 7.15. SECTION background check — Rule 7.7. If root is inside a SECTION,
