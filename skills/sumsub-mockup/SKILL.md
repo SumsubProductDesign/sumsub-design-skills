@@ -388,6 +388,39 @@ These are non-negotiable. Violating any of them is treated as a bug:
      }
    }
 
+   // 7.18. Modal/Drawer internal header defaults — catch "Hey, what's up, dude?",
+   // "Hi, I'm sabtitle", literal "Title"/"Description" that ship as defaults on the
+   // inner Header component. These are DIFFERENT from the page *Header* placeholder
+   // check in step 2 — modal/drawer headers use different property keys and are
+   // inside a separate subtree.
+   const modalDrawerInternalDefaults = [
+     "Hey, what's up, dude",
+     "Hi, I'm sabtitle",
+     "It's modal basic",
+   ];
+   // Also flag literal "Title" / "Description" as value ONLY when they appear
+   // inside a modal/drawer header (too generic to flag globally).
+   const exactDefaultsInModalHeader = ["Title", "Description", "Subtitle"];
+   const modalsAndDrawers = all.filter(n =>
+     n.type === "INSTANCE" && (
+       n.mainComponent?.parent?.name === "*Modal Basic*" ||
+       n.mainComponent?.parent?.name === "*Drawer Basic*"
+     )
+   );
+   for (const md of modalsAndDrawers) {
+     const hdr = md.findOne(n => n.type === "INSTANCE" && /\/ Header/i.test(n.name));
+     if (!hdr) continue;
+     for (const [key, prop] of Object.entries(hdr.componentProperties || {})) {
+       if (prop.type !== "TEXT") continue;
+       const v = prop.value || "";
+       if (modalDrawerInternalDefaults.some(p => v.includes(p))) {
+         issues.push(`${md.mainComponent.parent.name} "${md.name}" — internal Header '${key}' still default: "${v}". Call setProperties on the / Header sub-instance to replace.`);
+       } else if (exactDefaultsInModalHeader.includes(v)) {
+         issues.push(`${md.mainComponent.parent.name} "${md.name}" — internal Header '${key}' is literal default "${v}". Replace with real content.`);
+       }
+     }
+   }
+
    // 7.2. Modal / Drawer — empty Body + vertical centering + fake-modal detection.
    // SLOT properties on Modal Basic / Drawer Basic are READ-ONLY in the Plugin API
    // (figma throws "Slot component property values cannot be edited"). Correct
@@ -892,67 +925,90 @@ Scrim always covers **full root frame** (1440×900), including sidebar.
 
 ---
 
-## Modal Basic — setting body content via the Body frame (NOT slot swap)
+## Modal Basic / Drawer Basic — setting body content via `swapComponent`
 
-**Critical fact about Figma Plugin API:** SLOT component properties are **READ-ONLY** from plugin code. `instance.setProperties({"Content#19312:24": bodyComp.id})` on `*Modal Basic*` throws `"Slot component property values cannot be edited"`. SLOT swaps are only possible via the Figma editor UI, not programmatically. Do not try.
+**Two API facts to memorise:**
 
-**The correct path is the Body frame.** `*Modal Basic*` exposes a direct-child FRAME named `Body` inside the instance. It's a regular frame (not a sub-instance), so you can `appendChild` into it — Figma treats it as an instance override, no detach needed. Rule "never detach instances" still holds.
+1. **SLOT properties are read-only via `setProperties`.** `modal.setProperties({"Content#…": ...})` on `*Modal Basic*` throws `"Slot component property values cannot be edited"`. Not a bug — the API forbids it.
+2. **You can't `appendChild` into the Body FRAME either.** Figma throws `"Cannot move node. New parent is an instance or is inside of an instance"`. The Body is inside an INSTANCE subtree.
+
+**The correct path: swap the inner slot instance.** Inside the Body frame there is a sub-INSTANCE named `slot / basic` (or similar — trailing/leading spaces vary). Swap it with your own local component using `instance.swapComponent(bodyComp)`.
 
 ```js
-// 1. Create modal instance from the Size variant you need
+// 1. Create the modal instance (or drawer — same pattern)
 const modalSet = await figma.importComponentSetByKeyAsync(COMPONENTS.modalBasic);
 const modal = modalSet.children.find(v => v.name === "Size=Medium").createInstance();
 
-// 2. Customize the modal Header
-const modalHeader = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Header");
+// 2. Customize the modal Header — ALWAYS replace Title/Subtitle.
+//    Default texts are "Hey, what's up, dude? It's modal basic" / "Hi, I'm sabtitle" —
+//    if you don't overwrite, audit will catch and delivery is blocked.
+const modalHeader = modal.findOne(n => n.type === "INSTANCE" && /\/ Header/i.test(n.name));
 modalHeader.setProperties({
-  "Title text#3834:3": "Add domain",
-  "Subtitle#4643:1": false,
+  "Title text#3834:3": "Add domain",   // required — real title
+  "Subtitle text#4643:0": "Step 1 of 2",  // optional
+  "Subtitle#4643:1": true,              // show subtitle
   "Close button#8216:0": true,
 });
 
 // 3. Customize the modal Footer buttons
-const modalFooter = modal.findOne(n => n.type === "INSTANCE" && n.name === ".Modal Basic / Footer");
+const modalFooter = modal.findOne(n => n.type === "INSTANCE" && /\/ Footer/i.test(n.name));
 const footerBtns = modalFooter.findAll(n => n.type === "INSTANCE" && n.name === "*Button*");
 footerBtns[2].setProperties({ "Button Text#143:1442": "Cancel",   "Type": "Secondary" });
 footerBtns[3].setProperties({ "Button Text#143:1442": "Continue", "Type": "Primary" });
 
-// 4. Find the Body FRAME (direct child of the modal instance) and set up auto-layout
+// 4. Find the Body frame (trailing space in name — always use .trim())
 const modalBody = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
-modalBody.layoutMode = "VERTICAL";
-modalBody.primaryAxisSizingMode = "AUTO";    // grow vertically with content
-modalBody.counterAxisSizingMode = "FIXED";   // keep modal width
-modalBody.itemSpacing = 16;
-modalBody.paddingLeft = 24; modalBody.paddingRight = 24;
-modalBody.paddingTop = 0;   modalBody.paddingBottom = 16;
 
-// 5. Build your content and appendChild into modalBody
+// 5. Find the inner slot instance inside Body
+const slotInst = modalBody.findOne(n =>
+  n.type === "INSTANCE" && /slot\s*\/\s*basic/i.test(n.name)
+);
+if (!slotInst) throw new Error("slot / basic sub-instance not found inside Body — Modal Basic structure changed");
+
+// 6. Create a local main component to hold your content
+const bodyComp = figma.createComponent();
+bodyComp.name = "Modal Body / Add domain";
+bodyComp.layoutMode = "VERTICAL";
+bodyComp.primaryAxisSizingMode = "AUTO";    // grow with content
+bodyComp.counterAxisSizingMode = "FIXED";
+bodyComp.itemSpacing = 16;
+bodyComp.paddingLeft = 24; bodyComp.paddingRight = 24;
+bodyComp.paddingTop = 0;   bodyComp.paddingBottom = 16;
+bodyComp.resize(modal.width, 100);
+figma.currentPage.appendChild(bodyComp);  // must be in document tree before swap
+
+// 7. Build content inside the local component
 const desc = await makeText("Enter the domain…", "regular/body-m", "textSubtle");
-modalBody.appendChild(desc);
+bodyComp.appendChild(desc);
 desc.layoutSizingHorizontal = "FILL";
 
 const input = await makeInstance(COMPONENTS.inputBasic);
-modalBody.appendChild(input);
+bodyComp.appendChild(input);
 input.layoutSizingHorizontal = "FILL";
 
-// 6. Place the modal on the scrim root, CENTERED.
-//    Compute x/y AFTER all Body children are appended — modal.height is only
-//    final once auto-layout has resolved the new content.
+// 8. Swap the inner slot instance to point at your component
+slotInst.swapComponent(bodyComp);
+
+// 9. Hide the source component off-screen
+bodyComp.x = -20000; bodyComp.y = -20000;
+
+// 10. Place modal on scrim, centered AFTER swap (height is now final)
 scrimRoot.appendChild(modal);
 modal.layoutPositioning = "ABSOLUTE";
 modal.x = (scrimRoot.width  - modal.width)  / 2;
 modal.y = (scrimRoot.height - modal.height) / 2;
 ```
 
-**If SLOT errors appear anyway** (e.g. "Slot component property values cannot be edited"): you're not following the pattern above. Stop, re-read this section, don't try to work around the API.
+**Drawer Basic** — identical pattern. Its header uses different prop keys:
+- `"Title text#538:0"` → your title (default is literal `"Title"` — must replace)
+- `"Description text#369:24"` → your description (default is literal `"Description"` — must replace)
 
 **What you MUST NOT do:**
-- Don't call `modal.setProperties({"Content#19312:24": ...})` — throws.
-- Don't wrap `setProperties` in `try/catch` to swallow errors.
-- Don't build modals as custom FRAMEs named `Modal · *` with hand-composed Header / Body / Footer children. That's Rule #3 fabrication. Use the `*Modal Basic*` instance + Body frame.
-- Don't compute `modal.x/y` before the Body children are appended — height isn't final yet.
-
-**Drawer Basic** (`*Drawer Basic*`) has the same Body-frame pattern. Same rules apply.
+- Don't call `modal.setProperties({"Content#…": ...})` — SLOT is read-only, throws.
+- Don't `appendChild` into the Body frame directly — throws "Cannot move node…".
+- Don't wrap `swapComponent` in try/catch — if it fails, stop and surface.
+- Don't build modals/drawers as custom FRAMEs named `Modal · *` / `Drawer · *` with hand-composed Header/Body/Footer children — Rule #3 fabrication.
+- Don't leave default Header texts ("Hey, what's up, dude?", "Title", "Description") — always overwrite via setProperties on the `/ Header` sub-instance.
 
 ## Library Rules
 
