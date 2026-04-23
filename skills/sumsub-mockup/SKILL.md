@@ -893,6 +893,32 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
      }
    }
 
+   // 7.23b. Data rows not populated — ALL visible rows show identical default content.
+   // Caught in Domain Mgmt Verified Success (140:15666): 10 visible rows each with
+   // ∅ + "3:17 PM (GMT+4)" + "Status" + "Label" + "Show more" + "5" — the cell's
+   // Type wasn't set so every optional sub-component renders at once.
+   const rowDefaultSignals = /^(Label|Status|Show more|Checkbox)$/;
+   const timeDefault = /^\d{1,2}:\d{2}\s?(AM|PM)/;
+   for (const tbl of all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Table Starter*")) {
+     const dataRows = tbl.children.filter(c => c.name === "Table Row" && c.visible);
+     if (dataRows.length === 0) continue;
+     let unconfiguredRows = 0;
+     for (const row of dataRows) {
+       const texts = row.findAll(t => t.type === "TEXT" && t.visible !== false && t.characters);
+       const defaultHits = texts.filter(t =>
+         rowDefaultSignals.test(t.characters) || timeDefault.test(t.characters)
+       ).length;
+       // A populated row typically has 0-1 matches (maybe one Status label that
+       // says literal "Status" legitimately). 3+ matches means cells are unset.
+       if (defaultHits >= 3) unconfiguredRows++;
+     }
+     if (unconfiguredRows === dataRows.length && dataRows.length > 0) {
+       issues.push(`Table Starter "${tbl.name}" — all ${dataRows.length} visible rows show default cell content (Status / Label / Show more / time placeholder all rendered at once). Cells' "Type" property wasn't set. Iterate rows and call setProperties({Type: "Text Regular", "  ↪ Text in cell#14615:0": ...}) per cell, or hide the row.`);
+     } else if (unconfiguredRows > 0) {
+       issues.push(`Table Starter "${tbl.name}" — ${unconfiguredRows}/${dataRows.length} rows unconfigured (default cell content visible). Populate via setProperties on each cell or hide the rows.`);
+     }
+   }
+
    // 7.24. Direct TEXT modification inside DS component instances.
    // Blanking default text via `text.characters = ""` leaves 50+ empty TEXT
    // nodes on canvas — visible as hollow cells. Proper DS usage: setProperties
