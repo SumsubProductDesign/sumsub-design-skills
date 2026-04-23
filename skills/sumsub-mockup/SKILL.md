@@ -1033,20 +1033,39 @@ The rest of the pre-flight logic (how to compare versions, where to fetch) lives
      }
    }
 
-   // 7.28. Slot placeholder not hidden (Rule 7.13).
-   // After slot.appendChild(wrap), the original default placeholder (often
-   // named "Slot / Basic" or similar INSTANCE) stays as a sibling of the wrap
-   // and renders alongside the real content → "double body" bug.
+   // 7.28. Slot placeholder state — two failure modes.
    for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
      const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
      if (!body) continue;
      const slot = body.children?.find(c => c.type === "SLOT");
      if (!slot) continue;
-     // Count visible children in slot
      const visibleSlotKids = (slot.children || []).filter(c => c.visible);
+
+     // (a) Double body — more than one visible child, placeholder wasn't hidden.
      if (visibleSlotKids.length > 1) {
        const names = visibleSlotKids.map(c => c.name).join(", ");
-       issues.push(`Modal/Drawer "${md.name}" SLOT has ${visibleSlotKids.length} visible children [${names}]. The default placeholder (Slot / Basic) wasn't hidden. After slot.appendChild(wrap), iterate slot.children and set everyone except wrap to .visible = false.`);
+       issues.push(`Modal/Drawer "${md.name}" SLOT has ${visibleSlotKids.length} visible children [${names}]. Default placeholder wasn't hidden. Iterate slot.children and .visible=false every non-wrap sibling.`);
+     }
+
+     // (b) Empty modal — the ONLY visible child is the default placeholder
+     // (Slot / Basic INSTANCE), no custom wrap was appended. Means slot.appendChild(wrap)
+     // silently failed — usually because it was wrapped in try/catch (Rule #8 ban) or
+     // because the wrap construction threw before the append call.
+     if (visibleSlotKids.length === 1) {
+       const only = visibleSlotKids[0];
+       const isDefaultPlaceholder =
+         (only.type === "INSTANCE" && /slot\s*\/\s*basic/i.test(only.name)) ||
+         /^Slot \/ /i.test(only.name);
+       if (isDefaultPlaceholder) {
+         issues.push(`Modal/Drawer "${md.name}" has an EMPTY body — only the default "${only.name}" placeholder is visible, no custom wrap was appended. The body swap silently failed. Check for a try/catch around slot.appendChild (banned by Rule #8) or an earlier exception during wrap construction. Modal height is likely stuck at default (~228px for Size=Small empty).`);
+       }
+     }
+
+     // (c) Suspicious modal height — matches default-empty heights closely.
+     //     Default empties: Small=228h, Medium=240h-ish, Large=similar low value.
+     //     If modal.height < 260 AND slot has only placeholder, definitely empty.
+     if (md.height < 260 && visibleSlotKids.length <= 1 && visibleSlotKids.every(k => /slot\s*\/\s*basic/i.test(k.name || ""))) {
+       issues.push(`Modal/Drawer "${md.name}" height ${Math.round(md.height)}px — suspiciously close to default-empty. Verify body content was actually appended (not swallowed by try/catch).`);
      }
    }
 
@@ -1669,10 +1688,16 @@ const slot = body.children.find(c => c.type === "SLOT");  // just one
 // Then append into the slot:
 slot.appendChild(wrap);
 
-// The default placeholder inside the slot (named "slot / basic") can be hidden:
-const placeholder = slot.children.find(c => c.name.includes("slot / basic"));
-if (placeholder) placeholder.visible = false;
+// Hide ALL other slot children (default "Slot / Basic" placeholder etc.).
+// Iterate, don't match by name — name varies between component versions.
+for (const child of slot.children) {
+  if (child !== wrap) child.visible = false;
+}
 ```
+
+**⚠️ NEVER wrap the swap in try/catch.** Observed failure: skill defined a "safeSwapBody(modal, wrap)" helper with try/catch around both `slot.appendChild(wrap)` and the sibling-hide loop. When the append silently failed, the modal kept its default 228px height with only `Slot / Basic` visible — looked like an empty dialog in review. The skill's own audit ran after and passed because it only checked for >1 visible child (double-body), not for "only default child remains" (empty modal).
+
+If `slot.appendChild(wrap)` throws — stop, surface the error, fix the actual cause (wrap is undefined? slot reference stale from an interleaved await?). Don't catch and continue.
 
 **⚠️ Pre-cache all variables/styles/components BEFORE any tree mutation.** Interleaving `await figma.variables.importVariableByKeyAsync(...)` calls between capturing a node reference and mutating it causes `"Internal Figma Error: Parent not found"` — every await lets Figma reshuffle the internal tree and invalidates captured IDs, including IDs you re-fetched via `getNodeById`. Fix: do ALL imports first (one await block), build helpers that are PURE/SYNC, then do tree mutation in one sync stretch.
 
