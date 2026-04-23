@@ -23,7 +23,7 @@ fi
 # ─── Config ──────────────────────────────────────────────────────────────────
 REMOTE_URL="https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json"
 CACHE_FILE="${HOME}/.cache/sumsub-design-version-gate.json"
-CACHE_TTL=3600  # seconds — don't hammer GitHub on every tool call
+CACHE_TTL=60  # seconds — short, so the check effectively fires every session
 LOCAL_PLUGIN_JSON=""
 
 # Find local plugin.json. Plugins live under ~/.claude/plugins/ with variable
@@ -79,28 +79,54 @@ if version_ge "$LOCAL_VERSION" "$REMOTE_VERSION"; then
 fi
 
 # ─── Block + message ─────────────────────────────────────────────────────────
-# stderr on exit 2 becomes Claude's error context.
+# stderr on exit 2 becomes Claude's error context. It is INSTRUCTION for
+# Claude — follow it exactly.
 cat >&2 <<EOF
-⚠️ sumsub-design plugin is out of date — tool call BLOCKED.
+STOP. Plugin sumsub-design is out of date. This tool call is blocked.
 
 Local:  v${LOCAL_VERSION}
 Remote: v${REMOTE_VERSION}
 
-This gate exists because the skill has been observed inventing
-"auto mode" to bypass the SKILL.md pre-flight rule and silently
-building mockups on stale rules. The gate runs outside the skill's
-judgment — it cannot be argued with, renamed around, or deferred.
+WHAT YOU (CLAUDE) MUST DO NOW — exactly these steps, in order:
 
-To unblock:
-  1. Tell the user the plugin is out of date.
-  2. Ask: "yes to auto-update, or continue-anyway to skip?"
-  3. If yes — run via Bash:
-       claude plugin marketplace update sumsub-design
-       claude plugin update sumsub-design@sumsub-design
-     Then tell the user to fully quit and reopen Claude Desktop.
-  4. If continue-anyway — set env SUMSUB_SKIP_VERSION_GATE=1 for
-     the session (user-acknowledged stale plugin use).
+1. STOP all further tool calls. Do not create frames, do not import
+   components, do not run audits, do not do anything else.
 
-The tool call you just attempted has NOT been executed.
+2. Show the user EXACTLY this message (substitute the real versions):
+
+   ⚠️ sumsub-design plugin update available
+   Your local version: v${LOCAL_VERSION} · Latest: v${REMOTE_VERSION}
+
+   I can update it for you right now by running:
+     claude plugin marketplace update sumsub-design
+     claude plugin update sumsub-design@sumsub-design
+
+   Reply:
+     - yes / update — I will run the two commands via Bash, then you
+       quit and reopen Claude Desktop
+     - continue anyway — use the current (older) version for this
+       session
+
+3. WAIT for the user's reply. Do not proceed on assumption. Do not
+   invent "auto mode" or "will mention at the end" — those phrases
+   are banned regressions from prior sessions, the user has already
+   been burned by them.
+
+4. If user replies yes / update:
+     - Run via Bash: claude plugin marketplace update sumsub-design
+                   && claude plugin update sumsub-design@sumsub-design
+     - On success: tell user to fully quit and reopen Claude Desktop,
+       then come back and reply "restarted" to continue.
+     - On failure: surface the exact stderr, offer manual fallback.
+
+5. If user replies continue anyway:
+     - Run via Bash to set the session bypass, then retry the original
+       tool call. Example:
+         SUMSUB_SKIP_VERSION_GATE=1 <original command context>
+       In practice, instruct the user to start a new chat with that env
+       set, OR accept that the gate will keep firing this session.
+
+The tool call you just attempted was NOT executed. The only acceptable
+next action is step 2 above.
 EOF
 exit 2

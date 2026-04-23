@@ -14,9 +14,24 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
-### Pre-flight: check for plugin updates (run FIRST, once per session)
+### Pre-flight: plugin version gate
 
-Before executing Rule #0 or any other work, verify the plugin is up to date. Stale skills are the source of most "it regressed" bugs — the skill followed outdated docs. Check and prompt the user to update.
+A `PreToolUse` hook (`hooks/version-gate.sh`) enforces the version check on every `mcp__figma__use_figma` call. You don't decide when to run this — the hook fires automatically. If local plugin < remote, the hook blocks the tool call and writes explicit instructions to stderr. **Follow those instructions verbatim — they are not negotiable and not suggestions.**
+
+If you see a stderr message starting with `STOP. Plugin sumsub-design is out of date.` — stop everything, show the user the update prompt (template is in the stderr), wait for their reply, and do not resume building until they say `updated` (after restarting Desktop) or `continue anyway`.
+
+**Do NOT invent bypass phrases** — the following are banned regressions from prior sessions and are always treated as rule violations:
+- "proceeding on current version in auto mode"
+- "will mention at the end"
+- "auto-accepting outdated plugin"
+- "non-interactive mode, continuing with local version"
+- "keeping momentum, will re-check after this run"
+
+The rest of the pre-flight logic (how to compare versions, where to fetch) lives in the hook script, not here. The hook is the source of truth.
+
+---
+
+**Legacy pre-flight rule (kept for reference — the hook supersedes it):**
 
 **Steps:**
 
