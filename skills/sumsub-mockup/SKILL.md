@@ -854,6 +854,59 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
      }
    }
 
+   // 7.22. Content frame clipsContent hack + extreme undersize.
+   // Caught in Domain Mgmt Verified Success (140:15666): Content had
+   // clipsContent=false AND height=16px. Skill disabled clipping as a
+   // workaround for a Table Starter overflow — hiding symptom, not cause.
+   // Real fix is row.visible=false on unused table rows.
+   for (const n of all) {
+     if (n.type !== "FRAME") continue;
+     if (isInsideInstance(n)) continue;
+     if (!/^(Content|BG Content|Page Content)$/i.test(n.name)) continue;
+     if (n.clipsContent === false && n.children.length > 0) {
+       issues.push(`Content frame "${n.name}" has clipsContent=false — this masks overflow instead of fixing it. Check if table/drawer inside is sized beyond content, and hide unused rows via row.visible=false or resize properly.`);
+     }
+     if (n.layoutMode && n.height < 40 && n.children.length > 0) {
+       issues.push(`Content frame "${n.name}" auto-layout collapsed to ${Math.round(n.height)}px. Check layoutSizing on children and the frame itself — likely missing FILL vertical sizing.`);
+     }
+   }
+
+   // 7.23. Table Starter — unused rows not hidden + "Table header" defaults.
+   // Skill often creates a Table Starter (10 rows by default) and populates
+   // only a few. Leaving the rest visible with blank cells (or worse, the
+   // default "Table cell"/"Table header" DS text) is Rule #7 violation AND
+   // creates overflow. The correct path: hide unused rows via row.visible=false.
+   for (const tbl of all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Table Starter*")) {
+     const rows = tbl.children.filter(c => c.name === "Table Row");
+     const visibleRows = rows.filter(r => r.visible);
+     // Detect if all rows are visible (default state — almost always wrong)
+     if (visibleRows.length === rows.length && rows.length >= 10) {
+       issues.push(`Table Starter "${tbl.name}" has all ${rows.length} default rows visible. Real tables rarely need 10 rows — set unused rows to row.visible=false to avoid overflow and blank-cell defaults.`);
+     }
+     // Detect default "Table header" on header cells
+     const tblHeader = tbl.children.find(c => c.name === "Table Header");
+     if (tblHeader) {
+       const defaultCount = tblHeader.findAll(t => t.type === "TEXT" && t.characters === "Table header").length;
+       if (defaultCount > 0) {
+         issues.push(`Table Starter "${tbl.name}" has ${defaultCount} "Table header" default labels in the header row. Set column labels via setProperties({"Header name#…": "Domain" / "Status" / ...}) on each header cell instance, NOT by direct .characters edit.`);
+       }
+     }
+   }
+
+   // 7.24. Direct TEXT modification inside DS component instances.
+   // Blanking default text via `text.characters = ""` leaves 50+ empty TEXT
+   // nodes on canvas — visible as hollow cells. Proper DS usage: setProperties
+   // on the cell instance to change "Type" (hides text sub-nodes) or
+   // row.visible=false.
+   // (This check is approximate — counts empty TEXT nodes inside Table Starter
+   // instances; legitimate empty cells exist, so fires only when count is high.)
+   for (const tbl of all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Table Starter*")) {
+     const emptyTexts = tbl.findAll(n => n.type === "TEXT" && (!n.characters || n.characters === "") && n.visible !== false);
+     if (emptyTexts.length > 30) {
+       issues.push(`Table Starter "${tbl.name}" has ${emptyTexts.length} empty/blank visible TEXT nodes — looks like direct .characters="" overrides instead of hiding rows or using setProperties. Prefer row.visible=false on unused rows and setProperties on cells.`);
+     }
+   }
+
    // 7.25. Modal/Drawer body wrap WIDTH overflow.
    // Common failure: skill creates a wrap FRAME via figma.createFrame() with
    // `resize(modal.width, …)` then appendChild into the SLOT. But the slot's
@@ -1255,6 +1308,54 @@ btn.setProperties({
 2. `*Chips*` visible/hidden correctly
 3. Selected chip has `Selected: "yes"`
 4. Filters visible/hidden correctly
+
+---
+
+## Table Starter — populate, hide, label (don't hack internals)
+
+A `*Table Starter*` instance ships with **10 default rows + header row with "Table header" labels**. Three things you must handle:
+
+### 1. Hide unused rows via `row.visible = false`
+
+Never leave visible rows with empty cells or direct-edited `.characters = ""`. That leaks default DS text, creates overflow, and audit check 7.23 catches it.
+
+```js
+const rows = table.children.filter(c => c.name === "Table Row");
+// Populate rows 0..N-1 with real data
+for (let i = 0; i < DATA.length; i++) {
+  const d = DATA[i];
+  const cells = rows[i].children[0].children; // [checkbox, c1, c2, c3, c4, c5, actions]
+  cells[1].setProperties({ Type: "Text Regular", "  ↪ Text in cell#14615:0": d.name });
+  // ... rest of cells
+}
+// HIDE the rest — not blank, not leave alone
+for (let i = DATA.length; i < rows.length; i++) rows[i].visible = false;
+```
+
+### 2. Set header labels via `setProperties`
+
+The header row has the SAME cell structure as data rows — header cells are `Table Row`-like children of `Table Header`. Each header cell instance has a `"Header name#…"` property. Set it via setProperties, not by walking to the TEXT and editing `.characters`.
+
+```js
+const tableHeader = table.children.find(c => c.name === "Table Header");
+const headerCells = tableHeader.children;
+const labels = [null, "Domain", "Status", "Added", "Last check", "SSO", null]; // null = checkbox/actions
+for (let i = 0; i < headerCells.length && i < labels.length; i++) {
+  if (labels[i] === null) continue;
+  const cell = headerCells[i];
+  if (cell.type !== "INSTANCE") continue;
+  const labelKey = Object.keys(cell.componentProperties).find(k => /Header name/i.test(k));
+  if (labelKey) cell.setProperties({ [labelKey]: labels[i] });
+}
+```
+
+### 3. Never directly modify TEXT inside the Table Starter instance
+
+Specifically: **no `text.characters = "…"` on descendants of the table instance**. Figma Plugin API allows it but it violates the "never detach instance / never hack internals" rule. Audit check 7.24 counts empty TEXT nodes inside tables and flags if there are too many (symptom of direct blanking).
+
+### 4. Never `clipsContent = false` on Content frame to hide overflow
+
+If the table physically extends past the Content frame height, the fix is to HIDE unused rows (step 1), not to disable clipping on Content. Audit check 7.22 catches this.
 
 ---
 
