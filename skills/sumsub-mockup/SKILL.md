@@ -469,10 +469,13 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    // 7. Unbound spacing / cornerRadius / fills on YOUR custom frames.
    // Skip anything inside a component instance — DS owns its own tokens.
+   // Skip only "Main" (the outer column under Header that has no padding
+   // and no fill by design). "Content" is checked — it SHOULD have bound
+   // paddings per Rule 7.8.
    for (const n of all) {
      if (n.type !== "FRAME") continue;
      if (isInsideInstance(n)) continue;
-     if (["Item List","Main","Content"].includes(n.name)) continue;
+     if (n.name === "Main") continue;
      if (n.cornerRadius > 0 && !n.boundVariables?.topLeftRadius) {
        issues.push(`Unbound cornerRadius on ${n.name}: ${n.cornerRadius}px`);
      }
@@ -606,7 +609,7 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
    for (const n of all) {
      if (n.type !== "FRAME") continue;
      if (isInsideInstance(n)) continue;
-     if (["Item List","Main","Content"].includes(n.name)) continue;
+     if (n.name === "Main") continue;   // outer column, no padding by design
      // Spacing props
      for (const prop of spacingProps) {
        const val = n[prop];
