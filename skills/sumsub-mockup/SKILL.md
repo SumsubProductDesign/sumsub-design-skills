@@ -389,15 +389,38 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    Don't wrap in try/catch, don't delete the line if it throws. If `slot.children` throws, the slot reference is stale (interleaved awaits — see pre-cache-sync-only pattern above); re-fetch the slot and retry.
 
-7.14. **Position, size, color of components not specified in references → ASK the user, don't guess.** The skill is trained on generic SaaS / web conventions. Those conventions don't always match Sumsub's actual dashboard. Specifically:
+7.14. **Sumsub dashboard UI placement conventions — memorize and apply.** These are the Sumsub-specific layout patterns. Generic SaaS defaults ("bottom-right toast", "left drawer", etc.) are WRONG for Sumsub. Don't guess, don't ask — use the values below.
 
-   - **Toast placement** — Sumsub may position toasts differently than generic "bottom-right corner" patterns. If `reference/*.md` doesn't specify, ASK the user: *"Where should the success toast be placed on this screen? The Sumsub dashboard convention isn't in my references — bottom-right, top-center, or another location?"*
-   - **Floating action button placement** — same logic.
-   - **Notification/alert positions on a screen** (not modal-body alerts — those are inline).
-   - **Drawer side** (right vs left) — Sumsub convention in layout-patterns.md is right for detail panels, but for flow-specific drawers verify.
-   - **Any other "standard" UI pattern** (pull-to-refresh indicator, infinite-scroll loader, empty-state-in-table, etc.).
+   | Component | Position | Margin | Notes |
+   |---|---|---|---|
+   | **Toast** | **Top-right of root** | `x = root.width - toast.width - 24`, `y = 24` | Never bottom-right. Fades up from top. Stack vertically if multiple, each +8px below the previous. |
+   | **Modal Basic / Confirmation** | Centered horizontally over root | `x = (root.width - modal.width) / 2`, `y = (root.height - modal.height) / 2` | Computed AFTER body content is set (height is final). |
+   | **Drawer Basic** (detail panels) | Right edge, full height | `x = root.width - drawer.width`, `y = 0`, resize to `drawer.height = root.height` | Always right side for detail drawers. Left drawers are flow-builder specific, covered in `reference/flowbuilder.md`. |
+   | **Tint / scrim** | Covers entire root (sidebar included) | `x = 0`, `y = 0`, `resize(1440, 900)` | Full-frame, not just main area. |
+   | **Empty State** | Centered in Content | parent Content has `primaryAxisAlignItems = "CENTER"` + `counterAxisAlignItems = "CENTER"` | Empty state instance left at layout defaults inside Content. |
+   | **Loading indicator** (standalone page loader) | Centered in Content | Same centering pattern as Empty State | Not full-screen scrim. |
+   | **Notifications-menu popover** | Opens from Header's bell icon | Positioned by the Header component itself | Don't position manually. |
 
-   Fallback principle: if your positioning code has a comment like "generic convention" or "standard SaaS" — that's a red flag. Either find it in references or ASK.
+   ```js
+   // Toast — top-right
+   toast.layoutPositioning = "ABSOLUTE";
+   toast.x = root.width - toast.width - 24;
+   toast.y = 24;
+   scrimRoot.appendChild(toast);  // or root, depending on context
+
+   // Drawer — right edge, full height
+   drawer.layoutPositioning = "ABSOLUTE";
+   drawer.x = root.width - drawer.width;
+   drawer.y = 0;
+   drawer.resize(drawer.width, root.height);
+
+   // Modal — centered AFTER body is populated
+   modal.layoutPositioning = "ABSOLUTE";
+   modal.x = (root.width  - modal.width)  / 2;
+   modal.y = (root.height - modal.height) / 2;
+   ```
+
+   If you catch yourself writing `y = root.height - component.height - 24` for a toast — stop, that's the generic SaaS habit, Sumsub goes top-right. If the component isn't in the table above, check `reference/layout-patterns.md` for page-type-specific positioning before improvising.
 
 7.11. **Never use emoji as a UI icon.** Emoji like 🔐 🔒 ✉️ 📧 📄 📋 🗑️ ✏️ 📁 ⚙️ 🔍 ⚠️ ❌ ✅ ❗ ℹ️ 🏠 💬 🔗 ▶️ ⏸️ — do NOT paste these into TEXT content as a replacement for a real icon. Every icon in the mockup must be an `Icon / …` instance from the Assets library:
 
@@ -1018,6 +1041,30 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
    }
    if (emojiHits.length) {
      issues.push(`${emojiHits.length} TEXT node(s) contain UI-icon emoji (🔐, ✉️, 📄, etc.). Rule 7.11: replace with Icon / * component instance from Assets library. Samples: ${emojiHits.slice(0, 3).map(s => `"${s}"`).join(" | ")}`);
+   }
+
+   // 7.29. Toast position must be top-right of root (Rule 7.14).
+   // Generic SaaS habit is bottom-right; Sumsub is top-right.
+   // Expected: x ≈ root.width - toast.width - 24, y ≈ 24.
+   for (const toast of all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Toast*")) {
+     // Only check top-level absolute-positioned toasts (not inside instances)
+     if (isInsideInstance(toast)) continue;
+     const parent = toast.parent;
+     if (!parent || typeof parent.width !== "number") continue;
+     const expectedX = parent.width - toast.width - 24;
+     const expectedY = 24;
+     const dx = Math.abs(toast.x - expectedX);
+     const dy = Math.abs(toast.y - expectedY);
+     // Tolerate small offsets (±16px) for stacked toasts
+     if (dx > 32 || dy > 32) {
+       // Check specifically if bottom-right pattern (common mistake)
+       const isBottomRight = toast.x > parent.width / 2 && toast.y > parent.height / 2;
+       if (isBottomRight) {
+         issues.push(`Toast "${toast.name}" is bottom-right (x=${Math.round(toast.x)}, y=${Math.round(toast.y)}). Sumsub convention is top-right — set x = ${expectedX}, y = ${expectedY} (Rule 7.14).`);
+       } else {
+         issues.push(`Toast "${toast.name}" position (x=${Math.round(toast.x)}, y=${Math.round(toast.y)}) doesn't match top-right convention. Expected x≈${Math.round(expectedX)}, y≈${expectedY} (Rule 7.14).`);
+       }
+     }
    }
 
    // 7.28. Slot placeholder not hidden (Rule 7.13).
