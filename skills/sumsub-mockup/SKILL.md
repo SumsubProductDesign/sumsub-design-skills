@@ -14,30 +14,51 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
-### Pre-flight: plugin version gate — two-layer enforcement
+### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
-**Layer 1 (hook):** A `PreToolUse` hook (`hooks/version-gate.js`) fires on **every** `mcp__figma__.*` tool call — `use_figma`, `get_libraries`, `get_metadata`, `get_design_context`, `search_design_system`, etc. The hook is node-based (cross-platform). If local < remote, it blocks with exit 2 + stderr. Follow stderr instructions verbatim.
+**As the very first action of every session — before any other tool call, before reading any reference — do this:**
 
-**Layer 2 (proactive check — YOU, at session start):** Do NOT rely on the hook alone. As the **first action of every session** — before `get_libraries`, before reading references, before anything — proactively perform the version check yourself:
+1. **Read local version:** `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Extract the `version` field.
+2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
+3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently to Rule #0.
+4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
+5. **STOP and show the user this verbatim:**
 
-1. Read `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` → extract local version.
-2. WebFetch `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` → extract remote version.
-3. Compare SemVer. If remote > local → show the user the update prompt (same template the hook's stderr uses), WAIT for reply, act on `yes` / `continue anyway`.
-4. Fetch `CHANGELOG.md` entries between local and remote, include in the prompt.
+   ```
+   ⚠️ sumsub-design plugin update available
+   Your local version: vLOCAL · Latest: vREMOTE
 
-Why two layers: the hook can fail silently (stale cache, platform issues, hook not registered on user's install). The proactive check is the safety net. They overlap intentionally.
+   What's new since your version:
+   <paste CHANGELOG entries extracted in step 4>
 
-**Do NOT invent bypass phrases** — banned, rule break, period:
+   I can update it for you right now by running:
+     claude plugin marketplace update sumsub-design
+     claude plugin update sumsub-design@sumsub-design
+
+   Reply:
+     - yes / update — I'll run the two commands via Bash
+     - continue anyway — use current (older) version for this session
+   ```
+
+6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
+
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On success, tell user to fully quit and reopen Claude Desktop, wait for `restarted`, then continue. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
+
+8. **If `continue anyway`:** cache the decision for this conversation, proceed to Rule #0.
+
+9. **Once done (either updated or continue-anyway), don't re-check this conversation.**
+
+**Banned bypass phrases** — any of these is a rule break, period:
 - "proceeding on current version in auto mode"
 - "will mention at the end"
 - "auto-accepting outdated plugin"
 - "non-interactive mode, continuing with local version"
 - "keeping momentum, will re-check after this run"
-- "hook handles this, no need to check proactively"
-- "hook didn't fire yet because I haven't called use_figma, so no check needed"
-- "first tool is get_libraries which doesn't trigger hook, so skipping"
+- "first tool is get_libraries, so no check needed yet"
+- "doing the check later, after inspection"
+- "memory says plugin is current, skipping"
 
-The last two are the most recent creative bypass pattern: skill noticed hook only matched `use_figma` (pre-v3.51 config) and exploited the gap by calling get_libraries / get_metadata first, reasoning "no use_figma yet = no check needed". The hook matcher is now `mcp__figma__.*` so it fires on all figma tools, but the proactive check at session start is still mandatory regardless.
+If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
 
 0. **Ask WHERE to create the mockup — HARD STOP, WAIT for the answer.**
 

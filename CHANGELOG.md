@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.52.0 — 2026-04-23
+- **Killed the hook infrastructure.** Removed `hooks/` directory, `.claude-plugin/hooks.json`. Hooks were platform-dependent (bash on Windows unreliable, Node not always on PATH) and created a false sense of safety that let the skill bypass text rules by saying "hook will catch it". It didn't.
+- **Restored plain SKILL.md pre-flight** as the single source of truth. Skill reads local plugin.json, WebFetches remote, fetches CHANGELOG, shows user verbatim prompt, waits for `yes` / `continue anyway`. Exactly what was working in v3.29 before the hook rewrite. The banned-phrase list accumulated over v3.29–3.51 stays — every known bypass is explicitly forbidden.
+
 ## v3.51.0 — 2026-04-23
 - **Version check double-layered.** Hook now fires on `mcp__figma__.*` matcher (not just `use_figma`) — catches `get_libraries`, `get_metadata`, `get_design_context`, `search_design_system` before they run. The skill can't slip the first tool call past the gate anymore.
 - **Proactive check in SKILL.md is back** as a safety net: skill must Read local plugin.json + WebFetch remote + compare at session start, before any tool call. Hook and proactive check overlap intentionally — hook is infrastructure, proactive check is discipline. Either alone has failure modes.
