@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.50.0 — 2026-04-23
+- **Rule #0 banned-list extended** — new bypass pattern caught: skill used MEMORY.md entry for a prior task's fileKey as an implicit answer to "where to create". All memory-based pre-answers now explicitly forbidden: "MEMORY.md has a fileKey", "project convention in memory", "prior session established this", etc.
+- Explicit clarification in Rule #0: Memory is CONTEXT (component keys, rules, conventions), not ANSWERS. The only valid source for "where" is the user's current message in the current conversation.
+
 ## v3.49.0 — 2026-04-23
 - **Version-gate hook rewritten in Node.js** (`version-gate.js`). Bash hook didn't work on Windows (no `bash` / `find` / `curl` in the default shell path). Node is bundled with Claude Desktop on every OS — the hook now runs identically on macOS / Linux / Windows. Same behavior: reads local plugin.json(s), picks max SemVer, fetches remote, caches 60s, exit 2 + stderr on mismatch.
 - `hooks/hooks.json` updated to invoke `node ${CLAUDE_PLUGIN_ROOT}/hooks/version-gate.js`. The `.sh` version left in the repo for reference but no longer wired in.

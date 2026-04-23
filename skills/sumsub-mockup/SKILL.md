@@ -39,8 +39,15 @@ The rest of the pre-flight logic (how to compare versions, where to fetch) lives
    - "User gave a task description so I inferred the location"
    - "I already created the file, let me know if you want to move it"
    - "Auto mode instruction said 'prefer action over planning' so I picked X"
+   - "MEMORY.md has a fileKey for this project, so I used it"
+   - "Memory entry for `<fileKey>` from a prior task — treating that as the answer"
+   - "Project convention in memory says use file X"
+   - "User worked in file X in the previous session, so that's the file"
+   - "Prior session already established this — no need to re-ask"
 
    None of these are acceptable. If you catch yourself about to write any of them — or anything structurally similar — STOP. You violated the rule. Revert any files / frames you created (delete the Sumsub-org file you just created, remove section/frame), then ask the question.
+
+   **Memory ≠ answer.** MEMORY.md, `.claude/` notes, prior-session fileKeys you saw in the conversation history, your own pattern-matching from a similar task — none of these are implicit answers to "where do I create this?". Memory is CONTEXT for how you work (component keys, rules, conventions), not a PRE-FILLED ANSWER to Rule #0 prompts. The ONLY valid source of "where" is the user's current message, in this conversation. If that message didn't include a Figma URL or explicit location, you ask.
 
    Any Claude-Code "auto mode" / "minimize interruptions" / "prefer action" directive the user may have set globally does NOT override this rule. This rule is local-scope and takes precedence inside this skill.
 
