@@ -13,8 +13,10 @@ Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow
   - [1c. Verify it's installed](#1c-verify-its-installed)
   - [1d. Authenticate on first run](#1d-authenticate-on-first-run)
 - [Part 2 — Install the plugin](#part-2--install-the-plugin)
-  - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
-  - [Step 2 — Install the plugin](#step-2--install-the-plugin)
+  - [Easy path — from Claude Desktop (recommended)](#easy-path--from-claude-desktop-recommended)
+  - [Terminal path](#terminal-path)
+    - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
+    - [Step 2 — Install the plugin](#step-2--install-the-plugin)
   - [Step 3 — Restart Claude Desktop](#step-3--restart-claude-desktop)
 - [Verify](#verify)
 - [Available commands](#available-commands)
@@ -122,9 +124,30 @@ Type `/quit` (or press `Ctrl+C`) to exit the interactive session. You don't need
 
 ## Part 2 — Install the plugin
 
-Now that `claude` works, run these **two commands, one at a time**, in the same terminal:
+Now that `claude` is on your PATH, you can install the plugin. Two paths — pick whichever you prefer.
 
-### Step 1 — Add the marketplace
+### Easy path — from Claude Desktop (recommended)
+
+1. Open any chat in Claude Desktop.
+2. Paste this prompt:
+
+   ```
+   Install the sumsub-design plugin: run
+     claude plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
+     claude plugin install sumsub-design@sumsub-design
+   via Bash and report the output.
+   ```
+
+3. Claude runs both commands via its Bash tool and shows the output. Look for `✔ Successfully added marketplace: sumsub-design` and `✔ Successfully installed plugin: sumsub-design@sumsub-design`.
+4. Proceed to [Step 3 — Restart Claude Desktop](#step-3--restart-claude-desktop) below.
+
+If the Bash tool fails (e.g. `claude` not found on PATH), fall back to the Terminal path below.
+
+### Terminal path
+
+Run these **two commands, one at a time**, in a regular terminal (Terminal.app / PowerShell):
+
+#### Step 1 — Add the marketplace
 
 ```
 claude plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
@@ -132,7 +155,7 @@ claude plugin marketplace add https://github.com/SumsubProductDesign/sumsub-desi
 
 Wait for `✔ Successfully added marketplace: sumsub-design`.
 
-### Step 2 — Install the plugin
+#### Step 2 — Install the plugin
 
 ```
 claude plugin install sumsub-design@sumsub-design
