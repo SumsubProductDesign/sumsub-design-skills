@@ -56,24 +56,30 @@ The rest of the pre-flight logic (how to compare versions, where to fetch) lives
 
    **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
 
-   **Page-level placement inside the file.** Once the file is chosen, pick the target PAGE by this rule:
-   1. If the user named a specific page — use it.
-   2. Else, find an existing page whose name contains "Drafts" (case-insensitive) — use it. Typical name: `🛠 Drafts`.
-   3. Else, create a new page called `🛠 Drafts` and use it.
+   **Page-level placement inside the file — call `ensureDraftsPage()` as the FIRST LINE of every `use_figma` script.**
+
+   `figma.currentPage` RESETS BETWEEN `use_figma` INVOCATIONS. The first call may correctly run on Drafts; the second call starts with whatever page was last active (usually Page 1) and silently creates nodes there. This has been observed multiple times — sections / screens ending up on Page 1 even though the first call was on Drafts.
+
+   The `ensureDraftsPage()` helper (in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`) finds or creates the Drafts page and sets it as current. **Every single `use_figma` script, without exception, must start with:**
 
    ```js
-   const targetPage =
-     figma.root.children.find(p => /drafts/i.test(p.name))
-     ?? (() => {
-       const p = figma.createPage();
-       p.name = "🛠 Drafts";
-       return p;
-     })();
-   await targetPage.loadAsync();
-   await figma.setCurrentPageAsync(targetPage);
+   await ensureDraftsPage();   // MUST be the first call in every use_figma script
+   // … now safe to create / modify nodes ...
    ```
 
-   Never build mockups on a page with production frames unless the user explicitly told you to. "Current page" is not a default — always resolve the target page via the rule above.
+   Page resolution order inside `ensureDraftsPage()`:
+   1. Find existing page whose name matches `/drafts/i` — use it.
+   2. Else create `🛠 Drafts`.
+
+   If the user explicitly named a different page, override with that page instead (still as the first call): `await page.loadAsync(); await figma.setCurrentPageAsync(page);`.
+
+   **Forbidden bypass phrases** — all of these are Rule #0-style violations:
+   - "figma.currentPage is already Drafts from the previous call, skipping"
+   - "minor — I'll correct the page at the end if needed"
+   - "creating on current page for speed, will move later"
+   - "auto mode: using default currentPage"
+
+   All banned. If the section ends up on a wrong page, you revert (move the section to Drafts) and fix the missing `ensureDraftsPage()` call. Audit check 7.12 verifies root is on a Drafts-named page; it will fail the build if violated.
 
 1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
 

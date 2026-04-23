@@ -143,6 +143,23 @@ async function bindRadius(node, sizeOrKey) {
 // Convenience: bind all four paddings and itemSpacing at once.
 // Pass tokens for each; omit or pass 0 to skip.
 // Example: await bindFrameSpacing(frame, { pad: "xl", gap: "lg" });
+// ─── Page resolver — call this FIRST in every use_figma script ───────────────
+// figma.currentPage resets between use_figma invocations. If you don't set it
+// explicitly at the start, the script silently operates on Page 1 (or whatever
+// page was last active) and creates sections/frames in the wrong place. This
+// helper finds or creates the Drafts page, loads it, and makes it current.
+// Every use_figma script MUST call this before creating or modifying any node.
+async function ensureDraftsPage() {
+  let page = figma.root.children.find(p => /drafts/i.test(p.name));
+  if (!page) {
+    page = figma.createPage();
+    page.name = "🛠 Drafts";
+  }
+  await page.loadAsync();
+  await figma.setCurrentPageAsync(page);
+  return page;
+}
+
 async function bindFrameSpacing(node, { padLeft, padRight, padTop, padBottom, pad, gap } = {}) {
   padLeft   ??= pad;
   padRight  ??= pad;
