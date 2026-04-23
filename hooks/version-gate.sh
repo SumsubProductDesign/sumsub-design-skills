@@ -24,22 +24,28 @@ fi
 REMOTE_URL="https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json"
 CACHE_FILE="${HOME}/.cache/sumsub-design-version-gate.json"
 CACHE_TTL=60  # seconds — short, so the check effectively fires every session
-LOCAL_PLUGIN_JSON=""
+# ─── Find local version ──────────────────────────────────────────────────────
+# Claude Code keeps every cached plugin version on disk under
+# ~/.claude/plugins/cache/.../<version>/. `find | head -n1` would grab a
+# random one (filesystem order), which could be any old cached version.
+# The ACTIVE version after an update is always the MAX version on disk —
+# Claude Code doesn't delete old caches, but it loads the latest available.
+# So: collect all version strings from all plugin.json matches, sort SemVer,
+# take max.
 
-# Find local plugin.json. Plugins live under ~/.claude/plugins/ with variable
-# path, so search for our plugin.json anywhere under it.
+LOCAL_VERSION=""
 if command -v find >/dev/null 2>&1; then
-  LOCAL_PLUGIN_JSON=$(find "${HOME}/.claude/plugins" -type f -path "*sumsub-design*/.claude-plugin/plugin.json" 2>/dev/null | head -n1)
+  ALL_VERSIONS=$(find "${HOME}/.claude/plugins" -type f -path "*sumsub-design*/.claude-plugin/plugin.json" 2>/dev/null \
+    | while read -r f; do
+        grep -oE '"version"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$f" 2>/dev/null \
+          | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
+          | head -n1
+      done)
+  LOCAL_VERSION=$(printf '%s\n' "$ALL_VERSIONS" | grep -v '^$' | sort -V | tail -n1)
 fi
 
-if [ -z "$LOCAL_PLUGIN_JSON" ] || [ ! -f "$LOCAL_PLUGIN_JSON" ]; then
-  # Can't locate plugin.json — skip gate, don't block innocent user
-  exit 0
-fi
-
-# ─── Read local version ──────────────────────────────────────────────────────
-LOCAL_VERSION=$(grep -oE '"version"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$LOCAL_PLUGIN_JSON" | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
 if [ -z "$LOCAL_VERSION" ]; then
+  # Can't locate any plugin.json — skip gate, don't block innocent user
   exit 0
 fi
 
