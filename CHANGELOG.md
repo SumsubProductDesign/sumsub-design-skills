@@ -4,9 +4,6 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
-## v3.53.0 — 2026-04-23
-- Test bump to verify v3.52's pure-SKILL.md pre-flight fires correctly. No content changes.
-
 ## v3.52.0 — 2026-04-23
 - **Killed the hook infrastructure.** Removed `hooks/` directory, `.claude-plugin/hooks.json`. Hooks were platform-dependent (bash on Windows unreliable, Node not always on PATH) and created a false sense of safety that let the skill bypass text rules by saying "hook will catch it". It didn't.
 - **Restored plain SKILL.md pre-flight** as the single source of truth. Skill reads local plugin.json, WebFetches remote, fetches CHANGELOG, shows user verbatim prompt, waits for `yes` / `continue anyway`. Exactly what was working in v3.29 before the hook rewrite. The banned-phrase list accumulated over v3.29–3.51 stays — every known bypass is explicitly forbidden.
