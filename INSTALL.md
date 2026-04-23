@@ -4,6 +4,41 @@ Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow
 
 > ⚠️ Plugin management (`/plugin …`) works **only in the Claude Code CLI in a terminal**, not in Claude Desktop's Code tab. All install and update commands below go into Terminal.app (macOS) or PowerShell (Windows).
 
+## Contents
+
+- [Part 0 — Prerequisites](#part-0--prerequisites)
+- [Part 1 — Install and run Claude Code CLI in a terminal](#part-1--install-and-run-claude-code-cli-in-a-terminal)
+  - [1a. Open a terminal](#1a-open-a-terminal)
+  - [1b. Install the `claude` CLI](#1b-install-the-claude-cli)
+  - [1c. Verify it's installed](#1c-verify-its-installed)
+  - [1d. Authenticate on first run](#1d-authenticate-on-first-run)
+- [Part 2 — Install the plugin](#part-2--install-the-plugin)
+  - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
+  - [Step 2 — Install the plugin](#step-2--install-the-plugin)
+  - [Step 3 — Restart Claude Desktop](#step-3--restart-claude-desktop)
+- [Verify](#verify)
+- [Available commands](#available-commands)
+- [Example prompts](#example-prompts)
+- [Updating](#updating) — easiest path: [`UPDATE.md`](UPDATE.md) (no terminal)
+  - [Option A — `sumsub-update` one-liner (recommended, after one-time setup)](#option-a--sumsub-update-one-liner-recommended-after-one-time-setup)
+  - [Option B — Interactive `/plugin` menu inside the `claude` REPL](#option-b--interactive-plugin-menu-inside-the-claude-repl)
+  - [Option C — Manual two commands (no alias, no REPL)](#option-c--manual-two-commands-no-alias-no-repl)
+- [Uninstalling](#uninstalling)
+- [Troubleshooting](#troubleshooting)
+  - [`/plugin isn't available in this environment` in Claude Desktop](#plugin-isnt-available-in-this-environment-in-claude-desktop)
+  - [`command not found: claude` (macOS / Linux) after installing the CLI](#command-not-found-claude-macos--linux-after-installing-the-cli)
+  - [`'claude' is not recognized…` (Windows) after installing the CLI](#claude-is-not-recognized-windows-after-installing-the-cli)
+  - [Installer script fails with permission errors](#installer-script-fails-with-permission-errors)
+  - [`claude` opens but says "not logged in" when I try `claude plugin …`](#claude-opens-but-says-not-logged-in-when-i-try-claude-plugin-)
+  - [`Failed to clone marketplace repository: SSH host key is not in your known_hosts file`](#failed-to-clone-marketplace-repository-ssh-host-key-is-not-in-your-known_hosts-file)
+  - [Skills don't appear after install](#skills-dont-appear-after-install)
+  - [Figma tools aren't available in Claude](#figma-tools-arent-available-in-claude)
+  - [A skill runs but fails with an error](#a-skill-runs-but-fails-with-an-error)
+- [Team-wide auto-install (admins)](#team-wide-auto-install-admins)
+- [Support](#support)
+
+---
+
 ## Part 0 — Prerequisites
 
 You need three things before the plugin install can work:
