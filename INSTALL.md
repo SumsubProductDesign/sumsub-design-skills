@@ -171,6 +171,10 @@ Return the raw JSON — don't fix anything, I want the issue list first.
 
 ## Updating
 
+**Easiest way — from Claude Desktop, no terminal:** see [`UPDATE.md`](UPDATE.md) — one sentence in chat, Claude runs the commands for you.
+
+Below are the other ways (terminal-based) if you prefer them or the Desktop flow fails.
+
 The plugin doesn't auto-update. You need to refresh the marketplace cache and then pull the new version. Three ways to do it — pick one.
 
 > ⚠️ **Claude Desktop's "Check for updates" button is not enough.** It only looks at the locally cached marketplace copy and can show a stale "latest version". You MUST refresh the cache via the terminal first (any of the options below does this). After that, Desktop will show the correct latest version.
