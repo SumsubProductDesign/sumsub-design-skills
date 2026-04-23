@@ -206,7 +206,20 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
 4. **No screenshots.** Never call `get_screenshot` or any screenshot tool. Inspect everything via `use_figma` Plugin API (read properties, layoutMode, fills, variant props, text content). Screenshots are only allowed when the user explicitly asks.
 
-5. **Page title goes INSIDE the `*Header*` component.** Use the Header's built-in title property (e.g. `Title text#3817:0`). NEVER create a separate TEXT node for the page title above or below the header. Don't build a "Title Row" — that's duplication.
+5. **Page title goes INSIDE the `*Header*` component — no separate title TEXT anywhere else.** Use the Header's built-in title property (e.g. `Title text#3817:0`) plus its Subtitle / Buttons properties for the row of actions.
+
+   **What's forbidden — substance, not name:**
+   - A custom FRAME inside Content (or anywhere outside the Header instance) containing a TEXT with `semibold/h4-xl`, `semibold/h3-2xl`, `semibold/h2-3xl`, or any `bold/*` style and text that matches/restates the page title.
+   - A TEXT node above the table / empty state / card stack that acts as the page title, regardless of what style it uses.
+   - A HORIZONTAL row at the top of Content holding the title on the left and CTA button on the right. Both go in Header: title via `Title text#3817:0`, CTA via `↪ First Button#6943:8` = true and set its Button Text to the real label.
+
+   **Renaming the FRAME from "Title Row" / "Title Stack" to something else does NOT fix this.** The audit detects by substance (title-level text style inside a non-instance frame), not by frame name. If you find yourself renaming frames "to pass the audit", you're grading your own exam — fix the root cause instead:
+   1. Delete the duplicated title TEXT and its parent frame.
+   2. In the Header instance, `setProperties({ "Title text#3817:0": "<real title>" })`.
+   3. If you need a subtitle, use Header's `Subtitle#3817:6 = true` + `Subtitle text#3817:3 = "<subtitle>"`.
+   4. If you need an action button next to the title, use Header's `Buttons#6943:21 = true` + `↪ First Button#6943:8 = true` + set the inner *Button*'s text.
+
+   The user-facing rendering of all four things above comes from `*Header*` itself. Duplicating any of them in Content is noise that reviewers flag every time.
 
 6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
 
@@ -359,6 +372,34 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Naming convention for local components:** use `<Type> / <Purpose>` format — `Modal Body / …`, `Drawer Body / …`, `Card / …`, `Illustration / …`. Makes filtering and auditing easier.
 
+7.10. **`*Sidebar*` variant must match the page context.** The default variant (`Type=Dashboard, Collapsed=False`) is only correct for the actual Dashboard page. For any product-specific page, pick the matching Type:
+
+   | Page / task involves… | `Type` variant |
+   |---|---|
+   | Applicants list or applicant detail | `Applicants` |
+   | Integrations / Workflow Builder / flows | `Integrations` |
+   | Transaction monitoring / Travel Rule / VASP / rules | `Transaction monitoring` |
+   | AML screening / watchlists | `AML screening` |
+   | Case management / queues | `Case management` |
+   | Client lists / blocklists | `Client lists` |
+   | Statistics / reports | `Statistics` |
+   | Billing | `Billing` |
+   | Settings (SSO, domains, SDK translations, customization, team, etc.) | `Settings` |
+   | Tasks / unreviewed | `Tasks` |
+   | Admin console | `Admin` |
+   | Actual Dashboard page | `Dashboard` (the default — only correct here) |
+
+   ```js
+   const sidebarSet = await figma.importComponentSetByKeyAsync(COMPONENTS.sidebar);
+   // Pick variant by Type + Collapsed=False
+   const variant = sidebarSet.children.find(v =>
+     v.name.includes("Type=Applicants") && v.name.includes("Collapsed=False")
+   ) ?? sidebarSet.defaultVariant;
+   const sidebar = variant.createInstance();
+   ```
+
+   The default `Type=Dashboard` on a non-dashboard page is a visual bug — the active nav item won't match where the user is, and a reviewer will flag it immediately. Audit check 4 detects wrong variants based on Header title and screen name.
+
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
    - Audit not run = **do not share the link**. Treat it as the build being incomplete.
@@ -398,12 +439,37 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
      return true;
    }
 
-   // 1. Title Row antipattern — page title MUST be in Header's Title text property
-   const titleRowAntipatterns = all.filter(n =>
-     n.type === "FRAME" && /^(Title Row|Title Stack|Page Title)$/i.test(n.name)
-   );
-   if (titleRowAntipatterns.length) {
-     issues.push(`Title Row antipattern: ${titleRowAntipatterns.length} frame(s) — move title into *Header* 'Title text' property and delete`);
+   // 1. Title Row antipattern — page title MUST be in Header's Title text property.
+   // Detect by SUBSTANCE, not by frame name (skill has been caught renaming "Title
+   // Row" → "Actions Row" to bypass a name-based check). A page title is:
+   //   TEXT node outside any component INSTANCE, with a heading-level text style
+   //   (semibold/h2-3xl, h3-2xl, h4-xl, or bold/*), typically inside Content.
+   const headingStyleRe = /^(semibold|bold)\/(h[0-9]-\w+)/i;
+   async function getStyleName(textNode) {
+     try {
+       const styleId = textNode.textStyleId;
+       if (!styleId || typeof styleId !== "string") return null;
+       const style = await figma.getStyleByIdAsync(styleId);
+       return style?.name || null;
+     } catch(e) { return null; }
+   }
+   const titleSuspects = [];
+   for (const t of all) {
+     if (t.type !== "TEXT") continue;
+     if (isInsideInstance(t)) continue;  // Header's own title is fine
+     const styleName = await getStyleName(t);
+     if (!styleName || !headingStyleRe.test(styleName)) continue;
+     // Skip TEXT nodes that are inside a SECTION directly (section title, allowed)
+     let p = t.parent, insideSection = false;
+     while (p && p !== root) {
+       if (p.type === "SECTION") { insideSection = true; break; }
+       p = p.parent;
+     }
+     if (insideSection && t.parent?.type === "SECTION") continue;
+     titleSuspects.push({ text: t.characters?.slice(0, 60), style: styleName, parent: t.parent?.name });
+   }
+   if (titleSuspects.length) {
+     issues.push(`${titleSuspects.length} heading-level TEXT node(s) outside *Header*. Page title must live in *Header* 'Title text#3817:0'. Renaming the wrapping frame does NOT fix this — delete the text and set the Header property instead. Samples: ${titleSuspects.slice(0, 3).map(s => `"${s.text}" (${s.style}) in "${s.parent}"`).join(" | ")}`);
    }
 
    // 2. Placeholder text in *Header* properties
@@ -445,14 +511,45 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
      }
    }
 
-   // 4. Sidebar variant — reported as info (not a failure). Human must verify
-   // the variant matches the page context (Applicants page → Type=Applicants, etc.).
+   // 4. Sidebar variant — match against task context. We can infer the expected
+   // Type from the Header's Title text or the screen name.
    const sidebar = root.findOne(n =>
      n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Sidebar*"
    );
    const infos = [];
    if (sidebar) {
-     infos.push(`[info] Sidebar variant: "${sidebar.mainComponent.name}" — verify it matches the page context`);
+     const variantName = sidebar.mainComponent.name;
+     const typeMatch = variantName.match(/Type=([^,]+)/);
+     const sidebarType = typeMatch ? typeMatch[1].trim() : null;
+
+     // Gather hints about page context: Header title + screen name
+     const hdr = root.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Header*");
+     const hdrTitle = hdr?.componentProperties?.["Title text#3817:0"]?.value || "";
+     const ctx = (hdrTitle + " " + root.name).toLowerCase();
+
+     // Map keywords → expected Sidebar Type variant
+     const sidebarMap = [
+       { kw: /applicant/,                       expected: "Applicants" },
+       { kw: /integration|workflow|flow builder/, expected: "Integrations" },
+       { kw: /transaction|travel rule|vasp/,    expected: "Transaction monitoring" },
+       { kw: /aml|screening/,                   expected: "AML screening" },
+       { kw: /case management|case /,            expected: "Case management" },
+       { kw: /client list/,                     expected: "Client lists" },
+       { kw: /statistic|report/,                expected: "Statistics" },
+       { kw: /billing/,                         expected: "Billing" },
+       { kw: /setting|domain|sso|translation|customization|sdk translation/, expected: "Settings" },
+       { kw: /dev ?space/,                      expected: "Dev space" },
+       { kw: /task/,                             expected: "Tasks" },
+       { kw: /admin/,                            expected: "Admin" },
+     ];
+     let expected = null;
+     for (const m of sidebarMap) if (m.kw.test(ctx)) { expected = m.expected; break; }
+
+     if (expected && sidebarType && sidebarType !== expected) {
+       issues.push(`Sidebar variant is "Type=${sidebarType}", but the page context (title "${hdrTitle}") suggests "Type=${expected}". Rebind: sidebarSet.children.find(v => v.name.includes("Type=${expected}") && v.name.includes("Collapsed=False")).createInstance().`);
+     } else {
+       infos.push(`[info] Sidebar variant: "${variantName}"${expected ? ` (expected Type=${expected} — matches)` : " (no context-based expectation)"}`);
+     }
    }
 
    // 5. Overflow — any node extending beyond its parent's bounds
@@ -753,6 +850,34 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
        const bareOnHome = homePage.children.filter(n => n.type === "COMPONENT");
        if (bareOnHome.length > 0) {
          issues.push(`${bareOnHome.length} COMPONENT(s) on "Local components" page not inside the "Components (by Claude)" SECTION — appendChild them to the section.`);
+       }
+     }
+   }
+
+   // 7.25. Modal/Drawer body wrap WIDTH overflow.
+   // Common failure: skill creates a wrap FRAME via figma.createFrame() with
+   // `resize(modal.width, …)` then appendChild into the SLOT. But the slot's
+   // usable width is modal.width - body padding (typically ~48px). Result:
+   // wrap is 720px in a 672px slot, overflows by ~48px on the right, content
+   // gets clipped. The general overflow check misses it because SLOT nodes
+   // have their own geometry.
+   {
+     const modalsForOverflow = all.filter(n =>
+       n.type === "INSTANCE" && (
+         n.mainComponent?.parent?.name === "*Modal Basic*" ||
+         n.mainComponent?.parent?.name === "*Drawer Basic*"
+       )
+     );
+     for (const m of modalsForOverflow) {
+       const body = m.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+       if (!body) continue;
+       const slot = body.children?.find(c => c.type === "SLOT");
+       if (!slot) continue;
+       for (const child of slot.children || []) {
+         if (!child.visible) continue;
+         if (child.width > slot.width + 0.5) {
+           issues.push(`Modal/Drawer body wrap "${child.name}" is ${Math.round(child.width)}px wide inside a ${Math.round(slot.width)}px SLOT (modal ${Math.round(m.width)}px). Resize to slot.width: wrap.resize(slot.width, wrap.height) — NOT modal.width, which ignores the Body's ~48px internal padding.`);
+         }
        }
      }
    }
@@ -1261,79 +1386,110 @@ Scrim always covers **full root frame** (1440×900), including sidebar.
 
 ---
 
-## Modal Basic / Drawer Basic — setting body content via `swapComponent`
+## Modal Basic / Drawer Basic — setting body content via `slot.appendChild()`
 
-**Two API facts to memorise:**
+**Four API facts to memorise:**
 
-1. **SLOT properties are read-only via `setProperties`.** `modal.setProperties({"Content#…": ...})` on `*Modal Basic*` throws `"Slot component property values cannot be edited"`. Not a bug — the API forbids it.
-2. **You can't `appendChild` into the Body FRAME either.** Figma throws `"Cannot move node. New parent is an instance or is inside of an instance"`. The Body is inside an INSTANCE subtree.
+1. **SLOT properties are read-only via `setProperties`.** `modal.setProperties({"Content#…": ...})` throws `"Slot component property values cannot be edited"`.
+2. **Body FRAME is locked.** `body.appendChild(newNode)` throws `"Cannot move node. New parent is an instance or is inside of an instance"`.
+3. **`swapComponent` is not available on SLOT nodes.** `slot.swapComponent(bodyComp)` throws `"no such property 'swapComponent' on SLOT node"`.
+4. **The SLOT node itself DOES accept `appendChild`.** This is the working path. Append your wrap frame directly into the SLOT node and hide the default `slot / basic` child.
 
-**The correct path: swap the inner slot instance.** Inside the Body frame there is a sub-INSTANCE named `slot / basic` (or similar — trailing/leading spaces vary). Swap it with your own local component using `instance.swapComponent(bodyComp)`.
+**The correct path:**
 
 ```js
-// 1. Create the modal instance (or drawer — same pattern)
-const modalSet = await figma.importComponentSetByKeyAsync(COMPONENTS.modalBasic);
+// Find the SLOT node (not a FRAME, not an INSTANCE — type === "SLOT")
+const body = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+const slot = body.children.find(c => c.type === "SLOT");  // just one
+
+// Build your content wrap fully OFF-TREE first (all sync — see below for why).
+// Then append into the slot:
+slot.appendChild(wrap);
+
+// The default placeholder inside the slot (named "slot / basic") can be hidden:
+const placeholder = slot.children.find(c => c.name.includes("slot / basic"));
+if (placeholder) placeholder.visible = false;
+```
+
+**⚠️ Pre-cache all variables/styles/components BEFORE any tree mutation.** Interleaving `await figma.variables.importVariableByKeyAsync(...)` calls between capturing a node reference and mutating it causes `"Internal Figma Error: Parent not found"` — every await lets Figma reshuffle the internal tree and invalidates captured IDs, including IDs you re-fetched via `getNodeById`. Fix: do ALL imports first (one await block), build helpers that are PURE/SYNC, then do tree mutation in one sync stretch.
+
+```js
+// ═══ STAGE 1: cache everything async up front ═══════════════════════════════
+const modalSet   = await figma.importComponentSetByKeyAsync(COMPONENTS.modalBasic);
+const buttonSet  = await figma.importComponentSetByKeyAsync(COMPONENTS.button);
+const inputSet   = await figma.importComponentSetByKeyAsync(COMPONENTS.inputBasic);
+const spXL       = await figma.variables.importVariableByKeyAsync(SP_VARS.xl);
+const spLG       = await figma.variables.importVariableByKeyAsync(SP_VARS.lg);
+const styleBodyM = await figma.importStyleByKeyAsync(TEXT_STYLES["regular/body-m"]);
+await figma.loadFontAsync({ family: "Geist", style: "Regular" });
+await figma.loadFontAsync({ family: "Geist", style: "Medium" });
+await figma.loadFontAsync({ family: "Geist", style: "SemiBold" });
+
+// ═══ STAGE 2: sync helpers using the cached objects ══════════════════════════
+const bindSp  = (node, prop, v) => node.setBoundVariable(prop, v);
+const mkText  = (chars, style, fill) => {
+  const t = figma.createText();
+  t.characters = chars;
+  t.setTextStyleIdAsync(style.id);
+  return t;
+};
+
+// ═══ STAGE 3: build content OFF-TREE in one sync stretch ═════════════════════
 const modal = modalSet.children.find(v => v.name === "Size=Medium").createInstance();
 
-// 2. Customize the modal Header — ALWAYS replace Title/Subtitle.
-//    Default texts are "Hey, what's up, dude? It's modal basic" / "Hi, I'm sabtitle" —
-//    if you don't overwrite, audit will catch and delivery is blocked.
+// Customize Header (synchronous setProperties)
 const modalHeader = modal.findOne(n => n.type === "INSTANCE" && /\/ Header/i.test(n.name));
 modalHeader.setProperties({
-  "Title text#3834:3": "Add domain",   // required — real title
-  "Subtitle text#4643:0": "Step 1 of 2",  // optional
-  "Subtitle#4643:1": true,              // show subtitle
+  "Title text#3834:3": "Add domain",
+  "Subtitle text#4643:0": "Step 1 of 2",
+  "Subtitle#4643:1": true,
   "Close button#8216:0": true,
 });
 
-// 3. Customize the modal Footer buttons
+// Customize Footer buttons
 const modalFooter = modal.findOne(n => n.type === "INSTANCE" && /\/ Footer/i.test(n.name));
 const footerBtns = modalFooter.findAll(n => n.type === "INSTANCE" && n.name === "*Button*");
 footerBtns[2].setProperties({ "Button Text#143:1442": "Cancel",   "Type": "Secondary" });
 footerBtns[3].setProperties({ "Button Text#143:1442": "Continue", "Type": "Primary" });
 
-// 4. Find the Body frame (trailing space in name — always use .trim())
-const modalBody = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+// Find the Body + SLOT first — we need slot.width, NOT modal.width,
+// because the Body frame has ~48px internal padding (varies by size).
+// Sizing the wrap to modal.width causes horizontal overflow.
+const body = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+const slot = body.children.find(c => c.type === "SLOT");
 
-// 5. Find the inner slot instance inside Body
-const slotInst = modalBody.findOne(n =>
-  n.type === "INSTANCE" && /slot\s*\/\s*basic/i.test(n.name)
-);
-if (!slotInst) throw new Error("slot / basic sub-instance not found inside Body — Modal Basic structure changed");
+// Build the body wrap frame off-tree, sized to SLOT
+const wrap = figma.createFrame();
+wrap.name = "Modal Body / Add domain";
+wrap.layoutMode = "VERTICAL";
+wrap.primaryAxisSizingMode = "AUTO";
+wrap.counterAxisSizingMode = "FIXED";
+wrap.resize(slot.width, 100);  // ← slot.width, NOT modal.width
+wrap.fills = [];
+bindSp(wrap, "paddingLeft",  spXL);
+bindSp(wrap, "paddingRight", spXL);
+bindSp(wrap, "paddingTop",   0);   // tight to header
+bindSp(wrap, "paddingBottom", spLG);
+bindSp(wrap, "itemSpacing",  spLG);
 
-// 6. Create a local main component to hold your content
-const bodyComp = figma.createComponent();
-bodyComp.name = "Modal Body / Add domain";
-bodyComp.layoutMode = "VERTICAL";
-bodyComp.primaryAxisSizingMode = "AUTO";    // grow with content
-bodyComp.counterAxisSizingMode = "FIXED";
-bodyComp.itemSpacing = 16;
-bodyComp.paddingLeft = 24; bodyComp.paddingRight = 24;
-bodyComp.paddingTop = 0;   bodyComp.paddingBottom = 16;
-bodyComp.resize(modal.width, 100);
-
-// 7. Park the local component on the dedicated Local components page.
-//    Per Rule 7.9 (universal — applies to EVERY figma.createComponent() in the
-//    skill, not just modal bodies): use getLocalComponentsHome() helper.
-//    DO NOT appendChild to currentPage with x=-20000 — that stacks every
-//    component at the same off-canvas point and is unreadable.
-const home = await getLocalComponentsHome();  // "Local components" page → "Components (by Claude)" SECTION
-home.appendChild(bodyComp);
-positionInHome(home, bodyComp);  // auto-grid, 4 cols, no collisions
-
-// 8. Build content inside the local component
-const desc = await makeText("Enter the domain…", "regular/body-m", "textSubtle");
-bodyComp.appendChild(desc);
+const desc = mkText("Enter the domain you want to verify…", styleBodyM);
+wrap.appendChild(desc);
 desc.layoutSizingHorizontal = "FILL";
 
-const input = await makeInstance(COMPONENTS.inputBasic);
-bodyComp.appendChild(input);
+const input = inputSet.defaultVariant.createInstance();
+wrap.appendChild(input);
 input.layoutSizingHorizontal = "FILL";
 
-// 9. Swap the inner slot instance to point at your component
-slotInst.swapComponent(bodyComp);
+// ═══ STAGE 4: inject wrap into modal's SLOT — one sync call ══════════════════
+const body = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+const slot = body.children.find(c => c.type === "SLOT");
+slot.appendChild(wrap);
 
-// 10. Place modal on scrim, centered AFTER swap (height is now final)
+// Hide the default placeholder inside the slot
+const placeholder = slot.children.find(c => c !== wrap && c.name.includes("slot / basic"));
+if (placeholder) placeholder.visible = false;
+
+// ═══ STAGE 5: place the fully-sized modal on the scrim, centered ═════════════
 scrimRoot.appendChild(modal);
 modal.layoutPositioning = "ABSOLUTE";
 modal.x = (scrimRoot.width  - modal.width)  / 2;
