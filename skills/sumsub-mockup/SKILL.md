@@ -29,114 +29,22 @@ If you see a stderr message starting with `STOP. Plugin sumsub-design is out of 
 
 The rest of the pre-flight logic (how to compare versions, where to fetch) lives in the hook script, not here. The hook is the source of truth.
 
----
+0. **Ask WHERE to create the mockup — HARD STOP, WAIT for the answer.**
 
-**Legacy pre-flight rule (kept for reference — the hook supersedes it):**
+   **Forbidden bypass phrases** — same class of violation as pre-flight's banned auto mode. All of these are rule breaks, period:
+   - "Auto mode: defaulting to Sumsub org"
+   - "Reasonable default given this is a work task, proceeding"
+   - "Creating in Sumsub org, will mention at the end if you want another location"
+   - "Minimize interruptions, using default"
+   - "User gave a task description so I inferred the location"
+   - "I already created the file, let me know if you want to move it"
+   - "Auto mode instruction said 'prefer action over planning' so I picked X"
 
-**Steps:**
+   None of these are acceptable. If you catch yourself about to write any of them — or anything structurally similar — STOP. You violated the rule. Revert any files / frames you created (delete the Sumsub-org file you just created, remove section/frame), then ask the question.
 
-1. **Read local version.** Use the `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Parse JSON, extract `version`. If read fails, skip the check — proceed with warning "could not verify plugin version".
+   Any Claude-Code "auto mode" / "minimize interruptions" / "prefer action" directive the user may have set globally does NOT override this rule. This rule is local-scope and takes precedence inside this skill.
 
-2. **Fetch remote version.** Use the `WebFetch` tool:
-   - URL: `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json`
-   - Prompt: `"Return the raw JSON content of this file, nothing else."`
-   - Parse the response JSON, extract `version`. If fetch fails (network, 404) — skip with warning "could not check for updates".
-
-3. **Compare SemVer.** `local = "3.25.0"`, `remote = "3.28.0"` → remote > local, update available.
-
-4. **Fetch the CHANGELOG** to include what's new in the update prompt:
-   - WebFetch `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`
-   - Parse markdown sections of the form `## vX.Y.Z — DATE`.
-   - Extract entries where `vX.Y.Z` is **greater than local** and **≤ remote**.
-   - If the list is long, show the 5 most recent entries with a note "+N more…".
-   - If fetch fails, skip — don't block the update prompt.
-
-5. **If remote > local — STOP and show the user this message:**
-
-   > ⚠️ **sumsub-design plugin update available**
-   >
-   > Your local version: **vLOCAL** · Latest: **vREMOTE**
-   >
-   > **What's new since your version:**
-   > <CHANGELOG entries extracted in step 4 — render them as-is, preserving bullet points>
-   >
-   > I can update it for you right now by running:
-   > ```
-   > claude plugin marketplace update sumsub-design
-   > claude plugin update sumsub-design@sumsub-design
-   > ```
-   >
-   > Reply:
-   > - **`yes`** / **`update`** — I'll run the two commands via Bash, then you just quit and reopen Claude Desktop
-   > - **`continue anyway`** — don't update, use the current (older) version
-
-   Substitute `vLOCAL` / `vREMOTE` with the actual versions. If CHANGELOG fetch failed in step 4, omit the "What's new" section and add a one-line fallback: *"See full changelog: https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md"*.
-
-6. **If user replies `yes` or `update` — run the update automatically.** Use the `Bash` tool to execute both commands in sequence:
-
-   ```bash
-   claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design
-   ```
-
-   After the Bash call completes:
-   - If both commands succeeded (exit 0) — tell the user:
-     > ✅ Updated to vREMOTE. Fully quit Claude Desktop (⌘Q on macOS, right-click tray → Quit on Windows) and reopen so the new version loads. Then reply `restarted` and I'll continue.
-   - If commands failed — surface the exact error output and the manual fallback:
-     > ❌ Update failed: `<stderr excerpt>`
-     >
-     > Try manually in a regular terminal:
-     > ```
-     > claude plugin marketplace update sumsub-design
-     > claude plugin update sumsub-design@sumsub-design
-     > ```
-     > …or reply `continue anyway` to proceed on the current version.
-
-   After restart, the user comes back to the chat. Proceed to Rule #0.
-
-7. **If user replies `continue anyway`** — skip the update, cache the decision, proceed to Rule #0.
-
-8. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
-
-9. **NO AUTO MODE. NO BATCH MODE. NO "WILL MENTION AT THE END".** When remote > local, pre-flight is a HARD STOP. You do not proceed on the current version because it would be "more helpful" not to interrupt. You do not invent phrases like:
-
-   - *"Proceeding on current version in auto mode"*
-   - *"Will mention at the end"*
-   - *"Auto-accepting outdated plugin"*
-   - *"Non-interactive mode, continuing with local version"*
-   - *"User hasn't replied yet, starting work in parallel"*
-   - *"Keeping momentum, will re-check after this run"*
-
-   These are all bypasses of the rule. Every one of them is a Rule #8-style violation (skill grading its own exam). Treat each as a build failure on your part.
-
-10. **Non-interactive context handling.** If you genuinely cannot wait for user input (no tty, invoked via `--print`, spawned by another agent with no input channel), the correct behavior is to **ABORT with an error**, not silently proceed:
-
-    ```
-    ERROR: sumsub-design plugin version mismatch.
-      Local:  vLOCAL
-      Remote: vREMOTE
-    Cannot run in non-interactive mode with an out-of-date plugin —
-    skill rules and audit checks may be stale, delivering on old
-    rules ships silent bugs.
-    Resolution: update the plugin, then re-run.
-      claude plugin marketplace update sumsub-design
-      claude plugin update sumsub-design@sumsub-design
-    ```
-
-    Exit / return without building any Figma content. Do not create partial sections, do not set up pages, do not import any component. Zero side effects.
-
-    The ONLY way to proceed on an older version is: (a) user is in the loop, (b) user explicitly replies `continue anyway`. No other path exists.
-
-**When the check does NOT fire:**
-- Local ≥ remote (no update needed) — proceed silently to Rule #0.
-- WebFetch failed — warn once, proceed anyway.
-- Local plugin.json unreadable — warn once, proceed anyway.
-- User already said "continue anyway" earlier in this conversation — proceed.
-
-**Implementation note — cache the result.** Once the version is verified (either up-to-date, user accepted update, or user said continue), remember the outcome for the rest of the conversation. Don't make the user answer twice.
-
----
-
-0. **Ask WHERE to create the mockup — before anything else.** Don't assume the "current file" and don't default to personal Drafts. Four distinct destinations — ask explicitly:
+   Four distinct destinations — ask explicitly:
 
    > Where should I create the mockup?
    > 1. **Existing file** — share a Figma URL (tell me which section/frame if relevant)
