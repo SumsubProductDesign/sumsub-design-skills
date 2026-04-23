@@ -19,7 +19,7 @@ argument-hint: "[component description]"
 
 ### Pre-flight: check for plugin updates (run FIRST, once per session)
 
-Identical to `sumsub-mockup` Rule pre-flight. Read local `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`, WebFetch the remote version from GitHub main, SemVer compare, offer to auto-update via Bash on `yes`. Do not re-run once the session's check is done.
+Identical to `sumsub-mockup` Rule pre-flight. Read local `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`, WebFetch the remote version from GitHub main, SemVer compare, **also WebFetch `CHANGELOG.md` and include the entries between local and remote versions in the update prompt** so the user sees what's new. Offer to auto-update via Bash on `yes`. Do not re-run once the session's check is done.
 
 ### Rule #0 — clarify scope before building
 

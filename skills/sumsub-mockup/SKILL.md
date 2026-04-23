@@ -29,13 +29,21 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
 3. **Compare SemVer.** `local = "3.25.0"`, `remote = "3.28.0"` → remote > local, update available.
 
-4. **If remote > local — STOP and show the user this message verbatim:**
+4. **Fetch the CHANGELOG** to include what's new in the update prompt:
+   - WebFetch `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`
+   - Parse markdown sections of the form `## vX.Y.Z — DATE`.
+   - Extract entries where `vX.Y.Z` is **greater than local** and **≤ remote**.
+   - If the list is long, show the 5 most recent entries with a note "+N more…".
+   - If fetch fails, skip — don't block the update prompt.
+
+5. **If remote > local — STOP and show the user this message:**
 
    > ⚠️ **sumsub-design plugin update available**
    >
    > Your local version: **vLOCAL** · Latest: **vREMOTE**
    >
-   > Newer versions fix real bugs — each release ships audit checks and guidance that prevent silent mockup failures.
+   > **What's new since your version:**
+   > <CHANGELOG entries extracted in step 4 — render them as-is, preserving bullet points>
    >
    > I can update it for you right now by running:
    > ```
@@ -47,9 +55,9 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
    > - **`yes`** / **`update`** — I'll run the two commands via Bash, then you just quit and reopen Claude Desktop
    > - **`continue anyway`** — don't update, use the current (older) version
 
-   Substitute `vLOCAL` / `vREMOTE` with the actual versions.
+   Substitute `vLOCAL` / `vREMOTE` with the actual versions. If CHANGELOG fetch failed in step 4, omit the "What's new" section and add a one-line fallback: *"See full changelog: https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md"*.
 
-5. **If user replies `yes` or `update` — run the update automatically.** Use the `Bash` tool to execute both commands in sequence:
+6. **If user replies `yes` or `update` — run the update automatically.** Use the `Bash` tool to execute both commands in sequence:
 
    ```bash
    claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design
@@ -70,9 +78,9 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    After restart, the user comes back to the chat. Proceed to Rule #0.
 
-6. **If user replies `continue anyway`** — skip the update, cache the decision, proceed to Rule #0.
+7. **If user replies `continue anyway`** — skip the update, cache the decision, proceed to Rule #0.
 
-7. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
+8. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
 
 **When the check does NOT fire:**
 - Local ≥ remote (no update needed) — proceed silently to Rule #0.
