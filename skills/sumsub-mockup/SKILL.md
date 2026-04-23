@@ -311,27 +311,40 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Don't bind inside component instances** — DS owns its internals. Only bind on YOUR custom frames (outside any INSTANCE). Audit ignores instance internals.
 
-7.9. **Local components go on the "Local components" page, inside the "Components (by Claude)" SECTION.** Never `appendChild` a `figma.createComponent()` to `figma.currentPage` with `x = -20000`. That stacks every local component on top of each other at a single off-canvas point and is impossible to review.
+7.9. **EVERY local main component you create — regardless of purpose — goes on the "Local components" page, inside the "Components (by Claude)" SECTION.** This is a universal rule, not a Modal-specific one. It applies to every `figma.createComponent()` call the skill makes:
 
-   Use the `getLocalComponentsHome()` + `positionInHome()` helpers from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`:
+   | Typical local-component use case | Example name |
+   |---|---|
+   | Modal Basic body slot | `Modal Body / Add domain` |
+   | Drawer Basic body slot | `Drawer Body / Pending verification` |
+   | Popover content | `Popover / Tooltip — Liveness check` |
+   | Custom illustration wrapped as a component for reuse | `Illustration / Empty state — domains` |
+   | Repeating row/card pattern made into a component (instance it on multiple screens) | `Row / SSO config`, `Card / Compliance officer` |
+   | Any reusable structure you componentize for DRY | `<Any custom main component>` |
+
+   **Never** `appendChild` a `figma.createComponent()` to `figma.currentPage` with `x = -20000`. That stacks every component at the same off-canvas point and is impossible to review — user opens the file, scrolls to find them, and sees a pile.
+
+   Use the helpers from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`:
 
    ```js
-   const bodyComp = figma.createComponent();
-   bodyComp.name = "Modal Body / Add domain";
-   // …configure layout…
+   const comp = figma.createComponent();
+   comp.name = "<Type> / <Descriptive purpose>"; // e.g. "Card / Compliance officer"
+   // …configure layout, padding, etc…
 
    const home = await getLocalComponentsHome(); // finds or creates:
                                                  //   Page: "Local components"
                                                  //   Section: "Components (by Claude)" (fill #404040)
-   home.appendChild(bodyComp);
-   positionInHome(home, bodyComp);              // auto-grid, 4 cols × 600×500 cells
+   home.appendChild(comp);
+   positionInHome(home, comp);                  // auto-grid, 4 cols × 600×500 cells
    ```
 
    If you can't use the helper (writing fully custom code), replicate the logic:
    1. Find `figma.root.children` for a PAGE whose name matches `/^local\s*components?$/i`. Create one named `Local components` if not found.
    2. On that page, find a SECTION named `Components (by Claude)`. Create one with fill `#404040` if not found.
-   3. `appendChild(bodyComp)` into that SECTION (not into the Drafts SECTION, not into currentPage).
-   4. Position new components in a grid to avoid overlap.
+   3. `appendChild(comp)` into that SECTION (not into the Drafts SECTION, not into currentPage).
+   4. Position new components in a grid so they don't overlap existing ones.
+
+   **Naming convention for local components:** use `<Type> / <Purpose>` format — `Modal Body / …`, `Drawer Body / …`, `Card / …`, `Illustration / …`. Makes filtering and auditing easier.
 
 8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script below via `use_figma`, with `productContext` set to match the task. The rules are:
 
@@ -1253,9 +1266,10 @@ bodyComp.paddingTop = 0;   bodyComp.paddingBottom = 16;
 bodyComp.resize(modal.width, 100);
 
 // 7. Park the local component on the dedicated Local components page.
+//    Per Rule 7.9 (universal — applies to EVERY figma.createComponent() in the
+//    skill, not just modal bodies): use getLocalComponentsHome() helper.
 //    DO NOT appendChild to currentPage with x=-20000 — that stacks every
-//    component at the same off-canvas point and is unreadable. Use the
-//    getLocalComponentsHome() helper from blocks/helpers.js:
+//    component at the same off-canvas point and is unreadable.
 const home = await getLocalComponentsHome();  // "Local components" page → "Components (by Claude)" SECTION
 home.appendChild(bodyComp);
 positionInHome(home, bodyComp);  // auto-grid, 4 cols, no collisions
