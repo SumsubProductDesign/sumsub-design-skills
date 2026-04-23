@@ -372,6 +372,47 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Naming convention for local components:** use `<Type> / <Purpose>` format — `Modal Body / …`, `Drawer Body / …`, `Card / …`, `Illustration / …`. Makes filtering and auditing easier.
 
+7.11. **Never use emoji as a UI icon.** Emoji like 🔐 🔒 ✉️ 📧 📄 📋 🗑️ ✏️ 📁 ⚙️ 🔍 ⚠️ ❌ ✅ ❗ ℹ️ 🏠 💬 🔗 ▶️ ⏸️ — do NOT paste these into TEXT content as a replacement for a real icon. Every icon in the mockup must be an `Icon / …` instance from the Assets library:
+
+   ```js
+   // ❌ WRONG: emoji as icon in content
+   text.characters = "🔐 Okta SSO integration";
+   text.characters = "✉️ User provisioning allowlist";
+
+   // ✅ RIGHT: real icon instance + plain TEXT
+   const iconComp = await figma.importComponentByKeyAsync(ICON_KEYS["normal/lock"]);
+   const iconInst = iconComp.createInstance();
+   row.appendChild(iconInst);
+   const text = await makeText("Okta SSO integration", "regular/body-m", "textDefault");
+   row.appendChild(text);
+   ```
+
+   If no icon in the Assets pack matches what you need → tell the user explicitly. Don't silently substitute with an emoji. Emojis render inconsistently across platforms and fonts, clash with the DS, and are an instant visual tell that the mockup wasn't done properly.
+
+   **Exception:** emoji inside COMPONENT / COMPONENT SET NAMES is fine — those are DS conventions (e.g. `*Alert*` has variants `🔵 Info / 🟡 Warning / 🔴 Danger`, Scenarios has `🔷 Type=Scenario`). You don't author those; when reading them via the API, pass them through as-is.
+
+   **Not an exception:** emoji inside TEXT content that YOU wrote. Always use a real icon.
+
+7.12. **Modal/Drawer body wrap has ZERO internal padding — the modal's Body already pads.** The `*Modal Basic*` Body frame ships with ~48px of internal padding (L+R) and vertical padding. If you add `wrap.paddingLeft = 24` etc., you double-pad the content and it looks wrong. Keep the wrap padding-free; use `itemSpacing` for vertical gaps between children.
+
+   ```js
+   // ❌ WRONG: wrap has its own padding on top of Body's
+   wrap.paddingLeft = 24;
+   wrap.paddingRight = 24;
+   wrap.paddingTop = 16;
+   wrap.paddingBottom = 16;
+   wrap.itemSpacing = 16;
+
+   // ✅ RIGHT: only itemSpacing, no padding
+   wrap.paddingLeft = 0;
+   wrap.paddingRight = 0;
+   wrap.paddingTop = 0;
+   wrap.paddingBottom = 0;
+   wrap.itemSpacing = 16;   // bound to spacing/lg
+   ```
+
+   Same rule for Drawer Basic body wraps.
+
 7.10. **`*Sidebar*` variant must match the page context.** The default variant (`Type=Dashboard, Collapsed=False`) is only correct for the actual Dashboard page. For any product-specific page, pick the matching Type:
 
    | Page / task involves… | `Type` variant |
@@ -930,6 +971,44 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
      const emptyTexts = tbl.findAll(n => n.type === "TEXT" && (!n.characters || n.characters === "") && n.visible !== false);
      if (emptyTexts.length > 30) {
        issues.push(`Table Starter "${tbl.name}" has ${emptyTexts.length} empty/blank visible TEXT nodes — looks like direct .characters="" overrides instead of hiding rows or using setProperties. Prefer row.visible=false on unused rows and setProperties on cells.`);
+     }
+   }
+
+   // 7.26. UI-emoji in TEXT content (Rule 7.11).
+   // Catches emojis used as fake icons inside user-authored TEXT. Allows emoji
+   // inside component instances (DS variant names / annotation props legitimately
+   // use them). Only flags TEXT outside any INSTANCE.
+   const uiIconEmojis = /[\u{1F510}-\u{1F512}\u{1F4E7}\u{2709}\u{1F4C4}\u{1F4CB}\u{1F4D1}\u{1F5D1}\u{270F}\u{1F4C1}\u{2699}\u{1F50D}\u{26A0}\u{274C}\u{2705}\u{2757}\u{2139}\u{1F3E0}\u{1F4AC}\u{1F517}\u{25B6}\u{23F8}\u{25C0}\u{1F512}\u{1F513}]/u;
+   const emojiHits = [];
+   for (const n of all) {
+     if (n.type !== "TEXT") continue;
+     if (isInsideInstance(n)) continue;
+     if (!isVisible(n)) continue;
+     if (!n.characters) continue;
+     if (uiIconEmojis.test(n.characters)) {
+       emojiHits.push(n.characters.slice(0, 80));
+     }
+   }
+   if (emojiHits.length) {
+     issues.push(`${emojiHits.length} TEXT node(s) contain UI-icon emoji (🔐, ✉️, 📄, etc.). Rule 7.11: replace with Icon / * component instance from Assets library. Samples: ${emojiHits.slice(0, 3).map(s => `"${s}"`).join(" | ")}`);
+   }
+
+   // 7.27. Modal/Drawer body wrap has internal padding (Rule 7.12).
+   // The Body frame inside *Modal Basic* / *Drawer Basic* already pads its
+   // content. A wrap FRAME inside the SLOT should only use itemSpacing.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     if (!body) continue;
+     const slot = body.children?.find(c => c.type === "SLOT");
+     if (!slot) continue;
+     for (const wrap of slot.children || []) {
+       if (!wrap.visible) continue;
+       if (wrap.type !== "FRAME" && wrap.type !== "COMPONENT") continue;
+       const pads = [wrap.paddingLeft, wrap.paddingRight, wrap.paddingTop, wrap.paddingBottom];
+       const nonZero = pads.filter(p => typeof p === "number" && p > 0);
+       if (nonZero.length > 0) {
+         issues.push(`Modal/Drawer body wrap "${wrap.name}" has internal padding (L=${wrap.paddingLeft}, R=${wrap.paddingRight}, T=${wrap.paddingTop}, B=${wrap.paddingBottom}) — Rule 7.12: remove all paddings, the Body frame already pads. Keep only itemSpacing for vertical gaps.`);
+       }
      }
    }
 
@@ -1591,13 +1670,16 @@ wrap.name = "Modal Body / Add domain";
 wrap.layoutMode = "VERTICAL";
 wrap.primaryAxisSizingMode = "AUTO";
 wrap.counterAxisSizingMode = "FIXED";
-wrap.resize(slot.width, 100);  // ← slot.width, NOT modal.width
+wrap.resize(slot.width, 100);   // ← slot.width, NOT modal.width
 wrap.fills = [];
-bindSp(wrap, "paddingLeft",  spXL);
-bindSp(wrap, "paddingRight", spXL);
-bindSp(wrap, "paddingTop",   0);   // tight to header
-bindSp(wrap, "paddingBottom", spLG);
-bindSp(wrap, "itemSpacing",  spLG);
+
+// Rule 7.12: NO paddings on the wrap — the Body frame already pads.
+// Only itemSpacing for vertical gaps between children.
+wrap.paddingLeft = 0;
+wrap.paddingRight = 0;
+wrap.paddingTop = 0;
+wrap.paddingBottom = 0;
+bindSp(wrap, "itemSpacing", spLG);   // spacing/lg (16px) between stacked children
 
 const desc = mkText("Enter the domain you want to verify…", styleBodyM);
 wrap.appendChild(desc);
