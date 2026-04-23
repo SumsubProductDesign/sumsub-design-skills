@@ -57,15 +57,14 @@ header.layoutSizingHorizontal = "FILL";
 
 // 5. Content area — append first, then set sizing
 const content = makeFrame("Content", { direction: "VERTICAL" });
-content.paddingLeft = SP.xl;
-content.paddingRight = SP.xl;
-content.paddingTop = SP.xl;
-content.paddingBottom = SP.xl;
-content.itemSpacing = SP.xl;
 main.appendChild(content);
 content.layoutSizingHorizontal = "FILL";
 content.layoutSizingVertical = "FILL";
-await bindFill(content, VARS.cardBg); // Content area = white (Rule #6)
+await bindFill(content, VARS.cardBg); // Content = white (Rule #6)
+// Standard table-page Content padding formula (Rule 7.8 — tokens, not numerics):
+//   paddings all sides: spacing/xl (24px)
+//   itemSpacing:        spacing/lg (16px)
+await bindFrameSpacing(content, { pad: "xl", gap: "lg" });
 
 // 6. Title row — append first, then set sizing
 const titleRow = makeFrame("Title Row", { direction: "HORIZONTAL" });

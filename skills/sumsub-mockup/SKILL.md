@@ -311,6 +311,19 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Don't bind inside component instances** — DS owns its internals. Only bind on YOUR custom frames (outside any INSTANCE). Audit ignores instance internals.
 
+   **Content-frame padding formula (memorize):** for any screen's main `Content` frame, bind:
+
+   ```js
+   await bindFrameSpacing(content, { pad: "xl", gap: "lg" });
+   // equivalent:
+   //   paddingLeft / Right / Top / Bottom → spacing/xl (24px in Base library)
+   //   itemSpacing                        → spacing/lg (16px in Base library)
+   ```
+
+   Do not pick different tokens ad-hoc. If the target file has locally overridden `spacing/xl` or `spacing/lg` to different pixel values, that's the file's convention — don't fight it by binding to a different token. Your job is to use the correct token by name, not to hit a specific pixel value.
+
+   Modal / Drawer body frames (`bodyComp` from the swap pattern) use the same formula.
+
 7.9. **EVERY local main component you create — regardless of purpose — goes on the "Local components" page, inside the "Components (by Claude)" SECTION.** This is a universal rule, not a Modal-specific one. It applies to every `figma.createComponent()` call the skill makes:
 
    | Typical local-component use case | Example name |
@@ -673,6 +686,37 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
        } else if (exactDefaultsInModalHeader.includes(v)) {
          issues.push(`${md.mainComponent.parent.name} "${md.name}" — internal Header '${key}' is literal default "${v}". Replace with real content.`);
        }
+     }
+   }
+
+   // 7.17. Content-frame padding PIXEL values — not just bindings.
+   // Rule 7.8 requires bindings, but a binding to a token that resolves to
+   // an out-of-range value in this file (e.g., file-local override of
+   // spacing/xl to 20px when the Base library value is 24px) still looks
+   // broken. Verify the rendered value falls within Sumsub's expected
+   // range for Content areas:
+   //   padding L/R  ∈ [24, 32]   — spacing/xl (24) to spacing/3xl (32)
+   //   padding T/B  ∈ [16, 24]   — spacing/lg (16) to spacing/xl (24)
+   //   itemSpacing  ∈ [8, 24]    — spacing/s (8) to spacing/xl (24)
+   const contentFramesToAudit = all.filter(n =>
+     n.type === "FRAME" && !isInsideInstance(n) && /^(Content|BG Content|Page Content|Body)$/i.test(n.name)
+   );
+   for (const cf of contentFramesToAudit) {
+     const lr = [cf.paddingLeft, cf.paddingRight];
+     const tb = [cf.paddingTop, cf.paddingBottom];
+     const gap = cf.itemSpacing;
+     for (const [side, val] of [["paddingLeft", lr[0]], ["paddingRight", lr[1]]]) {
+       if (typeof val === "number" && val > 0 && (val < 24 || val > 32)) {
+         issues.push(`Content-type frame "${cf.name}" ${side} = ${val}px, out of expected range [24, 32] (Rule 7.8 formula). Rebind to spacing/xl or spacing/3xl, or verify file's token values.`);
+       }
+     }
+     for (const [side, val] of [["paddingTop", tb[0]], ["paddingBottom", tb[1]]]) {
+       if (typeof val === "number" && val > 0 && (val < 16 || val > 24)) {
+         issues.push(`Content-type frame "${cf.name}" ${side} = ${val}px, out of expected range [16, 24]. Rebind to spacing/lg or spacing/xl.`);
+       }
+     }
+     if (typeof gap === "number" && gap > 0 && (gap < 8 || gap > 24)) {
+       issues.push(`Content-type frame "${cf.name}" itemSpacing = ${gap}px, out of expected range [8, 24]. Rebind to spacing/s..spacing/xl.`);
      }
    }
 

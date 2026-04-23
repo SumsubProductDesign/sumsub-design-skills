@@ -56,13 +56,14 @@ main.appendChild(header);
 header.layoutSizingHorizontal = "FILL";
 
 // 5. Content behind modal — append first
-const bgContent = makeFrame("BG Content", { direction: "VERTICAL", gap: SP.xl });
-bgContent.paddingLeft = SP.xl;
-bgContent.paddingRight = SP.xl;
-bgContent.paddingTop = SP.xl;
+const bgContent = makeFrame("BG Content", { direction: "VERTICAL" });
 main.appendChild(bgContent);
 bgContent.layoutSizingHorizontal = "FILL";
 bgContent.layoutSizingVertical = "FILL";
+// Standard Content padding formula — bound to tokens (Rule 7.8):
+//   paddings: spacing/xl (24px in Base library, varies per file)
+//   itemSpacing: spacing/lg (16px)
+await bindFrameSpacing(bgContent, { pad: "xl", gap: "lg" });
 
 const titleText = await makeText(PAGE_TITLE, "semibold/h4-xl", "textStrong");
 bgContent.appendChild(titleText);

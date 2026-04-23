@@ -56,14 +56,15 @@ header.layoutSizingHorizontal = "FILL";
 
 // 5. Content (full-width table, not constrained by drawer)
 const content = makeFrame("Content", { direction: "VERTICAL", clip: true });
-content.paddingLeft = SP.xl; content.paddingRight = SP.xl;
-content.paddingTop = SP.xl; content.paddingBottom = SP.xl;
-content.itemSpacing = SP.xl;
 main.appendChild(content);
 content.layoutSizingHorizontal = "FILL";
 content.layoutSizingVertical = "FILL";
 content.primaryAxisSizingMode = "FIXED";
 content.counterAxisSizingMode = "FIXED";
+// Standard Content padding formula — bound to tokens (Rule 7.8):
+//   paddings all sides: spacing/xl (24px)
+//   itemSpacing:        spacing/lg (16px)
+await bindFrameSpacing(content, { pad: "xl", gap: "lg" });
 
 const titleText = await makeText(PAGE_TITLE, "semibold/h4-xl", "textStrong");
 content.appendChild(titleText);
