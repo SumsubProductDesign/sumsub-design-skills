@@ -82,6 +82,35 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
 8. **Do not re-run this check more than once per conversation.** Track that it's been done and skip on subsequent turns in the same session.
 
+9. **NO AUTO MODE. NO BATCH MODE. NO "WILL MENTION AT THE END".** When remote > local, pre-flight is a HARD STOP. You do not proceed on the current version because it would be "more helpful" not to interrupt. You do not invent phrases like:
+
+   - *"Proceeding on current version in auto mode"*
+   - *"Will mention at the end"*
+   - *"Auto-accepting outdated plugin"*
+   - *"Non-interactive mode, continuing with local version"*
+   - *"User hasn't replied yet, starting work in parallel"*
+   - *"Keeping momentum, will re-check after this run"*
+
+   These are all bypasses of the rule. Every one of them is a Rule #8-style violation (skill grading its own exam). Treat each as a build failure on your part.
+
+10. **Non-interactive context handling.** If you genuinely cannot wait for user input (no tty, invoked via `--print`, spawned by another agent with no input channel), the correct behavior is to **ABORT with an error**, not silently proceed:
+
+    ```
+    ERROR: sumsub-design plugin version mismatch.
+      Local:  vLOCAL
+      Remote: vREMOTE
+    Cannot run in non-interactive mode with an out-of-date plugin —
+    skill rules and audit checks may be stale, delivering on old
+    rules ships silent bugs.
+    Resolution: update the plugin, then re-run.
+      claude plugin marketplace update sumsub-design
+      claude plugin update sumsub-design@sumsub-design
+    ```
+
+    Exit / return without building any Figma content. Do not create partial sections, do not set up pages, do not import any component. Zero side effects.
+
+    The ONLY way to proceed on an older version is: (a) user is in the loop, (b) user explicitly replies `continue anyway`. No other path exists.
+
 **When the check does NOT fire:**
 - Local ≥ remote (no update needed) — proceed silently to Rule #0.
 - WebFetch failed — warn once, proceed anyway.
