@@ -1,18 +1,11 @@
 # Installation Guide — Sumsub Design Skills
 
-Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow.
-
-> ⚠️ Plugin management (`/plugin …`) works **only in the Claude Code CLI in a terminal**, not in Claude Desktop's Code tab. All install and update commands below go into Terminal.app (macOS) or PowerShell (Windows).
+Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow. No terminal required — everything runs through Claude Desktop's Bash tool.
 
 ## Contents
 
-- [Part 0 — Prerequisites](#part-0--prerequisites)
-- [Part 1 — Install and run Claude Code CLI in a terminal](#part-1--install-and-run-claude-code-cli-in-a-terminal)
-  - [1a. Open a terminal](#1a-open-a-terminal)
-  - [1b. Install the `claude` CLI](#1b-install-the-claude-cli)
-  - [1c. Verify it's installed](#1c-verify-its-installed)
-  - [1d. Authenticate on first run](#1d-authenticate-on-first-run)
-- [Part 2 — Install the plugin](#part-2--install-the-plugin)
+- [Prerequisites](#prerequisites)
+- [Part 1 — Install the plugin](#part-1--install-the-plugin)
   - [Easy path — from Claude Desktop (recommended)](#easy-path--from-claude-desktop-recommended)
   - [Terminal path](#terminal-path)
     - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
@@ -28,103 +21,31 @@ Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow
 - [Uninstalling](#uninstalling)
 - [Troubleshooting](#troubleshooting)
   - [`/plugin isn't available in this environment` in Claude Desktop](#plugin-isnt-available-in-this-environment-in-claude-desktop)
-  - [`command not found: claude` (macOS / Linux) after installing the CLI](#command-not-found-claude-macos--linux-after-installing-the-cli)
-  - [`'claude' is not recognized…` (Windows) after installing the CLI](#claude-is-not-recognized-windows-after-installing-the-cli)
-  - [Installer script fails with permission errors](#installer-script-fails-with-permission-errors)
-  - [`claude` opens but says "not logged in" when I try `claude plugin …`](#claude-opens-but-says-not-logged-in-when-i-try-claude-plugin-)
-  - [`Failed to clone marketplace repository: SSH host key is not in your known_hosts file`](#failed-to-clone-marketplace-repository-ssh-host-key-is-not-in-your-known_hosts-file)
+  - [Bash tool says `claude: command not found` or `'claude' is not recognized`](#bash-tool-says-claude-command-not-found-or-claude-is-not-recognized)
   - [Skills don't appear after install](#skills-dont-appear-after-install)
   - [Figma tools aren't available in Claude](#figma-tools-arent-available-in-claude)
+  - [`Failed to clone marketplace repository: SSH host key is not in your known_hosts file`](#failed-to-clone-marketplace-repository-ssh-host-key-is-not-in-your-known_hosts-file)
   - [A skill runs but fails with an error](#a-skill-runs-but-fails-with-an-error)
 - [Team-wide auto-install (admins)](#team-wide-auto-install-admins)
 - [Support](#support)
 
 ---
 
-## Part 0 — Prerequisites
+## Prerequisites
 
-You need three things before the plugin install can work:
+1. **Claude Desktop** — https://claude.ai/download (download and install like any app). Ship the `claude` CLI bundled for Bash access.
+2. **Figma Desktop** — https://www.figma.com/downloads/ (needed for authentication and viewing designs)
+3. **Figma account** with access to Sumsub libraries (Base components, Organisms, Assets)
 
-1. **Claude Desktop** — https://claude.ai/download (download and install like any app)
-2. **Claude Code CLI** (the `claude` terminal command) — see Part 1 below
-3. **Figma Desktop** — https://www.figma.com/downloads/ (needed for authentication and viewing designs)
+That's it. No separate CLI install needed — Claude Desktop's Bash tool runs the `claude` commands directly.
 
-Plus a Figma account with access to Sumsub libraries (Base components, Organisms, Assets).
-
----
-
-## Part 1 — Install and run Claude Code CLI in a terminal
-
-The `claude` CLI is a separate program from Claude Desktop. Even if Desktop is installed, you usually need to run a one-line installer to get the CLI on your `PATH`. Follow the section for your OS.
-
-### 1a. Open a terminal
-
-- **macOS:** press `⌘ Space`, type **Terminal**, press Enter. (Or launch Terminal.app from Applications → Utilities.)
-- **Windows:** press the Windows key, type **PowerShell**, press Enter. Use *PowerShell*, not Command Prompt.
-
-A window with a blinking cursor opens — you type commands there.
-
-### 1b. Install the `claude` CLI
-
-**macOS / Linux** — paste this one line and press Enter:
-
-```
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-Wait ~30 seconds for the installer to finish. It adds `claude` to `~/.local/bin` and updates your shell rc file so the command is on `PATH`. Close the terminal window and open a new one so the new `PATH` is picked up.
-
-**Windows (PowerShell)** — paste this one line and press Enter:
-
-```
-irm https://claude.ai/install.ps1 | iex
-```
-
-If you see a policy error, run this once first:
-
-```
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
-
-then retry the install.
-
-**Windows: add the install directory to your PATH.** The installer puts `claude.exe` in `C:\Users\<you>\.local\bin` but doesn't auto-add that folder to your PATH. Run this once after install:
-
-```powershell
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.local\bin", "User")
-```
-
-Then **close PowerShell completely and open a fresh window** — the new PATH is only picked up by new sessions. Verify with `claude --version`.
-
-(On macOS / Linux the installer updates your shell rc file automatically — only Windows requires this manual PATH step.)
-
-### 1c. Verify it's installed
-
-In the fresh terminal window, run:
-
-```
-claude --version
-```
-
-You should see something like `Claude Code v2.1.66`. If you get `command not found: claude` (or `'claude' is not recognized`), something went wrong — see the "Troubleshooting" section at the bottom.
-
-### 1d. Authenticate on first run
-
-Still in the terminal, run:
-
-```
-claude
-```
-
-This opens an interactive session. On the very first run it walks you through signing in — usually by opening a browser tab where you click "Authorize". After you approve, return to the terminal — it says you're logged in.
-
-Type `/quit` (or press `Ctrl+C`) to exit the interactive session. You don't need to keep it open for the plugin install.
+> **Don't have the `claude` command in Bash?** See [Troubleshooting → `claude` not found](#bash-tool-says-claude-command-not-found-or-claude-is-not-recognized) for a one-time CLI install fallback.
 
 ---
 
-## Part 2 — Install the plugin
+## Part 1 — Install the plugin
 
-Now that `claude` is on your PATH, you can install the plugin. Two paths — pick whichever you prefer.
+Two paths — pick whichever you prefer.
 
 ### Easy path — from Claude Desktop (recommended)
 
@@ -141,7 +62,7 @@ Now that `claude` is on your PATH, you can install the plugin. Two paths — pic
 3. Claude runs both commands via its Bash tool and shows the output. Look for `✔ Successfully added marketplace: sumsub-design` and `✔ Successfully installed plugin: sumsub-design@sumsub-design`.
 4. Proceed to [Step 3 — Restart Claude Desktop](#step-3--restart-claude-desktop) below.
 
-If the Bash tool fails (e.g. `claude` not found on PATH), fall back to the Terminal path below.
+If the Bash tool fails with `claude: command not found`, see [Troubleshooting → `claude` not found](#bash-tool-says-claude-command-not-found-or-claude-is-not-recognized) for the one-time CLI install, then retry the prompt above.
 
 ### Terminal path
 
@@ -305,56 +226,34 @@ claude plugin marketplace remove sumsub-design
 
 ### `/plugin isn't available in this environment` in Claude Desktop
 
-This is expected — Claude Desktop's Code tab doesn't support `/plugin` commands directly. There are two paths:
+Claude Desktop's Code tab doesn't support `/plugin` commands directly — use the [Easy path from Part 1](#easy-path--from-claude-desktop-recommended) (for install) or [UPDATE.md](UPDATE.md) (for updates). Both use the Bash tool to run the underlying `claude plugin …` commands without you ever touching a terminal.
 
-- **For initial install**: use your terminal (see [Part 2 — Install the plugin](#part-2--install-the-plugin)). The two `claude plugin …` commands must be run outside Desktop the first time.
-- **For updates after install**: you don't need a terminal at all. See [`UPDATE.md`](UPDATE.md) — paste one sentence into any Claude Desktop chat and Claude runs the commands for you via the Bash tool.
+### Bash tool says `claude: command not found` or `'claude' is not recognized`
 
-### `command not found: claude` (macOS / Linux) after installing the CLI
+The `claude` CLI isn't on Claude Desktop's Bash PATH. Usually Desktop ships it bundled, but some installations need a one-time CLI install.
 
-The installer adds `claude` to `~/.local/bin`, which may not be on your `PATH`. Fix:
+**One-time CLI install (pick your OS):**
 
+**macOS / Linux** — open Terminal.app, paste:
 ```
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+curl -fsSL https://claude.ai/install.sh | bash
 ```
+The installer adds `claude` to `~/.local/bin` and updates your shell rc file. Close the terminal and reopen Claude Desktop.
 
-(If you use bash, replace `.zshrc` with `.bashrc` in both places.)
+**Windows** — open PowerShell, paste:
+```
+irm https://claude.ai/install.ps1 | iex
+```
+If you see a policy error, run `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once and retry.
 
-Then run `claude --version` again. If it still says "not found", reopen the terminal entirely.
-
-### `'claude' is not recognized…` (Windows) after installing the CLI
-
-The installer warned "Native installation exists but `C:\Users\<you>\.local\bin` is not in your PATH" — it doesn't auto-add it on Windows.
-
-**Fix:** in PowerShell, run once:
-
+On Windows the installer often doesn't auto-add to PATH. Run once more in PowerShell:
 ```powershell
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.local\bin", "User")
 ```
 
-Then **close ALL PowerShell windows and open a fresh one**. Verify with `claude --version`.
+Then **quit Claude Desktop fully and reopen it** so it picks up the new PATH.
 
-If the command still fails, add the path via GUI:
-1. `Win + R` → type `SystemPropertiesAdvanced` → Enter
-2. **Environment Variables** → in the top "User variables" section select `Path` → **Edit**
-3. **New** → paste `C:\Users\<your-username>\.local\bin`
-4. OK → OK → OK
-5. Close all PowerShell windows, open a fresh one, retry `claude --version`
-
-### Installer script fails with permission errors
-
-**macOS:** you may need to allow the script to run if Gatekeeper blocks it. Re-run the install with:
-
-```
-bash -c "$(curl -fsSL https://claude.ai/install.sh)"
-```
-
-**Windows:** if `Set-ExecutionPolicy` still blocks, right-click PowerShell → "Run as administrator" and retry.
-
-### `claude` opens but says "not logged in" when I try `claude plugin …`
-
-Run `claude` without arguments first, sign in via the browser flow, then retry the plugin commands.
+**Authenticate once** — in a terminal, run `claude` and sign in via the browser flow. After that return to Claude Desktop and retry the install prompt.
 
 ### `Failed to clone marketplace repository: SSH host key is not in your known_hosts file`
 
