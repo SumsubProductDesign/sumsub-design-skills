@@ -372,6 +372,33 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
 
    **Naming convention for local components:** use `<Type> / <Purpose>` format — `Modal Body / …`, `Drawer Body / …`, `Card / …`, `Illustration / …`. Makes filtering and auditing easier.
 
+7.13. **Slot placeholder MUST be hidden after `slot.appendChild(wrap)`.** When you swap modal/drawer body via `slot.appendChild(wrap)`, the original `Slot / Basic` placeholder instance stays inside the SLOT as a SIBLING of your wrap — just invisible to you if you don't look. It renders next to your content and looks like a double body.
+
+   Always hide it explicitly:
+
+   ```js
+   slot.appendChild(wrap);
+
+   // Now hide ALL slot children except your wrap. Do NOT rely on
+   // slot.children.find(c => c.name.includes("Slot / Basic")) —
+   // the name varies by component version and may not match.
+   for (const child of slot.children) {
+     if (child !== wrap) child.visible = false;
+   }
+   ```
+
+   Don't wrap in try/catch, don't delete the line if it throws. If `slot.children` throws, the slot reference is stale (interleaved awaits — see pre-cache-sync-only pattern above); re-fetch the slot and retry.
+
+7.14. **Position, size, color of components not specified in references → ASK the user, don't guess.** The skill is trained on generic SaaS / web conventions. Those conventions don't always match Sumsub's actual dashboard. Specifically:
+
+   - **Toast placement** — Sumsub may position toasts differently than generic "bottom-right corner" patterns. If `reference/*.md` doesn't specify, ASK the user: *"Where should the success toast be placed on this screen? The Sumsub dashboard convention isn't in my references — bottom-right, top-center, or another location?"*
+   - **Floating action button placement** — same logic.
+   - **Notification/alert positions on a screen** (not modal-body alerts — those are inline).
+   - **Drawer side** (right vs left) — Sumsub convention in layout-patterns.md is right for detail panels, but for flow-specific drawers verify.
+   - **Any other "standard" UI pattern** (pull-to-refresh indicator, infinite-scroll loader, empty-state-in-table, etc.).
+
+   Fallback principle: if your positioning code has a comment like "generic convention" or "standard SaaS" — that's a red flag. Either find it in references or ASK.
+
 7.11. **Never use emoji as a UI icon.** Emoji like 🔐 🔒 ✉️ 📧 📄 📋 🗑️ ✏️ 📁 ⚙️ 🔍 ⚠️ ❌ ✅ ❗ ℹ️ 🏠 💬 🔗 ▶️ ⏸️ — do NOT paste these into TEXT content as a replacement for a real icon. Every icon in the mockup must be an `Icon / …` instance from the Assets library:
 
    ```js
@@ -991,6 +1018,23 @@ Before executing Rule #0 or any other work, verify the plugin is up to date. Sta
    }
    if (emojiHits.length) {
      issues.push(`${emojiHits.length} TEXT node(s) contain UI-icon emoji (🔐, ✉️, 📄, etc.). Rule 7.11: replace with Icon / * component instance from Assets library. Samples: ${emojiHits.slice(0, 3).map(s => `"${s}"`).join(" | ")}`);
+   }
+
+   // 7.28. Slot placeholder not hidden (Rule 7.13).
+   // After slot.appendChild(wrap), the original default placeholder (often
+   // named "Slot / Basic" or similar INSTANCE) stays as a sibling of the wrap
+   // and renders alongside the real content → "double body" bug.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     if (!body) continue;
+     const slot = body.children?.find(c => c.type === "SLOT");
+     if (!slot) continue;
+     // Count visible children in slot
+     const visibleSlotKids = (slot.children || []).filter(c => c.visible);
+     if (visibleSlotKids.length > 1) {
+       const names = visibleSlotKids.map(c => c.name).join(", ");
+       issues.push(`Modal/Drawer "${md.name}" SLOT has ${visibleSlotKids.length} visible children [${names}]. The default placeholder (Slot / Basic) wasn't hidden. After slot.appendChild(wrap), iterate slot.children and set everyone except wrap to .visible = false.`);
+     }
    }
 
    // 7.27. Modal/Drawer body wrap has internal padding (Rule 7.12).
@@ -1694,9 +1738,12 @@ const body = modal.children.find(c => c.type === "FRAME" && c.name.trim() === "B
 const slot = body.children.find(c => c.type === "SLOT");
 slot.appendChild(wrap);
 
-// Hide the default placeholder inside the slot
-const placeholder = slot.children.find(c => c !== wrap && c.name.includes("slot / basic"));
-if (placeholder) placeholder.visible = false;
+// Hide ALL slot children except wrap. Rule 7.13: name-based matching
+// ("Slot / Basic") is fragile — some component versions name the placeholder
+// differently. Iterate all siblings and hide every non-wrap.
+for (const child of slot.children) {
+  if (child !== wrap) child.visible = false;
+}
 
 // ═══ STAGE 5: place the fully-sized modal on the scrim, centered ═════════════
 scrimRoot.appendChild(modal);
