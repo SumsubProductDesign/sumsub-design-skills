@@ -247,7 +247,10 @@ claude plugin marketplace remove sumsub-design
 
 ### `/plugin isn't available in this environment` in Claude Desktop
 
-This is expected — Claude Desktop's Code tab doesn't support `/plugin` commands. Use your terminal instead (see Part 2 Install). All plugin install/update/uninstall must happen in Terminal.app or PowerShell.
+This is expected — Claude Desktop's Code tab doesn't support `/plugin` commands directly. There are two paths:
+
+- **For initial install**: use your terminal (see [Part 2 — Install the plugin](#part-2--install-the-plugin)). The two `claude plugin …` commands must be run outside Desktop the first time.
+- **For updates after install**: you don't need a terminal at all. See [`UPDATE.md`](UPDATE.md) — paste one sentence into any Claude Desktop chat and Claude runs the commands for you via the Bash tool.
 
 ### `command not found: claude` (macOS / Linux) after installing the CLI
 
