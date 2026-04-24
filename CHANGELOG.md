@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.57.0 — 2026-04-24
+Follow-up on the Domain management build. Deep inspection of all six modal/drawer custom bodies revealed widespread DS violations that v3.56 audit missed, plus the Scenarios title overflow needed a harder rule.
+
+- **Custom TEXT in modal/drawer bodies was Inter Regular 12 with no text style and no bound color.** 61 TEXT nodes across 4 modals + 2 drawers — every `figma.createText()` call in the skill's body-content helpers defaulted to Inter (Figma plugin default) and the skill set `.characters` without touching `.fontName`, `setTextStyleIdAsync`, or fills. Visually close enough to Geist 12px that nothing screamed, but the entire DS token layer was bypassed. New section in `sumsub-mockup/SKILL.md` with mandatory `mkText(chars, style, colorVar)` helper pattern — every modal/drawer body TEXT must pipe through Geist font load + `setTextStyleIdAsync(style.id)` + `setBoundVariableForPaint` for fills. **Audit 7.36** scans every custom body TEXT and flags non-Geist fonts. **Audit 7.37** flags any TEXT without `textStyleId`.
+- **Scenarios title cap tightened to 80 characters.** v3.56 said "≤ 120 chars" but the Domain management annotations were 130–170 chars and looked "close to 120" so the skill didn't trim. 80 chars = 600–900px wide at HUG = comfortably fits inside a 1440px screen with zero overlap risk. Banned title patterns enumerated in `sumsub-screen-annotations/SKILL.md`: multi-clause "and"+comma lists, subordinate clauses, setup-action-result triplets. Rule of thumb: if the title has two commas or two periods, rewrite as a single phrase. Fixed version of the same 9 annotations dropped from 1471–1985px to 685–875px on real rebuild.
+
 ## v3.56.0 — 2026-04-24
 Lessons from inspecting the Domain management — self-service build shipped by v3.55. Four modals and a drawer, all audit-passed, all with the same family of bugs:
 

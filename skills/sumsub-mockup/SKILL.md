@@ -1216,6 +1216,45 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.36. Custom TEXT in modal/drawer body — non-Geist font.
+   // Observed (Domain management build, v3.55): 61 TEXT nodes across 4 modals
+   // + 2 drawers used Inter Regular 12 because skill called figma.createText()
+   // without setting fontName. DS mandates Geist everywhere.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     const slot = body?.children?.find(c => c.type === "SLOT");
+     if (!slot) continue;
+     for (const wrap of (slot.children || [])) {
+       if (!wrap.visible || wrap.type !== "FRAME") continue;
+       const texts = wrap.findAll(n => n.type === "TEXT");
+       const badFont = texts.filter(t => {
+         const fam = t.fontName?.family;
+         return fam && fam !== "Geist" && fam !== "Geist Mono";
+       });
+       if (badFont.length > 0) {
+         const fams = [...new Set(badFont.map(t => t.fontName?.family || "?"))].join(", ");
+         issues.push(`Modal/Drawer "${md.name}" body has ${badFont.length} TEXT node(s) using non-Geist font [${fams}]. All custom TEXT must be Geist (or Geist Mono for code/TXT values). Set t.fontName = {family:"Geist", style:"Regular"} before setting characters, or use a helper that imports a DS text style.`);
+       }
+     }
+   }
+
+   // 7.37. Custom TEXT in modal/drawer body — no bound text style.
+   // Observed: skill created TEXT with figma.createText() + .characters only,
+   // leaving raw fontSize/weight. DS mandates setTextStyleIdAsync everywhere.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     const slot = body?.children?.find(c => c.type === "SLOT");
+     if (!slot) continue;
+     for (const wrap of (slot.children || [])) {
+       if (!wrap.visible || wrap.type !== "FRAME") continue;
+       const texts = wrap.findAll(n => n.type === "TEXT");
+       const raw = texts.filter(t => !t.textStyleId);
+       if (raw.length > 0) {
+         issues.push(`Modal/Drawer "${md.name}" body has ${raw.length} TEXT node(s) without a bound text style (raw fontSize/fontName). Every custom TEXT must use setTextStyleIdAsync with a DS style key (semibold/h* for headers, regular/body-m for paragraphs, medium/body-s for labels, regular/mono-m for code).`);
+       }
+     }
+   }
+
    // 7.35. SLOT alignment — CENTER with dead space.
    // Observed (Domain management build, v3.55): drawer slot 712px, custom
    // content 448px, slot.primaryAxisAlignItems = "CENTER" → 132px dead space
@@ -2090,6 +2129,58 @@ fieldStack.appendChild(input);
 ```
 
 Observed bug (Domain management build, v3.55): skill did `labelNode.characters = ""` to blank out the native label, then appended a custom TEXT node as a sibling in a "Field" frame. Audit 7.34 catches this pattern: Input has Label boolean ON, inner Label TEXT is empty, sibling TEXT nodes exist in the same auto-layout parent.
+
+### ⚠️ Custom TEXT inside modal/drawer bodies — Geist + DS text style, NEVER raw
+
+Every TEXT node you create with `figma.createText()` to put inside a modal or drawer body MUST:
+
+1. **Use Geist.** Not Inter, not system default. The TEXT node's initial font after `createText()` is the plugin/system default (often Inter) — always overwrite.
+2. **Have a bound text style** via `setTextStyleIdAsync`. Never leave `fontSize` / `fontName` raw.
+3. **Have a bound semantic color variable** via `setBoundVariableForPaint`. Never leave fills as a raw hex.
+
+```js
+// ✅ CORRECT — imports + helper cached once at top
+const styleBodyM = await figma.importStyleByKeyAsync("852096922153ce67692e41e382348f0e75f435b5"); // regular/body-m
+const styleLabel = await figma.importStyleByKeyAsync("b23ca7a249b7c3151fe83a0b8f9a870e0b062cec"); // medium/body-s
+const varDefault = await figma.variables.importVariableByKeyAsync("485b897d691c85b86a1ad8ebae7650f3dbcca365"); // text/neutral/default
+const varSubtle  = await figma.variables.importVariableByKeyAsync("47f41dc6d16468e6189a8784f58b12d07ebe72c3"); // text/neutral/subtle
+await figma.loadFontAsync({ family: "Geist", style: "Regular" });
+await figma.loadFontAsync({ family: "Geist", style: "Medium" });
+
+async function mkText(chars, style, colorVar) {
+  const t = figma.createText();
+  t.characters = chars;
+  await t.setTextStyleIdAsync(style.id);
+  t.fills = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", colorVar
+  )];
+  return t;
+}
+
+// Description paragraph: regular/body-m + neutral/default
+const desc = await mkText("Enter the domain you want to add.", styleBodyM, varDefault);
+// Label above a field: medium/body-s + neutral/subtle
+const lbl  = await mkText("Domain name", styleLabel, varSubtle);
+```
+
+```js
+// ❌ BANNED — raw font + raw fontSize + hex fill
+const t = figma.createText();
+t.characters = "Enter the domain...";
+// t.fontName stays Inter/Regular by default, t.fontSize stays 12
+t.fills = [{ type: "SOLID", color: { r: 0.215, g: 0.23, b: 0.302 } }];  // hex fill
+```
+
+Observed bug (Domain management build, v3.55): 61 TEXT nodes across 4 modals + 2 drawers used Inter Regular 12 with no text style and no bound color. All created manually via `figma.createText()` without setting font or style. The mockups visually looked OK because Inter 12px is close to Geist 12px — but every text hardcoded the DS away.
+
+**Mono text** (e.g. TXT record values) uses the dedicated style:
+```js
+const styleMono = await figma.importStyleByKeyAsync("0971de4d681dc891ba98c467a966dc2bef8a1038"); // regular/mono-m
+await figma.loadFontAsync({ family: "Geist Mono", style: "Regular" });
+// then: mkText("sumsub-domain-verification=8f3a2c...", styleMono, varDefault)
+```
+
+Audit 7.36 scans every TEXT inside every modal/drawer's custom body wrap and flags any with `fontName.family !== "Geist"` (excluding "Geist Mono" which is allowed). Audit 7.37 flags any TEXT with `!textStyleId` in those same custom bodies.
 
 ## Component property discovery — probe the instance, don't regex the root
 

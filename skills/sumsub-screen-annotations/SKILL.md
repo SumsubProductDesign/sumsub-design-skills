@@ -41,33 +41,48 @@ x = screen.x                             // same x as the screen (left edges ali
 - `y > screen.y + screen.height` — below the screen
 - Aligning y to a specific row's y — annotations describe the screen, not individual rows
 
-### Sizing: HUG width, capped at screen width
+### Title length — HARD CAP at 80 characters, single line
+
+The Scenarios component uses HUG width with single-line text. **Long titles = wide annotations = overlap with neighboring screens in the flow grid.** This is the single most frequent bug in this skill's output.
+
+**Hard rule: title ≤ 80 characters.** Measured, not estimated. If you're tempted to write more, you're writing documentation, not a scenario annotation.
 
 ```js
-annotation.layoutSizingHorizontal = "HUG";
-```
+// ✅ CORRECT — short, describes ONE action or state
+const title = "Add domain — Step 1: enter the apex or subdomain";  // 48 chars
+if (title.length > 80) throw new Error(`Scenarios title too long (${title.length} chars): "${title}"`);
 
-The annotation's width auto-sizes to fit its title text — **but HUG has no upper bound**. Long titles make 2000px-wide annotations that overlap the screens to the right.
-
-**Hard cap:** after HUG, check the resulting width. If it exceeds `screen.width - 40`, switch to FIXED and let the text wrap.
-
-```js
 annotation.setProperties({
   "✏️ Number#121:0": num,
   "✏️ Title#121:3": title,
 });
 annotation.layoutSizingHorizontal = "HUG";
+```
 
+**Target widths at 80-char cap:** 600–900px — comfortably fits within a 1440px screen, no overlap with neighbors.
+
+### Banned title patterns
+
+Phrases that always produce overlong titles:
+
+- **Multi-clause with "and" + comma lists:** *"Owner opens a Verified domain — drawer shows status timeline, the TXT record to keep in place, and the SSO configurations that depend on this domain."* (153 chars → 1964px-wide annotation) → **Split into "Verified domain drawer — timeline + dependent SSOs" (52 chars)**.
+- **Subordinate clauses:** *"Owner tries to remove a domain linked to active SSO. Modal lists affected configurations and user counts. Confirmation requires retyping the domain name."* (160 chars → 1985px) → **"Remove domain linked to active SSO — confirmation required" (60 chars)**.
+- **Complete sentences with setup + action + result:** *"System generates a unique TXT record. Owner copies Host / Value / TTL into their DNS provider, then clicks Verify."* (117 chars → 1502px) → **"Step 2: copy DNS TXT record and verify" (38 chars)**.
+
+Rule of thumb: if your title has **two commas or more**, or **two periods**, it's too long — rewrite it as a single phrase describing the screen's purpose in one beat.
+
+### Width cap fallback (when short titles still overflow)
+
+If a title under 80 chars still produces `annotation.width > screen.width - 40` (rare, happens with all-caps or wide fonts), switch to FIXED and let it wrap:
+
+```js
 if (annotation.width > screen.width - 40) {
   annotation.layoutSizingHorizontal = "FIXED";
   annotation.resize(screen.width, annotation.height);
-  // text auto-height handles multi-line wrap
 }
 ```
 
-**Also cap the title length:** keep titles ≤ 120 characters, 1–2 sentences. Longer "scenarios" should be split across multiple screens, each with its own short annotation — annotations describe ONE screen, not an entire feature.
-
-Observed bug (Domain management build, v3.55): 5 of 9 annotations ended up 1793–1985px wide against 1440px screens. Caused 200–425px overlap with neighboring screens in the flow grid. Titles were 130–170 characters, 2–3 sentences.
+Observed bug (Domain management build, v3.55): 5 of 9 annotations were 1793–1985px wide against 1440px screens, overlapping neighbors in the flow grid by 200–425px. All 9 titles were 130–170 chars, 2–3 sentences. Fixing them to ≤ 60 chars dropped widths to 685–875px — no overlap, all single-line.
 
 ---
 
