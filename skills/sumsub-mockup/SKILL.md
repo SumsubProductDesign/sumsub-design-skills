@@ -1071,6 +1071,99 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.30. Regex-fallback collision — Top Toolbar button label == filter label.
+   // When the skill hardcodes a prop key that fails and falls back to a
+   // regex sweep across the frame, the same label lands on multiple
+   // unrelated instances. Symptom: button text exactly matches filter
+   // label text, when they should be different.
+   {
+     const toolbar = root.findOne(n => n.type === "INSTANCE" && n.name === "Top Toolbar");
+     if (toolbar) {
+       const btns = toolbar.findAll(n => n.type === "INSTANCE" && n.name === "*Button*" && n.visible)
+         .map(b => b.findOne(t => t.type === "TEXT" && t.visible && t.name === "Button Text")?.characters)
+         .filter(Boolean);
+       const filters = toolbar.findAll(n => n.type === "INSTANCE" && n.name === "*Filter*" && n.visible);
+       const filterLabels = filters.map(f => {
+         const k = Object.keys(f.componentProperties || {}).find(k => /Label/i.test(k));
+         return k ? f.componentProperties[k]?.value : null;
+       }).filter(Boolean);
+       // Any button text that equals any filter label → collision
+       const collisions = btns.filter(b => filterLabels.includes(b));
+       if (collisions.length) {
+         issues.push(`Regex-fallback collision: Toolbar button label(s) [${collisions.join(", ")}] match filter label(s) verbatim. Likely cause: skill used findAll + /label/i regex to set properties. Use per-instance componentProperties probing instead — see "Component property discovery" section.`);
+       }
+     }
+   }
+
+   // 7.31. Scenarios annotation placement — Rule from sumsub-screen-annotations.
+   // Scenarios belong ABOVE each screen (y < screen.y), x-aligned to screen.
+   // NOT to the right of the screen (x > screen.x + screen.width), NOT per-row.
+   {
+     const annotations = all.filter(n =>
+       n.type === "INSTANCE" && /Scenario/i.test(n.mainComponent?.parent?.name || "")
+     );
+     // Group annotations by their nearest screen sibling (same parent).
+     // An annotation placed at x > screen.right or y inside screen body = wrong.
+     for (const ann of annotations) {
+       // Find screen in same parent (SECTION) whose x-range overlaps the annotation's
+       const parent = ann.parent;
+       if (!parent || parent.type !== "SECTION") continue;
+       const screens = (parent.children || []).filter(c =>
+         c.type === "FRAME" && c !== ann &&
+         Math.abs(c.width - 1440) < 4 && Math.abs(c.height - 900) < 4
+       );
+       // Associate with the screen whose x overlaps horizontally or is closest
+       const related = screens.find(s =>
+         ann.x >= s.x && ann.x < s.x + s.width
+       ) || screens.sort((a, b) => Math.abs(ann.x - a.x) - Math.abs(ann.x - b.x))[0];
+       if (!related) continue;
+       // Expect: ann.x in [screen.x, screen.x + screen.width - ann.width]
+       //         ann.y < screen.y (above, not inside, not below)
+       const outRight = ann.x > related.x + related.width - 4;
+       const inside = ann.y >= related.y && ann.y < related.y + related.height;
+       const below = ann.y >= related.y + related.height;
+       if (outRight || inside || below) {
+         issues.push(`Scenario annotation "${ann.componentProperties?.["✏️ Number#121:0"]?.value || ann.name}" placed wrong (x=${Math.round(ann.x)}, y=${Math.round(ann.y)}; screen at x=${Math.round(related.x)}, y=${Math.round(related.y)}). Scenarios must be ABOVE the screen (y < screen.y), x-aligned to screen. Not to the right, not inside, not below. Rule: sumsub-screen-annotations SKILL.md.`);
+       }
+     }
+     // Also: per-row annotations — if there are ≥2 annotations aligned with
+     // the same screen, likely someone tried to annotate individual rows.
+     const groupedByScreen = {};
+     for (const ann of annotations) {
+       const parent = ann.parent;
+       if (!parent || parent.type !== "SECTION") continue;
+       const screens = (parent.children || []).filter(c =>
+         c.type === "FRAME" && c !== ann &&
+         Math.abs(c.width - 1440) < 4 && Math.abs(c.height - 900) < 4
+       );
+       const related = screens.find(s =>
+         (ann.x >= s.x - 100 && ann.x < s.x + s.width + 100) &&
+         (Math.abs(ann.y - s.y) < 200 || (ann.x > s.x + s.width))
+       );
+       if (related) {
+         groupedByScreen[related.id] = (groupedByScreen[related.id] || 0) + 1;
+       }
+     }
+     for (const [screenId, count] of Object.entries(groupedByScreen)) {
+       if (count > 1) {
+         issues.push(`${count} scenario annotations associated with screen ${screenId} — only ONE annotation per screen allowed. Multiple scenarios → multiple screens, not multiple annotations on one. Rule: sumsub-screen-annotations SKILL.md + Task-phrase glossary.`);
+       }
+     }
+   }
+
+   // 7.32. Table Starter — manual cell hiding detection.
+   // Caught in KYB Levels build: skill used `.visible = false` on header/data
+   // cells instead of a DS column-count property. Symptom: header cells
+   // misaligned with data rows because widths drift.
+   for (const tbl of all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Table Starter*")) {
+     const header = tbl.children?.find(c => c.name === "Table Header");
+     if (!header) continue;
+     const hiddenHeaderCells = (header.children || []).filter(c => c.visible === false && c.type === "INSTANCE").length;
+     if (hiddenHeaderCells > 0) {
+       issues.push(`Table Starter "${tbl.name}" has ${hiddenHeaderCells} Header cell(s) manually hidden via .visible = false. Use DS component property for column count instead (probe via table.componentProperties for a /column/i variant or boolean). Manual hiding doesn't resize remaining cells and causes header/row misalignment.`);
+     }
+   }
+
    // 7.28. Slot placeholder state — two failure modes.
    for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
      const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
@@ -1576,6 +1669,28 @@ Specifically: **no `text.characters = "…"` on descendants of the table instanc
 
 If the table physically extends past the Content frame height, the fix is to HIDE unused rows (step 1), not to disable clipping on Content. Audit check 7.22 catches this.
 
+### 5. Column count — via DS property, NEVER manual `.visible = false` on cells
+
+`*Table Starter*` has a built-in way to configure column count (variant property or boolean flags per column). **Discover it at build time** — don't guess, don't hardcode.
+
+```js
+// Probe the Table Starter instance's own properties
+const props = Object.entries(table.componentProperties);
+// Look for a column-count variant (e.g. "Columns=6" or "Columns#.../visible")
+const columnProps = props.filter(([k, v]) =>
+  /column/i.test(k) && (v.type === "VARIANT" || v.type === "BOOLEAN")
+);
+// If found — set via setProperties. Examples of what might exist:
+//   table.setProperties({ "Columns": "6" })
+//   table.setProperties({ "Column 6#...": false, "Column 7#...": false })
+```
+
+**Forbidden:** iterating over `tableHeader.children` or row cells and setting `.visible = false` directly. This does NOT resize remaining cells; the DS's internal geometry assumes all default cells are present, so widths drift, and header no longer aligns with data rows.
+
+**Symptom when the skill tried manual hiding (caught in KYB Levels build):** header `Table header` text stuck visible in a supposedly-hidden cell (`.visible = false` on the cell instance, but the TEXT node inside still counted), AND columns 0-5 in header misaligned with columns 0-5 in data rows — because data-row cells 6+ were hidden separately but with different layout resolution.
+
+If the Table Starter does NOT expose a column-count property, the only correct approach is: set `cell.setProperties({ Type: "…" })` on the specific cells to match the content TYPE you need (Text Regular / Status / ID / Date+time / etc.) and leave the column count as-is. Unused columns stay visible but will be properly rendered DS defaults.
+
 ---
 
 ## Table Cell Configuration
@@ -1838,6 +1953,72 @@ modal.y = (scrimRoot.height - modal.height) / 2;
 - Don't wrap `swapComponent` in try/catch — if it fails, stop and surface.
 - Don't build modals/drawers as custom FRAMEs named `Modal · *` / `Drawer · *` with hand-composed Header/Body/Footer children — Rule #3 fabrication.
 - Don't leave default Header texts ("Hey, what's up, dude?", "Title", "Description") — always overwrite via setProperties on the `/ Header` sub-instance.
+
+## Component property discovery — probe the instance, don't regex the root
+
+Property keys like `"Button Text#143:1442"` or `"Title text#3817:0"` look stable but are **file/library-version specific**. Hardcoding them works until the DS team republishes a component with a new suffix. When your hardcoded key fails, the correct fallback is to **probe the specific instance you're configuring** — NOT to fall back to a `findAll + regex` across the whole frame.
+
+### Canonical pattern
+
+```js
+// On the specific instance you're configuring:
+const props = Object.entries(inst.componentProperties);
+
+// Find the one TEXT property whose key matches your semantic name.
+const btnTextEntry = props.find(([k, v]) =>
+  v.type === "TEXT" && /^Button Text/.test(k)
+);
+if (!btnTextEntry) throw new Error("No 'Button Text' TEXT prop on " + inst.name);
+const btnTextKey = btnTextEntry[0];
+
+// Now use the discovered key:
+inst.setProperties({ [btnTextKey]: "+ Create level" });
+```
+
+### Why `findAll + regex` on root is banned
+
+When `setProperties({"Button Text#143:1442": …})` throws, the tempting fallback is:
+
+```js
+// ❌ DO NOT DO THIS
+const btns = root.findAll(n => n.type === "INSTANCE");
+for (const btn of btns) {
+  const k = Object.keys(btn.componentProperties).find(k => /Button Text/i.test(k));
+  if (k) btn.setProperties({ [k]: "+ Create level" });
+}
+```
+
+This sets the same text on **every instance that happens to have a property matching /Button Text/i** — including filter chip buttons, toolbar buttons, kebab menu items, status badges with "label" props, etc. Caught in KYB Levels build: toolbar button text got identical to filter labels because both components had /label/i or /text/i properties matching the regex.
+
+**Rule:** probe the ONE instance you're configuring. If the property doesn't exist on that instance, the component doesn't have what you expected — surface an error, don't sprawl.
+
+### Banned patterns (auto-violations)
+
+- `root.findAll(n => ...).forEach(n => n.setProperties(...))` with a regex-discovered key
+- Any per-instance fallback that walks siblings to "find the right component"
+- Setting the SAME label on multiple instances in one iteration
+
+Audit check 7.30 (added in v3.55): scans sibling instances in Top Toolbar + Header + Table headers for identical TEXT values that shouldn't match (e.g. button label == filter label). Flags as "likely regex-fallback collision".
+
+---
+
+## Task-phrase glossary — common wording the skill misinterprets
+
+When the user's prompt contains these ambiguous phrases, use the interpretation on the right. Do NOT improvise.
+
+| User phrase | Correct interpretation | Wrong interpretation (banned) |
+|---|---|---|
+| "hovered row" | ONE specific row in the hover state (Default → Hover variant). Other rows stay Default. | Every row in hover. OR hover states on multiple rows. |
+| "error states" | A set of different statuses represented IN ONE SCREEN or across SEPARATE SCREENS (one screen per state). Describe them with ONE Scenarios annotation per screen. | Per-row callouts pointing at each error cell. |
+| "mixed statuses" | Show different statuses in ONE table's rows, with ONE Scenarios annotation describing the mix. | Multiple annotations, one per status type. |
+| "multiple states" | Usually means multiple SCREENS, one per state (e.g. Empty / Populated / Error). NOT multiple annotations on one screen. | Multiple annotations clustered on one screen. |
+| "with annotations" | ONE Scenarios annotation per screen, above the screen. | Callouts next to every element. |
+| "all statuses visible" | Populate rows with different status values. ONE annotation explaining the state of the table as a whole. | One annotation per status row. |
+| "hover + error states" | ONE screen with a hovered row AND a mix of status rows. ONE annotation describing the combined scenario. | Three annotations: one for hover, one per error state. |
+
+If the prompt truly requires multiple scenarios (multiple distinct user-flows), they go as **multiple screens** in the same section, each with its own single annotation above — never multiple annotations on the same screen.
+
+---
 
 ## Library Rules
 

@@ -17,6 +17,40 @@ Scenarios annotations are standardized blocks placed above each screen in a Figm
 
 ---
 
+## 🚨 Hard rules — read before placing ANY annotation
+
+### ONE annotation per screen
+
+One screen = one Scenarios annotation. If the user's prompt implies multiple scenarios (e.g., "hovered row + error states" or "empty + populated + error"), those are **separate screens**, each with its own single annotation — NOT multiple annotations on the same screen.
+
+**Banned** (caught in past builds):
+- "3 annotation instances placed beside error-state rows" → wrong, this is per-row callouts. Replace with ONE annotation describing the screen as a whole ("Table with mixed statuses — Active, Pending, Failed, Inactive").
+- "annotation per status type" → wrong, pool into one.
+- "callout pointing at this specific cell" → wrong, Scenarios aren't callouts. Use an Alert or Tag if you need inline element-level messaging.
+
+### Position: ABOVE the screen, left-aligned
+
+```
+y = screen.y - annotation.height - 24    // 24px above the screen's top edge
+x = screen.x                             // same x as the screen (left edges align)
+```
+
+**Banned positions:**
+- `x = screen.x + screen.width + 24` — to the right of the screen (caught in KYB Levels build; annotations floated in the SECTION's grey margin to the right, disconnected from the screen)
+- `y = screen.y + N` (inside the screen body) — below the top edge
+- `y > screen.y + screen.height` — below the screen
+- Aligning y to a specific row's y — annotations describe the screen, not individual rows
+
+### Sizing: HUG width
+
+```js
+annotation.layoutSizingHorizontal = "HUG";
+```
+
+The annotation's width auto-sizes to fit its title text. Don't set a fixed width.
+
+---
+
 ## Component Reference
 
 | Property | Value |
