@@ -41,13 +41,33 @@ x = screen.x                             // same x as the screen (left edges ali
 - `y > screen.y + screen.height` — below the screen
 - Aligning y to a specific row's y — annotations describe the screen, not individual rows
 
-### Sizing: HUG width
+### Sizing: HUG width, capped at screen width
 
 ```js
 annotation.layoutSizingHorizontal = "HUG";
 ```
 
-The annotation's width auto-sizes to fit its title text. Don't set a fixed width.
+The annotation's width auto-sizes to fit its title text — **but HUG has no upper bound**. Long titles make 2000px-wide annotations that overlap the screens to the right.
+
+**Hard cap:** after HUG, check the resulting width. If it exceeds `screen.width - 40`, switch to FIXED and let the text wrap.
+
+```js
+annotation.setProperties({
+  "✏️ Number#121:0": num,
+  "✏️ Title#121:3": title,
+});
+annotation.layoutSizingHorizontal = "HUG";
+
+if (annotation.width > screen.width - 40) {
+  annotation.layoutSizingHorizontal = "FIXED";
+  annotation.resize(screen.width, annotation.height);
+  // text auto-height handles multi-line wrap
+}
+```
+
+**Also cap the title length:** keep titles ≤ 120 characters, 1–2 sentences. Longer "scenarios" should be split across multiple screens, each with its own short annotation — annotations describe ONE screen, not an entire feature.
+
+Observed bug (Domain management build, v3.55): 5 of 9 annotations ended up 1793–1985px wide against 1440px screens. Caused 200–425px overlap with neighboring screens in the flow grid. Titles were 130–170 characters, 2–3 sentences.
 
 ---
 

@@ -1164,6 +1164,76 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.33. Modal/Drawer footer — default "Button" label leak.
+   // Observed (Domain management build, v3.55): skill configured the 2 Right-action
+   // buttons correctly but left a VISIBLE *Button* in Left actions with default
+   // label "Button". Parent Left actions frame is hidden by default so it doesn't
+   // render, but the structure is fragile — next DS revision flipping visibility
+   // would leak "Button" into every modal.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const footer = md.findOne(n => n.type === "INSTANCE" && /\/ Footer/i.test(n.name));
+     if (!footer) continue;
+     // Find *Button* instances where every ancestor up to footer is visible.
+     const visibleBtns = footer.findAll(n => {
+       if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
+       let cur = n;
+       while (cur && cur !== footer) {
+         if (cur.visible === false) return false;
+         cur = cur.parent;
+       }
+       return true;
+     });
+     for (const b of visibleBtns) {
+       const t = b.findOne(x => x.type === "TEXT" && x.name === "Button");
+       if (t && t.characters === "Button") {
+         issues.push(`Modal/Drawer "${md.name}" footer has a visible *Button* with default label "Button" (id ${b.id}). Either probe its Button Text key and set a real label, or hide the containing actions frame (Left actions / Right actions) via .visible = false.`);
+       }
+     }
+   }
+
+   // 7.34. Input — external TEXT label/caption instead of native property.
+   // Observed (Domain management build, v3.55): skill set Input's native Label
+   // text to "" and placed a sibling TEXT "Domain name" next to the input in a
+   // custom "Field" frame. Native Input spacing/text-style/label-gap are bypassed.
+   const inputInstances = all.filter(n =>
+     n.type === "INSTANCE" && /^\*Input /.test(n.name || "")
+   );
+   for (const inp of inputInstances) {
+     const props = inp.componentProperties || {};
+     const labelBoolKey = Object.keys(props).find(k => /^Label/.test(k) && props[k].type === "BOOLEAN");
+     if (!labelBoolKey || props[labelBoolKey].value !== true) continue;
+     const inner = inp.findOne(n => n.type === "TEXT" && n.name === "Label");
+     const isBlank = inner && (inner.characters === "" || inner.characters.trim() === "");
+     if (!isBlank) continue;
+     const parent = inp.parent;
+     if (!parent || !parent.children) continue;
+     const siblingTexts = parent.children.filter(s =>
+       s !== inp && s.type === "TEXT" && s.visible && (s.characters || "").trim().length > 0
+     );
+     if (siblingTexts.length > 0) {
+       const snippets = siblingTexts.map(t => JSON.stringify((t.characters || "").slice(0, 40))).join(", ");
+       issues.push(`Input "${inp.name}" has native Label toggle ON but inner Label TEXT is empty, while sibling TEXT nodes [${snippets}] sit next to it in parent "${parent.name}". Write to inp.findOne(n=>n.name==="Label").characters directly — don't redesign the label as an external sibling.`);
+     }
+   }
+
+   // 7.35. SLOT alignment — CENTER with dead space.
+   // Observed (Domain management build, v3.55): drawer slot 712px, custom
+   // content 448px, slot.primaryAxisAlignItems = "CENTER" → 132px dead space
+   // above the content. After slot.appendChild(wrap), force MIN alignment.
+   for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
+     const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
+     if (!body) continue;
+     const slot = body.children?.find(c => c.type === "SLOT");
+     if (!slot) continue;
+     if (slot.primaryAxisAlignItems !== "CENTER") continue;
+     const visKids = (slot.children || []).filter(c => c.visible);
+     const totalChildH = visKids.reduce((s, c) => s + (c.height || 0), 0);
+     const deadSpace = (slot.height || 0) - totalChildH;
+     if (deadSpace > 60) {
+       issues.push(`Modal/Drawer "${md.name}" SLOT has primaryAxisAlignItems = "CENTER" with ~${Math.round(deadSpace)}px dead space (slot ${Math.round(slot.height)}px, content ${Math.round(totalChildH)}px). After slot.appendChild(wrap), set slot.primaryAxisAlignItems = "MIN" to pin content to the top.`);
+     }
+   }
+
    // 7.28. Slot placeholder state — two failure modes.
    for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
      const body = md.children?.find(c => c.type === "FRAME" && c.name.trim() === "Body");
@@ -1953,6 +2023,73 @@ modal.y = (scrimRoot.height - modal.height) / 2;
 - Don't wrap `swapComponent` in try/catch — if it fails, stop and surface.
 - Don't build modals/drawers as custom FRAMEs named `Modal · *` / `Drawer · *` with hand-composed Header/Body/Footer children — Rule #3 fabrication.
 - Don't leave default Header texts ("Hey, what's up, dude?", "Title", "Description") — always overwrite via setProperties on the `/ Header` sub-instance.
+
+### ⚠️ Slot alignment — force MIN after appending content
+
+Default `slot.primaryAxisAlignItems = "CENTER"` (built into Modal Basic / Drawer Basic slot for short empty-states). When your wrap is shorter than the slot's total height — normal for drawers where slot is ~700px — the content floats in the vertical middle with dead space above and below.
+
+**Always do this after `slot.appendChild(wrap)`:**
+
+```js
+slot.appendChild(wrap);
+slot.primaryAxisAlignItems = "MIN";   // pin content to top — no dead space
+```
+
+Observed bug (Domain management build, v3.55): drawer slot 712px, custom content 448px → 132px of dead space above the content. Slot was default CENTER, skill forgot to override. Audit 7.35 flags any SLOT that still has CENTER alignment with >60px dead space.
+
+### ⚠️ Footer buttons — hide unused action frames, don't leave default "Button" labels
+
+Modal Basic / Drawer Basic footer has two sub-frames: `Left actions` and `Right actions`, each with 2 `*Button*` instances. By default Left actions is hidden — visually fine, but a `*Button*` instance inside with its default label `"Button"` is still `visible: true`. If a future DS revision flips Left actions visibility, the default "Button" leaks into the mockup.
+
+**When configuring a footer:**
+1. Decide which actions frames you need (usually just Right actions for primary/secondary).
+2. Explicitly set visibility on both frames via their footer properties, OR probe and hide manually:
+   ```js
+   const footer = modal.findOne(n => n.type === "INSTANCE" && /\/ Footer/i.test(n.name));
+   const leftActions  = footer.children.find(c => c.name === "Left actions");
+   const rightActions = footer.children.find(c => c.name === "Right actions");
+   if (leftActions)  leftActions.visible = false;
+   if (rightActions) rightActions.visible = true;
+   ```
+3. Configure **only the buttons inside the visible actions frame** — never `findAll("*Button*")` across the whole footer (catches invisible Left action buttons too).
+4. If the buttons you configure still have default `"Button"` labels after setProperties, the key probe failed — surface the error, don't ship.
+
+Audit 7.33 flags any visible `*Button*` inside a modal/drawer footer whose label is still the literal string `"Button"`.
+
+### ⚠️ Inputs — use native Label / Caption, NEVER external TEXT siblings
+
+Input Basic / Input Horizontal / Textarea have a Label boolean + an inner TEXT node named `"Label"` (and similarly `Caption` for helper text). Write to the inner nodes directly. Do NOT build your own TEXT as a sibling in the field stack — it bypasses the DS component's built-in spacing, text-style, and label-to-field gap, all of which the DS team calibrated.
+
+```js
+// ✅ CORRECT — native label + caption
+const input = inputSet.defaultVariant.createInstance();
+
+const labelBoolKey = Object.keys(input.componentProperties).find(
+  k => /^Label/.test(k) && input.componentProperties[k].type === "BOOLEAN"
+);
+if (labelBoolKey) input.setProperties({ [labelBoolKey]: true });
+const labelNode = input.findOne(n => n.type === "TEXT" && n.name === "Label");
+if (labelNode) labelNode.characters = "Domain name";
+
+const capBoolKey = Object.keys(input.componentProperties).find(
+  k => /^Caption/.test(k) && input.componentProperties[k].type === "BOOLEAN"
+);
+if (capBoolKey) input.setProperties({ [capBoolKey]: true });
+const capNode = input.findOne(n => n.type === "TEXT" && n.name === "Caption");
+if (capNode) capNode.characters = "Only the apex or subdomain. Don't include https:// or paths.";
+
+// Placeholder — same pattern
+const placeholderNode = input.findOne(n => n.type === "TEXT" && n.name === "Placeholder");
+if (placeholderNode) placeholderNode.characters = "partners.acme-corp.com";
+
+// ❌ BANNED — external label sibling
+const myLabel = figma.createText();
+myLabel.characters = "Domain name";
+fieldStack.appendChild(myLabel);   // ← redesigns the DS input spacing by hand
+fieldStack.appendChild(input);
+```
+
+Observed bug (Domain management build, v3.55): skill did `labelNode.characters = ""` to blank out the native label, then appended a custom TEXT node as a sibling in a "Field" frame. Audit 7.34 catches this pattern: Input has Label boolean ON, inner Label TEXT is empty, sibling TEXT nodes exist in the same auto-layout parent.
 
 ## Component property discovery — probe the instance, don't regex the root
 

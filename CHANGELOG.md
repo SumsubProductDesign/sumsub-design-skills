@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.56.0 — 2026-04-24
+Lessons from inspecting the Domain management — self-service build shipped by v3.55. Four modals and a drawer, all audit-passed, all with the same family of bugs:
+
+- **Slot alignment defaulted to CENTER.** Drawer body slot was 712px tall, custom content 448px → 132px dead space above the content, which made the drawer look bottom-heavy. Root: the skill appended the wrap into the slot but didn't override `slot.primaryAxisAlignItems` — Modal Basic / Drawer Basic slots default to `"CENTER"` for short empty-states. Rule added: after `slot.appendChild(wrap)`, set `slot.primaryAxisAlignItems = "MIN"` to pin content to the top. **Audit 7.35** flags any SLOT still at `"CENTER"` with >60px dead space.
+- **External TEXT labels next to Inputs, bypassing the native Label.** Skill set each Input's inner `Label` TEXT to `""` (blank but visible) and appended its own TEXT node as a sibling in a custom "Field" wrapper — redesigning the DS input's spacing, text-style, and label-to-field gap by hand. Rule added: write to the Input's inner `Label` / `Caption` / `Placeholder` TEXT nodes directly after toggling the corresponding boolean property. Never a sibling TEXT. **Audit 7.34** catches Input instances with Label ON + inner TEXT blank + non-empty sibling TEXT in the same auto-layout parent.
+- **Footer "Button" default leak.** Every modal footer had a visible `*Button*` in Left actions still carrying its default label `"Button"`. Invisible visually because the parent `Left actions` frame is hidden by default, but structurally dirty — next DS revision flipping that default would leak `"Button"` into every modal produced by the skill. Rule added: explicitly set `.visible` on both `Left actions` / `Right actions` frames, and only configure buttons inside the visible ones. **Audit 7.33** flags any visible-chain `*Button*` inside a modal/drawer footer whose label is still the literal `"Button"`.
+- **Scenarios annotations exploded past screen width.** HUG has no upper bound — long titles (130–170 characters, 2–3 sentences) produced annotations 1793–1985px wide against 1440px screens, overlapping neighbors in the flow grid by 200–425px. Rule added in `sumsub-screen-annotations/SKILL.md`: after HUG, if `annotation.width > screen.width - 40`, switch to FIXED at `screen.width` and let the text wrap. Soft cap on title length: ≤ 120 characters, 1–2 sentences. Longer scenarios get split into multiple screens, not stretched onto one.
+
 ## v3.55.0 — 2026-04-23
 Lessons from a KYB Levels build where three bugs shipped past audit: (1) every toolbar button got the same label as its neighbor filter, (2) Table Starter header had 8 columns while rows had 5, (3) Scenarios annotations ended up floating in the grey margin to the right of screens, 3 per row.
 
