@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.59.0 — 2026-04-27
+Two issues from the Billing build (file `kHQyyYdPZjEyrSahRmBLUr`):
+
+- **Audit checks 7.33 / 7.39 / 7.41 had a visible-chain bug.** The walk stopped at the immediate container (footer / toolbar / header) instead of going all the way to the audit root. Hidden grand-parents (e.g. an inner Top Toolbar where `Toolbar#736:139 = false` on its parent Table Starter) were ignored, causing false positives like "duplicate visible Button labels" on buttons that were inside a hidden parent and not actually rendering. Fixed: all three walks now use `cur !== root` and a new `visibleToRoot(n, root)` helper is canonical.
+- **Skill cherry-picked audit checks instead of pasting the script verbatim.** Build log's PHASE 4 listed 7 named checks ("heading-TEXT antipattern, Header placeholders, Sidebar variant, ...") and reported PASSED — but the full audit script has 40+ checks (7.1 through 7.42). Skill summarized rather than ran. Critical rule extended with banned phrases: enumerated subset listings, "Audit summary", "Audit checks run: ..." flat lists under 30 items, "Paraphrased audit", "Equivalent checks", "I ran the relevant checks". Also added what a real audit run looks like in the log: pasted script, raw `issues.push` output, no reformulation.
+- **Audit 7.40 sharpened for sidebars without a Selected property.** Some Sidebar variants (`Type=Billing` is one) don't expose `Selected` on any nav-item — visual active state isn't achievable through Plugin API in those variants. Audit now distinguishes "nav items with Selected exist but none is true" (hard fail, set the right one) from "no nav item exposes Selected at all" (known limitation — flag in build log, do NOT claim "variant inherently activates the X nav item", that's wrong).
+
 ## v3.58.0 — 2026-04-27
 A teammate's Rules list build (file `bbp6LvphVT5J6QytzGJY6z`) shipped with audit "PASSED 0 issues" but six visible bugs on canvas: missing primary CTA, no active sidebar item, 30+ default tab placeholders ("Tab", "Tab_4", "5", "Beta"), 2 default header cells ("Modified", "Table header"), duplicate "Export" button, all status cells defaulted to Active. Audit was blind to most of these — five new checks plug the gaps.
 

@@ -508,6 +508,45 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    No audit = no delivery. Simplified audit = no delivery. No exceptions.
 
+   **Audit phrases that prove the script was NOT run verbatim — banned in build logs:**
+
+   - "Audit checks run: heading-TEXT antipattern, Header placeholders, Sidebar variant, overflow, unbound spacing, Content fill, visible default texts, ..." — listing a hand-picked subset of 7–12 named checks instead of pasting the full audit script.
+   - "Audit PASSED — all checks clean" with no `issues.push` output trace and no script execution.
+   - "I ran the relevant audit checks" — there is no "relevant subset". You run the full audit or you don't deliver.
+   - "Paraphrased audit", "Audit summary", "Equivalent checks" — the script is not paraphrasable. It runs verbatim or not at all.
+   - Any phrase like "Audit list: ..." followed by a flat numbered or bulleted enumeration of fewer than 30 items. The full script in v3.59 has 40+ checks (7.1 through 7.42 with sub-checks). If your build log's PHASE 4 lists fewer than 30 items, you cherry-picked.
+
+   **What a real audit run looks like in the build log:**
+
+   ```
+   PHASE 4 — AUDIT
+   - Pasted audit script with ROOT_ID = <id>, productContext = <product>
+   - Ran via use_figma; 0 issues returned (or N issues, listed below verbatim)
+   - Each issue's exact issues.push string from the audit, if any
+   - No reformulation, no summary, no "checks performed: ..." list
+   ```
+
+   If your audit returns issues, you fix them and re-run. The build log records each iteration: which issues were found, what was changed, the next run's output. You do not summarize "X audit fixes applied → 0" — you list the actual `issues.push` strings each time.
+
+   **Visible-chain helpers (use these whenever you check button labels, text leaks, or duplicates):**
+
+   ```js
+   // Is `n` visible all the way to the audit root? Walks every ancestor.
+   // ALWAYS use this for visible-chain checks — never stop at a sub-container,
+   // because hidden grand-parents (e.g. a hidden Top Toolbar inside Table Starter)
+   // are common and cause false positives if the walk stops short.
+   function visibleToRoot(n, root) {
+     let cur = n;
+     while (cur && cur !== root) {
+       if (cur.visible === false) return false;
+       cur = cur.parent;
+     }
+     return true;
+   }
+   ```
+
+   Audit checks 7.33, 7.39, 7.41 in v3.58 and earlier had this bug — they walked only up to the immediate container (footer / toolbar / header), missing the case where the container itself sits inside a hidden parent. Fixed in v3.59.
+
    ```js
    // Audit script — paste and adapt ROOT_ID
    const root = figma.getNodeById("ROOT_ID_HERE");
@@ -1173,11 +1212,14 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.parent?.name === "*Modal Basic*" || n.mainComponent?.parent?.name === "*Drawer Basic*"))) {
      const footer = md.findOne(n => n.type === "INSTANCE" && /\/ Footer/i.test(n.name));
      if (!footer) continue;
-     // Find *Button* instances where every ancestor up to footer is visible.
+     // Find *Button* instances where every ancestor up to ROOT is visible
+     // (not just up to footer — fix from v3.59: hidden grand-parents must
+     // be respected, otherwise audit reports false positives for buttons
+     // inside hidden Top Toolbar / hidden Left actions / etc.).
      const visibleBtns = footer.findAll(n => {
        if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
        let cur = n;
-       while (cur && cur !== footer) {
+       while (cur && cur !== root) {
          if (cur.visible === false) return false;
          cur = cur.parent;
        }
@@ -1310,10 +1352,20 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
        )
      );
      for (const ctr of containers) {
+       // Skip the container itself if any of its ancestors are hidden — fixes
+       // a v3.58 false positive where a hidden inner Top Toolbar was matched
+       // by findAll and its (already-not-rendered) buttons were flagged.
+       let pchk = ctr;
+       let containerInVisibleChain = true;
+       while (pchk && pchk !== root) {
+         if (pchk.visible === false) { containerInVisibleChain = false; break; }
+         pchk = pchk.parent;
+       }
+       if (!containerInVisibleChain) continue;
        const visBtns = ctr.findAll(n => {
          if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
          let cur = n;
-         while (cur && cur !== ctr) { if (cur.visible === false) return false; cur = cur.parent; }
+         while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
          return true;
        });
        const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters).filter(Boolean);
@@ -1338,7 +1390,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
        const selectedNodes = sb.findAll(n => /selected/i.test(n.name) || /\.selected/i.test(n.name) || /active/i.test(n.name));
        const visSelected = selectedNodes.filter(n => {
          let cur = n;
-         while (cur && cur !== sb) { if (cur.visible === false) return false; cur = cur.parent; }
+         while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
          return n.visible !== false;
        });
        // Also probe for nav-item instances whose Selected variant is "true" / "Yes"
@@ -1348,7 +1400,16 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
          return v === "true" || v === "True" || v === "Yes" || v === true;
        });
        if (visSelected.length === 0 && selectedItems.length === 0) {
-         issues.push(`Sidebar "${sb.name}" has no active nav item — no node matching /Selected|Active/i is visible, and no instance has Selected variant on. Set the active item to match the current page (e.g. probe sidebar.findAll for nav items and set the relevant one's Selected to true).`);
+         // Soft warning: not all Sidebar variants expose a Selected property
+         // (e.g. Type=Billing variant has no per-page active state via Plugin
+         // API). Flag as warning, not hard fail — the skill should still try
+         // to set the active item if any nav-item instance HAS a Selected
+         // property; otherwise note this as a known limitation.
+         if (navItems.length === 0) {
+           issues.push(`Sidebar "${sb.name}" — no nav-item instance exposes a Selected property in this variant. Active-page highlight isn't achievable via Plugin API for this Sidebar configuration. Note as known limitation in build log; do NOT claim "variant Type=X inherently activates the X nav item" — that's wrong, the variant only selects the section, not the active page.`);
+         } else {
+           issues.push(`Sidebar "${sb.name}" has ${navItems.length} nav-item instance(s) with Selected property but none is set to true. Set the matching nav-item's Selected variant to "true" for the current page.`);
+         }
        }
      }
    }
@@ -1366,7 +1427,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
        const visBtns = h.findAll(n => {
          if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
          let cur = n;
-         while (cur && cur !== h) { if (cur.visible === false) return false; cur = cur.parent; }
+         while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
          return true;
        });
        const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters || "").filter(Boolean);
