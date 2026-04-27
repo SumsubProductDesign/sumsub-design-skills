@@ -1255,6 +1255,153 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.38. Default-text leak — visible TEXT nodes still showing component placeholders.
+   // Observed (Rules list build, v3.57): 30+ TEXT nodes in *Tab Basic* showed
+   // defaults like "Tab", "Tab_4", "Tab_5", "5", "Beta"; Table Header showed
+   // "Table header"; Status cells "Table cell"; Filters group buttons "Button";
+   // Header subheader "Title", "Subtitle". Audit 7.20 already covers some of
+   // these but missed the Tab/Counter/Badge family because filter was too narrow.
+   const DEFAULT_TEXTS = new Set([
+     "Tab", "Tab_2", "Tab_3", "Tab_4", "Tab_5", "Tab_6", "Tab_7", "Tab_8", "Tab_9", "Tab_10",
+     "Table header", "Table cell", "Heading", "Subheading",
+     "Button", "Title", "Subtitle", "Description", "Placeholder",
+     "Filled text", "Components", "Beta",
+     "Label", "Caption", "Helper text",
+     "Title text", "Subtitle text",
+   ]);
+   {
+     const allText = root.findAll(n => n.type === "TEXT");
+     const defaultLeaks = [];
+     for (const t of allText) {
+       if (!t.visible) continue;
+       // Visible-chain check
+       let cur = t.parent;
+       let visibleChain = true;
+       while (cur && cur !== root) {
+         if (cur.visible === false) { visibleChain = false; break; }
+         cur = cur.parent;
+       }
+       if (!visibleChain) continue;
+       const chars = (t.characters || "").trim();
+       if (DEFAULT_TEXTS.has(chars)) {
+         // Skip "5" since it's also a valid number; only flag in counter/badge contexts
+         if (chars === "5" && !/Counter|Badge/.test(t.parent?.name || "")) continue;
+         defaultLeaks.push({ id: t.id, text: chars, parent: t.parent?.name, container: ((cur => { let c = t.parent; let chain = []; while (c && chain.length < 4) { chain.push(c.name); c = c.parent; } return chain.join(" > "); })()) });
+       }
+     }
+     if (defaultLeaks.length > 0) {
+       const summary = defaultLeaks.slice(0, 8).map(l => `"${l.text}" in ${l.container}`).join("; ");
+       issues.push(`${defaultLeaks.length} default TEXT leak(s) visible in the mockup: ${summary}${defaultLeaks.length > 8 ? `, +${defaultLeaks.length - 8} more` : ""}. Each is an unconfigured component placeholder. Either set the proper text via setProperties / inner TEXT.characters, or hide the containing item if it's an unused slot.`);
+     }
+   }
+
+   // 7.39. Duplicate visible labels in same container — likely regex-fallback bug.
+   // Observed (Rules list build, v3.57): two visible "Export" buttons in Top
+   // Toolbar because skill renamed "Button" → "Export" via a regex match that
+   // hit two slots. Audit 7.30 only checks button-vs-filter; this one checks
+   // button-vs-button (and filter-vs-filter) within one toolbar/header/footer.
+   {
+     const containers = root.findAll(n =>
+       n.type === "INSTANCE" && (
+         /Top Toolbar/i.test(n.name) ||
+         /Header/i.test(n.name) ||
+         /\/ Footer/i.test(n.name) ||
+         n.mainComponent?.parent?.name === "*Header*"
+       )
+     );
+     for (const ctr of containers) {
+       const visBtns = ctr.findAll(n => {
+         if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
+         let cur = n;
+         while (cur && cur !== ctr) { if (cur.visible === false) return false; cur = cur.parent; }
+         return true;
+       });
+       const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters).filter(Boolean);
+       const counts = {};
+       for (const l of labels) counts[l] = (counts[l] || 0) + 1;
+       const dups = Object.entries(counts).filter(([, c]) => c > 1);
+       for (const [l, c] of dups) {
+         // Skip generic 1-char icon-only labels
+         if (l.length <= 2) continue;
+         issues.push(`Container "${ctr.name}" has ${c} visible *Button* instances with identical label "${l}". Likely a regex-fallback bug: the skill renamed the same property pattern on multiple buttons. Probe each button individually instead.`);
+       }
+     }
+   }
+
+   // 7.40. Sidebar — no active item highlighted for the current page.
+   // Observed (Rules list build, v3.57): sidebar variant Type=Transactions
+   // monitoring was set, but no nav item inside had Selected/Active state, so
+   // the page indicator was missing.
+   {
+     const sidebars = root.findAll(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Sidebar*");
+     for (const sb of sidebars) {
+       const selectedNodes = sb.findAll(n => /selected/i.test(n.name) || /\.selected/i.test(n.name) || /active/i.test(n.name));
+       const visSelected = selectedNodes.filter(n => {
+         let cur = n;
+         while (cur && cur !== sb) { if (cur.visible === false) return false; cur = cur.parent; }
+         return n.visible !== false;
+       });
+       // Also probe for nav-item instances whose Selected variant is "true" / "Yes"
+       const navItems = sb.findAll(n => n.type === "INSTANCE" && n.componentProperties?.["Selected"]);
+       const selectedItems = navItems.filter(n => {
+         const v = n.componentProperties?.["Selected"]?.value;
+         return v === "true" || v === "True" || v === "Yes" || v === true;
+       });
+       if (visSelected.length === 0 && selectedItems.length === 0) {
+         issues.push(`Sidebar "${sb.name}" has no active nav item — no node matching /Selected|Active/i is visible, and no instance has Selected variant on. Set the active item to match the current page (e.g. probe sidebar.findAll for nav items and set the relevant one's Selected to true).`);
+       }
+     }
+   }
+
+   // 7.41. Header CTA verification — if Buttons enabled, at least one visible
+   // button must have a non-default label. Observed: "Buttons#6943:21 = true"
+   // and "First Button = true" in build log, but the labeled CTA button was
+   // sitting inside a hidden Back-button slot, so no CTA actually rendered.
+   {
+     const headers = root.findAll(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Header*");
+     for (const h of headers) {
+       const props = h.componentProperties || {};
+       const buttonsOn = Object.keys(props).find(k => /^Buttons/.test(k) && props[k].type === "BOOLEAN" && props[k].value === true);
+       if (!buttonsOn) continue;
+       const visBtns = h.findAll(n => {
+         if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
+         let cur = n;
+         while (cur && cur !== h) { if (cur.visible === false) return false; cur = cur.parent; }
+         return true;
+       });
+       const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters || "").filter(Boolean);
+       const meaningful = labels.filter(l => l !== "Button" && l !== "Title" && l.length > 0);
+       if (visBtns.length > 0 && meaningful.length === 0) {
+         issues.push(`Header "${h.name}" has Buttons enabled but no visible button has a meaningful label (only defaults / empty). The intended CTA likely landed in a hidden slot. Probe header.findAll for visible *Button* instances and set the label on a real one (e.g. the first non-icon button in the right-side actions area).`);
+       }
+     }
+   }
+
+   // 7.42. Tab Basic — extra default-text items still visible.
+   // Observed (Rules list build, v3.57): Tab Basic has 12 .Tab Basic / Item
+   // children; skill renamed the first 4 but left items 5-11 with defaults
+   // ("Tab", "Tab_4", "Tab_5"...) AND visible=true on items 5-7. Each item
+   // still showed counter "5" + badge "Beta" defaults too.
+   {
+     const tabContainers = root.findAll(n => n.type === "INSTANCE" && /^\*?Tab Basic/.test(n.name));
+     for (const tc of tabContainers) {
+       const items = (tc.children || []).filter(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));
+       for (const item of items) {
+         if (!item.visible) continue;
+         const labelText = item.componentProperties?.["Label text#4517:0"]?.value;
+         if (typeof labelText === "string" && /^Tab(_\d+)?$/.test(labelText.trim())) {
+           issues.push(`Tab Basic item "${item.name}" is visible with default label "${labelText}". Either configure its Label text via setProperties or hide it via item.visible = false.`);
+         }
+         // Also flag visible Counter/Badge that weren't toggled off.
+         const counterOn = item.componentProperties?.["Counter#5190:0"]?.value;
+         const badgeOn = item.componentProperties?.["Badge#2885:0"]?.value;
+         if (counterOn === true || badgeOn === true) {
+           issues.push(`Tab Basic item "${item.name}" has Counter=${counterOn} / Badge=${badgeOn}. Set them to false unless you actually want to show a counter or "Beta" badge.`);
+         }
+       }
+     }
+   }
+
    // 7.35. SLOT alignment — CENTER with dead space.
    // Observed (Domain management build, v3.55): drawer slot 712px, custom
    // content 448px, slot.primaryAxisAlignItems = "CENTER" → 132px dead space
@@ -2181,6 +2328,104 @@ await figma.loadFontAsync({ family: "Geist Mono", style: "Regular" });
 ```
 
 Audit 7.36 scans every TEXT inside every modal/drawer's custom body wrap and flags any with `fontName.family !== "Geist"` (excluding "Geist Mono" which is allowed). Audit 7.37 flags any TEXT with `!textStyleId` in those same custom bodies.
+
+## Tab Basic — single component with N item slots, configure each one
+
+`*Tab Basic*` is a single COMPONENT (not a component_set) containing 10–12 `.Tab Basic / Item` children. Each item has its own properties: `Label text#4517:0`, `Counter#5190:0`, `Badge#2885:0`, `Tag#1082:0`, `Selected` variant, etc. Default state on every item: `Label text="Tab"` (or `Tab_4`, `Tab_5`...), `Counter=true` (showing "5"), `Badge=true` (showing "Beta").
+
+**Two failure modes the skill repeats:**
+
+1. **All labels stuffed into the first item.** Skill regex-finds three TEXT properties on item 0 (Label/Counter/Badge) and writes the four desired tab names into the first three available text slots. Result: item 0 shows "All / Pre-scoring / Monitoring" mashed into Label/Counter/Badge slots; items 1–3 keep defaults; item 4 is "Archived" via name match.
+2. **Items 5+ left visible with defaults.** Skill renames items 0–3 then forgets to hide items 4–11. Result: 7 extra "Tab" / "Tab_4" / "Tab_5" labels rendering in the tab strip with stray "5"/"Beta".
+
+**Correct pattern — iterate, set, hide rest:**
+
+```js
+const tabLabels = ["All", "Pre-scoring", "Monitoring", "Archived"];
+const items = tabs.children.filter(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));
+for (let i = 0; i < items.length; i++) {
+  if (i < tabLabels.length) {
+    items[i].visible = true;
+    items[i].setProperties({
+      "Label text#4517:0": tabLabels[i],
+      "Counter#5190:0": false,
+      "Badge#2885:0": false,
+      "Tag#1082:0": false,
+      "• Left icon#2885:9": false,
+      "Right icon •#1094:0": false,
+      "Selected": i === 0 ? "true" : "false",  // active tab — usually the first
+    });
+  } else {
+    items[i].visible = false;  // hide unused items
+  }
+}
+```
+
+Audit 7.42 flags any visible `.Tab Basic / Item` with default label `/^Tab(_\d+)?$/` or with `Counter=true` / `Badge=true`.
+
+## Sidebar — set the active nav item for the current page
+
+Setting `Type=Transactions monitoring` selects which section the sidebar shows but does NOT highlight the current page within that section. The skill repeatedly forgets the second step: navigating to the sub-item inside the section and toggling its `Selected` variant.
+
+```js
+const sidebar = sidebarSet.children.find(v => v.name === "Type=Transactions monitoring, Collapsed=False").createInstance();
+
+// After mounting, find the sub-item matching the current page and select it.
+const navItems = sidebar.findAll(n => n.type === "INSTANCE" && n.componentProperties?.["Selected"]);
+for (const item of navItems) {
+  const labelNode = item.findOne(n => n.type === "TEXT" && /label/i.test(n.name));
+  if (labelNode?.characters === "Rules") {
+    item.setProperties({ "Selected": "true" });
+  }
+}
+```
+
+Audit 7.40 flags any sidebar where no descendant has `Selected=true` and no `Selected` / `.Selected` node is visible.
+
+## Header — primary CTA placement
+
+`*Header*` Type=Generic doesn't have a dedicated "primary CTA" property — it has right-side action button slots (`First Button`, `Second Button`, `Kebab`) all defaulting to icon-only chrome controls (Help, language, kebab). The CTA-related properties `Buttons#... = true` + `First Button = true` only enable those chrome slots, NOT a separate primary button.
+
+**The skill's repeating bug:** sets `Button Text` on a `*Button*` instance found anywhere in the header tree — usually the back-button slot inside Title (which is hidden by default) — and reports CTA done in the build log. The label is set, but on a hidden button. Page renders without CTA.
+
+**Correct paths for a primary CTA:**
+
+A) **Override one of the right-side chrome buttons** (loses Help or language but is visually clean):
+```js
+const helpBtn = header.findAll(n => n.type === "INSTANCE" && n.name === "*Button*").find(b => {
+  const t = b.findOne(x => x.type === "TEXT" && x.name === "Button");
+  return t?.characters === "Help" && b.componentProperties?.["Content"]?.value === "Basic";
+});
+if (helpBtn) {
+  helpBtn.setProperties({
+    "Button Text#143:1442": "+ Create rule",
+    "Type": "Primary",
+    "Content": "Basic",
+  });
+}
+```
+
+B) **Build a Title Row in the Content area** with the CTA — see "Pattern 1 — Standard List/Table Page" in `layout-patterns.md`. This is the canonical Sumsub layout and what `table-page.js` block does. Prefer B if you have flexibility.
+
+Audit 7.41 flags any Header where Buttons is enabled but no visible button has a meaningful (non-default, non-empty) label.
+
+## Default-text leak — never ship a placeholder text visible
+
+Component placeholders that must NEVER be visible in a finished mockup:
+- Tab labels: `"Tab"`, `"Tab_2"` ... `"Tab_10"`
+- Table: `"Table header"`, `"Table cell"`
+- Buttons: `"Button"`
+- Headers: `"Title"`, `"Subtitle"`, `"Description"`, `"Heading"`, `"Subheading"`
+- Inputs: `"Placeholder"`, `"Filled text"`, `"Label"` (when blank), `"Caption"` (when blank), `"Helper text"`
+- Scenarios annotation: `"Components"`
+- Tab counter: `"5"` (only flagged inside Counter/Badge frames)
+- Tab badge: `"Beta"` (default — most pages don't have a Beta tab)
+
+Audit 7.38 scans every visible-chain TEXT and flags any matching this list. If a placeholder is intentional (e.g. an input field showing a placeholder before user typing), the value should still come from `setProperties` on the Input, not be left as the literal default.
+
+## Duplicate visible labels in one container — regex-fallback red flag
+
+Two visible buttons with the same label inside one Toolbar / Header / Footer is almost always a bug from setProperties matching multiple buttons via a regex pattern. Audit 7.39 flags `>=2 visible *Button* instances with identical label` inside any Top Toolbar / Header / Footer. Fix: probe each button individually (see "Component property discovery" section above).
 
 ## Component property discovery — probe the instance, don't regex the root
 

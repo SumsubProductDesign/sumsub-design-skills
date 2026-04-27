@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.58.0 — 2026-04-27
+A teammate's Rules list build (file `bbp6LvphVT5J6QytzGJY6z`) shipped with audit "PASSED 0 issues" but six visible bugs on canvas: missing primary CTA, no active sidebar item, 30+ default tab placeholders ("Tab", "Tab_4", "5", "Beta"), 2 default header cells ("Modified", "Table header"), duplicate "Export" button, all status cells defaulted to Active. Audit was blind to most of these — five new checks plug the gaps.
+
+- **7.38 Default-text leak.** Hard-coded list of component placeholders (`"Tab"`, `"Tab_2"`...`"Tab_10"`, `"Table header"`, `"Table cell"`, `"Button"`, `"Title"`, `"Subtitle"`, `"Placeholder"`, `"Filled text"`, `"Components"`, `"Beta"`) — any visible-chain TEXT matching this list fails. The skill kept letting these through because earlier audits only sampled button labels.
+- **7.39 Duplicate visible labels.** Two `*Button*` instances with the same label inside one Top Toolbar / Header / Footer = regex-fallback bug (skill renamed every match instead of probing one). Audit 7.30 already covered button-vs-filter; this catches button-vs-button and filter-vs-filter inside the same container.
+- **7.40 Sidebar — no active item.** Setting `Type=Transactions monitoring` selects which section to show but does NOT highlight the current page within. Audit walks the sidebar for any descendant with `Selected=true` variant or any visible `/Selected/i` node — no match = fail with instructions to set the active item to the current page.
+- **7.41 Header CTA verification.** When `Buttons` is enabled in `*Header*` and the build log claims a CTA was set, audit checks at least one visible-chain `*Button*` has a non-default, non-empty label. Catches the recurring bug where the skill writes `Button Text` onto a button that lives inside a hidden slot (back button, kebab, etc.) and reports success.
+- **7.42 Tab Basic — extra items + counter/badge defaults.** `*Tab Basic*` is a single component with 10–12 `.Tab Basic / Item` slots, each with its own properties. Skill repeatedly fills only the first item (mashing four labels into Label/Counter/Badge slots), leaves items 5+ visible with default `"Tab"` / `"Tab_4"` text, AND leaves `Counter=true` / `Badge=true` showing stray `"5"` and `"Beta"` everywhere. Audit flags any visible item with default-pattern label OR Counter/Badge = true.
+
+Three new rule sections in `sumsub-mockup/SKILL.md` document the correct patterns: how to iterate Tab Basic items + hide the rest, how to set the active sidebar nav item, where the primary CTA actually goes in `*Header*` Type=Generic (it's not the property the skill thinks it is — usually you override one right-side chrome button or build a Title Row in Content).
+
 ## v3.57.0 — 2026-04-24
 Follow-up on the Domain management build. Deep inspection of all six modal/drawer custom bodies revealed widespread DS violations that v3.56 audit missed, plus the Scenarios title overflow needed a harder rule.
 
