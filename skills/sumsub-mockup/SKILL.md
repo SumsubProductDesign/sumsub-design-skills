@@ -142,6 +142,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    |---|---|
    | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` |
    | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
+   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` |
    | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
    | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
 
@@ -1908,12 +1909,46 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   if (productContext === "tm") {
+     // TM screens have multiple layout patterns — check sidebar width matches pattern.
+     // Pattern 1 (Transactions table): Sidebar 257px, screen 1440×900
+     // Pattern 2 (Settings/Rules): Sidebar 276px, screen 1440×956
+     // Pattern 3 (Rule editor): No sidebar, Header Full Screen Page 1440px
+     // Pattern 4 (Transaction detail): No sidebar, 1920px wide canvas
+     // Pattern 5 (Txn Networks): No sidebar, 1681px wide canvas
+     if (sidebar) {
+       const sidebarW = Math.round(sidebar.width);
+       if (sidebarW !== 257 && sidebarW !== 276) {
+         issues.push(`TM Sidebar width is ${sidebarW}px — expected 257px (Transactions table / Pattern 1) or 276px (Settings / Pattern 2). See tm-layout-patterns.md.`);
+       }
+       if (sidebarW === 257 && Math.round(root.width) !== 1440) {
+         issues.push(`TM Pattern 1 (Sidebar 257): root width should be 1440px, got ${Math.round(root.width)}px`);
+       }
+       if (sidebarW === 276 && Math.round(root.width) !== 1440) {
+         issues.push(`TM Pattern 2 (Sidebar 276): root width should be 1440px, got ${Math.round(root.width)}px`);
+       }
+     } else {
+       // No sidebar — check for known full-screen patterns
+       const rootW = Math.round(root.width);
+       if (rootW !== 1440 && rootW !== 1920 && rootW !== 1681) {
+         issues.push(`TM no-sidebar screen width is ${rootW}px — expected 1440 (Rule editor Pattern 3), 1920 (Transaction detail Pattern 4), or 1681 (Txn Networks Pattern 5). See tm-layout-patterns.md.`);
+       }
+       // Transaction detail (Pattern 4): must have Header/Finance instance
+       if (rootW === 1920) {
+         const hasFinanceHeader = all.some(n => n.type === "INSTANCE" && /Header.*Finance|Header\/Finance/.test(n.name));
+         if (!hasFinanceHeader) {
+           issues.push(`TM Pattern 4 (Transaction detail, 1920px): expected a 'Header / Finance' instance (TM-specific 144px header) — not found. Import key 1fcc7d73759e1feaa9c2e4af4b487344ba398fcb.`);
+         }
+       }
+     }
+   }
+
    return issues.length === 0
      ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
      : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);
    ```
 
-   **Set `productContext`** at the top of the script to one of `"flow-builder" | "applicant-page" | "table-page" | null` based on the user's task. This enables the targeted checks in #8. When `null`, #8 is skipped.
+   **Set `productContext`** at the top of the script to one of `"flow-builder" | "applicant-page" | "table-page" | "tm" | null` based on the user's task. This enables the targeted checks in #8. When `null`, #8 is skipped.
 
    Adapt the root id, set the context, run, fix findings, re-run. Only share the link when the audit returns "✅ Audit PASSED". The most common failure modes:
    - #1 (Title Row antipattern)
@@ -1954,6 +1989,7 @@ Before building anything, **open the matching reference file(s) with the `Read` 
 | Product | Reference file |
 |---|---|
 | Applicant page / Applicant flow | `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md` |
+| Transaction Monitoring — any TM screen | `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` |
 | Flow Builder / Workflow canvas / Workflow nodes | `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md` |
 | Page layouts (table, detail, etc.) | `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
 | Design system components / variables | `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md` |
