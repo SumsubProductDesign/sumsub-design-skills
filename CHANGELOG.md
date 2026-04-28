@@ -4,6 +4,23 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.63.2 — 2026-04-28
+Patch: white fill Rule #6 not enforced for TM Pattern 4 content frames.
+
+Root cause: audit check 7.05 only matched frames named `Content` / `Page Content`. In TM Pattern 4 (Transaction detail, 1920px), the content-surface frames are named `Body`, `Columns`, `Main column`, and `Right panel` — none matched the regex. The build script also didn't set white fills on them, relying on inheritance from a parent that was itself transparent. Both frames being transparent meant the root grey (`#f6f7f9`) showed through the entire screen.
+
+Three layers of enforcement added:
+
+1. **Rule #6 expanded** — added an explicit table listing which frames must have white fills per pattern, including all four TM Pattern 4 frame names (`Body`, `Columns`, `Main column`, `Right panel`). Added "transparent ≠ white" warning and banned the rationalization "parent will be white, child can be transparent".
+
+2. **Audit check 7.05 regex expanded** — from `/^(Content|Page Content)$/i` to `/^(Content|BG Content|Page Content|Body|Main column|Columns|Right panel|Container)$/i`. All content-surface frame names across all patterns now trigger the white-fill check.
+
+3. **TM Pattern 4 dedicated audit** (inside the `productContext === "tm"` block) — when `rootW === 1920`, additionally scans for TM-specific content frames by name and emits a hard fail if any have transparent/missing fills, with an explicit pointer to Rule #6.
+
+4. **Background Rules section updated** — added TM Pattern 4 frame table and a code snippet showing `whiteFill()` being applied to all four frames individually. Explicit note: do NOT rely on fill inheritance — each frame must be set independently.
+
+---
+
 ## v3.63.1 — 2026-04-28
 Patch: closed the "it's already in context" rationalization loop for product-docs reads.
 

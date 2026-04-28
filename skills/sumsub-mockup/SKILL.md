@@ -256,7 +256,22 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    The user-facing rendering of all four things above comes from `*Header*` itself. Duplicating any of them in Content is noise that reviewers flag every time.
 
-6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey. Page root stays subtlest grey (`#f6f7f9`), but the `Content` / card areas are white (`#ffffff`).
+6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey, never transparent. Page root stays subtlest grey (`#f6f7f9`), but every content-surface frame must be explicitly white (`#ffffff`).
+
+   **Frames that MUST have a white fill (never leave transparent):**
+
+   | Pattern | Frames requiring explicit white fill |
+   |---|---|
+   | Standard list/table (Pattern 1) | `Content`, `Page Content` |
+   | Applicant / Detail page (Pattern 2) | `Body`, `Content` |
+   | Case detail (Pattern B) | `Body`, `Container`, left wrapper frame |
+   | TM Transaction detail (Pattern 4) | **`Body`**, **`Columns`**, **`Main column`**, **`Right panel`** |
+   | TM Rule editor (Pattern 3) | `Main content`, `Content` |
+   | Any builder page | The main editing surface frame |
+
+   ⚠️ **A transparent frame is not the same as a white frame.** Transparent frames inherit the root's grey (`#f6f7f9`) and make the entire screen look grey. You MUST explicitly set each content-surface frame's fill to the white variable — do not rely on inheritance from a parent.
+
+   ⛔ **Banned rationalization:** "The frame has no fill so it's transparent, which is fine — the parent will be white." This is wrong if the parent is also transparent, or if the root is grey.
 
 7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
 
@@ -815,10 +830,18 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    // 7.05. Content frame background — Rule #6. Content MUST be white.
    // If Content has no fill, the root subtlest-grey shows through and the page
-   // looks fully grey. Find top-level frames named "Content" / "Page Content" and
-   // verify they're bound to a white/inverse variable.
+   // looks fully grey. Covers all patterns including TM Pattern 4 where the
+   // content frames are named Body / Columns / Main column / Right panel.
+   //
+   // Covered names:
+   //   "Content", "Page Content", "BG Content"  — standard list pages
+   //   "Body"                                    — TM Pattern 4, detail pages
+   //   "Main column", "Columns"                  — TM Pattern 4 column layout
+   //   "Right panel"                             — TM Pattern 4 right column
+   //   "Container"                               — Case page left wrapper
    const contentFrames = all.filter(n =>
-     n.type === "FRAME" && !isInsideInstance(n) && /^(Content|Page Content)$/i.test(n.name)
+     n.type === "FRAME" && !isInsideInstance(n) &&
+     /^(Content|BG Content|Page Content|Body|Main column|Columns|Right panel|Container)$/i.test(n.name)
    );
    for (const cf of contentFrames) {
      const fill = cf.fills?.[0];
@@ -2023,6 +2046,25 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
          if (!hasFinanceHeader) {
            issues.push(`TM Pattern 4 (Transaction detail, 1920px): expected a 'Header / Finance' instance (TM-specific 144px header) — not found. Import key 1fcc7d73759e1feaa9c2e4af4b487344ba398fcb.`);
          }
+
+         // Pattern 4 content frames must be white — Rule #6.
+         // Body / Columns / Main column / Right panel are custom frames the skill
+         // creates; they must have explicit white fills (not transparent).
+         // Transparent frames inherit the root grey (#f6f7f9) and look grey.
+         const tmContentNames = /^(Body|Columns|Main column|Right panel)$/i;
+         const tmContentFrames = all.filter(n =>
+           n.type === "FRAME" && !isInsideInstance(n) && tmContentNames.test(n.name)
+         );
+         for (const tcf of tmContentFrames) {
+           const fill = tcf.fills?.[0];
+           if (!fill || fill.visible === false || fill.opacity === 0) {
+             issues.push(
+               `TM Pattern 4: "${tcf.name}" has no fill (transparent) — it inherits the root grey and makes the screen look grey. ` +
+               `Bind to semantic/background/neutral/inverse/normal (white). ` +
+               `Rule #6: every content-surface frame must have an EXPLICIT white fill.`
+             );
+           }
+         }
        }
      }
    }
@@ -2903,14 +2945,32 @@ If the prompt truly requires multiple scenarios (multiple distinct user-flows), 
 | Content (inside Main) | **White** (`#ffffff`) — this is the working surface, never grey | `semantic/background/neutral/inverse/normal` |
 | Cards inside Content | White, or as the card component dictates | `semantic/background/neutral/inverse/normal` |
 
-**Do NOT** leave the `Content` frame with no fill — the root's grey will show through and the page will look entirely grey. The visual model: grey margin around, white content surface in the middle.
+**TM Pattern 4 (Transaction detail, 1920px) — extra frames that MUST be white:**
+
+| TM Frame | Fill | Why |
+|---|---|---|
+| `Body` | **White** (`#ffffff`) | Main content area below Header/Finance |
+| `Columns` | **White** (`#ffffff`) | Horizontal columns wrapper |
+| `Main column` | **White** (`#ffffff`) | Left content column |
+| `Right panel` | **White** (`#ffffff`) | Right detail sidebar |
+
+⛔ **Do NOT leave any of these transparent.** Transparent frames inherit the root's grey and make the entire transaction detail screen look grey. Each frame must have its own explicit white fill — do not rely on inheritance from a parent.
 
 ```js
-// Content frame setup — always do this
+// Standard Content frame setup (all patterns)
 const bg = await figma.variables.importVariableByKeyAsync(VARS.cardBg); // inverse/normal
 content.fills = [figma.variables.setBoundVariableForPaint(
   { type: "SOLID", color: { r: 1, g: 1, b: 1 } }, "color", bg
 )];
+
+// TM Pattern 4 — set white on EVERY content-surface frame individually
+const whiteFill = () => figma.variables.setBoundVariableForPaint(
+  { type: "SOLID", color: { r: 1, g: 1, b: 1 } }, "color", bg
+);
+body.fills        = [whiteFill()];  // Body
+columns.fills     = [whiteFill()];  // Columns
+mainColumn.fills  = [whiteFill()];  // Main column
+rightPanel.fills  = [whiteFill()];  // Right panel
 ```
 
 ---
