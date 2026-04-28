@@ -151,7 +151,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    |---|---|
    | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` |
    | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
-   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` ⚠️ ALSO required: `sumsub-docs-transaction-monitoring.txt` (see Product-docs triggers below) — these are TWO SEPARATE requirements |
+   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md`, **AND** `${CLAUDE_PLUGIN_ROOT}/reference/products/sumsub-docs-transaction-monitoring.txt` — ALL FOUR required via explicit `Read` calls. The first three are in CLAUDE.md context but must still be explicitly read. The fourth is never pre-loaded. |
    | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
    | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
 
@@ -180,6 +180,8 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    4. Use `Grep` tool to find the specific section in the file (file is 2K+ lines — don't ingest it all).
    5. Build the plan using the actual terminology, field names, and flow steps from the docs. Not from your memory of how "domain verification usually works".
 
+   **⛔ "It's already in my context" is a banned rationalization — for ALL product-docs rows.** Some layout reference files (`tm-layout-patterns.md`, `ap-component-catalog.md`, `case-management-pattern.md`, etc.) are pre-loaded via CLAUDE.md. Product docs (the `.txt` files in `reference/products/`) are NEVER pre-loaded. Context presence of a layout file does NOT mean the product-docs requirement is met. An explicit `Read` tool call on the `.txt` file is required every time — no exceptions.
+
    | Task keywords | REQUIRED READ (from `${CLAUDE_PLUGIN_ROOT}/reference/products/`) |
    |---|---|
    | domain, SSO, single sign-on, SAML, OIDC, IdP, provisioning, team roles, account, billing, verification levels overview, dashboard | `sumsub-docs-overview.txt` |
@@ -195,6 +197,19 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    > - **Group B — Product docs** (`sumsub-docs-transaction-monitoring.txt`): what TM does as a product — rules, risk scoring, VASP screening, travel rule, crypto typologies, monitoring modes. Tells you *what content, labels, fields, and flows to put in the mockup*.
    >
    > **Reading Group A does NOT satisfy Group B.** If your task involves any TM keyword, you MUST read BOTH groups. Saying "I read `tm-layout-patterns.md`" when asked about product-docs compliance is a build violation equivalent to not reading either file. If your build log for a TM task doesn't show `sumsub-docs-transaction-monitoring.txt` — the build is non-compliant.
+   >
+   > ⛔ **The "it's already in my context" rationalization is explicitly banned:**
+   >
+   > `tm-layout-patterns.md` and `tm-component-catalog.md` are loaded into every session via CLAUDE.md. They are always in context. This is irrelevant. Context presence does NOT constitute a Read-tool call, and the two files cover Figma structure — NOT product knowledge.
+   >
+   > `sumsub-docs-transaction-monitoring.txt` is NEVER in CLAUDE.md and NEVER pre-loaded. It requires an explicit `Read` tool call every time. If you find yourself thinking "I already know the TM layout from context, so I'm good" — you've already fallen into the trap. The layout reference being in context tells you how to build frames. It says nothing about what a TM rule is, what risk levels mean, what fields a travel-rule transaction has, or how VASP screening works.
+   >
+   > **Banned internal monologue patterns (all are the same rationalization in disguise):**
+   > - "I have tm-layout-patterns.md in context from CLAUDE.md — that covers the TM reference requirement"
+   > - "The TM component catalog is loaded, so I'm ready to build"
+   > - "I know TM from previous sessions / previous tasks in this session"
+   > - "The user's brief describes the feature well enough, I don't need to read docs"
+   > - Any reasoning that gets from "TM task detected" to "starting build" without an explicit `Read` call on `sumsub-docs-transaction-monitoring.txt` showing up in the tool use log.
 
    **If the docs say the feature works differently than the user's brief describes**, the docs win. Build the mockup using Sumsub's actual terminology and structure. If the user's brief contradicts the docs meaningfully, STOP and ask before building.
 

@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.63.1 — 2026-04-28
+Patch: closed the "it's already in context" rationalization loop for product-docs reads.
+
+Root cause: `tm-layout-patterns.md` and `tm-component-catalog.md` are pre-loaded every session via CLAUDE.md. Seeing them in context, the skill concluded "TM references are covered" and skipped reading `sumsub-docs-transaction-monitoring.txt` — which is never pre-loaded. The fix adds three layers of enforcement:
+
+1. **Required-reads table (TM row)** now explicitly lists `sumsub-docs-transaction-monitoring.txt` alongside the three layout files as the fourth mandatory read, with a note that all four require explicit `Read` calls and that layout files being in context does not count.
+2. **Product-docs triggers section** — added a universal banned-rationalization note: product docs (`.txt` files) are never pre-loaded; context presence of a layout reference file does not satisfy the docs read for any product.
+3. **TM disambiguation block** — added a dedicated "banned internal monologue" list naming the exact rationalizations observed in the TM test build: "I have tm-layout-patterns.md in context", "I know TM from previous sessions", "the user's brief describes it well enough". All explicitly forbidden.
+
 ## v3.63.0 — 2026-04-28
 Five build violations caught from a TM Transaction Detail test run of v3.62.0. All violations addressed with rule-text reinforcement and a new audit check.
 
