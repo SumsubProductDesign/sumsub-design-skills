@@ -4,6 +4,30 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.64.0 — 2026-04-28
+
+New skill: `websdk-mockup` — WebSDK Figma mockup builder.
+
+Creates mockups for WebSDK verification flows: KYC steps, document capture, selfie/liveness, questionnaires, status screens, video ident, QR handoff, and more.
+
+Fully separate from `sumsub-mockup` to prevent token/component cross-contamination between Dashboard UI Kit and WebSDK design systems.
+
+**What's included:**
+- `skills/websdk-mockup/SKILL.md` — skill entry point with all critical rules (pre-flight, where-to-create, library check, reference reads, WebSDK-specific design system rules)
+- `skills/websdk-mockup/reference/variables.md` — complete WebSDK token reference (spacing, border-radius, text, background, border, icon variables) with `importVariableByKeyAsync` keys, Light/Dark hex values, and critical differences from Dashboard DS
+- `skills/websdk-mockup/reference/base-components.md` — full atom/molecule catalog from Base components library (`Gh2QlRTetoSQdlK9G1nDq4`): 35+ categories with component set keys and variant details
+- `skills/websdk-mockup/reference/organisms.md` — full organism catalog from Organisms library (`8VpSRNe9ur7SBctw0JrtOE`): 20+ pages covering all WebSDK screen types
+
+**Key WebSDK design system rules enforced:**
+- Font: **Manrope** (not Geist)
+- Icon tokens: **`semantic/icons/*`** (PLURAL — not `semantic/icon/*`)
+- Spacing prefix: **`semantic/spacing/*`** (not bare `spacing/*`)
+- Border-radius prefix: **`semantic/border-radius/*`** (not bare `border-radius/*`)
+- Dark shell: outer container is always `#20252c` even in Light mode — this is correct, not a bug
+- Color mode keys: Light = `1425:0`, Dark = `1425:1`
+
+---
+
 ## v3.63.2 — 2026-04-28
 Patch: white fill Rule #6 not enforced for TM Pattern 4 content frames.
 
