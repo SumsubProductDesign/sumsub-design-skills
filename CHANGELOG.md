@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.62.0 — 2026-04-28
+Transaction Monitoring added as a first-class product context — 8 TM Figma files scanned, layout patterns and component catalog documented, skill wired up with required-reads and audit checks.
+
+- **New reference/tm-layout-patterns.md.** 6 TM layout patterns with exact dimensions, assembly recipes, and decision tree:
+  - Pattern 1 — Transactions table: Sidebar 257px, 1440×900 (standard DS pattern)
+  - Pattern 2 — Settings/Rules: **Sidebar 276px** (TM-specific wider sidebar), 1440×956
+  - Pattern 3 — Rule editor: Header Full Screen Page 1440×64, Main 1000px + Settings panel 440px, no sidebar
+  - Pattern 4 — Transaction detail: **1920px canvas** (not 1440), no sidebar, `Header/Finance` 144px + Body: Main 1412 + Right 380; responsive breakpoints at 1680/1536/1440/1280
+  - Pattern 5 — Txn Networks case: **1681px canvas**, no sidebar, Left 1316 + Right panel 364
+  - Pattern 6 — Legacy VASPs: 1920px with old `*Menu*/Basic` 281px sidebar (avoid for new work)
+- **New reference/tm-component-catalog.md.** Full scan of TM Components library (`jH0zp9iwzizayCPZNggytx`) — 65 importable components across 5 pages: General + Finance (headers, transaction details, AML checks, matched rules, customer cards, notes, events), Travel rule (beneficiary/originator/Chainalysis), Crypto (Chainalysis/Elliptic/TRM Labs screening), Non-finance, Analytics tab (charts, status overview, relations map).
+- **sumsub-mockup/SKILL.md — TM added to required-reads table.** Rule #2 required-reads now includes: "Transaction Monitoring (any TM screen) → tm-layout-patterns.md + tm-component-catalog.md".
+- **sumsub-mockup/SKILL.md — TM added to product reference table** (Rule #14 section).
+- **sumsub-mockup/SKILL.md — productContext extended with `"tm"`.** New audit block for `productContext === "tm"`: validates sidebar width (257 or 276, anything else = hard fail with pattern hint), validates no-sidebar canvas width (1440/1920/1681 — anything else = hard fail), checks for `Header/Finance` instance on 1920px screens.
+- **Gotchas documented:** TM Settings/Rules use 276px sidebar (not standard 257px); Transaction detail is 1920px canvas (not 1440px); Rule editor has no sidebar; Transaction Networks uses custom 1681px canvas.
+
 ## v3.61.0 — 2026-04-28
 Hard-fail audit for Case Management Pattern B (Case detail page) — caught from a manual rebuild after v3.60 mockup placed components at the wrong positions. Skill had the pattern documented in `case-management-pattern.md` but no audit gate, so the mockup shipped with five layout violations.
 
