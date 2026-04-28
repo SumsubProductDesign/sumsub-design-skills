@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.60.0 — 2026-04-28
+Caught from another Rules list build (v3.59 audit-PASSED): two cells with text overflowing past the column boundary into the neighboring column. Cells were 193px wide; texts were 224px and 244px ("Velocity threshold — 30 day rolling", "Sanctions screening bypass detection"). Skill never applied truncation to populated cells, and audit had no overflow check.
+
+- **New audit 7.43 — Table cell text overflow.** Walks every visible cell in every Table Starter, finds visible TEXT nodes whose width exceeds `cell.width - 12px` AND have `textTruncation !== "ENDING"`. Flags with the exact fix instruction: walk up to "Text + button" wrapper FRAME, set `layoutSizingHorizontal = "FILL"`; on the TEXT node set `textAutoResize = "HEIGHT"`, `layoutSizingHorizontal = "FILL"`, `textTruncation = "ENDING"`.
+- **"Text Overflow Fix" section rewritten** as a mandatory defensive pattern: apply the truncation chain to EVERY populated cell, not just cells where overflow is observed. The skill doesn't know what real content users will paste in — defensive truncation prevents future overflow when text gets longer. Includes a copy-paste `applyTruncationToCell()` helper plus a per-cell-type wrapper FRAME name reference (Text Regular → `Text + button`, ID → `Text`, Date+time → `Date` / `Time` sub-frames).
+
 ## v3.59.0 — 2026-04-27
 Two issues from the Billing build (file `kHQyyYdPZjEyrSahRmBLUr`):
 

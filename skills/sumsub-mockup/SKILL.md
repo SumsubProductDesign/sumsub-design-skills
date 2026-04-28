@@ -1438,6 +1438,49 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.43. Table cell text overflow — text wider than its containing cell.
+   // Observed (Rules list build, v3.59): Row 7 col 1 text "Velocity threshold —
+   // 30 day rolling" was 224px wide in a 193px cell; Row 8 col 1 text
+   // "Sanctions screening bypass detection" was 244px in 193px. Visual overflow
+   // because TEXT had textAutoResize=WIDTH_AND_HEIGHT and parent "Text + button"
+   // frame was HUG, both growing past the cell's bounded width.
+   {
+     const tables = root.findAll(n => n.type === "INSTANCE" && /Table Starter/i.test(n.name));
+     for (const tbl of tables) {
+       const rows = (tbl.children || []).filter(c => c.name === "Table Row" && c.visible);
+       for (let ri = 0; ri < rows.length; ri++) {
+         const row = rows[ri];
+         const cells = row.children?.[0]?.children || [];
+         for (let ci = 0; ci < cells.length; ci++) {
+           const cell = cells[ci];
+           if (!cell || !cell.visible) continue;
+           // visible-chain check (use root, not container, to respect hidden grand-parents)
+           let cur = cell;
+           let visChain = true;
+           while (cur && cur !== root) {
+             if (cur.visible === false) { visChain = false; break; }
+             cur = cur.parent;
+           }
+           if (!visChain) continue;
+           const cellW = cell.width || 0;
+           // Find any TEXT inside that overflows cell width (account for typical 12px padding each side)
+           const texts = cell.findAll(n => n.type === "TEXT" && n.visible && (n.characters || "").length > 0);
+           for (const t of texts) {
+             // Skip texts inside a hidden sub-instance (visible-chain to cell)
+             let p = t.parent;
+             let inVis = true;
+             while (p && p !== cell) { if (p.visible === false) { inVis = false; break; } p = p.parent; }
+             if (!inVis) continue;
+             // Allow some slack — only flag if text is meaningfully wider than cell
+             if (t.width > cellW - 12 && t.textTruncation !== "ENDING") {
+               issues.push(`Table cell row ${ri + 1} col ${ci} ("${(t.characters || "").slice(0, 40)}") — text width ${Math.round(t.width)}px exceeds cell width ${Math.round(cellW)}px and truncation is OFF. Apply the truncation chain: walk up the immediate "Text + button" / wrapper FRAME and set its layoutSizingHorizontal = "FILL"; on the TEXT node set textAutoResize = "HEIGHT", layoutSizingHorizontal = "FILL", textTruncation = "ENDING".`);
+             }
+           }
+         }
+       }
+     }
+   }
+
    // 7.42. Tab Basic — extra default-text items still visible.
    // Observed (Rules list build, v3.57): Tab Basic has 12 .Tab Basic / Item
    // children; skill renamed the first 4 but left items 5-11 with defaults
@@ -2089,35 +2132,81 @@ cellStatus.setProperties({
 
 ---
 
-## Text Overflow Fix
+## Text Overflow in Table Cells — apply truncation chain to EVERY visible cell
 
-When text in cells extends beyond boundaries:
+**Rule (mandatory):** after populating any `*Table Starter*` data row, walk every visible Text Regular / ID / Date cell and apply the truncation chain. Don't wait until you observe overflow on specific cells — the data hasn't shipped yet, so you don't know what real content users will paste in. Apply defensively to every cell.
 
-### Root Cause
-Intermediate frames have `layoutSizingHorizontal: "HUG"` — text grows beyond cell width.
+### Why this is a recurring bug
 
-### Fix Algorithm
+Table Starter cells are FIXED-width (column width set by Table Starter variant). Inside, the cell contains nested frames that default to HUG: `Cell Content > Content > 1st line Content > Text > Text + button > [TEXT node]`. The TEXT defaults to `textAutoResize = "WIDTH_AND_HEIGHT"` and `textTruncation = "DISABLED"`. With long content, "Text + button" HUGs past its parent "Text" (FILL/FIXED at column width), and the text overflows visually past the cell boundary into the neighboring column.
+
+Observed (Rules list build, v3.59): cells of width 193px contained texts up to 244px wide. Audit reported PASSED because there was no overflow check.
+
+### Fix Algorithm — per cell
+
 ```js
-// 1. Content frame (VERTICAL, direct child of cell) → FILL
-contentFrame.layoutSizingHorizontal = "FILL";
+// 1. Walk up from the inner TEXT, set every HUG wrapper to FILL.
+//    The visible chain in a Text Regular cell is typically:
+//    Cell Content → Content → 1st line Content → Text → Text + button → text layer
+const cell = row.children[0].children[colIndex];
+const textBtnFrame = cell.findOne(n => n.type === "FRAME" && n.name === "Text + button");
+const textLayer   = textBtnFrame?.findOne(n => n.type === "TEXT" && n.name === "text layer");
 
-// 2. Text frame (HORIZONTAL, child of Content) → FILL
-textFrame.layoutSizingHorizontal = "FILL";
+if (textBtnFrame) textBtnFrame.layoutSizingHorizontal = "FILL";
 
-// 3. Text layer (TEXT node) → HEIGHT + FILL + truncation
-textLayer.textAutoResize = "HEIGHT";
-textLayer.layoutSizingHorizontal = "FILL";
-textLayer.textTruncation = "ENDING";
+// 2. On the TEXT node:
+if (textLayer) {
+  textLayer.layoutSizingHorizontal = "FILL";
+  textLayer.textAutoResize = "HEIGHT";       // grows vertically when content wraps
+  textLayer.textTruncation = "ENDING";       // truncate with ellipsis if vertical wrap is also bounded
+}
 ```
 
-### Applies to:
-- **ID cells:** Cell → Content → Text → text layer
-- **Entity cells:** Cell → Content → "Text + button" → text layer
+### Applies to all cell types — adjust the wrapper-frame name
 
-### Important:
-- `resize()` doesn't work on nodes inside auto-layout instances — use `layoutSizingHorizontal/Vertical`
-- `textAutoResize = "WIDTH_AND_HEIGHT"` ignores truncation
-- `maxLines` is unsupported in some contexts
+| Cell Type | Wrapper FRAME (HUG → FILL) | TEXT node name |
+|---|---|---|
+| Text Regular | `Text + button` | `text layer` |
+| ID | `Text` (inside Content) | `text layer` |
+| Date + time | `Date` and `Time` sub-frames | inner TEXT |
+| Status | (status uses *Status* instance — no truncation needed) | — |
+
+### Important constraints
+
+- `resize()` doesn't work on nodes inside auto-layout instances — use `layoutSizingHorizontal/Vertical` instead.
+- `textAutoResize = "WIDTH_AND_HEIGHT"` **ignores** truncation. Must be `"HEIGHT"` (or `"TRUNCATE"` on newer Figma).
+- `maxLines` is unsupported in some Figma contexts — rely on `textTruncation = "ENDING"` + bounded width.
+- The TEXT node MUST be inside an auto-layout chain that bounds its width. If a parent in the chain stays HUG, the FILL on the TEXT node won't bound it.
+
+### Defensive pattern — apply to every populated cell
+
+```js
+function applyTruncationToCell(cell) {
+  const wrapper = cell.findOne(n =>
+    n.type === "FRAME" && (n.name === "Text + button" || n.name === "Text")
+  );
+  if (!wrapper) return;
+  try { wrapper.layoutSizingHorizontal = "FILL"; } catch(e) {}
+  const t = wrapper.findOne(n => n.type === "TEXT" && n.name === "text layer");
+  if (!t) return;
+  try {
+    t.layoutSizingHorizontal = "FILL";
+    t.textAutoResize = "HEIGHT";
+    t.textTruncation = "ENDING";
+  } catch(e) {}
+}
+
+// Apply after populating each row's data
+const rows = table.children.filter(c => c.name === "Table Row" && c.visible);
+for (const row of rows) {
+  for (const cell of row.children[0].children) {
+    if (!cell.visible) continue;
+    applyTruncationToCell(cell);
+  }
+}
+```
+
+Audit 7.43 flags any visible TEXT inside a Table Starter cell that's wider than the cell minus 12px padding AND has `textTruncation !== "ENDING"`.
 
 ---
 
