@@ -1,12 +1,14 @@
 # Installation Guide — Sumsub Design Skills
 
-Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow. No terminal required — everything runs through Claude Desktop's Bash tool.
+Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow. No terminal required — everything runs through the **Claude Code** tab in Claude Desktop.
+
+> **Important:** All steps that say "in Claude" or "in Claude Desktop" mean the **Claude Code tab** — the tab labeled **"Claude Code"** inside Claude Desktop (not a regular chat tab). That's where the Bash tool and `/skill` commands are available.
 
 ## Contents
 
 - [Prerequisites](#prerequisites)
 - [Part 1 — Install the plugin](#part-1--install-the-plugin)
-  - [Easy path — from Claude Desktop (recommended)](#easy-path--from-claude-desktop-recommended)
+  - [Easy path — from Claude Code tab (recommended)](#easy-path--from-claude-code-tab-recommended)
   - [Terminal path](#terminal-path)
     - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
     - [Step 2 — Install the plugin](#step-2--install-the-plugin)
@@ -33,11 +35,11 @@ Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow
 
 ## Prerequisites
 
-1. **Claude Desktop** — https://claude.ai/download (download and install like any app). Ship the `claude` CLI bundled for Bash access.
+1. **Claude Desktop** — https://claude.ai/download (download and install like any app). Ships the `claude` CLI bundled for Bash access.
 2. **Figma Desktop** — https://www.figma.com/downloads/ (needed for authentication and viewing designs)
 3. **Figma account** with access to Sumsub libraries (Base components, Organisms, Assets)
 
-That's it. No separate CLI install needed — Claude Desktop's Bash tool runs the `claude` commands directly.
+That's it. No separate CLI install needed — the **Claude Code** tab's Bash tool runs the `claude` commands directly.
 
 > **Don't have the `claude` command in Bash?** See [Troubleshooting → `claude` not found](#bash-tool-says-claude-command-not-found-or-claude-is-not-recognized) for a one-time CLI install fallback.
 
@@ -47,10 +49,10 @@ That's it. No separate CLI install needed — Claude Desktop's Bash tool runs th
 
 Two paths — pick whichever you prefer.
 
-### Easy path — from Claude Desktop (recommended)
+### Easy path — from Claude Code tab (recommended)
 
-1. Open any chat in Claude Desktop.
-2. Paste this prompt in Claude Code tab:
+1. Open Claude Desktop and switch to the **Claude Code** tab (labeled "Claude Code" at the top — not a regular chat tab).
+2. Start a new conversation and paste this prompt:
 
    ```
    Install the sumsub-design plugin: run
@@ -59,7 +61,7 @@ Two paths — pick whichever you prefer.
    via Bash and report the output.
    ```
 
-3. Claude runs both commands via its Bash tool and shows the output. Look for `✔ Successfully added marketplace: sumsub-design` and `✔ Successfully installed plugin: sumsub-design@sumsub-design`.
+3. Claude Code runs both commands via its Bash tool and shows the output. Look for `✔ Successfully added marketplace: sumsub-design` and `✔ Successfully installed plugin: sumsub-design@sumsub-design`.
 4. Proceed to [Step 3 — Restart Claude Desktop](#step-3--restart-claude-desktop) below.
 
 If the Bash tool fails with `claude: command not found`, see [Troubleshooting → `claude` not found](#bash-tool-says-claude-command-not-found-or-claude-is-not-recognized) for the one-time CLI install, then retry the prompt above.
@@ -96,19 +98,19 @@ Done. The plugin bundles:
 - 4 skills (`sumsub-mockup`, `sumsub-specs-docs`, `sumsub-screen-annotations`, `sumsub-design-review`)
 - Figma remote MCP server — registered automatically
 
-On first use Claude will prompt you to authenticate with Figma.
+On first use Claude Code will prompt you to authenticate with Figma.
 
 ---
 
 ## Verify
 
-In Claude Desktop's Code tab, open a new chat and type:
+In the **Claude Code** tab, open a new conversation and type:
 
 ```
 /sumsub-design:sumsub-mockup create an applicant list page
 ```
 
-Claude should start the skill — Figma opens and a mockup appears.
+Claude Code should start the skill — Figma opens and a mockup appears.
 
 > **Note:** the `/sumsub-design:…` autocomplete may not show up in the dropdown — type the command manually and press Enter.
 
@@ -122,6 +124,8 @@ Claude should start the skill — Figma opens and a mockup appears.
 | `/sumsub-design:sumsub-specs-docs [component]` | Generates a Specs page with component anatomy |
 | `/sumsub-design:sumsub-screen-annotations` | Adds Scenarios annotations above every screen on the current page |
 | `/sumsub-design:sumsub-design-review` | Audits a mockup for design system compliance |
+
+All commands are entered in the **Claude Code** tab.
 
 ---
 
@@ -150,7 +154,7 @@ Return the raw JSON — don't fix anything, I want the issue list first.
 
 ## Updating
 
-**Easiest way — from Claude Desktop, no terminal:** see [`UPDATE.md`](UPDATE.md) — one sentence in chat, Claude runs the commands for you.
+**Easiest way — from the Claude Code tab, no terminal:** see [`UPDATE.md`](UPDATE.md) — one sentence in the Claude Code tab, and Claude Code runs the commands for you.
 
 Below are the other ways (terminal-based) if you prefer them or the Desktop flow fails.
 
@@ -199,7 +203,7 @@ If you prefer a UI-ish flow:
 5. Exit with `/quit` or `Ctrl+C`.
 6. Quit and reopen Claude Desktop.
 
-Note: `/plugin` works **only inside the `claude` terminal REPL**, not in Claude Desktop's Code tab.
+Note: `/plugin` works **only inside the `claude` terminal REPL**, not in the Claude Code tab inside Claude Desktop.
 
 ### Option C — Manual two commands (no alias, no REPL)
 
@@ -226,7 +230,7 @@ claude plugin marketplace remove sumsub-design
 
 ### `/plugin isn't available in this environment` in Claude Desktop
 
-Claude Desktop's Code tab doesn't support `/plugin` commands directly — use the [Easy path from Part 1](#easy-path--from-claude-desktop-recommended) (for install) or [UPDATE.md](UPDATE.md) (for updates). Both use the Bash tool to run the underlying `claude plugin …` commands without you ever touching a terminal.
+The **Claude Code** tab doesn't support `/plugin` commands directly — use the [Easy path from Part 1](#easy-path--from-claude-code-tab-recommended) (for install) or [UPDATE.md](UPDATE.md) (for updates). Both use the Bash tool to run the underlying `claude plugin …` commands without you ever touching a terminal.
 
 ### Bash tool says `claude: command not found` or `'claude' is not recognized`
 
@@ -253,7 +257,7 @@ On Windows the installer often doesn't auto-add to PATH. Run once more in PowerS
 
 Then **quit Claude Desktop fully and reopen it** so it picks up the new PATH.
 
-**Authenticate once** — in a terminal, run `claude` and sign in via the browser flow. After that return to Claude Desktop and retry the install prompt.
+**Authenticate once** — in a terminal, run `claude` and sign in via the browser flow. After that return to the Claude Code tab and retry the install prompt.
 
 ### `Failed to clone marketplace repository: SSH host key is not in your known_hosts file`
 
@@ -284,7 +288,7 @@ When asked `Are you sure you want to continue connecting?`, type `yes` and press
 
 1. Make sure Figma Desktop is open and you're logged in
 2. Run `sumsub-update` (or the manual update commands), restart Claude Desktop
-3. Ask Claude in a new chat: "what MCP tools do you have available?" — response should include tools prefixed with `figma_`
+3. Ask Claude Code in a new conversation: "what MCP tools do you have available?" — response should include tools prefixed with `figma_`
 
 ### A skill runs but fails with an error
 
