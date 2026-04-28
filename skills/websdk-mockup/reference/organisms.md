@@ -218,10 +218,15 @@ modal.resize(375, 660);  // or 375×812 for full-screen
 
 | Organism(s) | Screen type | Desktop size | Mobile size |
 |---|---|---|---|
-| Applicant Data, Email/Phone Verification, Proof of Address/Identity, Steps, Tips, Liveness | Standard Widget | 1440×960 | 375×812 |
-| Camera screens | Widget Type=Camera | 1440×960 | 375×650 (+ 812×375 landscape) |
-| Guidelines, List, QR, Preview | Modal overlay | 1440×800–918 + Modal/Full/Desktop | Modal/Full/Mobile standalone |
-| Statuses | No Examples section | — | — |
+| Welcome, Applicant Data, Document Type, Email Verification, Phone Verification, Proof of Address, Proof of Identity, Steps, Tips, Accesses | Standard Widget | 1440×960 | 375×812 |
+| Camera (POI) | Widget Type=Camera | 1440×960 | 375×650 (+ 812×375 landscape) |
+| Liveness (Selfie) | Widget Type=Camera | 1440×960 | 375×650 |
+| Preview (Review) | Standard Widget (content) | 1440×960 | — |
+| Guidelines, List | Modal overlay | 1440×800 + Modal/Full/Desktop | Modal/Full/Mobile standalone |
+| QR \| to phone | Modal overlay (taller) | 1440×918 + Modal/Full/Desktop | — (desktop only) |
+| Preview (modal) | Modal overlay | 1440×800 + Modal/Full/Desktop | Modal/Full/Mobile standalone |
+| Tips (modal variant) | Modal overlay | 1440×800 + Modal/Full/Desktop | — |
+| Statuses (Step + Final) | Standard Widget | 1440×960 | 375×812 |
 
 ---
 
@@ -286,6 +291,12 @@ Size: 343×724 (IOS/Android) or Desktop variant.
 
 Same Platform/Browser matrix as Camera/Location instructions.
 
+### Example Screens — Accesses
+
+| Example | Viewport | W × H | Widget | Organism | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `Accesses` (`3c05350d6baa4bb621e77700f41887c6cb5f7b80`) | `Access=Camera` |
+
 ---
 
 ## Page: Applicant Data
@@ -307,6 +318,12 @@ const comp = await figma.importComponentByKeyAsync("45653ee601d3f64b01ac3d32fbfd
 const inst = comp.createInstance();
 inst.setProperties({ "Tax#1686:0": true, "Alert#3228:1": false });
 ```
+
+### Example Screens — Applicant Data
+
+| Example | Viewport | W × H | Widget | Organism | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `Applicant Data` COMP (`45653ee601d3f64b01ac3d32fbfdd171c7593895`) | *(single component, no variants)* |
 
 ---
 
@@ -395,6 +412,15 @@ Full-screen WebSDK illustration. Both variants: **566×737**.
 |---|---|---|
 | `Type` | VARIANT | Sumsub / General |
 
+### Example Screens — Camera
+
+> Camera screens use `Widget Type=Camera`. The camera organism goes into the `↳ Camera slot#10434:8` INSTANCE_SWAP, not the Content SLOT.
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Camera | Desktop Camera | 1440×960 | `Type=Camera` | `POI camera Desktop` (`228282dceda135813ddbe0a29bc0447d6f13b0bc`) | `Step=Camera, Type=ID front side` |
+| Mobile — Camera | Mobile Camera | 375×650 | `Type=Camera` | `POI camera Mobile` (`58be4845a20470a7258f4225cbfbfe5006e3f4a6`) | `Step=Camera, Type=ID front side` |
+
 ---
 
 ## Page: Document Type
@@ -432,6 +458,12 @@ if (titleNode) {
 }
 ```
 
+### Example Screens — Document Type
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `Document Type` (`442dd62bd28ea1eade633911188ee851951355f6`) | `Type=Default` |
+
 ---
 
 ## Page: Email Verification
@@ -468,6 +500,13 @@ inst.setProperties({
 });
 ```
 
+### Example Screens — Email Verification
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Email input | Desktop Content | 1440×960 | `Type=Content` | `Input` email (`99aa5f1de6c064a55cc741fdef95ab758e26dcb7`) | `Type=Email Input, Status=Default` |
+| Desktop — Code entry | Desktop Content | 1440×960 | `Type=Content` | `Code` email (`4df460c0223e69547caf98f029d84399472b4c41`) | `Status=Default, Type=Timer` |
+
 ---
 
 ## Page: Guidelines
@@ -487,6 +526,15 @@ Full-screen guidelines page for Liveness, ID, or PoA.
 | `Type` | VARIANT | ID / Liveness / PoA |
 
 > No exposed text properties. All guideline text items ("Good lighting", "Correct facial positioning", etc.) are internal non-exposed text nodes.
+
+### Example Screens — Guidelines
+
+Guidelines always appear in a **Modal overlay** — never directly in a Widget Content slot.
+
+| Example | Viewport | W × H | Structure |
+|---|---|---|---|
+| Desktop | Desktop Modal | 1440×800 | Outer frame(1440×800) → Widget(1440×800, Type=Content) bg + Modal/Full/Desktop(`61c1659962a2ee584b7750cd6c588bdf8345599e`, 726×776 at x=357) → `Guidelines`(`ee868b662794e83115465a04bd7c253d4c60e79f`) `Type=Liveness` |
+| Mobile | Mobile Modal | 375×812 | `Modal/Full/Mobile`(`80881e81eb92ac7328d868a7d2eefe7a5066aff6`) standalone → `Guidelines` `Type=Liveness` |
 
 ---
 
@@ -516,6 +564,15 @@ inst.setProperties({
   "Text#2214:12": "Nothing found",
 });
 ```
+
+### Example Screens — List
+
+List always appears in a **Modal overlay**.
+
+| Example | Viewport | W × H | Structure |
+|---|---|---|---|
+| Desktop | Desktop Modal | 1440×800 | Outer frame(1440×800) → Widget(1440×800, Type=Content) bg + Modal/Full/Desktop(`61c1659962a2ee584b7750cd6c588bdf8345599e`) → `List`(`1db8ac6af01da0cefa64ec1c83cf735d1e0ab113`) `Type=Country` |
+| Mobile | Mobile Modal | 375×812 | `Modal/Full/Mobile`(`80881e81eb92ac7328d868a7d2eefe7a5066aff6`) standalone → `List` `Type=Country` |
 
 ---
 
@@ -575,6 +632,15 @@ Short video digit/phrase overlay. Used inside liveness screens.
 | `State` | VARIANT | Digits / Phrase / Loading |
 | `Slot#2892:0` | SLOT | — |
 
+### Example Screens — Liveness
+
+> Liveness uses `Widget Type=Camera`. The camera organism goes into the `↳ Camera slot#10434:8` INSTANCE_SWAP.
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Camera | 1440×960 | `Type=Camera` | `Selfie Desktop` (`f084df56919e9d34fdfba8bd8a7d0da0013938ee`) | `Type=Liveness, State=In progress - active` |
+| Mobile | Mobile Camera | 375×650 | `Type=Camera` | `Selfie Mobile` (`63b5ee9d5c0ba84081f36bdc1ea9fea97a72dd59`) | `Type=Liveness, State=In progress - active` |
+
 ---
 
 ## Page: Non-doc
@@ -627,6 +693,12 @@ Phone code entry screen. Size: **480×541–547**.
 | `Status` | VARIANT | Default / Error |
 | `Type` | VARIANT | Timer / Resend Link / Status |
 | `Sumsub ID Consent#1575:14` | BOOLEAN | false |
+
+### Example Screens — Phone Verification
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Phone input | Desktop Content | 1440×960 | `Type=Content` | `Input` phone (`e388d5ae8568912654305ba2f771ce7f6453fdee`) | `Type=Phone Number, Status=Default` |
 
 ---
 
@@ -702,6 +774,14 @@ Upload status overlay (Loading/Error). Size: **375×340**.
 
 > `Property 1/2/3` are locked to single values ("Mobile", "1", "2"). Only `Property 4` is useful.
 
+### Example Screens — Preview
+
+| Example | Viewport | W × H | Widget / Structure | Organism | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Review content | Desktop Content | 1440×960 | `Type=Content` Widget | `Review` (`09b8c6028793eab17ded1bde19087c3ee4d6e0bd`) | `Type=Video`, `Fastfail=False` (also Selfie/ID variants) |
+| Desktop — Modal (Preview/Full) | Desktop Modal | 1440×800 | Outer frame + Widget(1440×800) bg + Modal/Full/Desktop | `Preview / Full` (`303f62c47b324075ed306467e44c4390ae7130fe`) | `Type=Selfie` or `Type=ID front`, `Mobile=False` |
+| Mobile — Modal (Review/Slot) | Mobile Modal | 375×812 | `Modal/Full/Mobile` standalone | `Review / Slot` (`c6ef91d5aee989d399b3c8907da7382d21843644`) | `Type=Selfie` or `Type=ID front`, `Orientation=Mobile` |
+
 ---
 
 ## Page: Proof of Address
@@ -717,6 +797,12 @@ Upload status overlay (Loading/Error). Size: **375×340**.
 |---|---|---|
 | `Type` | VARIANT | Geolocation / Upload |
 | `Mark down#728:0` | BOOLEAN | false |
+
+### Example Screens — Proof of Address
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `PoA` (`f20729d5fc1b62ce03305606ff77e3db44fdab83`) | `Type=Upload` |
 
 ---
 
@@ -735,6 +821,12 @@ Document upload method selection (PoI screen).
 |---|---|---|
 | `Doc type` | VARIANT | One page / Two pages |
 
+### Example Screens — Proof of Identity
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `PoI` (`0d9832d0a09832159dc83af7c50f83fb229c14d1`) | `Doc type=Two pages` |
+
 ---
 
 ## Page: QR | to phone
@@ -750,6 +842,14 @@ QR code component (used for "continue on phone" flow). Size: **192×192**.
 ### `QR` — COMP `706492d301f178184a97dcb2b426a73cf55569ef`
 
 Single QR code display component.
+
+### Example Screens — QR | to phone
+
+The QR flow uses a **Modal overlay** (desktop-only; no mobile example for this page).
+
+| Example | Viewport | W × H | Structure |
+|---|---|---|---|
+| Desktop | Desktop Modal (tall) | 1440×918 | Outer frame(1440×918) → Widget(1440×918, Type=Content) bg + Modal/Full/Desktop(`61c1659962a2ee584b7750cd6c588bdf8345599e`, 726×900 at x=357) → `List`(`1db8ac6af01da0cefa64ec1c83cf735d1e0ab113`) `Type=Country` |
 
 ---
 
@@ -899,6 +999,17 @@ Animated step status screen. All variants: **480×553**.
 > inst.setProperties({ "Title slot#2393:1": titleVariant.id });
 > ```
 
+### Example Screens — Statuses
+
+Section names in source file: `"Step statuses examples"` and `"Final statuses examples"` (non-standard).
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Step status (Default) | Desktop Content | 1440×960 | `Type=Content` | `Step status` (`19f390fb940f29bcc82d764ee732f718ac129874`) | `Status state=Default` |
+| Desktop — Step status (Attention) | Desktop Content | 1440×960 | `Type=Content` | `Step status` (`19f390fb940f29bcc82d764ee732f718ac129874`) | `Status state=Attention` |
+| Desktop — Step status (Error) | Desktop Content | 1440×960 | `Type=Content` | `Step status` (`19f390fb940f29bcc82d764ee732f718ac129874`) | `Status state=Error` |
+| Desktop — Final statuses (Success) | Desktop Content | 1440×960 | `Type=Content` | `Final statuses` (`d3f95404b879e0993ddca2f599e2e5071cdda0ba`) | `Status=Success` |
+
 ---
 
 ## Page: Steps
@@ -917,6 +1028,14 @@ const set = await figma.importComponentSetByKeyAsync("c8893dba74df6506596ffccc6f
 const inst = set.defaultVariant.createInstance();
 inst.setProperties({ "State": "Default", "Sumsub ID#2771:1": false });
 ```
+
+### Example Screens — Steps
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Default | Desktop Content | 1440×960 | `Type=Content` | `Steps NEW` (`c8893dba74df6506596ffccc6f22a407d145e532`) | `State=Default` |
+| Desktop — Resubmission | Desktop Content | 1440×960 | `Type=Content` | `Steps NEW` | `State=Resubmission` |
+| Desktop — Reusable KYC | Desktop Content | 1440×960 | `Type=Content` | `Steps NEW` | `State=Reusable KYC` |
 
 ---
 
@@ -946,6 +1065,13 @@ const set = await figma.importComponentSetByKeyAsync("a4f45db0337fd053bbac9adf11
 const inst = set.defaultVariant.createInstance();
 inst.setProperties({ "Type": "Tips | Liveness", "Alert#1226:0": false });
 ```
+
+### Example Screens — Tips
+
+| Example | Viewport | W × H | Widget / Structure | Organism | Organism variant |
+|---|---|---|---|---|---|
+| Desktop — Tips content | Desktop Content | 1440×960 | `Type=Content` Widget | `Tips` (`a4f45db0337fd053bbac9adf11434aaa53bcd664`) | `Type=Tips\|Liveness` / `ID\|Live Capture` / `Selfie` / `Short Video` |
+| Desktop — Modal (Guidelines) | Desktop Modal | 1440×800 | Outer frame + Widget(1440×800) bg + Modal/Full/Desktop | `Guidelines` (`ee868b662794e83115465a04bd7c253d4c60e79f`) | `Type=Liveness` inside modal |
 
 ---
 
@@ -1082,6 +1208,12 @@ if (titleNode) {
 }
 ```
 
+### Example Screens — Welcome
+
+| Example | Viewport | W × H | Widget | Organism SET key | Organism variant |
+|---|---|---|---|---|---|
+| Desktop | Desktop Content | 1440×960 | `Type=Content` | `Welcome` (`927496fb36399feb71b4304d558be0d37a8fc5a9`) | `Type=Disclaimer` |
+
 ---
 
 ## Sumsub ID — Organisms
@@ -1200,3 +1332,7 @@ Reusable WebSDK header (in playground page). Not available via `importComponentB
 | Email input width | Email Input (375×554) is narrower than Phone Input (480×547) — match to platform |
 | QR WebSDK Header | `Header` COMP key `193b44314fe5c23934fb8e8b842f8dc7a2e66188` returns "not found" from importComponentByKeyAsync in some files |
 | Video Ident Desktop Languages | `Type=Languages` is 320×859 — unusually tall and narrow compared to other Desktop variants |
+| Camera organism via INSTANCE_SWAP | For `Type=Camera` Widget, put organism in `↳ Camera slot#10434:8` INSTANCE_SWAP, NOT in Content SLOT |
+| SECTION children require page nav | `figma.setCurrentPageAsync(page)` must be called before accessing SECTION `.children`; without it the array is empty |
+| Statuses section names | Page "Statuses" uses `"Step statuses examples"` and `"Final statuses examples"` (not the standard `"Examples"`) |
+| QR Modal height | QR page modal overlay uses 1440×918 (taller than standard 1440×800 used for Guidelines/List) |
