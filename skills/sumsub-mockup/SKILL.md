@@ -119,15 +119,24 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    All banned. If the section ends up on a wrong page, you revert (move the section to Drafts) and fix the missing `ensureDraftsPage()` call. Audit check 7.12 verifies root is on a Drafts-named page; it will fail the build if violated.
 
-1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. For known Sumsub products (Flow Builder, Applicant page, Specs) the required libraries are:
+1. **Check libraries BEFORE starting.** Call `get_libraries(fileKey)` to see which Figma libraries are connected. This call is MANDATORY — it must happen before the very first `use_figma` call. For known Sumsub products the required libraries are:
 
    | Product | Required libraries |
    |---|---|
    | Flow Builder | Organisms [Dashboard UI Kit], Base components [Dashboard UI Kit], Assets |
    | Applicant page | Applicant-page-and-Tasks-components (`QKXZwWodIwPVsjAjj4gMnE`), Organisms, Base components, Assets |
    | Table / Detail pages | Organisms, Base components, Assets |
+   | Transaction Monitoring | TM Components (`jH0zp9iwzizayCPZNggytx`), Organisms, Base components, Assets |
 
    If a required library is missing — STOP and ask the user to connect it. Do not proceed with invented structures.
+
+   **⛔ Banned bypass phrases for the library check — if you're about to say any of these, stop and actually call `get_libraries()` first:**
+   - "I'll proceed without checking libraries since this is a standard flow"
+   - "libraries are likely already connected"
+   - "I checked the file earlier" / "libraries were connected in a previous session"
+   - "let me start building and check libraries later"
+   - "skipping library check since I know which components to use"
+   - Any phrasing that implies the library check is optional or already done without evidence of a `get_libraries()` call in THIS session.
 
    **⛔ The "I couldn't find it in search_design_system" excuse is forbidden.** `search_design_system` is keyword-matched and often misses. Before telling the user a component doesn't exist, you MUST:
    1. Read the product's reference file from this plugin's `${CLAUDE_PLUGIN_ROOT}/reference/` folder (see rule #2)
@@ -142,7 +151,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    |---|---|
    | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` |
    | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
-   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` |
+   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` ⚠️ ALSO required: `sumsub-docs-transaction-monitoring.txt` (see Product-docs triggers below) — these are TWO SEPARATE requirements |
    | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
    | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
 
@@ -180,6 +189,12 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    | transaction monitoring, TM, rule, travel rule, crypto, VASP, wallet, payment flagging | `sumsub-docs-transaction-monitoring.txt` |
    | case management, queue, compliance officer, blueprint, SAR, STR, investigation | `sumsub-docs-case-management.txt` |
    | workflow, verification level, verification step, automation, marketplace, condition, action, review step | `sumsub-docs-workflow.txt` |
+
+   > ⚠️ **TM has TWO mandatory read groups that are completely different and neither substitutes for the other:**
+   > - **Group A — Figma layout references** (`tm-layout-patterns.md`, `tm-component-catalog.md`): component keys, canvas dimensions, pattern variants, sidebar widths. Tells you *how to build the frame structure*.
+   > - **Group B — Product docs** (`sumsub-docs-transaction-monitoring.txt`): what TM does as a product — rules, risk scoring, VASP screening, travel rule, crypto typologies, monitoring modes. Tells you *what content, labels, fields, and flows to put in the mockup*.
+   >
+   > **Reading Group A does NOT satisfy Group B.** If your task involves any TM keyword, you MUST read BOTH groups. Saying "I read `tm-layout-patterns.md`" when asked about product-docs compliance is a build violation equivalent to not reading either file. If your build log for a TM task doesn't show `sumsub-docs-transaction-monitoring.txt` — the build is non-compliant.
 
    **If the docs say the feature works differently than the user's brief describes**, the docs win. Build the mockup using Sumsub's actual terminology and structure. If the user's brief contradicts the docs meaningfully, STOP and ask before building.
 
@@ -230,15 +245,60 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
 7. **Fill with realistic data — always.** Tables: 10 rows with plausible names, dates, IDs, statuses (mix, not all "Approved"). Inputs: meaningful label + placeholder. Status badges: realistic distribution. Dates in DS format. NEVER leave default "Table cell", "Label", "Placeholder", "ID" text.
 
-7.5. **Never place new mockups on top of existing ones.** Before `appendChild`-ing your root frame to `figma.currentPage`, find free canvas space to the right of existing frames. Use the `findFreeCanvasSpot()` helper from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`:
+   **TM component instances require explicit text overrides — no component ships with realistic data by default.** For every TM component you create, set properties using `setProperties()` or find the text nodes inside and override them. Required overrides by component type:
 
-   ```js
-   const spot = findFreeCanvasSpot({ width: 1440, height: 900, gap: 200 });
-   root.x = spot.x;
-   root.y = spot.y;
+   | TM Component | Required overrides |
+   |---|---|
+   | `Header / Finance` (transaction detail header) | Amount + currency (e.g. `"$12,450.00"`), Transaction ID (e.g. `"TXN-2025-00847213"`), Customer name (e.g. `"Aleksei Petrov"`), Direction badge (Send/Receive), Status (e.g. `"In review"`) |
+   | Transaction table rows | Amount + currency (vary per row), Risk score (numeric 0-100, mix of low/med/high), Sender name/IBAN, Receiver name/IBAN, Date+time, Status (mix: Approved, In review, Rejected, Flagged) |
+   | VASP / counterparty card | VASP name (e.g. `"Binance"`, `"Kraken"`, `"OKX"`), Jurisdiction (e.g. `"EU"`, `"US"`, `"SG"`), Registration ID, Risk level badge |
+   | Rule match / alert rows | Rule name (e.g. `"High-value crypto transfer"`, `"Structuring pattern detected"`), Match count, Triggered at date |
+   | Travel rule fields | Originator name + address, Beneficiary name + address, VASP name, Transaction reference |
+   | Risk score widget | Numeric score (e.g. `"72"`), Risk label, Contributing factors (2–3 specific items like `"Known risky jurisdiction"`, `"New counterparty"`) |
+
+   Data must be diverse across rows — never all the same amount, never all the same status. Use a realistic mix of crypto and fiat amounts, multiple currencies (USD, EUR, BTC, ETH, USDT), varied risk levels, and a realistic date range (within the past 30 days).
+
+7.5. **Every root frame MUST live inside a SECTION — never directly on the page.** This is a hard rule with no exceptions. When the build script does `figma.currentPage.appendChild(rootFrame)`, it's a violation. The correct structure is always:
+
+   ```
+   figma.currentPage
+   └── SECTION  (fill #404040, name ending in "(made by Claude)")
+       └── Root frame  (your screen at x=40, y=160 inside the section)
    ```
 
-   If you're not using the helpers (writing custom code), replicate the logic: scan `figma.currentPage.children`, find the rightmost frame's `x + width`, place the new root at that value + 200px gap. Never default to (0, 0) on a page that already has frames — your mockup will silently overlap the previous one.
+   **`findFreeCanvasSpot()` positions the SECTION, not the root frame.** The helper returns where the SECTION should sit on the canvas. Your root frame's x/y inside the section is a fixed offset (40, 160 for single screens; per the grid formula for multi-screen). Do not use `findFreeCanvasSpot()` to position the root frame directly on the page — that skips the section entirely.
+
+   **Correct assembly order:**
+
+   ```js
+   // 1. Create section FIRST
+   const section = figma.createSection();
+   section.name = "TM Transaction detail (made by Claude)";
+   section.fills = [{ type: "SOLID", color: { r: 0x40/255, g: 0x40/255, b: 0x40/255 } }];
+
+   // 2. Find free spot on canvas — this positions the SECTION
+   const spot = findFreeCanvasSpot({ width: 1600, height: 1060, gap: 200 });
+   section.x = spot.x;
+   section.y = spot.y;
+   figma.currentPage.appendChild(section);
+
+   // 3. Build root frame(s) and append INSIDE the section
+   const root = figma.createFrame();
+   // ...configure root...
+   section.appendChild(root);
+   root.x = 40;   // offset inside the section, NOT page coordinates
+   root.y = 160;  // leave room for annotations above
+
+   // 4. Size the section to fit its contents
+   section.resizeWithoutConstraints(root.width + 80, root.height + 200);
+   ```
+
+   **Banned patterns:**
+   - `figma.currentPage.appendChild(root)` — root frame directly on page
+   - `root.x = spot.x; root.y = spot.y` when spot came from `findFreeCanvasSpot()` — misusing the helper
+   - Appending to page first, then "moving into section later" — audit reads structure, not intent
+
+   Audit check 7.45 verifies that the root frame's direct parent is a SECTION (not the PAGE itself). If it fires, the frame was appended to the page directly — fix by wrapping it in a section and removing the direct page child.
 
 7.6. **Multi-screen layout — grid, not one long row.** When building ≥4 screens for a single task, arrange them in a grid inside the SECTION, not in a single horizontal row. 6 screens × 1440px = 9000+ px wide and unreviewable. Use 3 or 4 columns:
 
@@ -274,9 +334,18 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    If you're creating multiple sections on a page, all of them get `#404040` and all of them get the `(made by Claude)` suffix. The page canvas itself should be `#1e1e1e` (darker) — that's a figma.currentPage setting, not the section.
 
-7.8. **Bind every non-zero spacing, gap, radius value to a design token — no raw numbers.**
+7.8. **Bind every non-zero spacing, gap, radius value to a design token — no raw numbers. This is a BUILD-TIME requirement, not a post-audit cleanup.**
 
    When you write `frame.paddingLeft = 24` or `frame.cornerRadius = 8`, you're shipping a hardcoded value. It looks fine visually but doesn't respond to DS updates, and any reviewer comparing tokens sees the number as a "break". Sumsub's convention: custom frames always bind these values to variables.
+
+   > ⚠️ **If audit check 7.16 fires** (unbound spacing or radius found), it means the BUILD SCRIPT was wrong — it did not include the `bindSpacing`/`bindRadius` calls. The correct fix is to rewrite the build script so the initial `use_figma` call does the binding. **Applying the binding in a separate post-audit `use_figma` call is not acceptable** — it means you shipped an incomplete build and are patching it after the fact. The build script must be self-complete: a single `use_figma` call that produces a fully token-bound result.
+   >
+   > **Banned patterns:**
+   > - "I'll bind the tokens after the audit runs"
+   > - "Binding spacing now as a cleanup step"
+   > - Running `use_figma` to build, then a second `use_figma` whose only job is fixing spacing/radius binding
+   >
+   > The only acceptable post-audit `use_figma` call is for functional changes the user requested after seeing the first build. Spacing/radius binding was always a requirement — doing it post-audit means it was skipped initially.
 
    **Spacing variables** (import via `figma.variables.importVariableByKeyAsync`, bind via `setBoundVariable`):
 
@@ -1940,6 +2009,20 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
            issues.push(`TM Pattern 4 (Transaction detail, 1920px): expected a 'Header / Finance' instance (TM-specific 144px header) — not found. Import key 1fcc7d73759e1feaa9c2e4af4b487344ba398fcb.`);
          }
        }
+     }
+   }
+
+   // 7.45. Root frame must be inside a SECTION — never directly on the page.
+   // Rule 7.5: every root frame's direct parent must be a SECTION node (type==="SECTION").
+   // If the parent is the PAGE itself, the build violated Rule 7.5 by appending
+   // the root directly to figma.currentPage without creating a section wrapper.
+   {
+     if (root.parent?.type === "PAGE") {
+       issues.push(
+         `Root frame "${root.name}" is a direct child of the PAGE — it must live inside a SECTION. ` +
+         `Create a section (fill #404040, name ending in "(made by Claude)"), append the root inside it, ` +
+         `and remove it from the page directly (Rule 7.5).`
+       );
      }
    }
 

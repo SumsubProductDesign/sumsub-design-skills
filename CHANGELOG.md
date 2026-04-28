@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.63.0 — 2026-04-28
+Five build violations caught from a TM Transaction Detail test run of v3.62.0. All violations addressed with rule-text reinforcement and a new audit check.
+
+- **[Violation 1] Rule #2 — TM product-docs disambiguation.** Skill was reading `tm-layout-patterns.md` (component keys, canvas sizes) and treating it as satisfying the product-docs read. `sumsub-docs-transaction-monitoring.txt` is a completely separate, mandatory read that covers product domain knowledge (rules, risk scoring, VASP screening, travel rule). Added explicit warning block after the product-docs trigger table clearly stating: Group A (layout refs) and Group B (product docs) are TWO SEPARATE mandatory read requirements; reading Group A does NOT satisfy Group B. Also added ⚠️ marker in the Required reads table for TM row.
+
+- **[Violation 2] Rule #1 — `get_libraries()` not called.** Strengthened Rule #1: added "MANDATORY — must happen before the very first `use_figma` call" language, added TM row to the required-libraries table (`jH0zp9iwzizayCPZNggytx`), and added a list of banned bypass phrases for skipping the library check (e.g. "libraries are likely already connected", "I checked the file earlier").
+
+- **[Violation 3] Rule 7.5 — Root frame placed directly on page, not inside a SECTION.** `findFreeCanvasSpot()` was being misused to position root frames directly on the page. Rewrote Rule 7.5 with explicit language: every root frame MUST live inside a SECTION; `findFreeCanvasSpot()` positions the SECTION, not the frame. Added the correct assembly order code example (create section → get spot → position section → append root inside section → resize section). Added banned patterns. Added **new audit check 7.45** that fires when `root.parent?.type === "PAGE"`.
+
+- **[Violation 4] Rule 7.8 — Spacing binding deferred to post-audit.** Spacing/radius variable binding was done in a separate follow-up `use_figma` call after audit caught it. Added explicit BUILD-TIME language to Rule 7.8 and a ⚠️ warning: if audit 7.16 fires, the build script was incomplete; applying the binding post-audit is not acceptable; a single `use_figma` call must produce a fully token-bound result. Added banned pattern phrases.
+
+- **[Violation 5] Rule #7 — No text overrides on TM component instances.** TM components ship with no data; `setProperties()` was never called on any TM instance (Header/Finance, transaction rows, VASP cards, risk score widgets, etc.). Added TM-specific realistic data table under Rule #7 specifying required overrides for each component type.
+
+---
+
 ## v3.62.0 — 2026-04-28
 Transaction Monitoring added as a first-class product context — 8 TM Figma files scanned, layout patterns and component catalog documented, skill wired up with required-reads and audit checks.
 
