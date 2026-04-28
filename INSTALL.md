@@ -8,7 +8,7 @@ Installs as a Claude Code plugin. Skills + Figma MCP server register in one flow
 
 - [Prerequisites](#prerequisites)
 - [Part 1 — Install the plugin](#part-1--install-the-plugin)
-  - [Easy path — from Claude Code tab (recommended)](#easy-path--from-claude-code-tab-recommended)
+  - [Easy path — from Claude Code tab](#easy-path--from-claude-code-tab)
   - [Terminal path](#terminal-path)
     - [Step 1 — Add the marketplace](#step-1--add-the-marketplace)
     - [Step 2 — Install the plugin](#step-2--install-the-plugin)
@@ -49,7 +49,7 @@ That's it. No separate CLI install needed — the **Claude Code** tab's Bash too
 
 Two paths — pick whichever you prefer.
 
-### Easy path — from Claude Code tab (recommended)
+### Easy path — from Claude Code tab
 
 1. Open Claude Desktop and switch to the **Claude Code** tab (labeled "Claude Code" at the top — not a regular chat tab).
 2. Start a new conversation and paste this prompt:
@@ -230,7 +230,7 @@ claude plugin marketplace remove sumsub-design
 
 ### `/plugin isn't available in this environment` in Claude Desktop
 
-The **Claude Code** tab doesn't support `/plugin` commands directly — use the [Easy path from Part 1](#easy-path--from-claude-code-tab-recommended) (for install) or [UPDATE.md](UPDATE.md) (for updates). Both use the Bash tool to run the underlying `claude plugin …` commands without you ever touching a terminal.
+The **Claude Code** tab doesn't support `/plugin` commands directly — use the [Easy path from Part 1](#easy-path--from-claude-code-tab) (for install) or [UPDATE.md](UPDATE.md) (for updates). Both use the Bash tool to run the underlying `claude plugin …` commands without you ever touching a terminal.
 
 ### Bash tool says `claude: command not found` or `'claude' is not recognized`
 
