@@ -4,6 +4,20 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.61.0 — 2026-04-28
+Hard-fail audit for Case Management Pattern B (Case detail page) — caught from a manual rebuild after v3.60 mockup placed components at the wrong positions. Skill had the pattern documented in `case-management-pattern.md` but no audit gate, so the mockup shipped with five layout violations.
+
+- **New audit 7.44 — Case page Pattern B structural validation.** Trigger: any frame whose first-level INSTANCE child is `Case page header` (component key `070118da7e99...`). Fails on:
+  - Header not at exactly `(0, 0)` with size `1440×88`
+  - Missing left wrapper FRAME (`Frame 270990504`) — the canonical mistake of placing `Case page Overview tab content` directly into root at x=0, w=992 (which stretches the intrinsic-932 component AND skips Container paddings)
+  - Left wrapper not at `(0, 96)` (the 8px gap below the 88px header) or wrong size
+  - Subheader missing OR with wrong paddings (must be `32/32/0/1`) OR wrong alignment (must be `primaryAxisAlignItems = CENTER, counterAxisAlignItems = MAX` — bottom-anchors Tab Basic at y=23)
+  - Container missing OR wrong paddings (must be `L=32, R=24, T=24, B=24`) OR wrong itemSpacing (must be 24)
+  - Right column not at `(992, 96)` — explicit error message names the canonical x=1016 mistake (24px gap BETWEEN columns instead of 24px right margin)
+  - Right column not 424×804
+
+The audit message includes the fix hint inline ("see case-management-pattern.md") so the skill knows where to look. Pattern B-specific because Case page is the only CM screen using this two-level wrapper structure.
+
 ## v3.60.0 — 2026-04-28
 Caught from another Rules list build (v3.59 audit-PASSED): two cells with text overflowing past the column boundary into the neighboring column. Cells were 193px wide; texts were 224px and 244px ("Velocity threshold — 30 day rolling", "Sanctions screening bypass detection"). Skill never applied truncation to populated cells, and audit had no overflow check.
 

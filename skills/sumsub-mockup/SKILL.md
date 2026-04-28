@@ -1481,6 +1481,108 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.44. Case page (Pattern B) — Frame 270990504 wrapper + Container paddings.
+   // Observed (Workflow Builder file build, v3.60): skill placed
+   // `Case page Overview tab content` directly into root at x=0, w=992. The
+   // component's intrinsic width is 932 — placing it raw at 992 stretches it,
+   // AND skips the canonical 32px-left / 24px-right Container paddings. Plus
+   // skill placed right column at x=1016 (24px between columns) instead of
+   // x=992 (24px right margin to screen edge), and skipped the 8px header→content gap.
+   //
+   // Trigger: any frame whose first-level INSTANCE child is `Case page header`
+   // (CM-specific component, key 070118da7e99...).
+   //
+   // Required structure:
+   //   root.children = [
+   //     Case page header (1440×88 @ 0,0),
+   //     Frame 270990504 (992×804 @ 0,96, FRAME, VERTICAL, no padding) {
+   //       Subheader (992×56, padding 32/32/0/1, CENTER/MAX align),
+   //       Container (992×scroll, padding 32/24/24/24, itemSpacing 24)
+   //     },
+   //     Case page right column (424×804 @ 992,96)
+   //   ]
+   {
+     const casePageHeaders = root.findAll(n =>
+       n.type === "INSTANCE" &&
+       n.mainComponent?.parent?.name === "Case page header"
+     );
+     for (const cph of casePageHeaders) {
+       const screen = cph.parent;
+       if (!screen) continue;
+
+       // 7.44a — header position
+       if (Math.abs(cph.x) > 0.5 || Math.abs(cph.y) > 0.5) {
+         issues.push(`Pattern B "${screen.name}": Case page header at (${Math.round(cph.x)},${Math.round(cph.y)}) — must be at (0, 0).`);
+       }
+       if (Math.abs(cph.width - 1440) > 0.5 || Math.abs(cph.height - 88) > 0.5) {
+         issues.push(`Pattern B "${screen.name}": Case page header is ${Math.round(cph.width)}×${Math.round(cph.height)} — must be 1440×88.`);
+       }
+
+       // 7.44b — left wrapper presence + position
+       const leftWrapper = screen.children.find(c =>
+         c.type === "FRAME" && (c.name === "Frame 270990504" || /Frame\s*\d+/.test(c.name))
+       );
+       if (!leftWrapper) {
+         issues.push(`Pattern B "${screen.name}": missing left wrapper FRAME (expected name "Frame 270990504"). Don't drop "Case page Overview tab content" directly into root — it must be wrapped in Frame 270990504 → Container with proper paddings. See case-management-pattern.md.`);
+       } else {
+         if (Math.abs(leftWrapper.x) > 0.5 || Math.abs(leftWrapper.y - 96) > 0.5) {
+           issues.push(`Pattern B "${screen.name}": left wrapper at (${Math.round(leftWrapper.x)},${Math.round(leftWrapper.y)}) — must be (0, 96). Note y=96 leaves 8px gap below the 88px header.`);
+         }
+         if (Math.abs(leftWrapper.width - 992) > 0.5 || Math.abs(leftWrapper.height - 804) > 0.5) {
+           issues.push(`Pattern B "${screen.name}": left wrapper is ${Math.round(leftWrapper.width)}×${Math.round(leftWrapper.height)} — must be 992×804.`);
+         }
+
+         // 7.44c — Subheader inside left wrapper
+         const subheader = leftWrapper.children.find(c => c.type === "FRAME" && /Subheader/i.test(c.name));
+         if (!subheader) {
+           issues.push(`Pattern B "${screen.name}": left wrapper has no Subheader FRAME. Required: HORIZONTAL frame named ".Header Full Screen Page / Subheader", padding 32/32/0/1, CENTER/MAX alignment, containing *Tab Basic* with 6 tabs.`);
+         } else {
+           const padOK = subheader.paddingLeft === 32 && subheader.paddingRight === 32;
+           if (!padOK) {
+             issues.push(`Pattern B "${screen.name}": Subheader paddings are L=${subheader.paddingLeft}/R=${subheader.paddingRight} — must be L=32, R=32.`);
+           }
+           if (subheader.primaryAxisAlignItems !== "CENTER" || subheader.counterAxisAlignItems !== "MAX") {
+             issues.push(`Pattern B "${screen.name}": Subheader alignment is ${subheader.primaryAxisAlignItems}/${subheader.counterAxisAlignItems} — must be CENTER/MAX (anchors Tab Basic to bottom at y=23).`);
+           }
+         }
+
+         // 7.44d — Container inside left wrapper
+         const container = leftWrapper.children.find(c => c.type === "FRAME" && c.name === "Container");
+         if (!container) {
+           issues.push(`Pattern B "${screen.name}": left wrapper has no Container FRAME. Required: VERTICAL frame named "Container", paddings 32/24/24/24, itemSpacing 24, holding "Case page Overview tab content" at width 932.`);
+         } else {
+           const expectedPads = { paddingLeft: 32, paddingRight: 24, paddingTop: 24, paddingBottom: 24 };
+           for (const [side, expected] of Object.entries(expectedPads)) {
+             if (container[side] !== expected) {
+               issues.push(`Pattern B "${screen.name}": Container ${side} = ${container[side]} — must be ${expected}. (Canonical Case page Container paddings: L=32, R=24, T=24, B=24, itemSpacing=24.)`);
+             }
+           }
+           if (container.itemSpacing !== 24) {
+             issues.push(`Pattern B "${screen.name}": Container itemSpacing = ${container.itemSpacing} — must be 24.`);
+           }
+         }
+       }
+
+       // 7.44e — right column position
+       const rightCol = screen.children.find(c =>
+         c.type === "INSTANCE" && c.mainComponent?.name === "Case page right column"
+       );
+       if (rightCol) {
+         if (Math.abs(rightCol.x - 992) > 0.5) {
+           issues.push(`Pattern B "${screen.name}": Case page right column at x=${Math.round(rightCol.x)} — must be x=992 (directly after left wrapper, NO gap between). The 24px gap goes on the RIGHT of the right column (right edge 1416, page edge 1440), not BETWEEN columns. x=1016 is the canonical mistake.`);
+         }
+         if (Math.abs(rightCol.y - 96) > 0.5) {
+           issues.push(`Pattern B "${screen.name}": Case page right column at y=${Math.round(rightCol.y)} — must be y=96 (vertically aligned with left wrapper).`);
+         }
+         if (Math.abs(rightCol.width - 424) > 0.5 || Math.abs(rightCol.height - 804) > 0.5) {
+           issues.push(`Pattern B "${screen.name}": Case page right column is ${Math.round(rightCol.width)}×${Math.round(rightCol.height)} — must be 424×804.`);
+         }
+       } else {
+         issues.push(`Pattern B "${screen.name}": no Case page right column instance found. Pattern B requires it at (992, 96) with 424×804.`);
+       }
+     }
+   }
+
    // 7.42. Tab Basic — extra default-text items still visible.
    // Observed (Rules list build, v3.57): Tab Basic has 12 .Tab Basic / Item
    // children; skill renamed the first 4 but left items 5-11 with defaults
