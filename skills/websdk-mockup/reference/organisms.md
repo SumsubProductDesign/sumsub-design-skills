@@ -1,7 +1,7 @@
 # WebSDK Organisms — Component Catalog
 
 > Library: Organisms (`8VpSRNe9ur7SBctw0JrtOE`)
-> Full scan: 2026-04-28 via Plugin API. Deep property inspection: 2026-04-28.
+> Full scan: 2026-04-28 via Plugin API. Deep property inspection: 2026-04-28. Examples sections scan: 2026-04-28.
 > Import: `await figma.importComponentByKeyAsync(key)` for COMP; `await figma.importComponentSetByKeyAsync(key)` for SET.
 
 ---
@@ -31,6 +31,197 @@ if (titleNode) {
 > - `Status preview` uses meaningless property names (Property 1/2/3/4) — only `Property 4` matters (Loading/Error)
 > - `Non-doc Mobile` has `Aditional text #1897:0` with a trailing space before `#` — include it exactly
 > - `Step status` uses `INSTANCE_SWAP` for the title slot — pass `component.id` (not key)
+
+---
+
+## Screen Assembly Guide
+
+> How to compose complete SDK mockup screens from the Widget shell + organism content.
+
+### Widget — Outer Shell Component
+
+Every complete SDK screen is wrapped in the **Widget** component, which provides the browser/app chrome, top bars, and bottom bar. Organisms go inside its Content SLOT.
+
+| Property | Value |
+|---|---|
+| Component SET key | `232e8d4d5beed4ad18da48386dab7a640ac0ca45` |
+| `Type=Content` variant key | `1ee5c92aaeccd3fd0637757e11ff70b2ac615a78` |
+| `Type=Camera` variant key | `ce1c7cd5ff6b65d98b872c206fbb86a3a10a85e0` |
+
+Widget properties:
+
+| Property key | Type | Options |
+|---|---|---|
+| `Type` | VARIANT | Content / Camera |
+| `Image#10288:0` | BOOLEAN | true/false — show hero image at top |
+| `Content #12831:0` | SLOT | The organism to inject as content |
+| `↳  Image#10431:4` | INSTANCE_SWAP | Swap the hero image component |
+| `↳ Camera slot#10434:8` | INSTANCE_SWAP | Swap camera view (Type=Camera only) |
+
+**Content SLOT preferred values** — 26 organisms are registered as valid slot contents (see SLOT `preferredValues` for the full list). Pass the organism's `component.id` when setting via SLOT.
+
+---
+
+### Screen Size Lookup
+
+| Screen type | Width | Height | Notes |
+|---|---|---|---|
+| Desktop — Content | 1440 | 960 | Standard, most organisms |
+| Desktop — Modal overlay | 1440 | 800 | Widget shorter; Modal/Full overlaid at x=357 |
+| Desktop — Modal overlay (QR) | 1440 | 918 | Taller modal variant |
+| Desktop — Camera | 1440 | 960 | Widget Type=Camera |
+| Mobile — Content | 375 | 812 | Standard mobile |
+| Mobile — Camera | 375 | 650 | Widget Type=Camera; shorter |
+| Landscape — Camera | 812 | 375 | Figma FRAME (not Widget instance) |
+| Mobile — Modal overlay | 375 | 660–812 | Modal/Full/Mobile component standalone (no Widget bg) |
+
+---
+
+### Organism Placement Inside Widget
+
+After creating a Widget instance and inserting an organism, positions depend on viewport:
+
+| Viewport | Inner widget width | Organism x | Organism y | Organism width |
+|---|---|---|---|---|
+| Desktop (1440×960) | 718px | 106 | 24 | 506 |
+| Mobile (375×812) | 351px | 16 | 24 | 319 |
+
+> **How to find the organism in the Widget tree:** navigate into the Widget instance → `Container` (1392×868) → `Widget frame` (718×868 desktop / 351×h mobile) → the organism instance sits inside Content SLOT at the positions above.
+
+---
+
+### Assembling a Standard Screen (Desktop or Mobile)
+
+```js
+// 1. Import Widget component set
+const widgetSet = await figma.importComponentSetByKeyAsync(
+  "232e8d4d5beed4ad18da48386dab7a640ac0ca45"
+);
+
+// 2. Create the Type=Content variant
+const widget = widgetSet.children
+  .find(v => v.name === "Type=Content")
+  .createInstance();
+
+// 3. Resize to target viewport (do NOT use layoutSizingHorizontal on root Widget)
+widget.resize(1440, 960);    // desktop content
+// widget.resize(375, 812);  // mobile content
+// widget.resize(1440, 960); // desktop camera (then set Type=Camera)
+// widget.resize(375, 650);  // mobile camera
+
+// 4. Toggle Image on/off
+widget.setProperties({ "Image#10288:0": false });
+
+// 5. Import the organism
+const orgComp = await figma.importComponentByKeyAsync("ORGANISM_KEY");
+// or for a SET:
+// const orgSet = await figma.importComponentSetByKeyAsync("SET_KEY");
+// const orgComp = orgSet.defaultVariant;
+const organism = orgComp.createInstance();
+organism.setProperties({ /* organism-specific props */ });
+
+// 6. Find Content SLOT wrapper inside Widget and place organism there
+//    Navigate: Widget → Container → Widget frame → Content SLOT
+//    The SLOT wrapper is the frame named "Content" inside the inner Widget frame.
+//    Fastest approach: use absoluteTransform to position relatively,
+//    or find by name:
+function findSlot(node, depth) {
+  if (depth > 5) return null;
+  // Slot wrapper is typically a frame named "Content" that is the SLOT
+  if (node.name === "Content" && node.type === "FRAME" && depth >= 3) return node;
+  let ch; try { ch = node.children; } catch(e) { return null; }
+  if (!ch) return null;
+  for (const c of ch) {
+    const r = findSlot(c, depth + 1);
+    if (r) return r;
+  }
+  return null;
+}
+const slot = findSlot(widget, 0);
+if (slot) {
+  slot.appendChild(organism);
+  // Organism inherits slot sizing — may need layoutSizingHorizontal = "FILL"
+  try { organism.layoutSizingHorizontal = "FILL"; } catch(e) {}
+}
+
+// 7. Add Widget to canvas
+const page = figma.currentPage;
+page.appendChild(widget);
+widget.x = 0; widget.y = 0;
+```
+
+---
+
+### Assembling a Modal Overlay Screen (Desktop)
+
+Used when organisms need a lightbox/modal over the main content (Guidelines, List, QR, Preview).
+
+```
+Frame "screen" (e.g. 1440×800, NONE layout, no fill)
+├── Widget INSTANCE (1440×800, Type=Content, shorter height)
+│   └── Content SLOT → organism shown in background
+└── Modal / Full / Desktop INSTANCE (726×776, at x=357, y=0, ABSOLUTE)
+    └── organism shown inside the modal
+```
+
+```js
+// Create outer frame
+const screen = figma.createFrame();
+screen.resize(1440, 800);
+screen.fills = [];
+
+// Widget (background content)
+const widgetSet = await figma.importComponentSetByKeyAsync("232e8d4d5beed4ad18da48386dab7a640ac0ca45");
+const widget = widgetSet.children.find(v => v.name === "Type=Content").createInstance();
+widget.resize(1440, 800);
+screen.appendChild(widget);
+widget.x = 0; widget.y = 0;
+
+// Modal / Full / Desktop overlay
+const modalComp = await figma.importComponentByKeyAsync(
+  "61c1659962a2ee584b7750cd6c588bdf8345599e"
+);
+const modal = modalComp.createInstance();
+screen.appendChild(modal);
+modal.resize(726, 776);  // height matches widget height minus any chrome
+modal.x = 357;           // centered over inner 718px widget: (1440 - 726) / 2 ≈ 357
+modal.y = 0;
+```
+
+---
+
+### Assembling a Mobile Modal Overlay Screen
+
+On mobile, the modal IS the entire screen (no Widget background):
+
+```js
+// Just the Modal / Full / Mobile component standalone
+const modalMobileComp = await figma.importComponentByKeyAsync(
+  "80881e81eb92ac7328d868a7d2eefe7a5066aff6"
+);
+const modal = modalMobileComp.createInstance();
+modal.resize(375, 660);  // or 375×812 for full-screen
+```
+
+---
+
+### Modal / Full Components
+
+| Component | Key | Standalone | Default size |
+|---|---|---|---|
+| `Modal / Full / Desktop` | `61c1659962a2ee584b7750cd6c588bdf8345599e` | COMP | 726×960 |
+| `Modal / Full / Mobile` | `80881e81eb92ac7328d868a7d2eefe7a5066aff6` | COMP | 375×812 |
+
+---
+
+### Examples Section Summary — What Screen Type Each Organism Uses
+
+| Organism(s) | Screen type | Desktop size | Mobile size |
+|---|---|---|---|
+| Applicant Data, Email/Phone Verification, Proof of Address/Identity, Steps, Tips, Liveness | Standard Widget | 1440×960 | 375×812 |
+| Camera screens | Widget Type=Camera | 1440×960 | 375×650 (+ 812×375 landscape) |
+| Guidelines, List, QR, Preview | Modal overlay | 1440×800–918 + Modal/Full/Desktop | Modal/Full/Mobile standalone |
+| Statuses | No Examples section | — | — |
 
 ---
 
