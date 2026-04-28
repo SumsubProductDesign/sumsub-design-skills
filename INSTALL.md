@@ -50,7 +50,7 @@ Two paths — pick whichever you prefer.
 ### Easy path — from Claude Desktop (recommended)
 
 1. Open any chat in Claude Desktop.
-2. Paste this prompt:
+2. Paste this prompt in Claude Code tab:
 
    ```
    Install the sumsub-design plugin: run
