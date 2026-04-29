@@ -288,6 +288,87 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    Data must be diverse across rows — never all the same amount, never all the same status. Use a realistic mix of crypto and fiat amounts, multiple currencies (USD, EUR, BTC, ETH, USDT), varied risk levels, and a realistic date range (within the past 30 days).
 
+7.4. **Production source file is canon — inspect node-by-node BEFORE building (HARD RULE).**
+
+   Every layout-pattern doc (`tm-layout-patterns.md`, `applicant-page-pattern.md`, `case-management-pattern.md`, etc.) lists at least one **source file** with the canonical production frames for that pattern. Examples:
+
+   | Pattern | Source file (fileKey) | Where to look |
+   |---|---|---|
+   | TM Pattern 4 (Transaction detail) | `5irNYDkalXUObKIxKXQiy3` | Page `Transaction page` → frames named `KYT - Transaction details / 18XX` (1920×3000+) |
+   | TM Pattern 5 (Transaction Networks case page) | `yHA20ZE0f6qdC2eyBlxpny` | Page `🟡 Txn networks v1` |
+   | Applicant page (Pattern 2) | `Di7nvHaOxXiWuDAN1oa0hK` | Page `Applicant page`, look for the largest frame with `*Sidebar*` collapsed=true |
+   | Case page (Pattern B) | `ieTGS0ab6tqr3zwXRYPHIu` | Page `Case page`, frames `Case page - Overview`, `Case page - AML`, etc. |
+   | TM Settings (Pattern 2) | `B9Otn9QPpssNomSzADBNqF` | Pages with prefix `⚫` |
+   | TM Rules table (Pattern 2) | `Swa6KOy5vBGGO1qIKNygYN` | Page `⚫ Rules table [Production]` |
+   | TM Transactions table (Pattern 1) | `4zG4nJT1s0mcVQDXuJjoJJ` | Page `⚫ Transactions table [Prod]` |
+   | Rule editor (Pattern 3) | `bbp6LvphVT5J6QytzGJY6z` | Page `🟢 Rule page [PHASE 1]` |
+
+   **Layout-pattern docs are scaffolding — they describe abstract dimensions and column widths. They do NOT tell you which blocks go in which column, in which order, with which variants. Production source IS that answer.**
+
+   **Step-by-step before any TM/AP/CM/etc. build:**
+
+   1. Look up the source file in the matching pattern doc.
+   2. `use_figma` on that source — list pages, find the canonical PROD page (usually marked `⚫` or `🟢 PROD` or has `Prod` / `Production` in the name).
+   3. Find the largest frame on that page matching the target screen size (1920×3000+ for Pattern 4 detail, etc.).
+   4. Walk node-by-node:
+      - Direct children of the root (header, body, sidebar)
+      - Body's columns, in order
+      - Each column's blocks, in order, with their component name + variant string
+   5. Record this as a **block manifest**:
+      ```
+      MAIN COLUMN (1412 wide, gap=40):
+        1. Customers card / Finance — Direction=Outbound, Type=Default
+        2. AML checks — State=Default
+        3. Properties — State=Collapsed
+        4. Matched rules — Property 1=Default
+        5. Transaction crypto info — Resolution=Large, Type=Default
+        6. Events Block
+
+      RIGHT COLUMN (380 wide, gap=40):
+        1. Transaction details — Type=Crypto
+        2. Notes — Empty=Yes
+      ```
+   6. **Build by mirroring this manifest exactly.** Block order = canonical order. Variants = canonical variants. Don't add blocks that aren't in canonical (no "Anomaly score" if the source doesn't show it). Don't omit blocks that are in canonical (don't skip "Transaction crypto info" without flagging it as a deliberate deviation).
+   7. After build, **re-inspect your output and diff against the manifest.** Every mismatch = a violation. Audit must report `0 deviations from canonical` before declaring done.
+
+   **Why this rule exists:**
+
+   Without it, builds are constructed from "plausible-looking SaaS dashboard" intuition — block order is invented, variants are picked at random (Properties=Expanded vs Collapsed, Notes=Empty=Yes vs Empty=No), and extra blocks (Anomaly score, Risk labels) are added because they "feel like they should be on a TM page". The result LOOKS correct (audit passes — 14 issues clean) but doesn't match production. A reviewer comparing against the real product immediately sees a fabricated layout.
+
+   **Build log MUST show:**
+   ```
+   PHASE 2.5 — CANONICAL SOURCE INSPECTION
+   - Opened source file: <fileKey> · <page name>
+   - Found canonical frame: <id> · <name> · <w>×<h>
+   - Block manifest (Main): [list]
+   - Block manifest (Right): [list]
+   - Block manifest (other panels): [list]
+   ```
+
+   **Banned rationalizations:**
+   - "I read the layout pattern doc; that has all the info I need"
+   - "The component catalog tells me what blocks exist, I'll figure out the order"
+   - "Production might be outdated; I'll use a reasonable modern arrangement"
+   - "The user wants a generic Finance txn, not Crypto, so canonical doesn't apply"
+   - "I'll make a plausible TM detail page; user can adjust later"
+   - "Source frame is too detailed; I'll simplify"
+   - "Skipping canonical inspection — I have similar TM examples in memory"
+
+   **Deviations from canonical require explicit user confirmation BEFORE build:**
+
+   If the canonical source uses a block / variant you can't import (e.g. `Transaction crypto info` was internal-only, not externally importable), STOP and tell the user:
+
+   > Canonical Pattern 4 includes `Transaction crypto info` (Resolution=Large, Type=Default) at Main #5. This component isn't externally importable from your file. Options:
+   > a) Connect a library that exposes it
+   > b) Skip it (Finance txn doesn't need crypto info)
+   > c) Build it manually from atoms (high cost)
+   >
+   > Which?
+
+   Don't pick a default silently and ship.
+
+   **Audit check 7.4 (added v3.66):** verifies the build's block manifest matches the canonical manifest fetched from source. Missing or reordered blocks → audit fails.
+
 7.5. **Every root frame MUST live inside a SECTION — never directly on the page.** This is a hard rule with no exceptions. When the build script does `figma.currentPage.appendChild(rootFrame)`, it's a violation. The correct structure is always:
 
    ```

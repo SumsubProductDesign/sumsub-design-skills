@@ -4,6 +4,111 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.68.0 — 2026-04-29
+
+`websdk-mockup` — **Rule #∞: Examples sections are the ONLY canonical source** (top-of-file rule, overrides all others).
+
+Promotes "look at Examples first" from a per-section guideline to the foundational rule of the skill, placed at the very top of `SKILL.md` (before pre-flight check). Codifies the lesson learned across multiple failed sessions:
+
+**Mandatory 5-step workflow** for every WebSDK screen:
+1. Identify target organism from user request
+2. Open Examples section in `8VpSRNe9ur7SBctw0JrtOE` via `use_figma`
+3. **Inspect canonical Widget node-by-node** — capture override map (visibility states of all toolbars, instruction, Image, padding, bg fill, organism in SLOT, organism in Camera slot, Container sizing)
+4. **Build by mirroring exactly** — same variant, same overrides, same insertion method
+5. **Audit by diffing build vs canonical** — 0 deviations before "done"
+
+**9 banned rationalizations** documented verbatim from past failed sessions:
+- "I know how a Welcome screen looks; I'll build it from atoms"
+- "Examples is just one variation; I'll make my own"
+- "I have the organism keys from `examples-library.md`; that's enough"
+- "I'll inspect Examples later if audit fails"
+- "Memory says I built this organism before; I'll reuse what I remember"
+- (5 more — see SKILL.md)
+
+**Concrete definition of "looking at Examples":** must be a `use_figma` inspection script that reads canonical Widget properties and prints them to context. Build log must include `PHASE — CANONICAL EXAMPLES INSPECTION` section with node-id and captured override map. Without that phase, build is non-compliant.
+
+**Cataloged failures section** lists 4 past WebSDK builds where skipping Examples inspection led to broken output (KYC v3.64.0 with all 7 overrides missed; POI build that took 4 attempts; Liveness rebuild after user pointed at Examples; mobile uniform-height bug from copying Examples per-organism heights). Establishes the pattern: skip inspection → wrong; inspect → correct first try.
+
+---
+
+## v3.67.0 — 2026-04-29
+
+`websdk-mockup` — **SLOT fill is `insertChild`, NOT appendChild + ban on overlay fallback (HARD RULE)**.
+
+**Critical bug discovered in v3.64.0 build log:** the skill claimed both `slot.appendChild(organism)` and `setProperties({ "Content #12831:0": comp.id })` "fail in current Plugin API", and resorted to **overlay fallback** — placing organism as Section sibling of Widget, positioned absolutely over the Widget area. Symptoms in real builds: 9 widgets all had EMPTY Content slots, organisms floated as siblings, all 7 critical Widget overrides skipped (Top Bar=Size=Large default instead of Size=Medium, instruction frame visible, Image frame visible, no bg fill, etc.).
+
+**Root cause:** the skill never tried `slot.insertChild(0, organism)`. It only tried appendChild (correctly fails) and setProperties on SLOT (correctly fails). The third method — insertChild — was never documented in `organisms.md` and was never attempted. **insertChild works.**
+
+**Fix in this release:**
+- New **Rule #4.45** in SKILL.md: "SLOT fill is insertChild(0, ...), NOT appendChild" — HARD RULE with banned alternatives table and banned rationalizations
+- New audit check: every Type=Content Widget MUST have `slot.children.length >= 1`. Empty slot = build violation.
+- **OVERLAY FALLBACK explicitly banned** — placing organism as Section sibling of Widget for any reason is a violation. The only correct insertion path is `slot.insertChild(0, organism)`.
+- `organisms.md` line 142: `slot.appendChild` → `slot.insertChild(0, organism)` with explanatory comment about why appendChild silently fails
+
+**Step status documentation corrected:**
+- v3.64.0 `organisms.md` claimed `Step status` has `Title slot#2393:1` INSTANCE_SWAP property. **It doesn't.** Plugin API scan shows Step status set has only: `Status state` VARIANT, `Slot#2653:11` SLOT, `Error#2653:15` SLOT, `Warning#2653:19` SLOT. Setting "Title slot#2393:1" fails with "Could not find a component property with name…".
+- Recommendation added: for text-driven status messaging (e.g. "Verifying your identity", "Your identity is verified"), use **`Final statuses`** set (`d3f95404b879e0993ddca2f599e2e5071cdda0ba`) — has 3 variants (Success / Pending / Rejected) with editable Title/Subtitle text nodes via `findOne(...)`.
+
+**Concrete fix that motivated this release:** KYC flow build at section `1173:101158` had 9 widgets all in default state (45 issues across the build). Re-fixed by walking each widget, applying the 7 canonical overrides, and using `slot.insertChild(0, sibling)` to move 5 sibling-overlay organisms into their respective Content slots. Final audit: 0 issues, all 9 widgets canonical.
+
+---
+
+## v3.66.0 — 2026-04-29
+
+`sumsub-mockup` + `websdk-mockup` — **Production source is canon (universal HARD rule)**.
+
+**New `sumsub-mockup` Rule 7.4** — for every TM/AP/CM/Dashboard build that has a layout-pattern doc, the skill MUST:
+1. Look up the source/canonical file in the matching pattern doc
+2. Open that file via `use_figma`, find the canonical PROD frame
+3. Walk it node-by-node and produce a **block manifest** (Main column blocks, Right column blocks, etc., in canonical order with their variants)
+4. Build by mirroring the manifest exactly — no invented block order, no extra blocks, no missing blocks
+5. Diff output against manifest before declaring done
+
+**New `websdk-mockup` Rule #4.4** — generalization of "look at Examples library first" to any Sumsub design context.
+
+**Why this rule exists:** without it, builds use "plausible-looking SaaS dashboard intuition" — block order is invented, variants are picked at random (Properties=Expanded vs Collapsed), extra blocks are added because they "feel right" (Anomaly score / Risk labels), and canonical blocks are quietly dropped (Transaction crypto info). Audit passes because component-level checks are clean, but a reviewer comparing against production sees a fabricated layout.
+
+**Concrete fix that motivated this rule:** TM Transaction Detail Pattern 4 build at `5593:147800` was rebuilt by inspecting canonical frame `964:457129` in source `5irNYDkalXUObKIxKXQiy3`. 14 differences fixed: block ordering, column placement (Customers card was in wrong column, Transaction details in wrong column, Properties in wrong column with wrong variant), removed extra Anomaly score + Risk labels that aren't in canonical, fixed body+columns gaps (40 + 64 instead of 20 + 20), Header/Finance Confirmed=No instead of Yes.
+
+**Source files mapping** added to Rule 7.4 — explicit table showing which fileKey + page to inspect for each Pattern (TM Pattern 4 → `5irNYDkalXUObKIxKXQiy3`, AP Pattern 2 → `Di7nvHaOxXiWuDAN1oa0hK`, Case Pattern B → `ieTGS0ab6tqr3zwXRYPHIu`, etc.).
+
+**Build log requirement:** every PHASE 2.5 — CANONICAL SOURCE INSPECTION must be present in the log, listing source fileKey, canonical frame ID, and the block manifest. Missing this section = build is non-compliant.
+
+**Deviation handling:** if a canonical block is unimportable (e.g. internal-only component), STOP and ask the user before substituting or skipping. No silent substitutions.
+
+**Catalog flagging:** during the rebuild, two TM Components catalog keys were found unimportable (`03e19780...` Customer card / Applicant, `8a431d6e...` Customer card / Counterparty, `6c5f3608...` Transaction crypto info). They're internal/macket keys not exposed to subscribers. `tm-component-catalog.md` should be re-verified.
+
+---
+
+## v3.65.0 — 2026-04-29
+
+`websdk-mockup` — Widget+Organism canonical assembly is now the enforced pattern.
+
+**New: `reference/examples-library.md`** — full inventory of every `Examples` SECTION across the Organisms file (`8VpSRNe9ur7SBctw0JrtOE`), with direct Figma links for: Accesses, Applicant Data, Camera, Document Type, Email Verification, Guidelines, List, Liveness, Phone Verification, Proof of Address, Proof of Identity, Welcome, Steps (10 states), Tips (12 states), Statuses, Sumsub ID Connect. Each entry has a node-id link straight to the canonical assembly.
+
+**The 7-step canonical Widget assembly recipe**, codified into a new HARD RULE (#4.5): every WebSDK screen must be built with `Widget` set (`232e8d4d5beed4ad18da48386dab7a640ac0ca45`, `Type=Content`) + organism inserted into Content SLOT — never from atoms.
+
+**The 7 critical instance overrides** (memorize these — without them the screen is broken):
+1. Bind Widget bg fill to `semantic/background/secondary/normal` — instances are created with `fills: []` by default
+2. Show only `Size=Medium` Top Bar on desktop, `Size=Small` on mobile (NOT `Size=Large`)
+3. Hide `instruction` frame (`.visible = false`) unless QR-handoff prompt is the screen's purpose
+4. Hide `Image` frame unless Steps illustration is part of the design
+5. Set `Container.layoutSizingHorizontal = "FILL"` on mobile (without this, Container stays at desktop width 1392)
+6. Set Widget `padding = 0/12/12/12` on mobile (master default is `0/24/24/24` desktop)
+7. Insert organism via `slot.insertChild(0, instance)` — `appendChild` silently drops it
+
+**New `auditWidget` function** in `examples-library.md` — verifies all 7 overrides on a built screen. Required check before declaring "done".
+
+**New gotchas documented:**
+- Cross-file cloning fails on missing fonts (Aeonik Pro, SF Pro Text not installed locally)
+- Widget responsiveness is partial — resize alone is not enough; you must override Container sizing
+- Slot's `appendChild` is unreliable for SLOT type; always use `insertChild(0, ...)`
+- Widget instance `fills` are always empty after `createInstance()` — must explicitly bind variable
+
+**New mandatory checklist** in SKILL.md — 11 items to verify before delivering any WebSDK screen.
+
+---
+
 ## v3.64.0 — 2026-04-28
 
 New skill: `websdk-mockup` — WebSDK Figma mockup builder.

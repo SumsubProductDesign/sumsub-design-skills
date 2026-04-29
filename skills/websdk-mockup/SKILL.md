@@ -12,6 +12,67 @@ argument-hint: "[screen description]"
 
 ---
 
+## 🟢 RULE #∞ — Examples sections are the ONLY canonical source. Always copy them; never reinvent.
+
+**This rule overrides every other rule below. Read it, internalize it, and follow it on every screen.**
+
+The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECTION on every organism page (Welcome, Document Type, Camera, Liveness, Guidelines, PoI, PoA, Steps, Tips, Statuses, etc.). Each Examples section has 2–12 ready-built **Widget instances** demonstrating the canonical assembly: which Widget variant to use (`Type=Content` vs `Type=Camera`), which organism goes inside, what visibility overrides are applied, what padding, what background fill.
+
+**These Examples are the ONLY source of truth. Everything else — `organisms.md`, `base-components.md`, `variables.md`, `examples-library.md`, your own intuition, prior session memory — is secondary.**
+
+### Mandatory workflow for EVERY WebSDK screen the user requests:
+
+1. **Identify the target organism.** From the user's request, derive which organism applies (Welcome / Document Type / Camera / Liveness / etc.). If multiple are needed for a flow, list each one.
+
+2. **Open the Examples section in `8VpSRNe9ur7SBctw0JrtOE`.** Use `use_figma` to load the matching organism page, find its `Examples` SECTION (use the inventory in `reference/examples-library.md` for direct node-ids).
+
+3. **Inspect a canonical Widget instance node-by-node.** For the matching desktop or mobile size, walk the Widget's children and record:
+   - Widget variant (`Type=Content` or `Type=Camera`)
+   - Visibility state of every Top Bar variant (Size=Large/Medium/Small) — only ONE is `visible: true`
+   - Visibility state of `instruction` frame
+   - Visibility state of `Image` frame
+   - Widget padding (`paddingTop / paddingRight / paddingBottom / paddingLeft`)
+   - Widget background fill bound variable (read `boundVariables.fills`)
+   - For Type=Content: which organism is in `Content ` SLOT (read `slot.children[0].mainComponent.parent.name` + variant)
+   - For Type=Camera: which organism is in `↳ Camera slot#10434:8` (read `componentProperties["↳ Camera slot#10434:8"].value`)
+   - Container `layoutSizingHorizontal` (relevant for mobile)
+
+4. **Build by mirroring the canonical Widget exactly.** Same Widget variant. Same visibility state on every toolbar / instruction / Image. Same padding. Same bg fill. Same organism. Same variant string on the organism. Same slot insertion method (`slot.insertChild(0, ...)` for Type=Content; `setProperties({ "↳ Camera slot#10434:8": variant.id })` for Type=Camera).
+
+5. **Audit your output by re-reading it and diffing against canonical.** For each property captured in step 3, compare your build's value to canonical. Any mismatch is a violation. Audit must show `0 deviations from canonical` before declaring done.
+
+### Banned shortcuts (every one of these has appeared in past failed builds):
+
+- "I know how a Welcome screen looks; I'll build it from atoms" — banned
+- "Examples is just one variation; I'll make my own" — banned
+- "The user wants something custom; canonical doesn't apply" — banned (deviations require explicit user confirmation, see Rule #4.45 deviation protocol)
+- "I'll inspect Examples later if audit fails" — banned (inspection is BEFORE build, not after)
+- "I have the organism keys from `examples-library.md`; that's enough" — banned (keys are not the same as canonical assembly — visibility overrides, padding, slot insertion are NOT in the keys table)
+- "Plugin API has limitations; I'll use overlay/sibling fallback" — banned (see Rule #4.45)
+- "I'll skip Examples inspection because the screen is simple" — banned
+- "Memory says I built this organism before; I'll reuse what I remember" — banned (memory is hint, Examples is canon)
+- "I'll plan first, then inspect Examples for fine-tuning" — banned (inspection is step 2, before plan)
+
+### What "looking at Examples" means concretely:
+
+Not: "I read the file once and have a sense of how it works."
+Not: "I read `examples-library.md` and have the organism key."
+**Yes:** before writing any `use_figma` build code, run a `use_figma` inspection script that reads the canonical Widget's properties and prints them to your context. Then write the build script using those exact values. Your build log must include a `PHASE — CANONICAL EXAMPLES INSPECTION` section listing the inspected node-id and the captured override map.
+
+If your build log doesn't show that phase, the build is non-compliant — even if the screen looks plausible.
+
+### Why this rule exists
+
+Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
+- KYC build v3.64.0: 9 widgets, all 7 overrides skipped, organisms placed as siblings → fully broken structurally
+- POI build session N: built from atoms instead of Widget+organism → 4 attempts before user said "look at Examples"
+- Liveness build session N+1: built from atoms first, fixed only after user pointed at Examples
+- Mobile uniform-height bug: per-organism heights from Examples copied as-is instead of normalized to 375×812
+
+**The pattern is consistent:** when the skill skips Examples inspection, it produces visually plausible but structurally wrong output. When it inspects Examples first and copies them exactly, the output is correct on first try.
+
+---
+
 ## 🚨 Critical rules — read and follow every time
 
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
@@ -89,37 +150,75 @@ await figma.setCurrentPageAsync(page);
 
 ---
 
-### Rule #1 — Check libraries BEFORE starting
+### Rule #1 — Check libraries BEFORE starting (HARD RULE)
 
-Call `get_libraries(fileKey)` to verify connected libraries **before** any `use_figma` call.
+Call `get_libraries(fileKey)` **before** any `use_figma` call. This is the very first Figma-related action of every WebSDK build session.
 
 **Required libraries for WebSDK mockups:**
 
-| Library | Role | Library key |
+| Library name (as shown in `get_libraries`) | Source file (fileKey) | Library key (`lk-…`) |
 |---|---|---|
-| **WebSDK UI Kit [Base components]** | Atoms & molecules | `Gh2QlRTetoSQdlK9G1nDq4` |
-| **Organisms [WebSDK]** | Full screen organisms | `8VpSRNe9ur7SBctw0JrtOE` |
+| **WebSDK UI Kit [Base components]** | `Gh2QlRTetoSQdlK9G1nDq4` | needs to be paged — call `get_libraries` with offset 20+ to find it; library key starts with `lk-…` |
+| **WebSDK UI Kit [Organisms]** | `8VpSRNe9ur7SBctw0JrtOE` | `lk-62dde7b6f3d37792c1a6ea5cbd86f957d98841f4fc92d9f5a8969734340e956dcdd45ee33185ce003b6c0ad0cf730b6f050560adcb6498f076d6ebd813fa2574` |
 
-If either library is missing — STOP and ask the user to connect it. Do not build with invented structures.
+> **fileKey vs library key — do not confuse them.** `fileKey` (the part of `figma.com/design/<fileKey>/<name>` URL) is what you pass to MCP tools like `use_figma` and `search_design_system`. **`libraryKey`** (always `lk-…` prefix) is what `get_libraries` returns and what the Figma library subscription system uses. Rule #1 enforcement uses the `lk-…` form.
+
+**Verification protocol — every session:**
+
+1. Call `get_libraries({ fileKey: <target file> })`
+2. Check `libraries_added_to_file` for both **WebSDK UI Kit [Base components]** and **WebSDK UI Kit [Organisms]** by name
+3. If either is missing:
+   a. Look in `libraries_available_to_add` (and paginate with `offset` if needed — both Sumsub libraries are in `source: "organization"` and may be on later pages)
+   b. **STOP and tell the user explicitly:**
+
+      ```
+      ⚠️ Required library not connected to <file>:
+        - WebSDK UI Kit [Base components]      <yes/no>
+        - WebSDK UI Kit [Organisms]            <yes/no>
+
+      Please subscribe the missing library in Figma:
+      Assets panel → Libraries → search for "WebSDK UI Kit" → click +.
+
+      Alternatively, paste the library key and I'll attempt to import keys directly,
+      but you'll lose the in-file Assets panel + future update notifications.
+      ```
+
+   c. Wait for the user to subscribe + confirm. Do not build until libraries are present.
+
+**Why this matters even though `importComponentSetByKeyAsync` works without subscription:**
+
+Plugin API can resolve component keys transitively even when the parent library isn't subscribed to the target file — that's what makes the imports succeed. **But this is a degraded state:**
+
+- The user can't see the components in their Figma Assets panel
+- Library update notifications won't reach them
+- A different artist opening the file would see broken instances if library is detached
+- Audits, design reviews, and code-connect lookups depend on subscription
+
+So even when builds *appear* to work, the file is non-canonical without subscriptions. Rule #1 enforces canonical state.
 
 **Banned bypass phrases:**
 - "I'll proceed without checking libraries since this is a standard flow"
 - "libraries are likely already connected"
 - "I checked the file earlier"
+- "Plugin API imports work even without subscription, so the build will succeed"
+- "I'll add the library check at the end as a verification"
 
 ---
 
 ### Rule #2 — Read reference files BEFORE any use_figma call
 
-For every WebSDK mockup task, **explicitly read ALL THREE reference files** before writing any Figma code:
+For every WebSDK mockup task, **explicitly read ALL FOUR reference files** before writing any Figma code:
 
 ```
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/variables.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/base-components.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/organisms.md
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/examples-library.md  ← canonical Widget+Organism assembly
 ```
 
 These files are NOT pre-loaded into context. They contain exact component keys, token import keys, and variant names — you cannot guess these correctly. Building without reading them is a rule violation.
+
+**`examples-library.md` is the most important** — it contains the canonical 7-step Widget assembly recipe and links to every `Examples` SECTION in the Organisms file (`8VpSRNe9ur7SBctw0JrtOE`). Always reference it first before building any screen — every organism has a ready-made Widget composition there to mirror.
 
 ---
 
@@ -152,30 +251,39 @@ These files are NOT pre-loaded into context. They contain exact component keys, 
 
 ### Rule #4 — Screen anatomy for WebSDK flows
 
-WebSDK is a mobile-first overlay SDK, not a full-page dashboard. The fundamental layout units are:
+**Always use the `Widget` organism as the outer shell.** Every WebSDK screen in production is built on top of `Widget` set (`232e8d4d5beed4ad18da48386dab7a640ac0ca45`, variant `Type=Content`). Never assemble shells from atom components (toolbars + custom frames) — `examples-library.md` documents this canonical pattern.
 
-**Mobile screen (390 × 844px — iPhone 14 baseline):**
+**Canonical sizes (matches Examples library):**
+- Desktop SDK: **1440 × 960** (full-page overlay)
+- Mobile: **375 × 812** (most common) or 375 × 661 / 375 × 660 / 375 × 669 / 375 × 650 / 375 × 471 (varies by organism)
+
+**Widget internal structure (after applying overrides — see examples-library.md):**
 ```
-Root (390 × 844)
-├── Toolbar / Top Bar / Mobile  (390 × 56–72px) ← navigation chrome
-└── Content area                (390 × remaining)
-    └── Organism (fills width, variable height)
+Widget instance (1440×960 desktop / 375×812 mobile)
+├── Toolbar / Top Bar (Size=Medium for desktop, Size=Small for mobile)
+└── Container
+    ├── instruction (HIDDEN unless QR-handoff prompt needed)
+    └── Widget frame
+        ├── Image       (HIDDEN unless Steps illustration needed)
+        ├── Content SLOT  ← organism goes here via insertChild(0, instance)
+        └── Bottom Bar
 ```
 
-**Desktop SDK widget (480 × variable):**
-```
-Root (480 × h)
-├── Toolbar / Top Bar / Desktop  (480 × 56–72px)
-└── Content area                 (480 × remaining)
-    └── Organism (fills width, variable height)
-```
+**The Widget master is responsive in size only.** Resizing alone is NOT enough — you must apply 7 instance overrides (top bar visibility, instruction visibility, Image visibility, Container FILL on mobile, padding 0/12/12/12 mobile, organism in slot, bg fill). See `reference/examples-library.md` for the full recipe.
 
 **Shell / container frame:**
 - Outer shell fill: `semantic/background/default/background-normal` → `#20252c` (dark)
 - Card surfaces inside: `semantic/background/secondary/normal` → `#ffffff`
 - Border radius of card: `semantic/border-radius/xl` (16px) or `semantic/border-radius/2xl` (24px)
 
-**Organism variants to use by flow step:**
+**Outer shell — always Widget organism:**
+
+| Component | Set key | Variant |
+|---|---|---|
+| `Widget` | `232e8d4d5beed4ad18da48386dab7a640ac0ca45` | `Type=Content` |
+| `Widget` background var | `feed2a5538bb5e0f2fb8a49bde6122c13ad68035` | `semantic/background/secondary/normal` (#fff light, #1b1b1f dark) |
+
+**Organism variants to drop into Content SLOT (by flow step):**
 
 | Step type | Organism | Key |
 |---|---|---|
@@ -196,6 +304,119 @@ Root (480 × h)
 | Final status | `Final statuses` | `d3f95404b879e0993ddca2f599e2e5071cdda0ba` |
 | Step progress indicator | `Steps NEW` | `c8893dba74df6506596ffccc6f22a407d145e532` |
 | Video identification | `Mobile` (video ident) / `Desktop` (video ident) | `9341ec89365d81bafda0065fe9fe93052a79c7fa` / `6e9e5ee2e6d0911f93b51f9675af94ea82a25002` |
+
+---
+
+### Rule #4.4 — Production source is canon (cross-skill universal rule)
+
+This rule is a generalization of Rule #4.5 to any Sumsub design context:
+
+**Whenever a layout pattern doc references a source/canonical file, you MUST inspect that file before building, walk it node-by-node, and mirror the canonical block sequence exactly.** Layout-pattern docs describe *abstract dimensions* — they do not tell you which blocks belong where, in what order, with which variants.
+
+For WebSDK specifically, the canonical source is the **Examples section** of the relevant organism page in `8VpSRNe9ur7SBctw0JrtOE`. For other Sumsub products (TM/AP/CM/Dashboard) the canonical source is listed in the matching pattern doc — see `sumsub-mockup` SKILL.md Rule 7.4.
+
+**Banned rationalizations (universal):**
+- "Pattern doc has dimensions; I'll figure out block order"
+- "Component catalog tells me what blocks exist"
+- "I'll make a plausible-looking layout; user can adjust"
+- "Source might be outdated"
+- "Skipping inspection — I built similar before"
+
+**Deviations from canonical (e.g. an unimportable block) require explicit user confirmation. Never substitute silently.**
+
+---
+
+### Rule #4.45 — SLOT fill is `insertChild(0, ...)`, NOT appendChild (HARD RULE)
+
+The Content SLOT inside a Widget instance has:
+- name: `"Content "` (TRAILING SPACE — match exactly)
+- type: `"SLOT"` (NOT `"FRAME"`)
+
+**The ONLY working method to insert an organism into the SLOT is `slot.insertChild(0, organism)`.**
+
+Banned alternatives — these are documented Plugin API failure modes:
+
+| Method | What happens | Why |
+|---|---|---|
+| `slot.appendChild(organism)` | Silent drop OR "Cannot move into instance" error | appendChild semantics on SLOT type are inconsistent — slot may stay empty |
+| `widget.setProperties({ "Content #12831:0": orgComp.id })` | "Slot component property values cannot be edited" error | SLOT properties are read-only via Plugin API |
+| Detach widget instance, then insert | "Removing this node is not allowed" / partial flatten | Widget detach flattens only one level; sub-instances stay immutable |
+| Place organism as sibling of Widget, position absolutely (overlay) | Visually looks correct but Widget's actual SLOT is empty — organism is structurally orphan | This is the SKILL FALLBACK BAN — see below |
+
+**OVERLAY FALLBACK IS BANNED.** When a previous build run "couldn't fill the slot", the wrong recovery is to place the organism as a Section sibling of the Widget and position it visually over the Widget. Symptoms of this anti-pattern:
+- Section has 9 widgets + N organism instances at top level (instead of organisms inside widgets)
+- Widget's Content slot is EMPTY
+- Audit shows `slotKidsCount: 0` for Type=Content widgets
+- Visually plausible but moving the Widget detaches the organism
+
+**Banned rationalizations (heard verbatim in past build logs):**
+- "neither method works in current Plugin API" — false; `insertChild(0, ...)` works
+- "Plugin API has read-only children inside instances" — true for FRAME children, NOT for SLOT children. SLOT is the API's intended slot mechanism.
+- "I'll position the organism over the Widget as a sibling" — banned overlay fallback
+- "appendChild error means SLOT can't accept inserts" — wrong; only appendChild fails, insertChild succeeds
+
+Audit: every Type=Content Widget MUST have `slot.children.length >= 1` after build. If 0, either the build skipped insertChild or used overlay fallback. Both are violations.
+
+---
+
+### Rule #4.5 — Use Widget organism + Examples library (HARD RULE)
+
+**Never assemble a WebSDK screen from atoms (custom frames + toolbars + selects).** Every screen MUST use the `Widget` organism (`232e8d4d5beed4ad18da48386dab7a640ac0ca45`, variant `Type=Content`) as outer shell with the appropriate organism (PoI / PoA / Welcome / etc.) inserted into its `Content ` SLOT.
+
+**Workflow for every WebSDK screen request:**
+
+1. **Open `reference/examples-library.md`** — find the Examples section for the target organism
+2. **Inspect that section in `8VpSRNe9ur7SBctw0JrtOE`** via Plugin API — read the canonical Widget overrides (visibility, padding, fill)
+3. **Replicate the assembly in target file** following the 7-step recipe (see `examples-library.md`)
+4. **Audit your output** with the `auditWidget` function from `examples-library.md` — must show 0 issues
+
+**The 7 critical instance overrides (memorize these):**
+
+| # | Property | Mobile | Desktop |
+|---|---|---|---|
+| 1 | Widget bg fill (bound) | `semantic/background/secondary/normal` (`feed2a5538bb5e0f2fb8a49bde6122c13ad68035`) | same |
+| 2 | Visible Top Bar variant | `Size=Small` | `Size=Medium` (NOT `Size=Large`) |
+| 3 | `instruction` frame `.visible` | `false` (unless QR-handoff) | `false` (unless QR-handoff) |
+| 4 | `Image` frame `.visible` | `false` (unless Steps illustration) | `false` (unless Steps illustration) |
+| 5 | `Container.layoutSizingHorizontal` | **`FILL`** (must override) | `FIXED` (default OK) |
+| 6 | Widget padding `0/T/R/B/L` | **`0/12/12/12`** (must override) | `0/24/24/24` (default OK) |
+| 7 | Organism in slot | `slot.insertChild(0, organism)` + `organism.layoutSizingHorizontal = "FILL"` | same |
+
+**Why each matters (failure modes):**
+
+- Skip #1 → screen has no background, transparent over canvas
+- Skip #2 → desktop shows Size=Large with logo (wrong); mobile shows 1392-wide top bar overflowing
+- Skip #3 → Container is wider than expected; 650-wide instruction column visible
+- Skip #4 → Steps illustration block visible above content (wrong for most screens)
+- Skip #5 → mobile widget Container stays at desktop width (1392), Widget frame collapses to w=1
+- Skip #6 → mobile content has 24px gutters instead of 12px (looks visually cramped vs example)
+- Skip #7 (using `appendChild`) → slot stays empty, content invisible
+
+**Banned shortcut phrases:**
+
+- "I'll build the structure manually since I have the components"
+- "Cloning across files should work fine"
+- "The Widget will reflow automatically when I resize"
+- "The instance inherits all properties from the master"
+
+---
+
+### Rule #4.6 — Mobile heights must be uniform across a flow (HARD RULE)
+
+**When building a multi-screen flow, every mobile widget MUST have the same height.** Use `375 × 812` as the canonical mobile size for every screen in a flow — even for Camera/Liveness screens where the Examples library shows smaller sizes (`375×650`, `375×661`, `375×669`).
+
+**Why:** consistent device height makes the flow visually scannable as a sequence. Varying heights (650 next to 812 next to 661) creates a stair-step that reads as inconsistent UI, even though each individual screen is technically correct.
+
+**The Examples library mixed sizes are reference for individual screen states** (e.g. an ID camera with no toolbar fits 650, with bottom bar fits 812) — they are NOT the canonical size to copy when assembling a flow. Always normalize to `375 × 812` for mobile in flow builds.
+
+**Desktop is always `1440 × 960`** in flows — same uniformity rule.
+
+**Banned phrases:**
+- "Examples shows 650 for camera so I'll use 650"
+- "Mobile screens can vary per step based on content"
+- "The smaller height matches the actual viewport better"
+
+The resize is enough — the inner Camera/Selfie organism reflows automatically inside the larger frame. Run `auditWidget` to verify all overrides still hold after resize.
 
 ---
 
@@ -378,3 +599,27 @@ await textNode.setTextStyleIdAsync(style.id);
 - **Icon tokens are PLURAL** — `semantic/icons/*` (not `semantic/icon/*`). Singular form doesn't exist in WebSDK and will silently fail.
 - **Dark shell is intentional** — don't try to fix `#20252c` background to white. It's the correct outer shell color. Only the content card inside should be white.
 - **Top Bar variants differ** — Mobile top bar (`254391124180127f6e7f06364d0e45d1aa8aa55c`) and Desktop top bar (`495969debf3bd2cabab7b4ba95b7907967b9b12f`) are different component sets with different properties. Use the correct one for the target platform.
+- **Widget instance fills are EMPTY by default** — even though the Widget master has `semantic/background/secondary/normal` bound, the instance is created with `fills: []`. You MUST explicitly bind the variable yourself after creating the instance. Without this, the screen has a transparent background and looks broken.
+- **`slot.appendChild(organism)` silently drops the organism** in some cases — use `slot.insertChild(0, organism)` instead. Verify by reading `slot.children.length` after insert.
+- **Cross-file cloning fails on missing fonts** — Aeonik Pro and SF Pro Text appear in Sumsub source files but aren't installed locally. `node.clone()` works in same parent context but `parent.appendChild(clone)` triggers font load that fails. If you must clone cross-file, do it in the same parent (clone auto-inserts as sibling) and don't manually re-append.
+- **Widget responsiveness is partial** — `widget.resize(375, 812)` resizes the outer frame but the Container stays at 1392 wide unless you set `Container.layoutSizingHorizontal = "FILL"`. This is the #1 cause of mobile widgets looking broken.
+- **Mobile padding default is wrong** — Widget master has `padding: 0/24/24/24` (desktop). For mobile (375 wide) you must override to `0/12/12/12` to match Examples.
+- **Always audit before delivering** — use the `auditWidget` function from `reference/examples-library.md` to verify all 7 overrides are correctly applied. Never deliver a Widget without running this audit.
+
+---
+
+## Memory checklist for every WebSDK build
+
+Before declaring "done":
+
+- [ ] Read `reference/examples-library.md` and identified the target Examples section
+- [ ] Inspected Examples in `8VpSRNe9ur7SBctw0JrtOE` to copy override values exactly
+- [ ] Used `Widget` set + `Type=Content` variant — not custom frames
+- [ ] Bound `semantic/background/secondary/normal` to Widget fills
+- [ ] Hidden non-applicable top bar Size variants (only one visible)
+- [ ] Hidden `instruction` frame (unless QR prompt is the screen's purpose)
+- [ ] Hidden `Image` frame (unless Steps illustration is part of the design)
+- [ ] Set `Container.layoutSizingHorizontal = "FILL"` on mobile widgets
+- [ ] Set Widget padding to `0/12/12/12` on mobile
+- [ ] Inserted organism via `slot.insertChild(0, instance)` + organism `layoutSizingHorizontal = "FILL"`
+- [ ] Ran `auditWidget` from `examples-library.md` — 0 issues

@@ -120,15 +120,14 @@ const orgComp = await figma.importComponentByKeyAsync("ORGANISM_KEY");
 const organism = orgComp.createInstance();
 organism.setProperties({ /* organism-specific props */ });
 
-// 6. Find Content SLOT wrapper inside Widget and place organism there
-//    Navigate: Widget → Container → Widget frame → Content SLOT
-//    The SLOT wrapper is the frame named "Content" inside the inner Widget frame.
-//    Fastest approach: use absoluteTransform to position relatively,
-//    or find by name:
+// 6. Find Content SLOT inside Widget and place organism there
+//    The SLOT node has:
+//      - name: "Content " (TRAILING SPACE — yes really)
+//      - type: "SLOT" (NOT "FRAME")
+//    Find it by walking; do NOT match by FRAME type or "Content" without space.
 function findSlot(node, depth) {
-  if (depth > 5) return null;
-  // Slot wrapper is typically a frame named "Content" that is the SLOT
-  if (node.name === "Content" && node.type === "FRAME" && depth >= 3) return node;
+  if (depth > 8) return null;
+  if (node.name === "Content " && node.type === "SLOT") return node;
   let ch; try { ch = node.children; } catch(e) { return null; }
   if (!ch) return null;
   for (const c of ch) {
@@ -139,9 +138,16 @@ function findSlot(node, depth) {
 }
 const slot = findSlot(widget, 0);
 if (slot) {
-  slot.appendChild(organism);
-  // Organism inherits slot sizing — may need layoutSizingHorizontal = "FILL"
-  try { organism.layoutSizingHorizontal = "FILL"; } catch(e) {}
+  // ⚠️ CRITICAL: use insertChild(0, organism), NOT appendChild!
+  // appendChild on SLOT silently fails or returns "Cannot move into instance" error.
+  // setProperties({ "Content #12831:0": orgComp.id }) ALSO fails — SLOT props are read-only
+  // (Plugin API API: "Slot component property values cannot be edited").
+  // The ONLY working method is insertChild(index, instance) on the SLOT node.
+  slot.insertChild(0, organism);
+  // After insertion, retrieve organism from slot to apply sizing (its id is unchanged
+  // but the local handle is sometimes invalidated post-insertChild)
+  const orgInSlot = slot.children[0];
+  try { orgInSlot.layoutSizingHorizontal = "FILL"; } catch(e) {}
 }
 
 // 7. Add Widget to canvas
@@ -984,20 +990,35 @@ Error/warning state title blocks. Size: mostly **480×64–88**.
 
 Animated step status screen. All variants: **480×553**.
 
+⚠️ **Verified property scan (2026-04-29) — different from earlier docs:**
+
 | Property key | Type | Default |
 |---|---|---|
 | `Status state` | VARIANT | Default / Error / Attention |
-| `Title slot#2393:1` | INSTANCE_SWAP | Pass component node ID of a `Status titles/*` instance |
-| `Slot#2653:11` | SLOT | — |
-| `Error#2653:15` | SLOT | — |
-| `Warning#2653:19` | SLOT | — |
+| `Slot#2653:11` | SLOT | (read-only via Plugin API — fill via `slot.insertChild(0, ...)`) |
+| `Error#2653:15` | SLOT | (same) |
+| `Warning#2653:19` | SLOT | (same) |
 
-> **`Title slot#2393:1`** requires an INSTANCE_SWAP: import the desired `Status titles/*` component and pass its `node.id`:
-> ```js
-> const titlesSet = await figma.importComponentSetByKeyAsync("580fe91ba211c910bde144e968a65427f1558f02");
-> const titleVariant = titlesSet.children.find(v => v.name.includes("Step title=ID"));
-> inst.setProperties({ "Title slot#2393:1": titleVariant.id });
-> ```
+> ❌ **Earlier docs claimed `Title slot#2393:1` (INSTANCE_SWAP) exists — it does NOT.** Plugin API errors with `"Could not find a component property with name: 'Title slot#2393:1'"` when you try to set it. The property does not exist on the component set.
+>
+> **What actually exists:** three SLOTs (Slot / Error / Warning) and the Status state VARIANT. There is no INSTANCE_SWAP for the title.
+>
+> **For a status screen with a customizable title, prefer `Final statuses` set (`d3f95404b879e0993ddca2f599e2e5071cdda0ba`)** — it has Title/Subtitle as exposed TEXT nodes editable via `findOne(...)`. Its 3 variants:
+> - Status=Success
+> - Status=Pending (good for "Verifying your identity" / processing screens)
+> - Status=Rejected
+>
+> Step status is appropriate only when the matching Status state variant + slot fill solves the screen. For text-driven status messaging, use Final statuses.
+
+```js
+// Step status — slot fill (only works for the 3 SLOTs above)
+const stepSet = await figma.importComponentSetByKeyAsync("19f390fb940f29bcc82d764ee732f718ac129874");
+const inst = stepSet.children.find(v => v.name.includes("Status state=Default")).createInstance();
+// Find slot by name (note trailing space if applicable, and type=SLOT)
+function findSlotByName(node, name) { /* walk and match name===name && type==="SLOT" */ }
+const slot = findSlotByName(inst, "Slot#2653:11"); // or whatever your target
+slot.insertChild(0, customContent);
+```
 
 ### Example Screens — Statuses
 
