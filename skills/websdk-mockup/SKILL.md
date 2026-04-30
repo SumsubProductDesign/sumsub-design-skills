@@ -26,7 +26,9 @@ The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECT
 
 2. **Open the Examples section in `8VpSRNe9ur7SBctw0JrtOE`.** Use `use_figma` to load the matching organism page, find its `Examples` SECTION (use the inventory in `reference/examples-library.md` for direct node-ids).
 
-3. **Inspect a canonical Widget instance node-by-node.** For the matching desktop or mobile size, walk the Widget's children and record:
+3. **Inspect a canonical Widget instance RECURSIVELY — node-by-node, all the way down.** This is NOT just "Widget level + Content slot organism level" — that's two levels. The canonical Examples have content **at every nesting level** that you must mirror.
+
+   **Walk depth: at least 6 levels deep.** For each node you encounter:
    - Widget variant (`Type=Content` or `Type=Camera`)
    - Visibility state of every Top Bar variant (Size=Large/Medium/Small) — only ONE is `visible: true`
    - Visibility state of `instruction` frame
@@ -36,10 +38,25 @@ The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECT
    - For Type=Content: which organism is in `Content ` SLOT (read `slot.children[0].mainComponent.parent.name` + variant)
    - For Type=Camera: which organism is in `↳ Camera slot#10434:8` (read `componentProperties["↳ Camera slot#10434:8"].value`)
    - Container `layoutSizingHorizontal` (relevant for mobile)
+   - **For the organism inside the Widget — INSPECT ITS OWN slots and INSTANCE_SWAP properties:**
+     - Walk the organism's children: any node with `type === "SLOT"`?
+     - Read the organism's `componentProperties`: any prop of type `INSTANCE_SWAP` whose value is NOT a default placeholder?
+     - For each non-default sub-slot/sub-swap in canonical, capture: which component, which variant.
+   - **Repeat for sub-organisms.** If the organism inside the Widget contains another organism that ALSO has a slot/swap, walk into that too. The canonical Accesses example has `Accesses` → `Instructions` SLOT → `Instructions/Camera` instance → `Tips / Group` instance — three levels of nesting all populated.
 
-4. **Build by mirroring the canonical Widget exactly.** Same Widget variant. Same visibility state on every toolbar / instruction / Image. Same padding. Same bg fill. Same organism. Same variant string on the organism. Same slot insertion method (`slot.insertChild(0, ...)` for Type=Content; `setProperties({ "↳ Camera slot#10434:8": variant.id })` for Type=Camera).
+4. **Build by mirroring the canonical Widget exactly — including all nested slot fills.** Same Widget variant. Same visibility state on every toolbar / instruction / Image. Same padding. Same bg fill. Same organism. Same variant string on the organism. Same slot insertion method, applied at EVERY nesting level where canonical has content:
+   - SLOT type → `slot.insertChild(0, instance)`
+   - INSTANCE_SWAP property → `instance.setProperties({ "PropertyKey": variant.id })`
+   - Detect which method applies by reading the property type / node type, not by guessing.
 
-5. **Audit your output by re-reading it and diffing against canonical.** For each property captured in step 3, compare your build's value to canonical. Any mismatch is a violation. Audit must show `0 deviations from canonical` before declaring done.
+5. **Audit your output recursively.** For each property captured in step 3 at every nesting level, compare your build's value to canonical. Empty inner slots = audit fail. INSTANCE_SWAP property still pointing at default placeholder when canonical points elsewhere = audit fail. Any mismatch is a violation. Audit must show `0 deviations from canonical` (across all nesting levels) before declaring done.
+
+> ⚠️ **Library-version drift:** the SAME organism in the canonical source library file might expose its inner slot as `type: "SLOT"`, while in the consumer file (where you build) it might be exposed as a `type: "INSTANCE_SWAP"` property on the parent organism instance — same logical slot, different API surface. Both methods (insertChild vs setProperties) populate the same visual area but require different code. Always read the actual property type on YOUR file's instance, not on the canonical library instance, to decide which method to call.
+
+> 📌 **Concrete example — Accesses organism:**
+> - Canonical Examples (in `8VpSRNe9ur7SBctw0JrtOE`): `Accesses` → child `Instructions` SLOT → `Instructions/Camera` instance inside (`Platform=Desktop, Browser=Safari` for desktop, `Platform=IOS, Browser=Safari` for mobile)
+> - Consumer file: `Accesses` instance has property `Slot#6363:0` of type INSTANCE_SWAP. Set via `accesses.setProperties({ "Slot#6363:0": instructionsCameraVariant.id })`. The slot key (`59c110db0432bfa7b963e5b6107b9de3d1cb287d` = `Instructions/Camera` set) is the same in both cases.
+> - **A build that only inserts Accesses into the Widget Content SLOT and stops there has populated 1 of 2 nesting levels — the screen looks half-done with empty grey placeholder where Tips/Group should be.**
 
 ### Banned shortcuts (every one of these has appeared in past failed builds):
 

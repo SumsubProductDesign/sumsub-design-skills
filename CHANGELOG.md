@@ -4,6 +4,31 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.69.0 — 2026-04-30
+
+`websdk-mockup` — **Rule #∞ inspection is RECURSIVE, not one-level**.
+
+**Problem caught in user-reported build:** the v3.68.0 KYC build placed `Accesses` organism (Camera permission screen) into the Widget Content slot correctly, BUT did not populate the inner `Instructions` slot of the Accesses organism itself. The screen rendered with empty grey `*Slot* / Basic` placeholder where canonical Examples have `Instructions/Camera` (with `Tips / Group` content showing actual permission instructions).
+
+**Root cause:** Rule #∞ workflow stopped after step "organism inserted into Widget Content slot ✓". The skill never walked INTO the inserted organism to check whether IT has its own slots/INSTANCE_SWAP properties that also need filling per canonical Example. Inspection was 2 levels deep when canonical compositions are 3+ levels deep.
+
+**Fix in this release — Rule #∞ step 3 expanded:**
+- Inspection must walk **at least 6 levels deep** into the canonical Widget
+- For every organism encountered, read both:
+  - Its child SLOT nodes (look for `type === "SLOT"` children)
+  - Its INSTANCE_SWAP properties (look for `componentProperties[k].type === "INSTANCE_SWAP"` with non-default value)
+- Mirror every populated nesting level in the build, using the correct insertion method per node type:
+  - SLOT type → `slot.insertChild(0, instance)`
+  - INSTANCE_SWAP property → `instance.setProperties({ key: variant.id })`
+
+**Library-version drift documented:** the same logical slot may be exposed as `SLOT` in the source library file but as `INSTANCE_SWAP` property in the consumer file. Both methods populate the same visual area but use different API. Always read the actual node type / property type on the BUILD instance (not on canonical), then call the matching method.
+
+**Concrete example added to SKILL.md:** Accesses organism — canonical has `Instructions` SLOT with `Instructions/Camera` (`Platform=Desktop, Browser=Safari` desktop / `Platform=IOS, Browser=Safari` mobile, set key `59c110db0432bfa7b963e5b6107b9de3d1cb287d`). Consumer file exposes this as `Slot#6363:0` INSTANCE_SWAP — fill via `accesses.setProperties({ "Slot#6363:0": variant.id })`.
+
+**Audit rule:** every level of nesting that has content in canonical MUST have the same content in build. Empty inner slots / default-placeholder INSTANCE_SWAP values that don't match canonical = audit fail.
+
+---
+
 ## v3.68.0 — 2026-04-29
 
 `websdk-mockup` — **Rule #∞: Examples sections are the ONLY canonical source** (top-of-file rule, overrides all others).
