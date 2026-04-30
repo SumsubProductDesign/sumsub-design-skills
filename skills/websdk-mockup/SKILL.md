@@ -104,6 +104,26 @@ Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
 
 ---
 
+## 🟠 KYB context — different from KYC, read this when user mentions KYB
+
+**KYB (Know Your Business) is a separate WebSDK product** from KYC. It has its own component library and architectural pattern.
+
+**Trigger phrases that indicate KYB:** "KYB", "company verification", "business verification", "associated parties", "beneficial owner / UBO", "company documents", "company search", "PoA for KYB", "associated party". When ANY of these appear, switch into KYB mode:
+
+1. **Source file:** `9ii3Ueqr01mbLS3SE6bsrJ` (KYB | Light + Dark)
+2. **Canonical examples:** sections on `🟡 Detailed UI/UX (Light)` page (id `1:43`) — General flow / Company search / Company documents / Adding associated parties / We're checking your data / PoA
+3. **Shell:** **`Window / *` LOCAL components** (NOT the WebSDK `Widget` set)
+4. **Frame size:** 1440×1046 background with centered 512×800 Window inside
+5. **Top Bar variant:** `Type=Steps, Stroke=False` (different axis than KYC's `Size=Medium/Small/Large`)
+6. **Bottom Bar:** assembled directly as `Toolbar / Bottom Bar / Desktop` instance — variant `Buttons=Two, Stroke=False` (or `Buttons=One`)
+7. **Library subscription required:** consumer file must subscribe to KYB library via Assets panel before keys will import. If `importComponentSetByKeyAsync(b0df76296cf872acbf76475d1497b3092003c4e9)` fails, ask user to subscribe.
+
+**Full KYB reference:** `${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md` — contains all 17+ KYB component keys, variant lists, canonical screen anatomy, assembly recipe, section node-IDs.
+
+**Do NOT mix KYB Window shells with KYC Widget shells in the same flow.** Use one OR the other based on the product context.
+
+---
+
 ## 🚨 Critical rules — read and follow every time
 
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
@@ -238,14 +258,18 @@ So even when builds *appear* to work, the file is non-canonical without subscrip
 
 ### Rule #2 — Read reference files BEFORE any use_figma call
 
-For every WebSDK mockup task, **explicitly read ALL FOUR reference files** before writing any Figma code:
+For every WebSDK mockup task, **explicitly read ALL FIVE reference files** before writing any Figma code:
 
 ```
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/variables.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/base-components.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/organisms.md
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/examples-library.md  ← canonical Widget+Organism assembly
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/examples-library.md  ← canonical Widget+Organism assembly (KYC)
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md     ← KYB-specific structure (Window/* shells)
 ```
+
+**For KYC tasks:** `examples-library.md` is the most important.
+**For KYB tasks:** `kyb-organisms.md` is the most important — KYB uses `Window / *` LOCAL components from a separate file (`9ii3Ueqr01mbLS3SE6bsrJ`), NOT the Widget shell from WebSDK Organisms. See "KYB does NOT use the standard WebSDK Widget shell" section.
 
 These files are NOT pre-loaded into context. They contain exact component keys, token import keys, and variant names — you cannot guess these correctly. Building without reading them is a rule violation.
 

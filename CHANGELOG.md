@@ -4,6 +4,31 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.71.0 — 2026-04-30
+
+`websdk-mockup` — **KYB context support** (Know Your Business — business verification flows).
+
+**New `reference/kyb-organisms.md`** — full reference for KYB WebSDK structure scanned from source file `9ii3Ueqr01mbLS3SE6bsrJ` (KYB | Light + Dark). Documents:
+
+- **Why KYB is architecturally different from KYC:** KYB does NOT use the WebSDK `Widget` shell. It uses LOCAL `Window / *` components in the KYB file (1440×1046 background frame with centered 512×800 Window inside).
+- **17+ KYB component keys** with full variant lists:
+  - Window-level shells: `Window / Select company` (5 states), `Window / Associated parties` (5 types), `Window / Proof of address` (3 types), `Window / Company documents`, `Window / Status page`
+  - Body organisms: `Associated parties`, `Proof of address`, `Select company / Company search`, `Card Associated Party / Associated Parties screen` (6 variants), `Card Associated Party / Status screen` (2 types), `Company document / Group` (3 states), `Group / Attached File` (3 states), `Collapse Block`, `Associated parties / Group Associated parties`
+  - Status organisms: `Status` (6 types), `Status group` (12 variants), `Status Page / Status` (5 statuses), `Status Page / Step` (4 steps)
+- **Canonical screen anatomy:** Top Bar (`Type=Steps, Stroke=False`) + Body (Title + Content with optional Slot + step organism) + Bottom Bar (`Buttons=Two/One, Stroke=False`)
+- **KYB flow sequence:** Start → Company search (5 states) → Status overview → Company documents → Associated parties (Add/Edit Individual/Company) → Proof of address → "We're checking your data" status states
+- **Section node IDs** in the KYB file for direct inspection: General flow `3719:142312`, Company search `5147:28502`, Company documents `3105:80346`, Adding associated parties `3105:95064`, We're checking your data `3417:55129`, PoA `6059:48423`
+- **Library subscription requirement:** consumer files must subscribe to KYB library before keys are importable. Pre-build check pattern documented.
+
+**SKILL.md updates:**
+- New "🟠 KYB context" section above critical rules — trigger phrases ("KYB", "company verification", "associated parties", "beneficial owner", etc.) and key architectural differences
+- Rule #2 expanded: read 5 reference files instead of 4 (kyb-organisms.md added). For KYC tasks examples-library.md is most important; for KYB tasks kyb-organisms.md is most important.
+- Explicit ban: don't mix KYB Window shells with KYC Widget shells in the same flow.
+
+**Why this matters:** prior versions of the skill would attempt KYB screens using the KYC Widget shell + organisms in slot — wrong architecture. KYB uses pre-assembled Window shells with built-in toolbars and per-state variants (e.g. `Window / Select company / State=Find your company`). The variant covers the entire screen state, not just the inner organism.
+
+---
+
 ## v3.70.0 — 2026-04-30
 
 `websdk-mockup` — **`Image` visibility is canonical-driven, not "always false" (HARD RULE refinement)**.
