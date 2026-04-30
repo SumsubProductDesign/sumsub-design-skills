@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.72.0 — 2026-04-30
+Triggered by KYB WebSDK build (v3.71.0) that audit-PASSED with massive canonical deviations: 11/11 wrong background fill (#F6F7F9 instead of canonical #FFFFFF), 8/11 wrong frame heights (universal 1100/1300 instead of per-screen 960/1024/1067), 9/11 wrong Window heights (variant defaults instead of canonical post-resize values). The skill literally captured the canonical heights in Phase 2 and then ignored them in Phase 6, building with hardcoded "reasonable defaults" instead.
+
+- **New Critical rule — "Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions".** Top-level rule placed at the very start of the Critical rules section. Six properties enumerated (frame W/H, background fill, instance position, instance dimensions AFTER post-instantiation resize, variant values, layout structure) with explicit guidance on each. Particularly:
+  - **Component instance heights** — components have intrinsic variant heights, but canonical instances are often resized after `createInstance()` to a different per-screen height. Use canonical instance height, not variant intrinsic.
+  - **Background fills are product-specific** — KYB uses white, KYC uses subtlest grey. The canonical tells you which; don't default to one.
+  - **Layout structure must match** — if canonical wraps content in extra frames (Pattern B's `Frame 270990504 → Subheader + Container`), reproduce the wrapper hierarchy. Don't flatten.
+- **Banned phrases in build logs** — explicit list of phrases that signal canonical bypass: "Per-row height = max(frameH)", "Frame heights: 1046/1100/1300" (3 universal values can't match per-screen canonical), "#F6F7F9 light KYC-style bg" applied to KYB build, "Window heights: variant defaults", "Reasonable default", "Common pattern", "Approximate the canonical".
+- **New audit 7.45 — Canonical-match.** If `productContext.canonicalMap` is provided (skill builds it during Phase 2 inspection), every built screen must have a map entry, and frame dimensions / fill / instance position+size must match within 2px tolerance. If `productContext.requiresCanonical = true` but no map provided, audit hard-fails with instructions to build the map. Each issue message names the canonical property and the deviation.
+- **Procedure to follow**: (1) Locate canonical source per pattern doc → (2) Build a `canonicalMap` array `[{ screenLabel, frameW, frameH, frameBg, componentVariant, componentX, componentY, componentW, componentH }, ...]` from inspected canonical → (3) Build using map values, NOT defaults → (4) Audit 7.45 verifies match.
+
+If canonical is missing or ambiguous, the rule is **stop and ask the user, do not invent**. "I built X but couldn't find canonical for screens 4/10/11 so I used 1300" is no longer acceptable — surface the gap, get an explicit user decision.
+
+---
+
 ## v3.71.0 — 2026-04-30
 
 `websdk-mockup` — **KYB context support** (Know Your Business — business verification flows).

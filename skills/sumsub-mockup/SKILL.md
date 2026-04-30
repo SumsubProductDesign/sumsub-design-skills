@@ -14,6 +14,45 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
+### Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions
+
+If a canonical version of the screen you're being asked to build exists somewhere — in the same source file, in a published library, in the design system — **find it first, capture its exact dimensions, and match them**. Do not "build with reasonable defaults" and call it good. The canonical reference IS the spec.
+
+**The rule applies to every measurable property:**
+
+| Property | What "match canonical" means |
+|---|---|
+| Frame width / height | Read canonical frame's exact `width × height`. Use those values. Do NOT pick a "universal" frame height (e.g. always 1100 or always 1300) — canonical heights vary per screen. |
+| Background fill | Read canonical's `fills[0].color`. Use that exact RGB. Do NOT default to "subtlest grey" or "white" — KYB uses white, KYC uses subtlest grey, the canonical tells you which. |
+| Component instance position | Read canonical instance `x, y`. Use those values. |
+| Component instance dimensions | Read canonical `width × height` AFTER any post-instantiation resize. **Components have intrinsic variant heights, but canonical instances are often resized after `createInstance()` to a different per-screen height.** Use the canonical instance height, not the variant's intrinsic height. |
+| Variant property values | Read canonical's `componentProperties` / `mainComponent.name` for each instance. Use the same variant. |
+| Layout structure | If canonical wraps content in extra frames (e.g. Case page Pattern B has `Frame 270990504 → Subheader + Container`), reproduce the wrapper hierarchy. Do not flatten. |
+
+**The recurring failure pattern:** skill inspects canonical (Phase 2 of the build log: "captured heights 698 / 706 / 800 / 824 / 856 / 1036 / 1712"), then **builds with hardcoded defaults that ignore the inspection** ("Per-row height = max(frameH) of screens in that row" → universal 1046 / 1100 / 1300). Capturing data and ignoring it is the same as not capturing.
+
+**Procedure (must happen before STAGE 2 of the build):**
+
+1. **Locate canonical.** For KYB → look in source file `9ii3Ueqr01mbLS3SE6bsrJ` sections (General flow, Company search, Company documents, etc.). For Case page → file `ieTGS0ab6tqr3zwXRYPHIu` Tabs section. For Applicant page → file `Di7nvHaOxXiWuDAN1oa0hK` Detailed design page. The pattern docs in `.claude/figma/*.md` name the canonical source per pattern.
+2. **Build a canonical map** — for every screen you'll build, record:
+   ```
+   { screenLabel: "Find your company",
+     frameW: 1440, frameH: 1046, frameBg: "#FFFFFF",
+     componentVariant: "State=Find your company",
+     componentX: 464, componentY: 32, componentW: 512, componentH: 800 }
+   ```
+3. **Build using the map values, not "reasonable defaults".** Every `frame.resize()`, `instance.resize()`, and `frame.fills` should reference a value from the map.
+4. **Audit 7.45 verifies the match** — if a built frame's dimensions / fill / Window height don't match the canonical map within 2px tolerance, audit fails.
+
+**Banned phrases in build logs** (signs the skill bypassed the rule):
+- "Per-row height = max(frameH) of screens in that row" — invented, not canonical
+- "Frame heights: 1046 / 1100 / 1300" — three universal values cannot match per-screen canonical heights
+- "Background frame fill #F6F7F9 (light KYC-style bg)" applied to a KYB build — canonical KYB is #FFFFFF, this is cross-product contamination
+- "Window heights: variant defaults" — canonical Window heights are post-resize, not intrinsic. Using defaults skips the resize step.
+- "Reasonable default", "common pattern", "approximate the canonical" — the canonical IS the spec. There's no approximation; there's match or fail.
+
+If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
+
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
 **As the very first action of every session — before any other tool call, before reading any reference — do this:**
@@ -1667,6 +1706,87 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
            }
          }
        }
+     }
+   }
+
+   // 7.45. Canonical-match check — frame dimensions, fill, instance heights
+   // must match a canonical reference within 2px tolerance.
+   //
+   // Observed (KYB WebSDK build, v3.71): skill captured canonical heights
+   // (698/706/800/824/856/1036/1712) in Phase 2, then built with hardcoded
+   // defaults (1046/1100/1300 universal) in Phase 6. Used #F6F7F9 bg even
+   // though every canonical KYB frame uses #FFFFFF. Result: 8 of 11 frame
+   // heights wrong, 9 of 11 Window heights wrong, 11 of 11 backgrounds wrong.
+   //
+   // The audit script can't verify against an external canonical without a
+   // canonical map provided in productContext. So the script enforces:
+   //
+   // (a) If productContext.canonicalMap exists, every built screen must
+   //     have an entry, and frame/window dimensions must match within 2px.
+   // (b) If productContext.canonicalMap is missing for a "matchable" build
+   //     (any build referencing pattern docs or canonical files), fail with
+   //     an explicit "no canonical map provided" message — skill must build
+   //     one from inspection before proceeding.
+   //
+   // Skill is responsible for populating productContext.canonicalMap during
+   // Phase 2 (canonical inspection). Phase 6 build reads from the map.
+   {
+     const cm = (typeof productContext === "object" && productContext) ? productContext.canonicalMap : null;
+     if (cm && Array.isArray(cm)) {
+       // Each canonicalMap entry: { screenLabel, frameW, frameH, frameBg, componentVariant, componentX, componentY, componentW, componentH }
+       const builtScreens = root.children?.filter(c => c.type === "FRAME") || [];
+       for (const built of builtScreens) {
+         const entry = cm.find(e => built.name === e.screenLabel || built.name.includes(e.screenLabel));
+         if (!entry) {
+           issues.push(`7.45 canonical-match: built frame "${built.name}" has no canonical map entry. Either remove the frame or add it to productContext.canonicalMap from inspected canonical.`);
+           continue;
+         }
+         // Frame dimensions
+         if (Math.abs(built.width - entry.frameW) > 2) {
+           issues.push(`7.45 canonical-match: frame "${built.name}" width ${Math.round(built.width)} ≠ canonical ${entry.frameW} (>2px tolerance).`);
+         }
+         if (Math.abs(built.height - entry.frameH) > 2) {
+           issues.push(`7.45 canonical-match: frame "${built.name}" height ${Math.round(built.height)} ≠ canonical ${entry.frameH} (>2px tolerance). Skill likely used a "universal" hardcoded height instead of the canonical per-screen height.`);
+         }
+         // Frame fill
+         if (entry.frameBg) {
+           const fill = built.fills?.[0];
+           const expected = entry.frameBg.replace("#", "").toLowerCase();
+           const actual = fill?.type === "SOLID" ?
+             [Math.round(fill.color.r*255), Math.round(fill.color.g*255), Math.round(fill.color.b*255)]
+               .map(v => v.toString(16).padStart(2,"0")).join("").toLowerCase()
+             : null;
+           if (actual !== expected) {
+             issues.push(`7.45 canonical-match: frame "${built.name}" bg fill #${actual} ≠ canonical #${expected}. Cross-product contamination is a recurring bug (KYC #F6F7F9 used for KYB which should be #FFFFFF, or vice versa).`);
+           }
+         }
+         // Component instance match
+         if (entry.componentVariant) {
+           const inst = built.findOne(n => n.type === "INSTANCE");
+           if (!inst) {
+             issues.push(`7.45 canonical-match: frame "${built.name}" has no INSTANCE child but canonical specifies "${entry.componentVariant}".`);
+           } else {
+             const variantName = inst.mainComponent?.name;
+             if (variantName !== entry.componentVariant && !variantName?.includes(entry.componentVariant)) {
+               issues.push(`7.45 canonical-match: frame "${built.name}" instance variant "${variantName}" ≠ canonical "${entry.componentVariant}".`);
+             }
+             if (typeof entry.componentX === "number" && Math.abs(inst.x - entry.componentX) > 2) {
+               issues.push(`7.45 canonical-match: frame "${built.name}" instance x=${Math.round(inst.x)} ≠ canonical ${entry.componentX}.`);
+             }
+             if (typeof entry.componentY === "number" && Math.abs(inst.y - entry.componentY) > 2) {
+               issues.push(`7.45 canonical-match: frame "${built.name}" instance y=${Math.round(inst.y)} ≠ canonical ${entry.componentY}.`);
+             }
+             if (typeof entry.componentW === "number" && Math.abs(inst.width - entry.componentW) > 2) {
+               issues.push(`7.45 canonical-match: frame "${built.name}" instance width=${Math.round(inst.width)} ≠ canonical ${entry.componentW}.`);
+             }
+             if (typeof entry.componentH === "number" && Math.abs(inst.height - entry.componentH) > 2) {
+               issues.push(`7.45 canonical-match: frame "${built.name}" instance height=${Math.round(inst.height)} ≠ canonical ${entry.componentH}. Common cause: skill used the variant's intrinsic height instead of resizing to canonical height. After createInstance(), call instance.resize(canonical.componentW, canonical.componentH).`);
+             }
+           }
+         }
+       }
+     } else if (typeof productContext === "object" && productContext && productContext.requiresCanonical === true) {
+       issues.push(`7.45 canonical-match: productContext.requiresCanonical is true but no canonicalMap was provided. During Phase 2 (canonical inspection), build a canonicalMap with one entry per screen { screenLabel, frameW, frameH, frameBg, componentVariant, componentX, componentY, componentW, componentH }. Phase 6 build must read from this map, not invent "reasonable defaults".`);
      }
    }
 
