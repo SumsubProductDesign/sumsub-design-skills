@@ -58,6 +58,20 @@ The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECT
 > - Consumer file: `Accesses` instance has property `Slot#6363:0` of type INSTANCE_SWAP. Set via `accesses.setProperties({ "Slot#6363:0": instructionsCameraVariant.id })`. The slot key (`59c110db0432bfa7b963e5b6107b9de3d1cb287d` = `Instructions/Camera` set) is the same in both cases.
 > - **A build that only inserts Accesses into the Widget Content SLOT and stops there has populated 1 of 2 nesting levels — the screen looks half-done with empty grey placeholder where Tips/Group should be.**
 
+> 📌 **Concrete example — Tips / Guidelines / Liveness intro screens (Image area MUST be visible):**
+>
+> Default Type=Content Widget rule says "hide Image frame" — this is correct for Welcome / Document Type / Accesses / Review / Final statuses. **It is WRONG for Tips / Guidelines / Liveness intro / step-instruction screens.**
+>
+> Canonical Tips Examples (`2287:180771`) show every Widget instance has:
+> - `Image#10288:0` = **true** (Image frame visible)
+> - `↳  Image#10431:4` = INSTANCE_SWAP pointing at a `Steps` variant (set `48b1e3e308f6d74906213d9f215065ad781eae79`)
+>
+> The `Steps` set has variants per flow step: `Type=Liveness`, `Type=ID-Front`, `Type=ID-Back`, `Type=Selfie`, `Type=Video-ident`, etc. Each renders the relevant illustration in the 718×240 Image area above the Tips content.
+>
+> **Inspection check:** when canonical Examples for the target organism have `Image#10288:0 = true`, the build MUST mirror this — set both the boolean AND the INSTANCE_SWAP. If you only set Tips in Content slot but leave `Image#10288:0 = false`, you ship a Tips screen with no illustration.
+>
+> **Rule for override map decisions:** never apply visibility/property overrides "globally per Widget variant". Always read the canonical Example for THIS specific organism and copy what it has — the same `Type=Content` Widget can have Image=true (Tips/Guidelines) or Image=false (Welcome/Status) depending on which organism it hosts.
+
 ### Banned shortcuts (every one of these has appeared in past failed builds):
 
 - "I know how a Welcome screen looks; I'll build it from atoms" — banned
@@ -394,10 +408,12 @@ Audit: every Type=Content Widget MUST have `slot.children.length >= 1` after bui
 | 1 | Widget bg fill (bound) | `semantic/background/secondary/normal` (`feed2a5538bb5e0f2fb8a49bde6122c13ad68035`) | same |
 | 2 | Visible Top Bar variant | `Size=Small` | `Size=Medium` (NOT `Size=Large`) |
 | 3 | `instruction` frame `.visible` | `false` (unless QR-handoff) | `false` (unless QR-handoff) |
-| 4 | `Image` frame `.visible` | `false` (unless Steps illustration) | `false` (unless Steps illustration) |
+| 4a | `Image#10288:0` boolean | **canonical-driven**: `false` for Welcome/DocType/Accesses/Review/Status; **`true` for Tips/Guidelines/Liveness intro** | same |
+| 4b | `↳  Image#10431:4` INSTANCE_SWAP | when 4a=true: set to relevant `Steps` variant (set `48b1e3e308f6d74906213d9f215065ad781eae79`) — `Type=Liveness` / `Type=ID-Front` / `Type=ID-Back` / `Type=Selfie` / etc. | same |
 | 5 | `Container.layoutSizingHorizontal` | **`FILL`** (must override) | `FIXED` (default OK) |
 | 6 | Widget padding `0/T/R/B/L` | **`0/12/12/12`** (must override) | `0/24/24/24` (default OK) |
 | 7 | Organism in slot | `slot.insertChild(0, organism)` + `organism.layoutSizingHorizontal = "FILL"` | same |
+| 8 | Organism's INNER slots/INSTANCE_SWAP props | recursive — fill every nested level whose canonical Example has content (e.g. Accesses `Slot#6363:0` → `Instructions/Camera`) | same |
 
 **Why each matters (failure modes):**
 

@@ -4,6 +4,32 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.70.0 — 2026-04-30
+
+`websdk-mockup` — **`Image` visibility is canonical-driven, not "always false" (HARD RULE refinement)**.
+
+**Problem caught in user-reported build:** Liveness Tips screen (`1236:169929`) rendered without illustration. The Tips/Group content was visible, but the 718×240 Image area at the top was empty grey instead of showing the Liveness step illustration. Welcome / Document Type / Accesses / Review / Status screens looked correct. Pattern: only Tips/Guidelines/Liveness intro screens were broken.
+
+**Root cause:** v3.68.0 Rule #∞ override map listed `Image.visible = false` as a flat rule for all Type=Content widgets. Skill applied it globally during build. **The rule was oversimplified.**
+
+In canonical Examples (Tips Examples section `2287:180771`):
+- Welcome / Document Type / Accesses / Review / Final statuses widgets have `Image#10288:0 = false` ✓
+- **Tips widgets have `Image#10288:0 = true`** + `↳  Image#10431:4` INSTANCE_SWAP set to a `Steps` variant
+- Steps set (`48b1e3e308f6d74906213d9f215065ad781eae79`) has illustration variants: `Type=Liveness`, `Type=ID-Front`, `Type=ID-Back`, `Type=Selfie`, `Type=Video-ident`, etc.
+- Each renders the relevant step illustration in the 718×240 Image area above the Tips content
+
+**Fix in this release:**
+- Critical-overrides table in SKILL.md split row #4 into:
+  - `4a. Image#10288:0 boolean` — **canonical-driven** (false for Welcome/DocType/etc., true for Tips/Guidelines/Liveness intro)
+  - `4b. ↳  Image#10431:4 INSTANCE_SWAP` — when 4a=true, set to relevant Steps variant
+- Added explicit guidance: "never apply visibility/property overrides globally per Widget variant. Always read the canonical Example for THIS specific organism."
+- Added row #8 to overrides table — recursive sub-slot fills (per v3.69 rule, made explicit in summary table)
+- Concrete Tips example added with set keys
+
+**Concrete example added:** Tips/Liveness organism — `Image#10288:0 = true`, `↳  Image#10431:4` = INSTANCE_SWAP to `Steps` set variant `Type=Liveness` (set key `48b1e3e308f6d74906213d9f215065ad781eae79`). Skill must mirror BOTH the boolean AND the swap from canonical Example.
+
+---
+
 ## v3.69.0 — 2026-04-30
 
 `websdk-mockup` — **Rule #∞ inspection is RECURSIVE, not one-level**.
