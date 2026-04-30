@@ -108,19 +108,34 @@ sumsub-design-skills/
 │   ├── plugin.json                  # plugin manifest
 │   └── marketplace.json             # marketplace catalog
 ├── .mcp.json                        # Figma MCP server config
+├── CHANGELOG.md                     # release notes (per-version, user-visible changes)
 ├── skills/
 │   ├── sumsub-mockup/
-│   │   ├── SKILL.md                        # /sumsub-design:sumsub-mockup
+│   │   ├── SKILL.md                        # /sumsub-design:sumsub-mockup (Dashboard)
 │   │   └── blocks/                         # helpers.js + block templates
 │   ├── sumsub-component/SKILL.md           # /sumsub-design:sumsub-component
 │   ├── sumsub-specs-docs/SKILL.md          # /sumsub-design:sumsub-specs-docs
 │   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-design:sumsub-screen-annotations
-│   └── sumsub-design-review/SKILL.md       # /sumsub-design:sumsub-design-review
-└── reference/
+│   ├── sumsub-design-review/SKILL.md       # /sumsub-design:sumsub-design-review
+│   └── websdk-mockup/                      # /sumsub-design:websdk-mockup (WebSDK flows)
+│       ├── SKILL.md                                # canonical Examples-driven assembly
+│       └── reference/
+│           ├── variables.md                        # WebSDK token import keys
+│           ├── base-components.md                  # WebSDK atoms catalog
+│           ├── organisms.md                        # WebSDK organisms catalog
+│           └── examples-library.md                 # canonical Widget+Organism Examples inventory
+└── reference/                       # shared reference (Dashboard + product docs)
     ├── design-system.md             # Components, variables, tokens
     ├── color-usage.md               # Semantic color usage
-    ├── layout-patterns.md           # Page layout patterns
-    └── BLOCKS.md                    # Figma Blocks system
+    ├── layout-patterns.md           # Dashboard page layout patterns
+    ├── BLOCKS.md                    # Figma Blocks system
+    ├── figma-gotchas.md             # Plugin API gotchas
+    ├── flowbuilder.md               # Workflow builder patterns
+    ├── applicant-page-pattern.md    # Applicant detail Pattern 2
+    ├── ap-component-catalog.md      # Applicant page component keys
+    ├── tm-layout-patterns.md        # Transaction Monitoring patterns
+    ├── tm-component-catalog.md      # TM component keys
+    └── products/                    # Sumsub product docs (KYC/KYB/TM/CM/...)
 ```
 
 ## Team-wide distribution
