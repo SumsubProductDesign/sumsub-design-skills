@@ -4,6 +4,33 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.76.0 — 2026-04-30
+**Component-key catalogs added for 11 products.** v3.73 docs were mostly layout patterns + sample dimensions, but skill couldn't `importComponentByKeyAsync` without keys. Now all major products have catalogs.
+
+- **`sumsub-id-component-catalog.md`** (skills/sumsub-id-mockup/reference/) — Sumsub ID Account: 16 file-local components + external Sidebar `*Sidebar* / Desktop` set key + Account Header component key, with sidebar internal structure (Toolbar/Group, Content wrapper, Footer at y=796). Connect: confirmed no local components, custom Frame 2085662918 split into Left/Right columns. Reusable Identity: 3 sets + 1 component.
+
+- **`settings-component-catalog.md`** — 22 sets + 25 components (Members tables, Roles, Branding, Activity log, Profile, Password, etc.). Notes on duplicate naming (Members table v2 vs v9, Role table v3 vs v5).
+
+- **`billing-component-catalog.md`** — top 35 of 60 (Tables: Contracted services / Service usage / Billing overview / Table row_expanded; Cards: Card 6-variant / Plans 3-variant / Summary 8-variant; Payment: Payment details / Card details / Commitment 8-variant; Drawers: Service agreement / Plan details). 
+
+- **`global-settings-component-catalog.md`** — 22 sets + 29 components, top 25 listed (KYC Regulations 6-variant, KYB settings, AML Screening, 22 Tip components for tooltips per feature).
+
+- **`aml-screening-component-catalog.md`** — 12 sets + 18 components (`AML preset events` 11-variant, `Search configuration` 7-variant, vendor-specific Comply Advantage / World Check / Quantifind blocks, Resolution chain editor primitives Condition / Rule / Step group / Stepper row).
+
+- **`data-comparison-component-catalog.md`** — 14 sets + 8 components (CCR/MVP-prefixed components, `Result card` 4-variant for match decisions, `.Drawer / Header/2nd level` for 800-wide Advanced rule test drawer).
+
+- **`poa-settings-component-catalog.md`** — 10 sets + 7 components (PoA Settings 2-variant, Modal/Content, Custom Settings Card, Levels, Accepted languages, etc.).
+
+- **`dashboard-misc-component-catalogs.md`** (combined) — Reports (4+3), Marketplace Products (8 sets including `Content 2.0` organism), Marketplace Integrations (none — uses external libs), Operator (1 component), Databases (3+5 with `NewRowTable2.0` as current iteration).
+
+**Skipped from this batch**:
+- Questionnaires Components page — too heavy, transport drops on full scan. Components live deeply nested. Direct probe needed when reproducing specific Questionnaires screens.
+- Sign up — split layout, no local component catalog needed (uses Image + Drawer 800).
+- Workflow Builder — already documented in `workflow-builder-pattern.md`.
+- Statistics, Dev space, Dashboard Home Old — legacy, not for new builds.
+
+These catalogs fill the gap between knowing the layout pattern and being able to import the right components programmatically. Audit 7.45 (canonical-match) can now cross-reference these keys when validating component instances.
+
 ## v3.75.0 — 2026-04-30
 **New skill: `/sumsub-design:sumsub-id-mockup`** — dedicated builder for Sumsub ID product line (Account dashboard, Connect embeddable widget, Reusable KYC). Sumsub ID is a separate brand from Dashboard, with distinct components (`Sumsub ID / Account / Header`, `*Sidebar* / Desktop` 384) and design language.
 
