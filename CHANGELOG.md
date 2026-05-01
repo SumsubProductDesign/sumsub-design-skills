@@ -4,6 +4,35 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.73.0 — 2026-04-30
+**Bulk reference-doc expansion + per-product split.** Pattern docs were split out per-file (was: a few combined docs). Plugin now ships with **28 reference docs** in `skills/sumsub-mockup/reference/products/`.
+
+- **New pattern docs (Dashboard project):**
+  - `settings-pattern.md` — Settings hub unique pattern (1920 + Menu 80 + Additional Menu 191 + Header 1649)
+  - `marketplace-pattern.md` — Integrations (Pattern A: Sidebar 257 + 600-wide drawer) + Products (Pattern B: Content 2.0 organism)
+  - `reports-pattern.md` — Editor with collapsed sidebar 52
+  - `billing-pattern.md` — List with Cards Row + Period Row + Table
+  - `operator-pattern.md` — Settings family on 1841 canvas
+  - `signup-pattern.md` — Auth split (Image 1120 + Form 800)
+  - `reusable-identity-pattern.md` — Standard Pattern 1 (1440 + 257)
+  - `legacy-dashboard-patterns.md` — covers Statistics, Dev space, Dashboard Home Old (P6 legacy nav)
+  - `dashboard-project-files.md` — INDEX of 32 files in Dashboard Figma project + scan-via-PAT instructions
+- **New Sumsub-products pattern docs (other projects):**
+  - `kyb-levels-pattern.md` — KYB Companies Levels (3 patterns: list + editor + multi-frame review)
+  - `questionnaires-pattern.md` — 1280 + 276 sidebar + Header Full Screen Page editor
+  - `appearance-customisation-pattern.md` — 1920 split-view (Settings 727 + Preview/Appearance 1193)
+  - `databases-pattern.md` — Browser-chrome wrapper + 276 sidebar
+  - `poa-settings-pattern.md` — 1280 full-screen builder
+  - `global-settings-pattern.md` — 1920 + 276 + Header 120
+  - `data-comparison-pattern.md` — 1440 + 276 + 800-wide drawer for advanced rule test
+  - `aml-screening-pattern.md` — Mixed canvas (1920+276 / 1440+52)
+  - `workflow-builder-pattern.md` — Canvas + node types + bars (Flow Builder)
+- **Updated existing pattern docs:**
+  - `case-management-pattern.md` — Pattern B (Case detail) two-level wrapper structure (`Frame 270990504 → Subheader + Container`) with exact paddings 32/24/24/24, alignment CENTER/MAX, 6 tabs (was 5), 24px right margin (NOT between columns)
+- **README Project Structure rewritten** to reflect 28-doc reference layout.
+
+These docs were validated against canonical references file-by-file. Audit 7.45 (canonical-match, v3.72.0) reads `productContext.canonicalMap` against these docs' dimensions when building.
+
 ## v3.72.0 — 2026-04-30
 Triggered by KYB WebSDK build (v3.71.0) that audit-PASSED with massive canonical deviations: 11/11 wrong background fill (#F6F7F9 instead of canonical #FFFFFF), 8/11 wrong frame heights (universal 1100/1300 instead of per-screen 960/1024/1067), 9/11 wrong Window heights (variant defaults instead of canonical post-resize values). The skill literally captured the canonical heights in Phase 2 and then ignored them in Phase 6, building with hardcoded "reasonable defaults" instead.
 

@@ -124,18 +124,41 @@ sumsub-design-skills/
 │           ├── base-components.md                  # WebSDK atoms catalog
 │           ├── organisms.md                        # WebSDK organisms catalog
 │           └── examples-library.md                 # canonical Widget+Organism Examples inventory
-└── reference/                       # shared reference (Dashboard + product docs)
+└── skills/sumsub-mockup/reference/products/   # 28 per-product pattern docs (split per-file)
+    │
+    │ # Foundations (shared)
     ├── design-system.md             # Components, variables, tokens
     ├── color-usage.md               # Semantic color usage
-    ├── layout-patterns.md           # Dashboard page layout patterns
+    ├── layout-patterns.md           # Dashboard page layout patterns (P1-P6)
     ├── BLOCKS.md                    # Figma Blocks system
-    ├── figma-gotchas.md             # Plugin API gotchas
-    ├── flowbuilder.md               # Workflow builder patterns
-    ├── applicant-page-pattern.md    # Applicant detail Pattern 2
+    │
+    │ # Per-product layout patterns
+    ├── applicant-page-pattern.md    # Applicant detail
     ├── ap-component-catalog.md      # Applicant page component keys
-    ├── tm-layout-patterns.md        # Transaction Monitoring patterns
-    ├── tm-component-catalog.md      # TM component keys
-    └── products/                    # Sumsub product docs (KYC/KYB/TM/CM/...)
+    ├── case-management-pattern.md   # Case page (Pattern B), Blueprint editor (C), Report builder (D)
+    ├── cm-component-catalog.md      # CM UI kit component keys (95 importable)
+    ├── tm-layout-patterns.md        # Transaction Monitoring (6 patterns, 1440/1920/1681 canvases)
+    ├── tm-component-catalog.md      # TM Components library (65 keys)
+    ├── kyb-levels-pattern.md        # KYB Levels (Companies)
+    ├── questionnaires-pattern.md    # Questionnaires Redesign
+    ├── appearance-customisation-pattern.md  # WebSDK appearance editor (1920 split)
+    ├── databases-pattern.md         # Databases (Active/Available)
+    ├── poa-settings-pattern.md      # PoA Settings (1280 full-screen builder)
+    ├── global-settings-pattern.md   # Global Settings (1920+276)
+    ├── data-comparison-pattern.md   # Cross-Check Rules
+    ├── aml-screening-pattern.md     # AML screening (1920+276 / 1440+52)
+    ├── workflow-builder-pattern.md  # Flow Builder canvas + nodes
+    │
+    │ # Dashboard project (separate Figma project)
+    ├── dashboard-project-files.md   # INDEX of 32 files in Dashboard project
+    ├── settings-pattern.md          # Settings hub (P2 unique 80+191+1649 dual nav)
+    ├── marketplace-pattern.md       # Marketplace Integrations + Products
+    ├── reports-pattern.md           # Reports (P4 collapsed 52)
+    ├── billing-pattern.md           # Billing (P1 with Cards Row)
+    ├── operator-pattern.md          # Operator workspace (1841)
+    ├── signup-pattern.md            # Sign up (P5 Image+Form split)
+    ├── reusable-identity-pattern.md # Reusable Identity (P1)
+    └── legacy-dashboard-patterns.md # Statistics, Dev space, Dashboard Home Old (P6)
 ```
 
 ## Team-wide distribution
