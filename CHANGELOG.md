@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.74.0 — 2026-04-30
+**Sumsub ID product line documented.** New pattern doc covers the separate "Sumsub ID" Figma project (decentralized identity / wallet / passport-style auth — distinct from Dashboard).
+
+- **`sumsub-id-pattern.md`** — 3 patterns across 4 product files in project `108055557`:
+  - **Pattern A — Account dashboard** (`F38QSCQ62kCVe8ROwpXdvn`): 1440 canvas + **384-wide Sidebar** (uniquely wide, NOT 257/276) + Content 1024 + 32px right margin. Header `Sumsub ID / Account / Header` overlays full-width 1440×64.
+  - **Pattern B — WebSDK auth flow** (`HQjWYtGpp95LEgLGAPTSwR`): 1440 canvas + centered Toolbar 718 (NOT full-width) + Container 1392 with 24px L/R margins. NOT a full WebSDK Widget like KYB/KYC — Sumsub ID has its own simpler welcome/status flow.
+  - **Pattern C — Connect embedded widget** (`Z87D5m8KArTvQWH13Nwmmo`): 947×812 embeddable widget (NOT 1440), supports light (#ecedf2) and dark (#2a2b30) themes. Used for partner integrations (MiniPay, Age Verification).
+- **README Project Structure updated** to include sumsub-id-pattern.md.
+
+Files in Sumsub ID project that are NOT pattern-relevant: main file (diagrams + cover only), Refs and IA, Brand assets, Blockchain (older 2025-08).
+
 ## v3.73.0 — 2026-04-30
 **Bulk reference-doc expansion + per-product split.** Pattern docs were split out per-file (was: a few combined docs). Plugin now ships with **28 reference docs** in `skills/sumsub-mockup/reference/products/`.
 

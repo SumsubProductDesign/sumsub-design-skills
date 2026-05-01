@@ -158,7 +158,10 @@ sumsub-design-skills/
     ├── operator-pattern.md          # Operator workspace (1841)
     ├── signup-pattern.md            # Sign up (P5 Image+Form split)
     ├── reusable-identity-pattern.md # Reusable Identity (P1)
-    └── legacy-dashboard-patterns.md # Statistics, Dev space, Dashboard Home Old (P6)
+    ├── legacy-dashboard-patterns.md # Statistics, Dev space, Dashboard Home Old (P6)
+    │
+    │ # Sumsub ID (separate Figma project — wallet/passport product line)
+    └── sumsub-id-pattern.md         # Account (384 sidebar) + WebSDK (centered) + Connect (947 embed)
 ```
 
 ## Team-wide distribution
