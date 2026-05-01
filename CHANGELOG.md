@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.75.0 — 2026-04-30
+**New skill: `/sumsub-design:sumsub-id-mockup`** — dedicated builder for Sumsub ID product line (Account dashboard, Connect embeddable widget, Reusable KYC). Sumsub ID is a separate brand from Dashboard, with distinct components (`Sumsub ID / Account / Header`, `*Sidebar* / Desktop` 384) and design language.
+
+- **New skill folder** `skills/sumsub-id-mockup/`:
+  - `SKILL.md` — trigger phrases (Sumsub ID, Account, Connect, MiniPay, Reusable KYC, Magic links, Trusted devices, Attestations), critical canonical-first rule (inherits from sumsub-mockup v3.72+), banned patterns (don't use 257/276 sidebar for Account, don't use 1440 for Connect, don't substitute Sumsub ID Header with Dashboard `*Header*`, don't build Sumsub ID WebSDK auth flow here)
+  - `reference/sumsub-id-pattern.md` — Pattern A (Account 1440+384), Pattern C (Connect 947×812 light+dark), Pattern P1 (Reusable KYC 1440+257)
+  - `reference/reusable-identity-pattern.md` — moved from `sumsub-mockup/reference/products/`
+
+- **Sumsub ID WebSDK auth flow** documented in `websdk-mockup/reference/sumsub-id-websdk.md` (NOT in the new skill — websdk-mockup handles all WebSDK Widget flows). Pattern: 1440 + centered Toolbar 718 + Container 1392 (24px L/R margins). Distinct from KYC and KYB WebSDK structures.
+
+- **Skill split rationale:** Sumsub ID Account/Connect use brand-specific components (`Sumsub ID /` namespace) and unique 384px sidebar. Sumsub ID WebSDK uses widget-flow conventions matching the websdk-mockup audit framework. Clean separation by skill boundary keeps each canonical reference focused.
+
+- **Removed** `skills/sumsub-mockup/reference/products/sumsub-id-pattern.md` and `reusable-identity-pattern.md` — moved to dedicated skill folder, no duplication.
+
+- **README updated** with new command entry + Project Structure layout reflecting the `sumsub-id-mockup` skill.
+
 ## v3.74.0 — 2026-04-30
 **Sumsub ID product line documented.** New pattern doc covers the separate "Sumsub ID" Figma project (decentralized identity / wallet / passport-style auth — distinct from Dashboard).
 

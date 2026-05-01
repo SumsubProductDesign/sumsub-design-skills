@@ -59,6 +59,18 @@ Builds a single Figma COMPONENT or a COMPONENT SET with variants on demand. Use 
 
 The skill clarifies scope (where to put it, single vs variant set, naming) before building, and self-verifies via audit (auto-layout, bindings, realistic default text, DS icons only).
 
+### `/sumsub-design:sumsub-id-mockup` — Sumsub ID Mockup Builder
+
+Creates mockups for **Sumsub ID** product line — separate brand from Dashboard. Covers Account dashboard (1440 + 384 sidebar), Connect embeddable widget (947×812 light/dark), Reusable KYC config (standard P1).
+
+```
+/sumsub-design:sumsub-id-mockup Account dashboard with MFA settings and trusted devices
+/sumsub-design:sumsub-id-mockup Connect widget for MiniPay (light theme)
+/sumsub-design:sumsub-id-mockup Reusable KYC partner config page
+```
+
+For Sumsub ID **WebSDK auth flow** (welcome / status onboarding screens) → use `/sumsub-design:websdk-mockup` instead.
+
 ### `/sumsub-design:sumsub-design-review` — Design System Audit
 
 Audits Figma mockups for compliance with the Sumsub Dashboard design system. Walks the node tree via Plugin API and reports issues: unbound fills/strokes/spacing, `base/*` tokens instead of `semantic/*`, wrong fonts, wrong libraries.
@@ -117,13 +129,19 @@ sumsub-design-skills/
 │   ├── sumsub-specs-docs/SKILL.md          # /sumsub-design:sumsub-specs-docs
 │   ├── sumsub-screen-annotations/SKILL.md  # /sumsub-design:sumsub-screen-annotations
 │   ├── sumsub-design-review/SKILL.md       # /sumsub-design:sumsub-design-review
+│   ├── sumsub-id-mockup/                   # /sumsub-design:sumsub-id-mockup (Sumsub ID Account/Connect/Reusable KYC)
+│   │   ├── SKILL.md
+│   │   └── reference/
+│   │       ├── sumsub-id-pattern.md        # Account (384) + Connect (947) + Reusable KYC (P1)
+│   │       └── reusable-identity-pattern.md
 │   └── websdk-mockup/                      # /sumsub-design:websdk-mockup (WebSDK flows)
 │       ├── SKILL.md                                # canonical Examples-driven assembly
 │       └── reference/
 │           ├── variables.md                        # WebSDK token import keys
 │           ├── base-components.md                  # WebSDK atoms catalog
 │           ├── organisms.md                        # WebSDK organisms catalog
-│           └── examples-library.md                 # canonical Widget+Organism Examples inventory
+│           ├── examples-library.md                 # canonical Widget+Organism Examples inventory
+│           └── sumsub-id-websdk.md                 # Sumsub ID WebSDK auth flow (centered Toolbar 718 + Container 1392)
 └── skills/sumsub-mockup/reference/products/   # 28 per-product pattern docs (split per-file)
     │
     │ # Foundations (shared)
