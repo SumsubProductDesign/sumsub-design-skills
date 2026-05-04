@@ -4,6 +4,62 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.79.0 — 2026-05-04
+**29 sims filled with real content via skill-true builds (importComponentByKeyAsync + setProperties + Base fallback).** Previous sims had empty Body — only sidebar/header skeletons. Now each sim has actual content: tables, cards, forms, sections.
+
+### Pattern: skill-true (no clone)
+
+Skill cannot `.clone()` canonical fragments — only `importComponentByKeyAsync` + `setProperties`. Where catalog component is FILE-LOCAL (key won't import cross-file), skill must fall back to Base components (`*Table Starter*`, `*Collapsible Card*`, `*Card*`, `*Tab Button*`).
+
+### File-local components hit during skill-true rebuild
+
+| Product | File-local component | Fallback used |
+|---|---|---|
+| Billing | `Card (Overview)` `24421453a35b53...`, `Table_Billing overview` `26ffe4e00...` | Base `Card` set + `Table Starter` set |
+| Settings | `Roles` `113f685c...` | `Table Starter` |
+| TM Transactions | `Txn table` `cce5398...` | `Table Starter` |
+| TM Transaction detail | `Header / Finance` `1fcc7d73...` | Base `*Header*` + `Collapsible Card` sections |
+
+Skill audit must validate: every Body has at least 1 content component (Tab Button / Card / Table / Collapsible Card / Input / Select). Empty Body = audit FAIL.
+
+### Sims (all 29 with real content)
+
+URLs unchanged — same node IDs as v3.78, content added inside.
+
+| # | Product | Filled with |
+|---|---|---|
+| 1 | Sumsub ID Account | Title + 4 Settings/Item/Desktop + Button + Sidebar (z-top) |
+| 2 | Sumsub ID Connect | Left + Right column + Modal Basic widget |
+| 3 | Settings Dashboard | Table Starter (Roles fallback) |
+| 4 | Case page CM | Frame 270990504 wrapper (Subheader + Tab Basic + Container with Overview tab content) + Right column |
+| 5 | TM Settings | Tab Button + 3 Collapsible Cards + Save/Cancel buttons row |
+| 6 | KYB WebSDK Window | Title + Subtitle + Input + Country Select |
+| 7 | Reusable Identity | Tab Button + Table Starter |
+| 8 | Marketplace Integrations | Title + Tab Button + 12 Cards in wrapping grid |
+| 9 | Marketplace Products | Content 2.0 organism (already has full content) |
+| 10 | Billing | Header + 3 Cards row + Block Title + Top Toolbar + Table Starter |
+| 11 | Operator | Performance stats title + Tab Button + 3 metrics cards + Table |
+| 12 | Reports | Reports title + Top Toolbar + Table Starter |
+| 13 | Sign up | Title + Subtitle + Email + Password inputs + Sign up button |
+| 14 | KYB Levels list | Companies levels title + Top Toolbar + Table |
+| 15 | KYB Levels editor | Tab Button + 4 Collapsible Cards |
+| 16 | Questionnaires list | Questionnaires title + Top Toolbar + Table |
+| 17 | Questionnaires editor | Question types title + 5 Collapsible Cards |
+| 18 | Appearance | Appearance title + 3 Inputs + 2 Selects |
+| 19 | Databases Active | Browser + Sidebar + Header + Rows component (or Table Starter fallback) |
+| 20 | PoA Settings | PoA presets title + 4 Collapsible Cards |
+| 21 | Global Settings | Tab Button + 3 Collapsible Cards |
+| 22 | AML Vendors | Comply Advantage title + Tab Button + 3 Collapsible Cards |
+| 23 | AML Resolution chain | Resolution rules title + Table Starter |
+| 24 | Cross-Check Rules | Title + Tab Button + Table Starter |
+| 25 | TM Transactions table | Sidebar + Header + Table Starter (1159 wide) |
+| 26 | TM Rule editor | Header (title + primary button) + Body (4 Collapsible Cards) |
+| 27 | TM Transaction detail | Header / Finance + Tab Basic + 2-col layout (Main 4 cards + Right panel 2 cards) |
+| 28 | TM Transaction Networks | Case header + Container + Right panel (canonical instances) |
+| 29 | Applicant page | AP page header + Summary + Body (5 Collapsible Cards) |
+
+---
+
 ## v3.78.0 — 2026-05-04
 **Canonical-match audit run on 29 simulations across all major Dashboard products.** Each sim was built from canonical inspection, then audited via skill rule 7.45 (frame W/H, fill, instance pos/dims, variant — within 2px tolerance). 29/29 PASS after fixes. Pattern docs corrected from canonical truth.
 
