@@ -70,25 +70,48 @@ figma.notify("Built " + root.id);
 // 3. (Optional) verify in a SEPARATE use_figma call by reading the IDs back via throw new Error(...)
 ```
 
-### File-local components: use `getNodeByIdAsync`, not `importComponentByKeyAsync`
+### File-local components: use `getNodeByIdAsync` OR Base components fallback (NEVER clone canonical)
 
-Cross-file `importComponentByKeyAsync` / `importComponentSetByKeyAsync` only resolves PUBLISHED library components. **File-local components (components defined inside a non-library Figma file, even with a valid `key`) fail with "Component … not found"** when imported from another file.
+Cross-file `importComponentByKeyAsync` / `importComponentSetByKeyAsync` only resolves PUBLISHED library components. **File-local components fail with "Component … not found"** when imported from another file.
 
-When the catalog flags a component as file-local (look for `⚠ FILE-LOCAL` in product catalogs), do one of:
-1. **Build inside the source file's Drafts page** — the component is then accessible via `getNodeByIdAsync(nodeId)`.
-2. **`canonicalInstance.clone()`** — find the canonical instance in the source file, clone it, append into your build, then override text/variant.
+When the catalog flags a component as file-local (look for `⚠ FILE-LOCAL` in product catalogs):
+1. **Build inside the source file's Drafts page** — the component becomes accessible via `getNodeByIdAsync(nodeId)`.
+2. **Fall back to Base components** with realistic data via `setProperties`. Document the fallback in the audit report.
 
-Example (Sumsub ID Account Header is file-local in `F38QSCQ62kCVe8ROwpXdvn`):
-```js
-// ❌ WRONG — fails cross-file
-const headerSet = await figma.importComponentSetByKeyAsync("b8e4...");
+> ⚠️ **Don't `canonicalInstance.clone()` to fill content.** A clone of the canonical IS the canonical — that's not a build, that's stealing. Skill output must be reproducible by importing components from published libraries + setProperties. If a fragment can only be reproduced via clone, the catalog has a gap and the user should be told.
 
-// ✅ CORRECT — works inside source file
-const headerComp = await figma.getNodeByIdAsync("2191:36842");
-const header = headerComp.createInstance();
-```
+### Skill-true builds: no clone of canonical content
 
-The Bottom toolbar in KYB WebSDK (`9ii3Ueqr01mbLS3SE6bsrJ`) is the same situation — set key looks valid via `mainComponent.parent.key`, but `importComponentSetByKeyAsync` fails. Workaround: clone canonical instance.
+If you build by `.clone()`-ing canonical fragments (Body / Content / wrapper / table data), you're NOT simulating the skill — you're copy-pasting the canonical. **A real skill run cannot do this.** The skill must:
+- `importComponentByKeyAsync(key)` for every component
+- `setProperties({...})` to fill text/variants/booleans
+- Generate realistic data inline (10 rows, real names, real statuses) — not copy from canonical
+
+If a needed component's key is file-local and there's no published equivalent, the skill MUST:
+1. Pick a Base components fallback that fits the role
+2. Note in the audit report that fallback was used (and which canonical component is missing)
+3. Continue building — never bail out silently
+
+### Base components fallback table
+
+When a product-specific component is file-local, use these Base/Organisms equivalents:
+
+| Canonical role | File-local example | Base fallback | Key |
+|---|---|---|---|
+| Generic data table | `Roles`, `Txn table`, `Table_Billing overview`, `Case table` | `*Table Starter*` | `213b7e3d7cc4503bbab83cd6c249e41e06dae295` |
+| Settings card / metric card | `Card (Overview)` (Billing) | `Card` set | `4f02e07effac461a3dc35a659794017bd5a8c692` |
+| Collapsible section card | `APCardCollapsible`, blueprint sections | `*Collapsible Card*` | `db0df8e75407eeebbf40e0762905eec0d3691851` |
+| Toolbar / filters row | `Top Toolbar` (always published — use direct) | `Top Toolbar` | `fa8defc5fadd20a84c812784786217c6e0003ca0` |
+| Sub-tab navigation | various product Tab Buttons | `*Tab Button*` | `8f7da8c5932abfc90cf27d9516a60a5e2c355195` |
+| Page tab navigation | `Tab Basic / Item` (published) | `*Tab Basic*` | `8b7caf090f6d71e8892fb33f649cab470552dc83` |
+| Form input | various | `*Input Basic*` | `984bd06621f139256149638f37d3ae22221a7ccc` |
+| Dropdown select | various | `*Select Basic*` | `8c6e366aa04e78faf3beb584535554b77d47d11b` |
+| Primary action button | various | `*Button*` | `2c388961efd7b1030f71704ad85f89ba4c4f68ed` |
+| Block heading + actions | `Block Title` (published in some files) | text + button row | manual |
+
+### Empty Body = audit FAIL
+
+After the build, audit must verify Body has at least one content component (Card / Table / Collapsible Card / Tab Button / Input / Select). A skeleton with sidebar + header + empty Body is NOT a delivered mockup.
 
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
