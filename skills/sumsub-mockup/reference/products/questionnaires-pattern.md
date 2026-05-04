@@ -8,27 +8,25 @@
 
 ## Critical canvas dimensions
 
-**Questionnaires uses 1280-wide canvas, NOT 1440.** This is a hold-over from Sumsub Dashboard's older breakpoint. Don't auto-default to 1440 like other dashboard products.
+⚠️ **Corrected v3.78** from canonical `4575:110596` (Questionnaires list): List uses **1920 canvas** (NOT 1280); editor still uses 1280.
 
-| Pattern | Canvas | Sidebar | Notes |
-|---|---|---|---|
-| List page | 1280 × scroll | 276px (NOT 257) | Settings-style sidebar — same as TM Settings/Rules |
-| Builder/editor | 1280 × scroll | none | Uses `*Header Full Screen Page*` 1280×64 |
-
-**276 vs 257 sidebar:** Questionnaires uses the wider 276px sidebar variant, same as TM Settings. Auditing `productContext === "questionnaires"` should validate sidebar width is 276 if a sidebar is present.
+| Pattern | Canvas | Sidebar | Header | Notes |
+|---|---|---|---|---|
+| List page | **1920 × 1080** | 276 (inside Wokspace_1280x720 wrapper) | *Header* 1644×92 @ (276, 0) | List has Sidebar inside wrapper FRAME |
+| Builder/editor | 1280 × scroll | none | *Header Full Screen Page* 1280×64 | Question types editor 1280-wide |
 
 ---
 
-## Pattern A — Questionnaires List
+## Pattern A — Questionnaires List (1920 + Wokspace + Sidebar 276)
 
-> Page `4161:433030` "Questionnaires list"
+> Canonical: `4575:110596` "Screen 754"
 
 ```
-Root (1280 × scroll, NONE layout, fill #ffffff)
-├── *Sidebar*  (276 × scroll, x=0, y=0, Type=Settings or similar)
-└── Main area (x=276)
-    ├── *Header*           (1004 × 116, x=276, y=0)   ← full content-area width
-    └── *Table Starter*    (940 × scroll, x=308, y=140)  ← 32px content padding
+Root (1920 × 1080, NONE layout, fill #ffffff)
+├── Wokspace_1280x720 (FRAME 1920×1080 @ (0,0))
+│   └── *Sidebar*  (276 × 1080, x=0, y=0, key e2579193f0ca592605c39761a1570b8bacb2bdae)
+├── *Header*  (1644 × 92, x=276, y=0)
+└── Content   (1644 × 988, x=276, y=92)
 ```
 
 **Confirmed dimensions** from `Screen 565`:

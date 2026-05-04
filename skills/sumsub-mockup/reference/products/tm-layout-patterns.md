@@ -32,26 +32,27 @@ Root (1440 × 900)
 
 ---
 
-## Pattern 2 — TM Settings (Sidebar 276 + Header + Body)
+## Pattern 2 — TM Settings (Sidebar 257 + Header 56 + Body)
 
-> Used for: **TM Settings**, **TM Rules table**.
-> ⚠️ Sidebar is **276px** (not 257px) — TM-specific wider sidebar variant.
+> Used for: **TM Settings** (`B9Otn9QPpssNomSzADBNqF`), **TM Rules table** (`Swa6KOy5vBGGO1qIKNygYN`).
+> ⚠️ **Corrected v3.78** from canonical `4387:42299`: Sidebar is **257** (NOT 276), Header height **56** (NOT 64), Body @ y=56.
 
 ```
-Root (1440 × 956)
-├── *Sidebar*  (276 × 956, x=0, y=0)   ← 276px, NOT standard 257px
-├── *Header*   (1164 × 64, x=276, y=0)
-└── Body       (1164 × 892, x=276, y=64)
-    - VERTICAL layout, paddingL=32, paddingR=32, paddingT=24
+Root (1440 × 1154+ scrollable)
+├── *Sidebar*  (257 × ~956, x=0, y=0, variant Type=Transactions monitoring Collapsed=False)
+├── *Header*   (1164 × 56, x=276, y=0, variant Production=True Version=New Type=Generic)
+└── Body       (1164 × 1098, x=276, y=56)
+    - VERTICAL layout, paddingT=24, paddingL=32, paddingR=32
     ├── Block Title (h4-xl, semibold)
     ├── Content sections (collapsible cards, tables)
     └── Button bar (56px, bottom — Save/Cancel)
 ```
 
+**Note**: Sidebar instance is 257 wide, but Header starts at x=276 (19px gap with white background bleed). Layout `0 + 257 + (gap 19) + 1164 = 1440`.
+
 **Key differences from standard Pattern 1:**
-- Sidebar: **276px** (not 257px) → content area **1164px** (not 1183px)
-- Screen height: **956px** (not 900px)
-- Body structure: VERTICAL with top/left/right padding + Button bar at bottom
+- Header height: **56px** (not 64px)
+- Body height: **1098px** (not 892px) — taller content area
 
 **Files using this pattern:**
 - `B9Otn9QPpssNomSzADBNqF` (TM Settings) — x=276, content=1164, height=956
@@ -185,7 +186,7 @@ What kind of TM screen?
 │   → Pattern 1 (Sidebar 257 + Header 64 + Content 1183, screen 1440×900)
 │
 ├── Settings page / Rules table
-│   → Pattern 2 (Sidebar 276 + Header 64 + Body 1164, screen 1440×956)
+│   → Pattern 2 (Sidebar 257 + Header 56 + Body 1164, screen 1440×1154+ scrollable)
 │
 ├── Creating or editing a rule
 │   → Pattern 3 (Header Full Screen Page 1440×64 + Main 1000px + Settings panel 440px)

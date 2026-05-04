@@ -35,10 +35,10 @@ Reusable KYC lives in a different Figma project file:
 > File: `F38QSCQ62kCVe8ROwpXdvn` "Sumsub ID | Account"
 
 ```
-Root (1440 × 900, fill #ffffff)
-├── Sumsub ID / Account / Header  (1440 × 64, x=0, y=0)    ← full-width overlay header
-├── *Sidebar* / Desktop            (384 × 900, x=0, y=0)    ← UNIQUELY WIDE (NOT 257/276)
-└── content wrapper                (1024 × 836, x=384, y=32)
+Root (1440 × 900, fill #ECEDF2)              ← canonical bg is subtlest grey, NOT white
+├── Sumsub ID / Account / Header  (1440 × 64, x=0, y=0)    ← full-width overlay header (file-local — use getNodeByIdAsync)
+├── content wrapper                (1024 × 836, x=384, y=32)
+└── *Sidebar* / Desktop            (384 × 900, x=0, y=0)    ← appended LAST so it sits on top
     └── (account settings: emails, docs, MFA, devices, magic links, etc.)
 ```
 

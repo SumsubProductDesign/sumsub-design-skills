@@ -4,6 +4,66 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.78.0 — 2026-05-04
+**Canonical-match audit run on 29 simulations across all major Dashboard products.** Each sim was built from canonical inspection, then audited via skill rule 7.45 (frame W/H, fill, instance pos/dims, variant — within 2px tolerance). 29/29 PASS after fixes. Pattern docs corrected from canonical truth.
+
+### Pattern doc corrections (canonical was different from doc)
+
+- **`tm-layout-patterns.md` Pattern 2 (TM Settings)**: Sidebar **257** (not 276), Header **56** (not 64). Body @ y=56.
+- **`sumsub-id-pattern.md` Account Pattern A**: bg fill **#ECEDF2** (not white). Z-order: Sidebar appended last (top), Header underneath.
+- **`settings-pattern.md` Pattern P2**: Header height **120** (not 64). Body content y=128. Added component keys: `Menu / Group` `d6c711248e224a9a9408f0cdfbe4d3a43e4953f8`, `*Additional Menu* / Group` `21399a383bda156ae8d7e569054717322b1802ca`.
+- **`questionnaires-pattern.md` Pattern A**: Canvas **1920** (not 1280). Sidebar 276 lives inside Wokspace_1280x720 wrapper. Header height 92.
+- **`marketplace-pattern.md` Pattern A**: NO `*Header*` — Sidebar 257 + Wrapper 1183 directly. Sidebar variant `Type=Marketplace, Collapsed=False`.
+- **`billing-pattern.md`**: NO `*Header*` in Service usage canonical. Older Sidebar key `a4d31cfd4e019221531cd24596bdb5702030b8e4`.
+- **`reports-pattern.md`**: Sidebar key `1218d0ada51812d45b0e637a5596f364babde608` (not standard `60be5cbb...`).
+- **`databases-pattern.md`**: Sidebar key `7b7f757fea4763d00ba146c4d3b60893fdbc7389` (`.Sidebar category` file-local). Browser & URL Controls key `aed05b6d97203188775958ed01669aeacc94c79f`.
+- **`signup-pattern.md`**: Drawer on **LEFT** (x=0), Image on **RIGHT** (x=800) — pattern doc had it backwards.
+- **`applicant-page-pattern.md`**: Modern canonical has NO 52px sidebar at top — only AP page header 1440x152 + Summary 360 (not 380) + Body 1080 (not 1008).
+- **`tm-layout-patterns.md` Pattern 1 (Transactions table)**: Header @ x=281 (not 257) — 24px gap between Sidebar and Header.
+- **`websdk-mockup` KYB Window**: Top toolbar variant `Type=Steps, Stroke=False` (not defaultVariant which is 68px tall instead of canonical 56px).
+
+### Audit script reinforcement
+
+Skill MUST run audit 7.45 against `productContext.canonicalMap` after every build, BEFORE declaring success. The 6 initial sims I claimed done were all dim-mismatched until audit forced fixes — never trust visual inspection.
+
+### Sim coverage
+
+29 sims, all PASS audit:
+
+| # | Product | Pattern |
+|---|---|---|
+| 1 | Sumsub ID Account | A — 384 sidebar |
+| 2 | Sumsub ID Connect | C — 947x812 embed |
+| 3 | Settings Dashboard | P2 — 80+191 dual nav |
+| 4 | Case page CM | B — 1440 + 992 + 424 |
+| 5 | TM Settings | 1440 + 257 + 56 + Body |
+| 6 | KYB WebSDK Window | 1440x1046 + 512x800 |
+| 7 | Reusable Identity | P1 — 1440 + 257 + 1183 |
+| 8 | Marketplace Integrations | A — 1440 + 257 + 1183 |
+| 9 | Marketplace Products | B — 1440 + Content 2.0 organism |
+| 10 | Billing | 1440 + 257 + 1183 (no Header) |
+| 11 | Operator | 1841 + 276 + 1565 |
+| 12 | Reports | 1440 + 52 + 1388 |
+| 13 | Sign up | 1920 split (800 Drawer + 1120 Image) |
+| 14 | KYB Levels list | 1440 + 257 + 1183 |
+| 15 | KYB Levels editor | 1440 + Headers 120 + Content |
+| 16 | Questionnaires list | 1920 + 276 (in Wokspace) + Header 92 |
+| 17 | Questionnaires editor | 1280 + Header Full Screen 64 |
+| 18 | Appearance customisation | 1920 split (727 Settings + 1193 Preview) |
+| 19 | Databases Active | 1920 + Browser 80 + 276 + 1639 |
+| 20 | PoA Settings | 1280 + Header 120 |
+| 21 | Global Settings User verif | 1920 + 276 + Header 120 |
+| 22 | AML Vendors | 1920 + 276 + Body 1644 |
+| 23 | AML Resolution chain | 1440 + 52 + 1388 |
+| 24 | Cross-Check Rules | 1440 + 276 + 1164 |
+| 25 | TM Transactions table | 1440 + 257 + (24 gap) + 1159 |
+| 26 | TM Rule editor | 1440 + 52 + Header 64 + Body |
+| 27 | TM Transaction detail | 1920 (no sidebar) + Header 64 |
+| 28 | TM Transaction Networks | 1681 + Case header 1680 + 1316/364 split |
+| 29 | Applicant page | 1440 + AP header 152 + Summary 360 + Body 1080 |
+
+---
+
 ## v3.77.0 — 2026-05-04
 **Lessons from 1:1 simulation across 6 representative products.** Ran the skill end-to-end on Sumsub ID Account, Sumsub ID Connect, Settings (Dashboard P2), Case page (CM), TM Settings, KYB WebSDK Window. Three new critical rules + catalog format upgrade.
 

@@ -10,14 +10,15 @@
 
 **1920-wide canvas + DUAL sidebar** (80 + 191 + 1649 = 1920). No other Sumsub product uses this 2-level menu layout.
 
-| Region | Width | Position | Purpose |
-|---|---|---|---|
-| `Menu / Group` | 80 | x=0 | Primary nav — icon-only (Dashboard, Applicants, Settings, etc.) |
-| `*Additional Menu*` | 191 | x=80 | Secondary subsection nav within Settings (Profile/Team/Roles/Branding/Business info/Legal info) |
-| `*Header*` | 1649 | x=271, y=0 | Page chrome with title + actions |
-| Content area | 1649 | x=271, y=64 | Forms / tables / settings content |
+| Region | Width | Position | Component | Key |
+|---|---|---|---|---|
+| `Menu / Group` | 80 | x=0, y=0 | variant `Collapse=True` | `d6c711248e224a9a9408f0cdfbe4d3a43e4953f8` |
+| `*Additional Menu* / Group` | 191 | x=80, y=0 | single component | `21399a383bda156ae8d7e569054717322b1802ca` |
+| `*Header*` | 1649 | x=271, y=0 | Height **120** (NOT 64), variant `Production=True, Version=Old, Type=Generic` | `2689f7829a20be7044c1cf097a434e5c67ac123b` |
+| Content area | 1649 | x=271, y=**128** | Forms / tables (NOT y=64) | — |
 
 Layout sum: `80 + 191 + 1649 = 1920` ✓
+Header height correction (v3.78): canonical `2597:102201` shows Header is **120** tall, content starts at y=128 (not 64).
 
 ---
 
@@ -27,8 +28,8 @@ Layout sum: `80 + 191 + 1649 = 1920` ✓
 Root (1920 × 1080+, fill #ffffff)
 ├── Menu / Group              (80 × 1080)              ← primary icon-only nav at x=0
 ├── *Additional Menu* / Group  (191 × 1080)             ← subsection menu at x=80
-├── *Header*                   (1649 × 64, x=271, y=0)
-└── Content                    (1649 × scroll, x=271, y=64)
+├── *Header*                   (1649 × 120, x=271, y=0)    ← HEIGHT 120 (NOT 64)
+└── Content                    (1649 × scroll, x=271, y=128)
     └── (form rows, tables, settings)
 ```
 

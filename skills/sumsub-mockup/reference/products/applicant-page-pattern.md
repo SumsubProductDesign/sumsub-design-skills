@@ -7,27 +7,20 @@
 
 ## Screen Structure
 
-Pattern 2 from layout-patterns.md — **Detail Full-Screen Page** with collapsed 52px DS sidebar as a real left column (NOT an overlay). Everything else shifts right by 52px.
+⚠️ **Corrected v3.78** from canonical `14441:253969` (KYC page in `13395:21886`): Modern AP screens have **NO 52px sidebar** at top level. Layout is full-bleed Header 1440 + Summary 360 (not 380) + Body 1080 (not 1008).
 
 ```
 Root (1440 × 900+, NONE layout, fill #ffffff)
 │
-├── *Sidebar* (52×1024, Type=Applicants, Collapsed=True) ← own left column
-│
-├── Page header (INSTANCE, 1388×152 at x=52)
+├── AP page header  (INSTANCE, 1440×152 at x=0, y=0)         ← FULL WIDTH (key 65f821c2c7ee3fa60d6d16bef7d6eac140b732fe)
 │   ├── Sandbox flag bar (20px, yellow #faad14)
 │   ├── Header row (96px, HORIZONTAL, pad: 16/32/16/32)
-│   │   └── Wrapper (HORIZONTAL, gap=8)
-│   │       ├── Left: back button + avatar + name + status + badges
-│   │       └── Right: action buttons + dividers + shortcuts
-│   └── Subheader (56px, VERTICAL, pad: 0/32/1/32)
-│       └── *Tab Basic* (HORIZONTAL, gap=24) — navigation tabs
+│   └── Subheader (56px, VERTICAL, pad: 0/32/1/32) → *Tab Basic*
 │
-├── Summary panel (380×747 at x=52, y=152) ← AP's own left panel
-│   └── Summary SET (Collapsed=No, Role=Admin)
-│       └── Summary / Level / Steps
+├── Summary  (INSTANCE, 360×748 at x=0, y=152)               ← key c1b844754f6352b82d43119aa620e6ce99c67658
+│   └── Summary / Level / Steps
 │
-└── Body (1008×h at x=432, y=152, VERTICAL, gap=16..20, pad: 24/32/64/32)
+└── Body (1080×h at x=360, y=152, VERTICAL, gap=16..20, pad: 24/32/64/32)
     ├── APCardCollapsible (collapsed/expanded cards)
     ├── Section title rows (HORIZONTAL: text + button)
     ├── HORIZONTAL card grids (gap=16)

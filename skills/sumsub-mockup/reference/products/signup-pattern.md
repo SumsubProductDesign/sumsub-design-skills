@@ -6,12 +6,14 @@
 
 ---
 
-## Pattern — 1920 split (Image 1120 + Drawer 800)
+## Pattern — 1920 split (Drawer 800 LEFT + Image 1120 RIGHT)
+
+> ⚠️ **Corrected v3.78**: canonical `8631:14656` shows Drawer on **LEFT** (x=0), Image on **RIGHT** (x=800). Bg fill `#F6F7F9` (subtlest grey, NOT white).
 
 ```
-Root (1920 × 1080, fill #ffffff)
-├── Image for form    (1120 × 1080, x=0)         ← marketing visual / illustration
-└── *Drawer*          (800 × 1080, x=1120)        ← sign-up form (permanent right column)
+Root (1920 × 1080, fill #F6F7F9)
+├── *Drawer*          (800 × 1080, x=0)              ← sign-up form (LEFT permanent column)
+└── Image for form    (1120 × 1082, x=800)            ← marketing visual on RIGHT, key 7d7a6e9bab9dece2ff267bace5907784ad225418
 ```
 
 Layout sum: `1120 + 800 = 1920` ✓
