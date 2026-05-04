@@ -53,6 +53,43 @@ If a canonical version of the screen you're being asked to build exists somewher
 
 If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
 
+### Never `throw new Error()` at the end of a build `use_figma` call
+
+**Throwing at the end of a `use_figma` script that performs writes can roll back nested-instance text overrides and similar deferred mutations.** The whole script is treated as a transaction; the throw aborts and Figma reverts ambiguous writes (TEXT-inside-instance, instance-swap, setProperties on nested), leaving the file looking like nothing was built.
+
+✅ **Use** `figma.notify("…")` to surface status messages back to the user — they appear as toasts and don't roll back.
+✅ **Use** `throw new Error(...)` ONLY in **read-only audit scripts** to surface multi-line JSON back to the host (it's the only way to get long strings back through `mcp__figma__use_figma`).
+❌ **Never** end a build script with `throw new Error("Built! id=...")` — the build will look like it succeeded in the response, but the Figma file will be missing the deferred writes (text overrides, swap targets, etc.).
+
+If you need both build + reporting in the same call, structure as:
+```js
+// 1. Build everything
+const root = figma.createFrame(); /* ... */ ;
+// 2. Confirm via notify
+figma.notify("Built " + root.id);
+// 3. (Optional) verify in a SEPARATE use_figma call by reading the IDs back via throw new Error(...)
+```
+
+### File-local components: use `getNodeByIdAsync`, not `importComponentByKeyAsync`
+
+Cross-file `importComponentByKeyAsync` / `importComponentSetByKeyAsync` only resolves PUBLISHED library components. **File-local components (components defined inside a non-library Figma file, even with a valid `key`) fail with "Component … not found"** when imported from another file.
+
+When the catalog flags a component as file-local (look for `⚠ FILE-LOCAL` in product catalogs), do one of:
+1. **Build inside the source file's Drafts page** — the component is then accessible via `getNodeByIdAsync(nodeId)`.
+2. **`canonicalInstance.clone()`** — find the canonical instance in the source file, clone it, append into your build, then override text/variant.
+
+Example (Sumsub ID Account Header is file-local in `F38QSCQ62kCVe8ROwpXdvn`):
+```js
+// ❌ WRONG — fails cross-file
+const headerSet = await figma.importComponentSetByKeyAsync("b8e4...");
+
+// ✅ CORRECT — works inside source file
+const headerComp = await figma.getNodeByIdAsync("2191:36842");
+const header = headerComp.createInstance();
+```
+
+The Bottom toolbar in KYB WebSDK (`9ii3Ueqr01mbLS3SE6bsrJ`) is the same situation — set key looks valid via `mainComponent.parent.key`, but `importComponentSetByKeyAsync` fails. Workaround: clone canonical instance.
+
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
 **As the very first action of every session — before any other tool call, before reading any reference — do this:**

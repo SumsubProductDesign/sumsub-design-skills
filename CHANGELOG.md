@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.77.0 — 2026-05-04
+**Lessons from 1:1 simulation across 6 representative products.** Ran the skill end-to-end on Sumsub ID Account, Sumsub ID Connect, Settings (Dashboard P2), Case page (CM), TM Settings, KYB WebSDK Window. Three new critical rules + catalog format upgrade.
+
+- **New rule: Never `throw new Error()` at the end of a build `use_figma` call.** Throwing rolls back deferred writes (nested-instance text overrides, instance-swap, setProperties on nested) — the response says "success" but the file is missing the writes. Use `figma.notify()` for status; `throw` is only for read-only audit scripts that need to surface multi-line JSON. (Discovered in Sim 1 Sumsub ID Account: Title/Subtitle overrides reverted after build threw.)
+
+- **New rule: File-local components require `getNodeByIdAsync`, not `importComponentByKeyAsync`.** Cross-file `importComponentByKeyAsync`/`importComponentSetByKeyAsync` only resolves PUBLISHED library components — file-local components fail with "not found" even with valid `key`. For file-local components: build inside the source file's Drafts page (then `getNodeByIdAsync(nodeId)` works) or `canonicalInstance.clone()`. Hit by Sumsub ID Account Header (`b8e4...`) and KYB WebSDK Bottom toolbar (`d6af...`).
+
+- **New rule: Sidebar Title/Subtitle defaults leak.** `*Sidebar* / Desktop` variant `State=Have documents` does NOT auto-populate inner Title/Subtitle text — they retain literal "Title" and "Subtitle" placeholders. Override explicitly via `findAll(n => n.type==="TEXT" && (n.characters==="Title"||n.characters==="Subtitle"))` and assign `.characters`. Audit will catch leaked defaults.
+
+- **Catalog format upgraded** — `sumsub-id-component-catalog.md` now marks each component as Published vs ⚠ FILE-LOCAL with explicit `getNodeByIdAsync` node IDs. Rolling out to other catalogs as gaps surface.
+
+**Sim results** (delivered to user as URL list): 6 sims successfully built. KYB WebSDK Window canonical match at 1440×1046 / 512×800 @ (464, 32). Top toolbar variant defaulted to 68px instead of canonical 56px — note: when set has multiple variants, never default-construct; pick the canonical variant by name match. TM Settings sim missing Header (Body should be at y=64, was at y=56).
+
+---
+
 ## v3.76.0 — 2026-04-30
 **Component-key catalogs added for 11 products.** v3.73 docs were mostly layout patterns + sample dimensions, but skill couldn't `importComponentByKeyAsync` without keys. Now all major products have catalogs.
 

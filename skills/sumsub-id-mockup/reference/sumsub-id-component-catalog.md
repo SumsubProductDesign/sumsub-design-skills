@@ -37,10 +37,18 @@
 
 These are imported from a separate library/file, used in Account mockups:
 
-| Component | Set Key | Variant Name | Used For |
-|---|---|---|---|
-| `*Sidebar* / Desktop` | `685695d849b0c1029f5ece1f209935b0a7ff935d` | `State=Have documents` (others probably: No documents, Initial) | 384-wide left sidebar |
-| `Sumsub ID / Account / Header` | `b8e414041560cf9bd976a68de0ce5c11603f7be5` (component, not set) | — | Full-width 1440×64 page header (overlay) |
+| Component | Set Key | Variant Name | Used For | Import Method |
+|---|---|---|---|---|
+| `*Sidebar* / Desktop` | `685695d849b0c1029f5ece1f209935b0a7ff935d` | `State=Have documents` | 384-wide left sidebar | `importComponentSetByKeyAsync` ✓ |
+| `Sumsub ID / Account / Header` | `b8e414041560cf9bd976a68de0ce5c11603f7be5` | — | Full-width 1440×64 page header (overlay) | ⚠ FILE-LOCAL — use `getNodeByIdAsync("2191:36842")` inside source file `F38QSCQ62kCVe8ROwpXdvn`; cross-file import fails |
+
+> ⚠️ **Published vs File-local rule**: Cross-file `importComponentByKeyAsync`/`importComponentSetByKeyAsync` only works on PUBLISHED library components. File-local components (even with valid keys) fail with "not found". For file-local pieces:
+> - Build inside the source file's Drafts page, OR
+> - Use `getNodeByIdAsync(nodeId)` to fetch the local main and `.createInstance()` from it.
+>
+> When the build is happening inside the same file as the canonical (e.g., target file is `F38QSCQ62kCVe8ROwpXdvn`), file-local components ARE accessible via node ID — but you must use `getNodeByIdAsync`, not `importComponentByKeyAsync`.
+
+⚠️ **Sidebar variant Title/Subtitle leak**: When you import the `*Sidebar* / Desktop` variant, the inner `Title` and `Subtitle` TEXT nodes do NOT get auto-populated by the variant — they keep their DEFAULT placeholder strings (literal "Title", "Subtitle"). Override them explicitly via `findAll(n => n.type==="TEXT" && (n.characters==="Title"||n.characters==="Subtitle"))` and set `.characters` directly. The audit will catch leaked defaults if you skip this step.
 
 **Sidebar internal structure** (probed from `State=Have documents` variant):
 - `Sidebar / Toolbar / Group / Desktop` (336×44, y=16) — top toolbar within sidebar
