@@ -53,6 +53,49 @@ If a canonical version of the screen you're being asked to build exists somewher
 
 If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
 
+### Canonical Body inspection: read the WHOLE content tree, not just the chrome
+
+Most builds break because the skill inspects the chrome (Sidebar / Header / Body wrapper dimensions) but **does not walk into the canonical Body** to find out what's actually inside. Result: the skill outputs "generic" Body content (Tab Button + 3 Cards + Table) regardless of product, even when canonical Body has color pickers, illustrations, gradient settings, language selectors, blueprints, etc.
+
+**Procedure — extend Canonical Map step 2:**
+
+For each screen you build, after capturing chrome dimensions, walk the canonical Body and record EVERY child component:
+
+```js
+function walkBody(node, depth, lines, max) {
+  if (lines.length >= max) return;
+  const pad = "  ".repeat(depth);
+  const main = node.type === "INSTANCE" && node.mainComponent ? node.mainComponent : null;
+  let info = pad + node.type + ":" + node.name + " " + Math.round(node.width) + "x" + Math.round(node.height);
+  if (node.type === "TEXT") info += " text=" + JSON.stringify((node.characters||"").slice(0,40));
+  if (main) info += " key=" + main.key;
+  lines.push(info);
+  if (node.type !== "TEXT" && "children" in node && node.children) {
+    for (const c of node.children) walkBody(c, depth+1, lines, max);
+  }
+}
+const lines = [];
+walkBody(canonicalBody, 0, lines, 100);
+// Extend canonicalMap entry with bodyTree: lines
+```
+
+Then your build must reproduce **the same component sequence**. If canonical Body has:
+- `Color Picker / Mini` × 4
+- `Theme / Preview` × 3
+- `*Select Color*` × 2
+
+You build the same 4 + 3 + 2 in the same order, with `setProperties` to set the variants/text the canonical used. Don't substitute "Tab Button + Card + Table" because that's what other products have.
+
+**Banned generic Body templates:**
+- "title text + 3 input + 2 select" applied to a customisation editor (Appearance) → wrong, real Appearance has Color Picker / Theme Preview / gradient settings
+- "Tab Button + Table Starter" applied to PoA Settings → wrong, real PoA has Collapsible Cards with toggles per preset
+- "Title + 5 Collapsible Cards" applied to Question types editor → wrong, real Question types editor has paragraph/short text/date subsection cards with input previews inside
+
+If a canonical component is FILE-LOCAL and skill cannot import its key, the skill MUST:
+1. Check if equivalent published exists (Color Picker → `*Color Picker*` from Base, Theme Preview → maybe nothing — surface as gap)
+2. If no published equivalent → **inline-build the visual pattern** from atomic components (frames + text nodes + bound semantic variables) matching canonical layout
+3. Document the inline-build in audit report
+
 ### Never `throw new Error()` at the end of a build `use_figma` call
 
 **Throwing at the end of a `use_figma` script that performs writes can roll back nested-instance text overrides and similar deferred mutations.** The whole script is treated as a transaction; the throw aborts and Figma reverts ambiguous writes (TEXT-inside-instance, instance-swap, setProperties on nested), leaving the file looking like nothing was built.

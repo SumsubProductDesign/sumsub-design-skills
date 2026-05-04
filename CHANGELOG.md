@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.79.2 — 2026-05-04 (patch)
+**Canonical Body inspection rule** added to SKILL.md. Caught when skill produced generic "title + 3 input + 2 select" Body for Appearance customisation when canonical actually has Color Picker / Theme Preview / Settings/Content. Rule:
+- Skill must walk the canonical Body tree (not just chrome) before building
+- Build must reproduce the same component sequence from canonical
+- "Banned generic Body templates" list with examples (Appearance, PoA, Question types)
+- Fallback procedure when canonical component is file-local: check published equivalent, else inline-build from atoms
+
 ## v3.79.1 — 2026-05-04 (patch)
 **Actually wrote the skill-true rule into SKILL.md** that v3.79 only described in CHANGELOG. v3.79 commit only bumped version + changelog without touching skill behavior — meaning skill at runtime had no idea about skill-true rule. Fixed: SKILL.md now contains:
 - "No clone of canonical content" rule
