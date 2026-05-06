@@ -156,6 +156,28 @@ When a product-specific component is file-local, use these Base/Organisms equiva
 
 After the build, audit must verify Body has at least one content component (Card / Table / Collapsible Card / Tab Button / Input / Select). A skeleton with sidebar + header + empty Body is NOT a delivered mockup.
 
+### Mandatory audit step at end of every build (no exceptions)
+
+**Every `/sumsub-mockup` invocation MUST end with an audit pass.** The skill is not "done" until audit returns PASS. Skipping audit and just delivering a URL = bug.
+
+**Required audit checks (run all, in order):**
+
+1. **Default-text leak scan.** Walk the built tree, find every TEXT node whose `characters` matches one of: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
+2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
+3. **Empty Body check** (rule above).
+4. **Canonical-match check** (rule 7.45 — frame W/H, fill, instance pos/dims/variant within 2px tolerance vs canonicalMap).
+5. **Body content match** (canonical Body walk — same component sequence as canonical).
+
+**Fix-loop, not detect-only.** If any FAIL: skill must attempt to fix via setProperties (set realistic values from prompt context, or "[needs review]" placeholder if no realistic data is inferrable). Then re-audit. Repeat up to 3 iterations. After 3rd iteration if still FAIL — surface the residual failures to the user with a clear "I cannot fix these without you specifying X / Y" message instead of pretending it's done.
+
+**Audit verdict goes into the response.** Final reply to the user must include: `Audit: PASS | FAIL — [count] leaks fixed, [count] residual` and URL only emitted on PASS or with explicit FAIL acknowledgement.
+
+**Banned skill-output patterns:**
+- "Macket built. URL: ..." with no audit mention → bug
+- "audit_verdict: SKIPPED" in any sim log → bug
+- Default text "Label" / "Title" visible in delivered macket → bug
+- Sub-agent saying "the build doesn't introduce custom TEXT so I skipped audit" → wrong, audit covers default leaks INSIDE imported instances too
+
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
 **As the very first action of every session — before any other tool call, before reading any reference — do this:**
@@ -203,6 +225,15 @@ After the build, audit must verify Body has at least one content component (Card
 If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
 
 0. **Ask WHERE to create the mockup — HARD STOP, WAIT for the answer.**
+
+   **Exception (URL-in-prompt = explicit destination):** If the user's prompt contains a full Figma URL like `https://www.figma.com/design/<fileKey>/...`, that URL **IS** the answer to "where". You do NOT hard-stop. You:
+   1. Extract the fileKey from the URL
+   2. Notify the user inline: `Building in <fileKey>, Drafts page` — one line, not blocking
+   3. Proceed to step 1 (libraries check) using that fileKey
+   4. The default page inside the file is the existing Drafts page (matched via `/drafts/i`); if absent, create `🛠 Drafts`
+   5. If the user wants a specific section/frame inside that file, they'll say so in the prompt; otherwise the new section goes onto the Drafts page
+
+   This exception covers "Build X. Файл: https://figma.com/design/abc/..." prompts which are common in testing and routine work. Hard-stop applies only when the prompt has NO URL and NO explicit location.
 
    **Forbidden bypass phrases** — same class of violation as pre-flight's banned auto mode. All of these are rule breaks, period:
    - "Auto mode: defaulting to Sumsub org"

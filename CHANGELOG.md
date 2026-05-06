@@ -4,6 +4,39 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.80.0 — 2026-05-06
+**Sub-agent simulation testing → 3 SKILL.md fixes from real failure modes.** Spawned sub-agents that ran the skill from a user-style prompt; collected JSON logs per sim. Six logs reveal three reproducible failures + one pattern-doc drift.
+
+### Rule #0 URL exception (skill stops being too cautious when destination is in the prompt)
+
+**Problem:** Sims 1, 3, 4, 8, 10 hard-stopped at Rule #0 even though the user prompt contained a full Figma URL. Skill demanded user explicitly answer 4-option destination question, refusing to recognise the URL as the answer.
+
+**Fix:** added explicit exception. If prompt contains `https://www.figma.com/design/<fileKey>/...`, skill auto-picks Drafts page in that file and notifies inline (`Building in <fileKey>, Drafts page`) — no hard-stop. Hard-stop applies only when prompt has NO URL.
+
+### Mandatory audit step at end of every build
+
+**Problem:** Sim 12 (Reports) marked `audit_verdict: SKIPPED` saying "the build doesn't introduce custom TEXT so I skipped audit". Sims 3, 8, 10 marked `NOT_RUN` because they didn't build. NONE of the 6 logs contain a real audit pass.
+
+**Fix:** SKILL.md now has explicit "Mandatory audit step" section: 5 required checks (default-text leak scan, default-property leak scan, empty Body, canonical-match, Body content match) + fix-loop (3 iterations) + audit verdict mandatory in skill output. Banned skill outputs: "URL with no audit", "audit_verdict: SKIPPED", "build doesn't have custom TEXT so audit not needed".
+
+### Reports pattern doc Header drift
+
+**Problem:** Sim 12 found canonical Reports table page DOES use standard `*Header*` (variant `Production=True, Version=Old, Type=Generic`) at 1388×64. Pattern doc previously stated "no `*Header*` — Body has its own internal chrome".
+
+**Fix:** `reports-pattern.md` corrected — Header restored, layout now `Sidebar 52 + Header 1388×64 + Body 1388×836`.
+
+### Sim findings still pending (need fresh logs after users update plugin)
+
+User's installed plugin was on v3.71.0 — 9 versions behind. All today's fixes (3.77-3.79.2) hadn't propagated. Plugin update required:
+```
+claude plugin marketplace update sumsub-design
+claude plugin update sumsub-design@sumsub-design
+```
+
+Remaining sims (1, 2, 4, 5, 6, 7, 9, 11, 13–29) to be regression-tested by user in fresh sessions after update.
+
+---
+
 ## v3.79.2 — 2026-05-04 (patch)
 **Canonical Body inspection rule** added to SKILL.md. Caught when skill produced generic "title + 3 input + 2 select" Body for Appearance customisation when canonical actually has Color Picker / Theme Preview / Settings/Content. Rule:
 - Skill must walk the canonical Body tree (not just chrome) before building

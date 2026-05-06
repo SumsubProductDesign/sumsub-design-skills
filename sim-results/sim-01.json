@@ -1,0 +1,57 @@
+{
+  "sim": 1,
+  "product": "Sumsub ID | Account — Connections page",
+  "prompt": "Собери экран Sumsub ID Account — Connections page со списком подключенных сервисов в Figma. Файл: https://www.figma.com/design/F38QSCQ62kCVe8ROwpXdvn/",
+  "fileKey": "F38QSCQ62kCVe8ROwpXdvn",
+  "skill_invoked": "sumsub-design:sumsub-mockup (full SKILL.md loaded; pattern knowledge from .claude/figma/sumsub-id-pattern.md applied — Pattern A: 1440 × 1080, Sumsub ID/Account/Header 1440×64, *Sidebar*/Desktop 384×900, Content 1024×836 at x=384, y=32)",
+  "tools_available": [
+    "Bash",
+    "Edit",
+    "Read",
+    "Write",
+    "ToolSearch",
+    "Skill",
+    "WebFetch",
+    "mcp__figma__use_figma",
+    "mcp__figma__get_metadata",
+    "mcp__figma__get_design_context",
+    "mcp__figma__get_libraries",
+    "mcp__figma__search_design_system",
+    "mcp__figma__create_new_file",
+    "mcp__figma__whoami",
+    "mcp__figma__get_variable_defs",
+    "mcp__figma__get_screenshot",
+    "mcp__Claude_Preview__*",
+    "mcp__Claude_in_Chrome__*",
+    "WebSearch"
+  ],
+  "blockers": [
+    "Pre-flight Rule #1 (plugin version check): EXECUTED. Local plugin.json = 3.71.0; remote main = 3.79.2. Per skill SKILL.md Rule #1 step 5, this is a HARD STOP — must show user CHANGELOG diff and ask 'yes/update' or 'continue anyway' before any further tool call. Banned bypass phrases include 'auto-accepting outdated plugin' and 'continuing in auto mode'. Did not bypass. Logged as blocker; no use_figma calls made.",
+    "Rule #0 (location HARD STOP): User provided fileKey F38QSCQ62kCVe8ROwpXdvn (Sumsub ID | Account — active prod file per memory project_dashboard_project_map.md and sumsub-id-pattern.md). Skill mandates 4-option ask: (1) existing file, (2) Personal Drafts, (3) Team project, (4) Sumsub org. Even when user shares a URL, the question of WHICH PAGE inside the file remains. Sumsub ID Account file has multiple PROD pages (Sumsub ID account 3416:14299, Disposable emails validation 4878:39479, Documents match 4908:19224, Emails 4765:83095) plus dev pages (View docs + Export data 4030:59582, History + Connections 7935:28001 — WIP). 'Connections' is exactly the WIP page name 7935:28001 (per .claude/figma/sumsub-id-pattern.md catalog). Must confirm: (a) extend existing 7935:28001 WIP canonical, OR (b) create on 🛠 Drafts. Did not auto-default — would clobber WIP work otherwise.",
+    "Rule #2 (mandatory reference reads): NOT performed in this session. Required reads for any custom-page build: /Users/konstantin/.claude/plugins/marketplaces/sumsub-design/reference/figma-gotchas.md, design-system.md, color-usage.md, layout-patterns.md. Sumsub-ID-specific knowledge lives in .claude/figma/sumsub-id-pattern.md (already context-loaded) but explicit Read calls were not made.",
+    "Rule #1 (get_libraries mandatory first MCP call): NOT performed. Sumsub ID is a separate product line from Dashboard — uses its own libraries (NOT the standard Base components / Organisms / Assets stack). Per .claude/figma/sumsub-id-pattern.md: components include 'Sumsub ID / Account / Header', '*Sidebar* / Desktop' (384px wide — UNIQUE width, not 257/276/52), 'Sumsub ID / Account / Item', plus emails, docs, MFA, devices, magic links sub-components. None of these are in the Dashboard libraries. Must call get_libraries(F38QSCQ62kCVe8ROwpXdvn) to verify Sumsub ID library is connected before importing any component by key.",
+    "Component keys for Sumsub ID Account: NOT documented in plugin reference/ or .claude/figma/. Only the layout pattern is documented (sumsub-id-pattern.md lists dimensions and component NAMES but not keys). Required discovery step before build: open the file via use_figma, walk an existing canonical Account page (e.g. node 3416:14299), find each instance, read mainComponent.key. Without this, every importComponentByKeyAsync call will fail. Risk is high since the file is structurally complex (12 listed pages with PROD/dev/WIP/CR/HOLD states).",
+    "Rule 7.4 (canonical-source inspection): NOT performed. The 'History + Connections' WIP page (7935:28001) IS the canonical for this build's target. Block manifest must be extracted: which connection types appear (Wallets / Social logins / Magic links / API integrations / etc.), in what order, with which Status badge variants, what empty/populated mix. Also need to inspect adjacent canonical pages (Trusted devices 4906:13295, MFA 4937:51667) which use the same Pattern A — they show how 'connection-list-style' content is structured in this product. Skipping this = inventing the page from generic 'connected services' SaaS patterns (banned per Rule #2 product-docs section).",
+    "Sumsub ID product docs: NO matching .txt file in /Users/konstantin/.claude/plugins/marketplaces/sumsub-design/reference/products/. Trigger table in Rule #2 doesn't list Sumsub ID explicitly. Closest match: sumsub-docs-overview.txt (covers 'account', 'team roles', 'verification levels overview'). Connections semantics (what counts as a 'connected service' in Sumsub ID — wallets via Web3? OAuth providers? Partner KYC reuses? Magic-link sessions?) is product-specific knowledge not in any reference. Must ask user to clarify scope, or read the existing canonical page node 7935:28001 to derive scope from canonical content.",
+    "Rule 7.5 + 7.7 (SECTION wrapper + #404040 + (made by Claude) suffix): cannot prepare without first resolving Rule #0 destination — section wrapper applies to Drafts builds, not to extensions of existing canonical pages.",
+    "Audit (Rule #8): NOT_RUN. Audit script can only run against a built root frame ID. No build = no audit = no link to share."
+  ],
+  "components_attempted": [],
+  "default_text_leaks_detected": [],
+  "default_text_leaks_fixed": 0,
+  "audit_verdict": "NOT_RUN",
+  "audit_failures": [
+    "Build was not executed — pre-flight blockers (plugin version mismatch + Rule #0 destination ambiguity + missing component-key discovery) gate all use_figma calls per skill rules. Audit only runs against a built root frame ID."
+  ],
+  "url": null,
+  "duration_ms": 240000,
+  "questions_for_user": [
+    "Plugin version: local 3.71.0, remote 3.79.2. Update the plugin first (run `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`), or 'continue anyway' on 3.71.0 for this build? Skill mandates I ask before proceeding.",
+    "Where to create the Connections page? (a) extend existing 'History + Connections' WIP canonical at node 7935:28001 inside F38QSCQ62kCVe8ROwpXdvn — risky, would touch teammate's WIP; (b) create new frame on 🛠 Drafts page in the same file — safe sandbox, my default for builds; (c) new file in Sumsub org. Recommend (b).",
+    "What is a 'connected service' in Sumsub ID Account context? Sumsub ID is a decentralized identity / passport-style product — 'connections' could mean: (i) Web3 wallets (MetaMask / WalletConnect / Coinbase / etc.), (ii) Social-login providers (Google / Apple / Microsoft / Facebook), (iii) Partner KYC reuses (apps that pulled this user's verified identity via Sumsub Connect — e.g. MiniPay, age-verification partners), (iv) Active sessions / Magic-link grants, (v) API integrations. Pick the scope or all of the above grouped into sections.",
+    "Pattern A confirmed (1440 × 1080, full-width Header 64, Sidebar/Desktop 384, content wrapper 1024 starting at x=384 y=32)? File memory has dimensions but a fresh inspection of the canonical Account page (node 3416:14299) before build is required to confirm the Header instance still uses these dims and to capture the correct component keys.",
+    "Active sidebar nav item — which menu entry should be 'Selected' for the Connections page? Sumsub ID Account sidebar has entries like Profile / Documents / Emails / MFA / Trusted devices / History / Connections. Need to inspect the Sidebar/Desktop component variants for which property exposes Selected (per Rule 7.40 — not all sidebars expose this via Plugin API).",
+    "Connection list density and states: how many rows? Mix of statuses (Connected / Pending / Revoked / Expired)? Per-row Last-active timestamp? Per-row 'Disconnect' kebab action? Realistic-data fill is mandatory per Rule #7 — no 'Service A / Service B' placeholders.",
+    "Was simulation mode (plan + honest log without invoking use_figma due to blockers) the right call here, or should I have force-pushed past Rule #0 and built into 🛠 Drafts with assumed scope? Per skill rules, force-pushing is banned ('auto mode does not override Rule #0'). Logged blockers honestly per simulation contract."
+  ]
+}

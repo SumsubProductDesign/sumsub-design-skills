@@ -1,0 +1,67 @@
+{
+  "sim": 10,
+  "product": "Billing",
+  "prompt": "Собери Billing — Service usage с метриками и таблицей в Figma. Файл: https://www.figma.com/design/kHQyyYdPZjEyrSahRmBLUr/",
+  "fileKey": "kHQyyYdPZjEyrSahRmBLUr",
+  "skill_invoked": "sumsub-design:sumsub-mockup (knowledge applied directly from .claude/figma/billing-pattern.md without slash-command invocation; pattern is documented as Pattern 1 — Standard list with metric cards above table)",
+  "tools_available": [
+    "Bash",
+    "Edit",
+    "Read",
+    "Write",
+    "ToolSearch",
+    "Skill",
+    "mcp__figma__use_figma",
+    "mcp__figma__get_metadata",
+    "mcp__figma__search_design_system",
+    "mcp__figma__get_design_context",
+    "mcp__figma__get_screenshot",
+    "mcp__figma__get_variable_defs",
+    "mcp__figma__create_new_file",
+    "mcp__figma__generate_figma_design"
+  ],
+  "blockers": [
+    "Figma MCP tools were initially deferred (schemas not loaded at session start) — would require ToolSearch with query 'select:mcp__figma__use_figma,mcp__figma__get_metadata,mcp__figma__search_design_system' before first call. Sim task focused on logging without performing the build.",
+    "Cards Row in Billing canonical uses raw custom TEXT nodes with Geist Medium 12 (label) / Geist Medium 16 (value) / Geist Regular 12 (subtitle) — no packaged 'Metric Card' organism exists. Each of 3 cards must be hand-built per-screen with bound text styles + semantic color tokens; risk of leaving 'TOTAL AMOUNT DUE / $5,002.33 / April 2026' default-stub text if not customized for current period.",
+    "Period Row contains 11 *Select Inline* instances (1 in Filters group + 9 in .Top Toolbar/Filter + 1 export selector) — every Select Inline's Label text must be set via the component's native `Label text` property, NOT via external sibling TEXT (per audit 7.40 / billing-pattern memory).",
+    "Table Starter's internal Top Toolbar must be hidden via `Toolbar#736:139 = false` — the Period Row above takes its role; forgetting this leaves a duplicate filter strip.",
+    "Sidebar variant `Type=Billing` does not expose a `Selected` property to highlight the active sub-item (audit 7.40 known limitation) — active-item highlight cannot be programmatically asserted; cosmetic gap accepted per documented limitation.",
+    "Spacing variable `spacing/xl` in this file overrides to 20px (instead of canonical 24px). Bound correctly but pixel value differs — strict audit may flag (audit 7.17). Need to confirm with user whether to match canonical 24 or honor the file's local 20.",
+    "Header CTA: canonical uses 'Export report' as primary action overridden onto the right-side action button slot — would override `Buttons#3817:5 = true` and set the primary button label; default 'Button' label stub would leak otherwise."
+  ],
+  "components_attempted": [
+    {"name": "*Sidebar* (Type=Billing, Collapsed=False)", "key": "60be5cbb4d070ccc4853589a555d949c3f23f62e", "result": "PLANNED", "fallback_used": null},
+    {"name": "*Header* (with Buttons#3817:5=true, Title text#3817:0='Billing')", "key": "387e2cf61b1bf4f2045d3ccefecc5c7820a86889", "result": "PLANNED", "fallback_used": null},
+    {"name": "Cards Row (custom FRAME with 3 metric cards — TOTAL AMOUNT DUE / NEXT INVOICE / ACCOUNT BALANCE)", "key": null, "result": "PLANNED_CUSTOM_BUILD", "fallback_used": "Hand-built FRAME with 3 child FRAMEs; each card has 3 TEXT nodes (Geist Medium 12 label, Geist Medium 16 value, Geist Regular 12 subtitle); semantic background neutral inverse + border neutral subtler"},
+    {"name": "*Filters group* (Period selector — current month)", "key": "54b3ab29659d303031879bf792d1dd1daa2b2245", "result": "PLANNED", "fallback_used": null},
+    {"name": ".Top Toolbar / Filter (9 *Select Inline* — Service type, Country, Applicant type, Status, Date from, Date to, Currency, Check type)", "key": null, "result": "PLANNED_INTERNAL", "fallback_used": "Internal sub-component of Top Toolbar; configured via parent Top Toolbar component"},
+    {"name": "Top Toolbar (external Period Row)", "key": "fa8defc5fadd20a84c812784786217c6e0003ca0", "result": "PLANNED", "fallback_used": null},
+    {"name": "*Table Starter* (with Toolbar#736:139=false; columns: Service · Checks used · Unit price · Total · Period · Actions)", "key": "213b7e3d7cc4503bbab83cd6c249e41e06dae295", "result": "PLANNED", "fallback_used": null},
+    {"name": "*Select Inline* (export CSV/PDF format selector)", "key": "0f96c548a40736ee0652a43bdac1ce5466d936e0", "result": "PLANNED", "fallback_used": null}
+  ],
+  "default_text_leaks_detected": [
+    "Header primary button default label 'Button' would leak if Buttons#3817:5=true is set without overriding the label to 'Export report'",
+    "Cards Row 3 metric values default to placeholder text ('$0.00 / Date / $0.00') — would leak if not customized to canonical April 2026 figures: TOTAL AMOUNT DUE $5,002.33 / NEXT INVOICE May 1, 2026 / ACCOUNT BALANCE $10,000.00",
+    "Cards Row subtitle defaults — would leak if not set to 'April 2026' / 'Auto-payment enabled' / 'Enterprise plan'",
+    "Period Row Filters group default 'Period' label text — would leak if Label text not set to 'Current month' or specific period",
+    "9 Select Inline Filter labels (Service type/Country/Applicant type/Status/Date from/Date to/Currency/Check type) — each defaults to component's stub label; would leak if Label text instance prop not overridden",
+    "Table Starter 10 default rows — placeholder service names like 'Service name', '0 checks', '$0.00' — would leak if not populated with realistic billing data (KYC/AML checks, document verification, face match etc.)"
+  ],
+  "default_text_leaks_fixed": 0,
+  "audit_verdict": "NOT_RUN",
+  "audit_failures": [
+    "Build was not executed — sim task scope is logging the plan, blockers, and components-attempted matrix.",
+    "If executed, anticipated audit checks per .claude/skills/design-review.md: (1) Cards Row TEXT nodes must bind to semantic/text/neutral/strong (value), semantic/text/neutral/subtle (label/subtitle); (2) Cards Row FRAME backgrounds must bind to semantic/background/neutral/inverse/normal with semantic/border/neutral/subtler/normal; (3) all 3 cards must use spacing/lg padding bound to variable, NOT hardcoded 16px; (4) corner radius border-radius/lg bound; (5) Geist font family confirmed (not Inter); (6) Period Row gap bound to spacing/m or spacing/lg; (7) Table Starter Toolbar#736:139=false verified; (8) Sidebar Type=Billing applied (active-item highlight known limitation accepted); (9) no leaked default text strings from any default_text_leaks_detected entry."
+  ],
+  "url": "https://www.figma.com/design/kHQyyYdPZjEyrSahRmBLUr/",
+  "duration_ms": 0,
+  "questions_for_user": [
+    "Куда положить макет — в существующую страницу 'Prod' (node `2678:272959`), отдельную WIP-страницу '🛠 Drafts (Designers Only)', или в тестовый файл `INX5ci5n7v9dA2L4EJ8zDR`?",
+    "Какой период показать в Cards Row — канонический April 2026 ($5,002.33 / May 1, 2026 / $10,000.00 / Enterprise plan), или актуальный текущий месяц с другими цифрами?",
+    "Header CTA — оставить 'Export report' (канон) или заменить на другой?",
+    "Spacing/xl в этом файле = 20px (override от канонических 24px). Биндить как есть (20) или принудительно ставить 24px из библиотеки?",
+    "Sidebar variant Type=Billing не подсвечивает активный sub-item — оставить как есть (документированная ограниченность DS), или добавить кастомный highlight поверх?",
+    "Table — заполнять 10 реалистичных строк по сервисам (KYC ID verification, Liveness, AML screening, Face match, POA, Phone, Email, etc.) или меньше?",
+    "Скроллить таблицу внутри Body или экран должен быть выше 900px чтобы вместить все 10 строк?"
+  ]
+}
