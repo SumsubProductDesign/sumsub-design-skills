@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.107.0 — 2026-05-08 (fake bump to test v3.106 HARD STOP on VM)
+No-op. User on v3.106; this remote = MINOR mismatch. Tests:
+1. Does pre-flight WebFetch succeed on VM (or 404 like before)?
+2. If it succeeds → does agent show the v3.106→v3.107 mismatch and stop?
+3. If it fails → does agent now HARD STOP per v3.106 rule, instead of "proceeding with local version"?
+
+---
+
 ## v3.106.0 — 2026-05-08 (HARD STOP on remote-check failure — class-not-symptom)
 **VM test exposed:** when WebFetch on `raw.githubusercontent.com/.../plugin.json` returns non-200 (or any non-JSON), the agent rationalizes "proceeding with local version" and skips the version check entirely. The fallback rule line in SKILL.md ("could not verify plugin version, proceeding on faith") was itself the bypass — gave the agent cover to invent paraphrases like "Remote check returned 404 (repo not publicly accessible at that path) — proceeding with local version".
 
