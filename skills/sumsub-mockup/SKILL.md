@@ -329,23 +329,26 @@ This applies to ALL retry/walk loops in build scripts, not just visibility toggl
 2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
 3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently to Rule #0.
 4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
-5. **STOP and show the user this verbatim:**
+5. **STOP and show the user this message verbatim** (matches the v3.91 hook output, in Russian — this is what worked best historically per user feedback 2026-05-07):
 
    ```
    ⚠️ sumsub-design plugin update available
-   Your local version: vLOCAL · Latest: vREMOTE
 
-   What's new since your version:
-   <paste CHANGELOG entries extracted in step 4>
+   Твоя версия: vLOCAL · Последняя: vREMOTE
 
-   I can update it for you right now by running:
+   Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
+
+   Я могу обновить прямо сейчас двумя командами:
+
      claude plugin marketplace update sumsub-design
      claude plugin update sumsub-design@sumsub-design
 
-   Reply:
-     - yes / update — I'll run the two commands via Bash
-     - continue anyway — use current (older) version for this session
+   Ответь:
+     • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
+     • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
    ```
+
+   **Do NOT add "будешь должен мне 100 долларов"-style preamble. Do NOT add "Continuing — but flagging" or similar bypass framing. Output the message verbatim, then stop.**
 
 6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 

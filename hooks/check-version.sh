@@ -3,16 +3,10 @@
 #
 # Fires before mcp__figma__use_figma / create_new_file / generate_figma_design.
 # Compares local plugin version against remote main branch on GitHub.
-# If mismatch — blocks the tool call with a message instructing to update.
+# If mismatch — blocks the tool call with the verbose user-facing message that
+# matches the prior working pre-flight UX (Russian-localized, with reply options).
 #
-# Why this is a hook and not a text rule: text rules in SKILL.md kept being
-# bypassed by agents inventing new rationalization phrases ("continuing under
-# auto mode", "canonical hasn't materially changed", "minor mismatch — proceeding
-# (no breaking changes typical for patch bump)", etc.). Hook removes the agent's
-# ability to assess. Harness blocks the tool call before agent gets control.
-#
-# Override (when user has explicitly chosen to continue with old version):
-#   SUMSUB_SKIP_VERSION_CHECK=1 in the environment
+# Override: SUMSUB_SKIP_VERSION_CHECK=1
 
 if [ "$SUMSUB_SKIP_VERSION_CHECK" = "1" ]; then
   exit 0
@@ -30,7 +24,7 @@ fi
 
 REMOTE_RAW=$(curl -s --max-time 5 "https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json" 2>/dev/null)
 if [ -z "$REMOTE_RAW" ]; then
-  echo "⚠️ sumsub-design: could not fetch remote version (network?). Proceeding with local v$LOCAL." >&2
+  echo "⚠️ sumsub-design: не удалось проверить remote версию (нет сети?). Продолжаю с local v$LOCAL." >&2
   exit 0
 fi
 
@@ -45,18 +39,21 @@ fi
 
 cat >&2 <<EOF
 ⚠️ sumsub-design plugin update available
-Your local version: v$LOCAL · Latest: v$REMOTE
 
-This Figma tool call is BLOCKED until the version is reconciled.
+Твоя версия: v${LOCAL} · Последняя: v${REMOTE}
 
-To update:
+Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
+
+Я могу обновить прямо сейчас двумя командами:
+
   claude plugin marketplace update sumsub-design
   claude plugin update sumsub-design@sumsub-design
 
-Then re-send your original prompt — the new version picks up automatically on the next tool call.
+Ответь:
+  • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
+  • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
 
-To proceed on the OLDER version anyway (rare; only if you've read the changelog and decided the newer rules don't apply):
-  Set SUMSUB_SKIP_VERSION_CHECK=1 in your environment, then re-send.
+Этот Figma tool call заблокирован до твоего ответа. Чтобы продолжить на текущей версии без обновления — установи SUMSUB_SKIP_VERSION_CHECK=1 в окружении.
 
 Changelog: https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md
 EOF
