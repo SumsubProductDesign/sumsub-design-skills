@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.102.0 — 2026-05-07 (fake bump for user-level hook test)
+No-op. User on v3.101, this remote = mismatch. Tests user-level PreToolUse hook from `~/.claude/settings.local.json`.
+
+---
+
 ## v3.101.0 — 2026-05-07 (fake bump for anti-SemVer test)
 No-op. User on v3.100, this remote = MINOR mismatch (typical case where SemVer prior would say "1-2 minor behind, low risk, proceed"). v3.100 explicitly bans that thought — verify on real prompt.
 
