@@ -14,6 +14,36 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
+### ⚡ FIRST 3 ACTIONS OF EVERY SKILL INVOCATION (do not reorder, do not skip)
+
+This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 10, 12 (May 2026) all skipped pre-flight despite the rule existing further down in this file. Reading the file top-down means these have to be the very first concrete actions or they will be silently dropped:
+
+**Action 1 — pre-flight version check.** Before ANY other tool call:
+1. `Read` `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` → extract `version`
+2. `WebFetch` `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` → extract `version`
+3. SemVer compare — if local < remote: STOP, follow full pre-flight protocol below in section "Pre-flight: plugin version check". If local ≥ remote: proceed silently.
+
+**Action 2 — destination resolution (Rule #0).** If user prompt contains a Figma URL → use that fileKey + Drafts page (URL exception). Otherwise STOP and ask the 4-option destination question.
+
+**Action 3 — section wrapper.** Before creating any frame, create the SECTION wrapper:
+```js
+const section = figma.createSection();
+section.name = "<Task name> (made by Claude)";    // suffix REQUIRED
+section.fills = [{type:"SOLID", color:{r:0x40/255, g:0x40/255, b:0x40/255}}];   // #404040 REQUIRED
+draftsPage.appendChild(section);
+// then create root frame INSIDE section, not outside
+```
+
+If you skip Action 3, audit check 7.15 will fail your build and you'll re-do the work to wrap in a section. Just do it the first time. **No build is "delivered" without `(made by Claude)` section suffix and `#404040` fill — this is a hard audit gate, not a stylistic preference.**
+
+**Banned skill-output patterns** (any of these = skill executed without proper init):
+- "Skipping pre-flight, plugin is recently installed" → still required, no exceptions
+- "Created macket at <URL>" with no mention of section name and fill in the response → skill bypassed Action 3
+- "Section created" without `(made by Claude)` suffix shown verbatim → wrong, name must include suffix
+- "I'll wrap in a section at the end" → Action 3 must be the wrapper FIRST, not retrofit
+
+If a sim/build run in the wild reaches "I'm done" without all 3 actions visible in the output → that's a skill execution bug (caught in v3.82 from user testing).
+
 ### Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions
 
 If a canonical version of the screen you're being asked to build exists somewhere — in the same source file, in a published library, in the design system — **find it first, capture its exact dimensions, and match them**. Do not "build with reasonable defaults" and call it good. The canonical reference IS the spec.

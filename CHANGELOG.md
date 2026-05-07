@@ -4,6 +4,30 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.82.0 — 2026-05-06
+**Skill stopped doing pre-flight check + tried to bypass section-naming rule (live user report).** Both rules existed in SKILL.md but skill at runtime ignored them. Root cause: rules were buried far down in the file (pre-flight at line ~214, section-naming at line ~641); skill reads top-down and silently drops them after the first few sections.
+
+### Fix: top-of-file "FIRST 3 ACTIONS" enforcement block
+
+Added new block at the very top of Critical rules section (line ~17), explicitly listing the first 3 mandatory actions in order:
+
+1. **Pre-flight version check** — Read local plugin.json + WebFetch remote + SemVer compare. STOP if outdated.
+2. **Destination resolution (Rule #0)** — URL exception applies; else 4-option ask.
+3. **Section wrapper** — `figma.createSection()` with name `<Task name> (made by Claude)` and fill `#404040`. **Required first**, not retrofit at end.
+
+Each action references the deeper rule sections for full protocol. The top-of-file placement ensures the skill encounters them within the first 50 lines of SKILL.md, before any other temptation to start building.
+
+### New banned skill-output patterns
+
+- "Skipping pre-flight, plugin is recently installed" — no, still required
+- "Created macket at <URL>" with no mention of section name + fill in response → bypass evidence
+- "Section created" without `(made by Claude)` suffix shown verbatim → wrong name
+- "I'll wrap in a section at the end" → Action 3 must be FIRST, not retrofit
+
+If a build reaches "I'm done" without visible evidence of all 3 actions, that's now an explicit skill execution bug.
+
+---
+
 ## v3.81.0 — 2026-05-06
 **Skill audit caught lying — fixes from real Sim 1 build that passed audit while content was invisible.**
 
