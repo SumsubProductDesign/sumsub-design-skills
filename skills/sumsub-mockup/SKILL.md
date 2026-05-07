@@ -25,24 +25,41 @@ This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 1
 
 **Action 2 — destination resolution (Rule #0).** If user prompt contains a Figma URL → use that fileKey + Drafts page (URL exception). Otherwise STOP and ask the 4-option destination question.
 
-**Action 3 — section wrapper.** Before creating any frame, create the SECTION wrapper:
+**Action 3 — section wrapper + free-spot placement.** Before creating any frame:
+
 ```js
+// 3a. Create the SECTION wrapper with required name + fill
 const section = figma.createSection();
 section.name = "<Task name> (made by Claude)";    // suffix REQUIRED
 section.fills = [{type:"SOLID", color:{r:0x40/255, g:0x40/255, b:0x40/255}}];   // #404040 REQUIRED
 draftsPage.appendChild(section);
-// then create root frame INSIDE section, not outside
+
+// 3b. CRITICAL: find a free spot on the page — DO NOT place at (0,0) or arbitrary coords
+const spot = findFreeCanvasSpot({ width: <root_w_+_padding>, height: <root_h_+_padding>, gap: 200 });
+section.x = spot.x;
+section.y = spot.y;
+
+// 3c. Then create root frame INSIDE section
+const root = figma.createFrame();
+section.appendChild(root);
+root.x = 40; root.y = 160;   // offset INSIDE section, leaves room for annotations above
 ```
 
-If you skip Action 3, audit check 7.15 will fail your build and you'll re-do the work to wrap in a section. Just do it the first time. **No build is "delivered" without `(made by Claude)` section suffix and `#404040` fill — this is a hard audit gate, not a stylistic preference.**
+`findFreeCanvasSpot()` walks all existing top-level nodes on the current page, finds their bounding boxes, returns the first empty rectangular slot of the requested size (with `gap` margin). Helper is defined in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`.
+
+If you place the section at (0,0) or at some hard-coded coordinate without `findFreeCanvasSpot()`, you WILL overlap existing canonical mackets on the page. This was reported in live user testing (May 2026, v3.82 build) — skill placed Connections macket at coordinates that overlapped existing prod-canonical Account screens, even though the build itself was correct.
+
+**No build is "delivered" without (a) `(made by Claude)` section suffix, (b) `#404040` fill, (c) section position from `findFreeCanvasSpot()`. All three are hard audit gates, not stylistic preferences.**
 
 **Banned skill-output patterns** (any of these = skill executed without proper init):
 - "Skipping pre-flight, plugin is recently installed" → still required, no exceptions
 - "Created macket at <URL>" with no mention of section name and fill in the response → skill bypassed Action 3
 - "Section created" without `(made by Claude)` suffix shown verbatim → wrong, name must include suffix
 - "I'll wrap in a section at the end" → Action 3 must be the wrapper FIRST, not retrofit
+- Section placed at hard-coded `x=0, y=0` (or any coord not from `findFreeCanvasSpot()`) → overlap risk, banned
+- Section visually overlaps existing canonical content on the page → audit 7.50 (canvas overlap) fails
 
-If a sim/build run in the wild reaches "I'm done" without all 3 actions visible in the output → that's a skill execution bug (caught in v3.82 from user testing).
+If a sim/build run in the wild reaches "I'm done" without all 3 actions visible in the output → that's a skill execution bug.
 
 ### Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions
 
@@ -2478,6 +2495,37 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
          `Create a section (fill #404040, name ending in "(made by Claude)"), append the root inside it, ` +
          `and remove it from the page directly (Rule 7.5).`
        );
+     }
+   }
+
+   // 7.50. Canvas overlap — section must not visually overlap any pre-existing top-level node.
+   // Caught in v3.82 user testing: skill placed Connections section at coords that overlapped
+   // existing canonical Account screens. findFreeCanvasSpot() exists in helpers.js but skill
+   // sometimes skips it and uses (0,0) or hard-coded coords.
+   {
+     // Find the SECTION ancestor of root
+     let sec = root.parent;
+     while (sec && sec.type !== "SECTION") sec = sec.parent;
+     if (sec && sec.parent?.type === "PAGE") {
+       const page = sec.parent;
+       const myL = sec.x, myT = sec.y, myR = sec.x + sec.width, myB = sec.y + sec.height;
+       for (const sibling of page.children) {
+         if (sibling.id === sec.id) continue;
+         // Only check top-level FRAMEs and SECTIONs (skip vector/text/image clutter)
+         if (sibling.type !== "FRAME" && sibling.type !== "SECTION") continue;
+         if (typeof sibling.x !== "number") continue;
+         const sL = sibling.x, sT = sibling.y, sR = sibling.x + sibling.width, sB = sibling.y + sibling.height;
+         // Standard rectangle overlap check
+         const overlaps = !(myR <= sL || sR <= myL || myB <= sT || sB <= myT);
+         if (overlaps) {
+           issues.push(
+             `Section "${sec.name}" overlaps existing top-level node "${sibling.name}" (${sibling.type}) on the page. ` +
+             `Move the section to a free spot via findFreeCanvasSpot() helper (Rule 7.50 / Action 3). ` +
+             `Section bbox=(${myL},${myT})-(${myR},${myB}); overlapping sibling bbox=(${sL},${sT})-(${sR},${sB}).`
+           );
+           break;   // one overlap is enough to fail the audit
+         }
+       }
      }
    }
 

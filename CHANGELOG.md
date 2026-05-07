@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.83.0 — 2026-05-06
+**Skill placed section overlapping existing canonical mackets (live user report on v3.82).** Build itself was good — pre-flight ran, section had correct name + fill, content was filled, audit returned PASS — but section was placed at coordinates that visually overlapped existing prod-canonical Account screens on the same page.
+
+### Two fixes
+
+1. **Action 3 in FIRST 3 ACTIONS now requires `findFreeCanvasSpot()`.** Section position must come from the helper, not hard-coded coords. Code example updated. New banned pattern: section placed at hard-coded `x=0, y=0` (or any coord not from the helper).
+
+2. **New audit check 7.50 — canvas overlap.** Walks page top-level nodes (FRAMEs + SECTIONs), finds bounding box of the new section, returns FAIL if it overlaps any sibling. Catches the bug post-build even if Action 3 was bypassed.
+
+---
+
 ## v3.82.0 — 2026-05-06
 **Skill stopped doing pre-flight check + tried to bypass section-naming rule (live user report).** Both rules existed in SKILL.md but skill at runtime ignored them. Root cause: rules were buried far down in the file (pre-flight at line ~214, section-naming at line ~641); skill reads top-down and silently drops them after the first few sections.
 
