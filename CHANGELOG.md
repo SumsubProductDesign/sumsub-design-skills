@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.96.0 — 2026-05-07 (no-op fake bump #3)
+Test bump after v3.95 rollback. User on v3.95 (= v3.81 SKILL.md baseline, no hooks), this remote bump = mismatch on next figma tool call. Verifies whether the pre-rollback SKILL.md text-rule pre-flight correctly stops + asks user.
+
+---
+
 ## v3.95.0 — 2026-05-07 (full SKILL.md rollback to v3.81)
 **User direction:** stop adding layers, take SKILL.md from the last known-good version (v3.81.0) verbatim.
 
