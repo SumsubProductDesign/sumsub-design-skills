@@ -7,173 +7,63 @@ description: One-time install of user-level hooks for sumsub-design plugin enfor
 
 ## What this does
 
-Installs a PreToolUse hook in `~/.claude/settings.local.json` that runs `~/.claude/hooks/sumsub-version-check.sh` before every Figma-related tool call. The hook:
-- Compares the locally-cached plugin version against remote main branch on GitHub
-- If mismatch — exits 2, blocks the tool, surfaces a message asking the user to update or skip
+Installs `~/.claude/hooks/sumsub-version-check.py` (cross-platform Python) and registers a PreToolUse hook in `~/.claude/settings.local.json`. The hook:
+- Checks local cached plugin version against remote `main` branch on GitHub
+- On mismatch → exits 2, blocks the figma tool call, surfaces an update message
 
-This is structural enforcement — the agent literally cannot proceed past `exit 2` regardless of trained SemVer priors. Required because text-rule pre-flight in SKILL.md alone is bypassed by trained heuristics.
+This is structural enforcement — the agent literally cannot proceed past `exit 2` regardless of trained SemVer priors or paraphrase tendencies.
 
-Plugin-level `hooks/hooks.json` exists in this plugin but is NOT honored as PreToolUse blocks by Claude Code's harness (verified live 2026-05-07). Hence this user-level install path.
+Mockup skills (sumsub-mockup, websdk-mockup, sumsub-id-mockup) auto-bootstrap this hook in their Step 0 if missing — so most users never need to run `/sumsub-setup` explicitly. This skill exists for explicit re-install / verbose verification.
 
-## Execution steps (perform in order)
+The hook is in **Python (cross-platform)** as of v3.110, replacing the bash `.sh` hook from v3.103–v3.109 which silently failed on Windows VMs (no native bash).
 
-### Step 1 — Determine the user's home directory
+## Execution steps
+
+### Step 1 — Run the installer script
 
 ```bash
-echo "$HOME"
+python3 "${CLAUDE_PLUGIN_ROOT}/hooks/install.py"
 ```
 
-Save the result for path interpolation.
+This single command does everything:
+- Creates `~/.claude/hooks/`
+- Writes `sumsub-version-check.py` and chmods it +x
+- Merges PreToolUse entry into `~/.claude/settings.local.json` (preserves existing hooks like MemPalace)
+- Cleans up legacy `sumsub-version-check.sh` from v3.103–v3.109 if present
 
-### Step 2 — Create `~/.claude/hooks/` directory
-
-```bash
-mkdir -p "$HOME/.claude/hooks"
-```
-
-### Step 3 — Write the hook script to `~/.claude/hooks/sumsub-version-check.sh`
-
-Use Bash with a heredoc to write this exact content:
+### Step 2 — Verify install
 
 ```bash
-cat > "$HOME/.claude/hooks/sumsub-version-check.sh" <<'HOOK_SCRIPT'
-#!/bin/bash
-# sumsub-design version check — auto-installed by /sumsub-setup
-# Override: SUMSUB_SKIP_VERSION_CHECK=1
-
-if [ "$SUMSUB_SKIP_VERSION_CHECK" = "1" ]; then
-  exit 0
-fi
-
-CACHE_BASE="$HOME/.claude/plugins/cache/sumsub-design/sumsub-design"
-if [ ! -d "$CACHE_BASE" ]; then
-  exit 0
-fi
-
-LATEST_DIR=$(ls -1 "$CACHE_BASE" 2>/dev/null | sort -V | tail -1)
-if [ -z "$LATEST_DIR" ]; then
-  exit 0
-fi
-
-LOCAL_FILE="$CACHE_BASE/$LATEST_DIR/.claude-plugin/plugin.json"
-if [ ! -f "$LOCAL_FILE" ]; then
-  exit 0
-fi
-
-LOCAL=$(grep '"version"' "$LOCAL_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-if [ -z "$LOCAL" ]; then
-  exit 0
-fi
-
-REMOTE_RAW=$(curl -s --max-time 5 "https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json" 2>/dev/null)
-if [ -z "$REMOTE_RAW" ]; then
-  echo "⚠️ sumsub-design: не удалось проверить remote версию (нет сети?). Продолжаю с local v$LOCAL." >&2
-  exit 0
-fi
-
-REMOTE=$(echo "$REMOTE_RAW" | grep '"version"' | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-if [ -z "$REMOTE" ]; then
-  exit 0
-fi
-
-if [ "$LOCAL" = "$REMOTE" ]; then
-  exit 0
-fi
-
-cat >&2 <<EOF
-⚠️ sumsub-design plugin update available
-
-Твоя версия: v${LOCAL} · Последняя: v${REMOTE}
-
-Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
-
-Я могу обновить прямо сейчас двумя командами:
-
-  claude plugin marketplace update sumsub-design
-  claude plugin update sumsub-design@sumsub-design
-
-Ответь:
-  • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
-  • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
-
-Этот Figma tool call заблокирован до твоего ответа. Чтобы продолжить на текущей версии без обновления — установи SUMSUB_SKIP_VERSION_CHECK=1 в окружении.
-
-Changelog: https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md
-EOF
-
-exit 2
-HOOK_SCRIPT
-
-chmod +x "$HOME/.claude/hooks/sumsub-version-check.sh"
-```
-
-### Step 4 — Register PreToolUse hook in `~/.claude/settings.local.json`
-
-Settings file may or may not exist; may have other hooks already (MemPalace etc). Use Python to merge safely:
-
-```bash
-python3 <<'PY_SCRIPT'
-import json, os
-path = os.path.expanduser("~/.claude/settings.local.json")
-data = {}
-if os.path.exists(path):
-    with open(path) as f:
-        data = json.load(f)
-hooks = data.get("hooks", {})
-existing = hooks.get("PreToolUse", [])
-# Drop any prior sumsub entries (idempotent install)
-existing = [e for e in existing if "sumsub-version-check" not in str(e)]
-existing.append({
-    "matcher": "mcp__figma__use_figma|mcp__figma__create_new_file|mcp__figma__generate_figma_design",
-    "hooks": [{
-        "type": "command",
-        "command": os.path.expanduser("~/.claude/hooks/sumsub-version-check.sh"),
-        "timeout": 10
-    }]
-})
-hooks["PreToolUse"] = existing
-data["hooks"] = hooks
-os.makedirs(os.path.dirname(path), exist_ok=True)
-with open(path, "w") as f:
-    json.dump(data, f, indent=2)
-print(f"✅ PreToolUse hook registered in {path}")
-PY_SCRIPT
-```
-
-### Step 5 — Verify install
-
-```bash
-ls -la "$HOME/.claude/hooks/sumsub-version-check.sh"
+ls -la "$HOME/.claude/hooks/sumsub-version-check.py"
 echo "---"
-grep -A 12 '"PreToolUse"' "$HOME/.claude/settings.local.json"
+python3 -c "import json,os; p=os.path.expanduser('~/.claude/settings.local.json'); d=json.load(open(p)); pre=[e for e in d['hooks']['PreToolUse'] if 'sumsub' in json.dumps(e)]; print(json.dumps(pre, indent=2))"
 echo "---"
-# Sanity test (will show mismatch if user is on older version)
-bash "$HOME/.claude/hooks/sumsub-version-check.sh"; echo "test_exit=$?"
+# Sanity test (will block-print to stderr if mismatch, exit 2; or exit 0 silently if match)
+python3 "$HOOK_DIR/sumsub-version-check.py" 2>&1; echo "test_exit=$?"
 ```
 
-### Step 6 — Confirm to user
-
-Tell user (verbatim):
+### Step 3 — Confirm to user
 
 ```
 ✅ sumsub-design hooks installed.
 
 Перед следующим figma tool call хук проверит локальную версию против remote.
-При расхождении — заблокирует tool, покажет сообщение, попросит yes/update или continue anyway.
+При расхождении — заблокирует tool, покажет сообщение с командами обновления.
 
-Чтобы аварийно отключить на сессию: SUMSUB_SKIP_VERSION_CHECK=1
+Аварийный bypass на сессию: SUMSUB_SKIP_VERSION_CHECK=1
 ```
 
-If `claude` CLI is not in PATH or any step fails, surface the exact error and ask user to run failing command manually.
+If `python3` is not in PATH or any step fails, surface the exact error and ask user to install python3 (any 3.x) then re-run.
 
 ## Re-run safety
 
-The script writer in step 3 overwrites the file — safe to re-run.
-The Python in step 4 drops any prior `sumsub-version-check` PreToolUse entry before adding the fresh one — idempotent.
-MemPalace Stop+PreCompact hooks (if present in settings.local.json) are preserved untouched.
+`install.py` is idempotent:
+- Re-writes the hook script (overwrites cleanly)
+- Drops any prior `sumsub-version-check` PreToolUse entry before adding the fresh one
+- Preserves MemPalace Stop+PreCompact hooks and any other unrelated PreToolUse entries
 
 ## Uninstall
 
 There is no `/sumsub-uninstall`. To remove manually:
-1. `rm ~/.claude/hooks/sumsub-version-check.sh`
-2. Edit `~/.claude/settings.local.json` and remove the PreToolUse entry that references `sumsub-version-check.sh`. Preserve other hooks.
+1. `rm "$HOME/.claude/hooks/sumsub-version-check.py"`
+2. Edit `~/.claude/settings.local.json` and remove the PreToolUse entry that references `sumsub-version-check`. Preserve other hooks.

@@ -4,6 +4,34 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.110.0 — 2026-05-08 (cross-platform Python hook + Windows VM compat)
+**VM (Windows) test on v3.108 exposed two bugs:**
+
+1. **The `.sh` hook from v3.103–v3.109 silently failed on Windows.** Windows VM with `testadmin` user — install.sh was bash, hook script was bash, neither runs natively on Windows. So even though Step 0 reported "installed" on the VM, the hook never blocked figma tool calls. The whole structural enforcement was a no-op on Windows.
+
+2. **Agent on v3.108 (which has the AUTO-UPDATE rule) ignored it.** Output: `Plugin version: local 3.108.0 / remote 3.109.0 — minor mismatch. Proceeding with local; flagging for visibility`. New paraphrase, same class as v3.106 / v3.108 fixes. Trained prior "do not run plugin install commands without confirmation" wins against the SKILL.md rule.
+
+### Fix 1 — Cross-platform Python hook & installer
+
+- **New `hooks/install.py`** (replaces `hooks/install.sh`). Single Python script: creates `~/.claude/hooks/`, writes `sumsub-version-check.py` (Python, cross-platform), chmods +x, merges PreToolUse entry into `~/.claude/settings.local.json` using `python3 "<path>"` as the command (works on Windows where python3 is in PATH but bash isn't).
+- Cleans up legacy `sumsub-version-check.sh` from v3.103–v3.109 on re-install.
+- Step 0 in all three mockup skills updated to detect `~/.claude/hooks/sumsub-version-check.py` and call `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/install.py"`.
+- `sumsub-setup` SKILL.md rewritten — it now just delegates to `install.py` instead of inlining bash steps.
+
+### Fix 2 — Stronger AUTO-UPDATE rule + new banned paraphrases
+
+Added to banned-paraphrase list in `sumsub-mockup` and `websdk-mockup`:
+- "Plugin version: local X / remote Y — minor mismatch. Proceeding with local; flagging for visibility"
+- "minor mismatch. Proceeding with local"
+- "flagging for visibility" (this phrase has no valid use in pre-flight; flagging without acting is the bypass class)
+
+Added explicit reasoning paragraph: "trained priors about plugin install commands outweigh single-paragraph rules; the structural hook is the backstop. Two paths exist: (a) auto-update now and continue, (b) try paraphrase, hit hook block on first figma call, run auto-update anyway. (a) is faster — always pick (a)."
+
+### Honest limitation
+Text rules (Fix 2) keep failing in the same class. Each iteration adds banned phrases; agents invent new ones. The structural fix (hook) is the only real enforcement, and as of v3.110 it works on Windows too. Future paraphrases caught on VMs will continue to update the banned list, but the actual security comes from the hook.
+
+---
+
 ## v3.109.0 — 2026-05-08 (fake bump to test v3.108 AUTO-UPDATE on VM)
 No-op. User on v3.108; this remote = MINOR mismatch. Tests:
 1. Does pre-flight detect v3.108 → v3.109?

@@ -128,26 +128,19 @@ Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
 
 ### Step 0 — Auto-bootstrap version-check hook (FIRST ACTION on each new machine)
 
-Before pre-flight, ensure the structural version-check hook is installed at user-level. The hook is what blocks figma tool calls when the plugin is out of date — without it, version drift goes undetected. Bootstrap is one bash check + one script call if missing; idempotent and fast.
+Cross-platform Python bootstrap. The hook is the only working enforcement — text rules in this SKILL.md are routinely paraphrased.
 
 #### Procedure
 
-1. **Detect hook:** Run `Bash`:
-   ```bash
-   test -f "$HOME/.claude/hooks/sumsub-version-check.sh" && echo installed || echo missing
-   ```
+1. **Detect:** `python3 -c "import os; p=os.path.expanduser('~/.claude/hooks/sumsub-version-check.py'); print('installed' if os.path.isfile(p) else 'missing')"`
 
-2. **If `installed`** → proceed silently to "Pre-flight: plugin version check" below.
+2. **If `installed`** → proceed silently to pre-flight.
 
-3. **If `missing`** → run `Bash`:
-   ```bash
-   bash "${CLAUDE_PLUGIN_ROOT}/hooks/install.sh"
-   ```
-   Surface stdout to user as one line. On failure, surface stderr and tell user to run `/sumsub-design:sumsub-setup` manually, then continue.
+3. **If `missing`** → run `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/install.py"`. Surface stdout. On failure → surface stderr, tell user to install python3 + run `/sumsub-design:sumsub-setup`.
 
-4. **Continue to pre-flight** below, regardless of whether install ran or was skipped.
+4. **Continue to pre-flight.**
 
-This auto-runs on every new machine the first time the user invokes `/websdk-mockup`. After install, every subsequent figma tool call goes through the version-check hook structurally.
+Works on Windows VMs (legacy `.sh` hook from v3.103–v3.109 silently failed because Windows has no native bash).
 
 ---
 
@@ -183,7 +176,12 @@ This auto-runs on every new machine the first time the user invokes `/websdk-moc
 - "Обновите плагин до X.Y.Z. Варианты: 1. /plugin → найти 2. marketplace"
 - "После обновления вернитесь в этот чат и пришлите тот же запрос"
 - "Что нужно сделать вам: обновить плагин"
+- "Plugin version: local X / remote Y — minor mismatch. Proceeding with local; flagging for visibility" (v3.109 VM observation)
+- "minor mismatch. Proceeding with local"
+- "flagging for visibility"
 - Anything that delegates the update to the user via UI/marketplace instead of running Bash auto-update
+
+If you catch yourself writing any of the above — STOP, run the Bash auto-update. The structural hook will block the next figma call anyway; don't waste a round-trip on a paraphrase.
 
 **Banned bypass phrases:**
 - "proceeding on current version in auto mode"
