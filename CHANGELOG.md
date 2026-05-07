@@ -4,6 +4,24 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.103.0 — 2026-05-07 (added /sumsub-setup skill for per-machine hook install)
+**Live test on user's VM showed:** plugin-level hooks not delegated by Claude Code, AND user-level hook installs in `/Users/konstantin/.claude/` only enforce on that machine. To enforce on team members' machines (each VM, each Mac, each developer), each user must install the hook locally.
+
+### Fix: shipped `/sumsub-design:sumsub-setup` skill
+
+New skill: `skills/sumsub-setup/SKILL.md`. Contains step-by-step bash to:
+1. Create `~/.claude/hooks/`
+2. Write `sumsub-version-check.sh` with the version-check logic
+3. `chmod +x` it
+4. Use Python to merge a PreToolUse entry into `~/.claude/settings.local.json` (preserves existing hooks like MemPalace)
+5. Verify install
+
+User runs `/sumsub-design:sumsub-setup` once per machine. Idempotent (re-runnable). Hook then enforces structurally on that machine.
+
+For team rollout: each designer installs plugin (via marketplace), runs setup once. After that, every Figma tool call goes through the version check; structural block on mismatch.
+
+---
+
 ## v3.102.0 — 2026-05-07 (fake bump for user-level hook test)
 No-op. User on v3.101, this remote = mismatch. Tests user-level PreToolUse hook from `~/.claude/settings.local.json`.
 
