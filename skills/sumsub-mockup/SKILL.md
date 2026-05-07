@@ -321,31 +321,6 @@ for (const child of body.children) {
 
 This applies to ALL retry/walk loops in build scripts, not just visibility toggles. Property overrides, swap operations, or any iteration that captures a "do not modify this one" reference must use `.id`.
 
-### Step 0 — Auto-bootstrap version-check hook (FIRST ACTION on each new machine)
-
-Before pre-flight, ensure the structural version-check hook is installed at user-level. The hook is **the only working enforcement** — text rules in this SKILL.md are routinely paraphrased away by trained priors (see banned-paraphrase list below). Bootstrap is cross-platform Python (works on macOS, Linux, Windows).
-
-#### Procedure
-
-1. **Detect hook:** Run `Bash`:
-   ```bash
-   python3 -c "import os,sys; p=os.path.expanduser('~/.claude/hooks/sumsub-version-check.py'); print('installed' if os.path.isfile(p) else 'missing')"
-   ```
-
-2. **If `installed`** → proceed silently to "Pre-flight: plugin version check" below.
-
-3. **If `missing`** → run `Bash`:
-   ```bash
-   python3 "${CLAUDE_PLUGIN_ROOT}/hooks/install.py"
-   ```
-   Surface stdout to user as one line. On failure (e.g. `python3` not in PATH), surface stderr and tell user to install python3 then run `/sumsub-design:sumsub-setup` manually.
-
-4. **Continue to pre-flight** below.
-
-This auto-runs on every new machine the first time the user invokes `/sumsub-mockup`. The Python hook works on Windows VMs (where the legacy `.sh` hook from v3.103–v3.109 silently failed because Windows has no native bash).
-
----
-
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
 #### ⚠️ CRITICAL — read this BEFORE you reach for SemVer reasoning
@@ -384,52 +359,34 @@ You do not have an internal threshold for this plugin. Every diff requires user 
 2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
 3. **Compare exact strings (NOT SemVer logic).** If local string ≠ remote string → continue to step 4 regardless of which side of the diff is "PATCH" or "MINOR" or "MAJOR". If local string = remote string → proceed silently to Rule #0.
 4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
-5. **AUTO-UPDATE IMMEDIATELY — no asking, no choice menu (NEW v3.108).** Output one short line:
+5. **STOP and show the user this message verbatim** (matches the v3.91 hook output, in Russian — this is what worked best historically per user feedback 2026-05-07):
 
    ```
-   ⚠️ sumsub-design vLOCAL → vREMOTE — обновляю...
-   ```
+   ⚠️ sumsub-design plugin update available
 
-   Then run `Bash`:
-   ```
-   claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design
-   ```
+   Твоя версия: vLOCAL · Последняя: vREMOTE
 
-6. **On Bash success:** output `✅ Обновлено до vREMOTE. Продолжаю.` and continue with the task. Claude Code reloads plugin SKILL.md on the next tool call automatically — no restart required.
+   Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
 
-7. **On Bash failure (network, auth, command not found, etc.):** surface the exact stderr to the user and ask:
+   Я могу обновить прямо сейчас двумя командами:
 
-   ```
-   ❌ Auto-update failed:
-   <stderr>
+     claude plugin marketplace update sumsub-design
+     claude plugin update sumsub-design@sumsub-design
 
    Ответь:
-     • retry            — попробую ещё раз
-     • manual           — обновишь сам, я подожду
-     • continue anyway  — работаем на vLOCAL (фиксируется на сессию)
+     • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
+     • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
    ```
 
-   Wait for explicit reply.
+   **Do NOT add "будешь должен мне 100 долларов"-style preamble. Do NOT add "Continuing — but flagging" or similar bypass framing. Output the message verbatim, then stop.**
 
-8. **Once update lands (either auto-success or user-manual confirmation), don't re-check this conversation.**
+6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 
----
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task — Claude Code reloads plugin SKILL.md on the next tool call automatically, no restart required. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
 
-**Rationale for auto-update (no ask):** User is in auto mode and the update is always the correct action on mismatch. The previous "yes/update vs continue anyway" choice menu was paraphrased by the agent into "Обнови плагин сам через /plugin → найти sumsub-design → обновить, и возвращайся" (observed on VM 2026-05-08), which is the worst of both worlds — agent stops AND delegates to user. Class-not-symptom: remove the choice menu, force the auto-update path. The "continue anyway" option only appears in the failure branch where it's actually needed.
+8. **If `continue anyway`:** cache the decision for this conversation, proceed to Rule #0.
 
-**Banned agent paraphrases that signal the bug recurring:**
-- "Обновите плагин до X.Y.Z. Варианты: 1. /plugin → найти sumsub-design 2. marketplace переустановить"
-- "После обновления вернитесь в этот чат и пришлите тот же запрос"
-- "Что нужно сделать вам: обновить плагин"
-- "Plugin version: local X / remote Y — minor mismatch. Proceeding with local; flagging for visibility" (v3.109 VM observation 2026-05-08)
-- "minor mismatch. Proceeding with local"
-- "flagging for visibility" (this phrase is itself a banned-class signal — there is no scenario where the agent flags a version diff and proceeds; on diff, it auto-updates)
-- Anything that asks the user to update via UI or marketplace, instead of running Bash auto-update
-- Anything that frames "proceeding with local" as a valid option in the auto-update step
-
-**If you (the agent) catch yourself about to write "minor mismatch" or "proceeding with local" or "flagging for visibility" while in pre-flight step 5 — STOP. The structural hook will block the next figma tool call anyway. Save the round-trip: run the Bash auto-update now.**
-
-**Why text rules keep failing:** trained priors about "do not run plugin install commands without user confirmation" outweigh a single-paragraph rule. The version-check hook (installed by Step 0) is the structural backstop — even if you paraphrase the rule, the hook blocks the figma tool call until version matches. So you have two paths: (a) run the auto-update yourself and continue; (b) try to skip with a paraphrase, hit the hook block on the first figma call, then run the auto-update anyway. (a) is faster. Always pick (a).
+9. **Once done (either updated or continue-anyway), don't re-check this conversation.**
 
 **Banned bypass phrases** — any of these is a rule break, period:
 - "proceeding on current version in auto mode"
@@ -440,33 +397,8 @@ You do not have an internal threshold for this plugin. Every diff requires user 
 - "first tool is get_libraries, so no check needed yet"
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
-- "Remote check returned 404 — proceeding with local version"
-- "could not verify plugin version, proceeding on faith"
-- "repo not publicly accessible at that path, continuing"
-- "WebFetch failed, defaulting to local"
 
-#### Remote-check failure handling — NEW v3.106
-
-If WebFetch on the remote `plugin.json` does NOT return a clean JSON with a `version` field (any 4xx/5xx, redirect, empty body, parse error, network timeout) — **HARD STOP**, do NOT proceed on faith.
-
-Show the user verbatim:
-
-```
-⚠️ sumsub-design pre-flight: не смог проверить remote версию.
-
-Локальная: vLOCAL
-Remote URL: https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json
-Что вернулось: <первые 300 символов ответа WebFetch — статус, тело, или сообщение об ошибке>
-
-Возможные причины: VM-сеть режет GitHub, репозиторий стал private, URL поломался.
-
-Ответь:
-  • retry            — попробую WebFetch ещё раз
-  • continue anyway  — работаем на текущей версии (фиксируется на сессию)
-  • update           — запущу marketplace update + plugin update вслепую
-```
-
-Wait for explicit reply. Do not infer from auto mode, do not invent rationalizations. The "proceeding on faith" fallback is GONE — this is the class-not-symptom fix, removing the agent's bypass option entirely.
+If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
 
 0. **Ask WHERE to create the mockup — HARD STOP, WAIT for the answer.**
 

@@ -33,11 +33,6 @@ If the request is "Sumsub ID welcome screen" / "Sumsub ID auth flow" / "Sumsub I
 
 ## Pre-flight (mandatory before any tool call)
 
-0. **Auto-bootstrap version-check hook** (first action on each new machine, cross-platform Python):
-   - Detect: `python3 -c "import os; p=os.path.expanduser('~/.claude/hooks/sumsub-version-check.py'); print('installed' if os.path.isfile(p) else 'missing')"`
-   - If `missing` → run `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/install.py"`. Surface stdout to user as one line.
-   - On install failure → surface stderr, tell user to install python3 + run `/sumsub-design:sumsub-setup` manually.
-   - Continue to step 1 regardless. Works on Windows (.sh hook from v3.103–v3.109 silently failed there).
 1. **Plugin version check** — same as `sumsub-mockup`. Read local `plugin.json` + WebFetch remote, compare. Update prompt if mismatch.
 2. **Read references:**
    - `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/sumsub-id-pattern.md` — full layout patterns + dimensions
