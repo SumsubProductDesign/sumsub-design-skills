@@ -4,6 +4,28 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.85.0 — 2026-05-06
+**Connect built as onboarding when it's actually a permission-grant flow (Sim 2 v2 result).** After v3.84.1 fixed pre-flight, agent rebuilt Sim 2 — Title leak fixed, sections added, but agent built a sign-up screen ("Welcome to Sumsub ID" + email input + "Continue with email") instead of the Connect permission-grant flow ("Share your Sumsub ID data with Noah" + "Noah will be able to reuse: ID/address/selfie" + Allow/Cancel).
+
+**Root cause:** `sumsub-id-pattern.md` Pattern C section described GEOMETRY (947×812, light/dark themes) but no PRODUCT SEMANTICS. Agent saw "Welcome to Sumsub ID for MiniPay" in the prompt and improvised a sign-up flow. Pattern doc didn't say "Connect = re-use existing ID, NOT new onboarding".
+
+### Fix in `sumsub-id-pattern.md` Pattern C
+
+- New "⚠ Product semantics" subsection at top: explicit "Connect = permission-grant for existing Sumsub ID, NOT new-account onboarding". With NOT-this / IS-this examples and canonical copy.
+- Layout dimensions made exact: Left column is **718 × 780** (NOT 547 like Sim 2 v2 produced; NOT 947 either). Content frame 506 × 572 inside.
+- Partner logo handling section: NEVER leave `Icon / Small / Building` as partner placeholder. Two acceptable options documented.
+- "Banned generic templates for Connect" list: any "Welcome to Sumsub ID" + email-signup + "Continue with email" build = misread Connect as onboarding, FAIL.
+
+### Default-text Mode B audit also missed a Label leak
+
+Sim 2 v2 audit said `default_text_leaks_fixed: 2` PASS, but live tree shows `*Input* / Base / Form` has `Label` sub-instance with `TEXT:Title text="Label"` — exact short-stub leak that Mode A regex should catch. Mode B should also catch it via mainComponent compare. Audit reported PASS anyway. Either:
+- Audit didn't actually run Mode A on visible TEXTs inside nested instances, OR
+- Agent reported audit as PASS without running it
+
+For now, banning the specific output: `audit_verdict: PASS` while a `TEXT:characters="Label"` exists anywhere in the visible tree = bug. Will add explicit verifier in v3.86 if it recurs.
+
+---
+
 ## v3.84.1 — 2026-05-06 (regression fix)
 **Pre-flight version check stopped firing reliably after v3.82.** Live user report — agent in their session said pre-flight rule "asked to STOP and prompt the user to update; I surfaced the mismatch but continued under auto mode to deliver the JSON log this sim expects". This is exactly a banned bypass phrase from the deep "Pre-flight" section, but in their context it didn't register because:
 

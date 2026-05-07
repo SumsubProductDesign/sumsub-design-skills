@@ -85,19 +85,77 @@ The 384px sidebar is brand-driven — gives extra room for avatar circle + ident
 
 > File: `Z87D5m8KArTvQWH13Nwmmo` "Sumsub ID ✦ Connect"
 
+### ⚠ Product semantics — read this BEFORE building
+
+**Sumsub ID Connect = "Share your existing Sumsub ID with this partner".** It's a permission-grant flow, NOT a new-account onboarding flow. The user ALREADY has a verified Sumsub ID; they're authorising a partner (MiniPay, Noah, Age Verification provider) to re-use that verified identity.
+
+- **NOT this**: "Welcome to Sumsub ID" + email signup + benefits-of-Sumsub-ID + "Continue with email"
+- **IS this**: "Share your Sumsub ID data with [Partner]" + "[Partner] will be able to reuse: ID documents / address / selfie+liveness" + Allow/Cancel buttons + consent checkbox
+
+If the user prompt says "Welcome to Sumsub ID for MiniPay" — interpret as "Connect permission-grant screen for MiniPay partner", not as Sumsub ID account signup. The `Welcome to Sumsub ID` frame in canonical (`132:103729`, page `[❇️] Sumsub ID ✦ MiniPay`) IS the permission-grant screen, despite the misleading title.
+
+Common copy that should appear (canonical):
+- Title: `Share your Sumsub ID data with <Partner>`
+- Subtitle: `<Partner> enables <Partner> to reuse your verified Sumsub ID`
+- Group label: `<Partner> will be able to reuse:` followed by bullet items
+- Bullet items: ID documents (passport or ID card), Address verification, Selfie + liveness check
+- Footer: Allow sharing button + Cancel link + I-confirm-privacy consent checkbox
+
+### Layout structure
+
 ```
 Root (947 × 812, fill light #ecedf2 OR dark #2a2b30)
 └── Frame 2085662918  (947 × 780, x=0, y=16)
-    └── (Connect login widget — embeddable on partner sites)
+    └── Left column  (718 × 780)            ← single column, NOT 547 or other widths
+        ├── *Button* / Basic (44 × 44 lang switcher, top-left)   [optional]
+        ├── content  (506 × 572, vertically centered)
+        │   ├── Sumsub ID / Connect / Logos  (176 × 72, 3 elements)
+        │   │   ├── Logo: Sumsub logo (Company Logo, 72 × 72)
+        │   │   ├── Repeat icon (Icon / Small / Repeat, 32 × 72 wrapper)
+        │   │   └── Logo: Partner logo (Company Logo with PARTNER override, 72 × 72)
+        │   ├── Title  (506 × 88) — overrides REQUIRED:
+        │   │   - Title text: "Share your Sumsub ID data with <Partner>"
+        │   │   - Subtitle text: "<Partner-specific subtitle>"
+        │   ├── Tips / Group  (506 × 128)
+        │   │   ├── *Label* / Vertical: "<Partner> will be able to reuse:"
+        │   │   └── Tips items × 3 (ID, address, selfie)
+        │   └── (optional) *Slot* / Basic for additional context
+        └── Toolbar / Bottom Bar / Desktop  (718 × 246)
+            ├── *Checkbox* / Item: "I confirm that I have read the Privacy Notice…"
+            ├── *Button* / Basic Primary: "Allow sharing"
+            └── *Button* / Basic Secondary: "Cancel"
 ```
+
+**Layout dimensions are exact, do not invent:**
+- Frame 2085662918: 947 × 780 @ (0, 16)
+- Left column: **718 × 780** (NOT 547, NOT 947 — 718 is the canonical inner content width)
+- content frame inside Left: 506 × 572, vertically centered
+- Toolbar / Bottom Bar / Desktop: 718 × 246 at the bottom of Left column
 
 **Two theme variants:**
 - Light: `#ecedf2` (subtlest grey)
 - Dark: `#2a2b30` (deep grey)
 
-**Why 947 wide?** Connect is **embeddable**, designed to be placed inside partner pages/apps (MiniPay, Age Verification, etc.). Not a full-page experience. The 947 width is the canonical embed dimension.
-
 **y=16 padding top** on inner Frame 2085662918 — 16px top margin within the 812 viewport, leaving 16px bottom margin too.
+
+### Partner logo handling
+
+The Logos component (set `968128769cce…` per recent live tests, or look up by name `Sumsub ID / Connect / Logos`) ships with placeholder logos. The Partner-side Logo wrapper contains an `Icon / Small / Building` placeholder by default — DO NOT leave it. Two options:
+1. **Best**: instance-swap the placeholder Building icon with a real partner brand asset (image fill or imported partner logo component, if available).
+2. **Acceptable for unfamiliar partners**: leave a single `Company Logo` instance (which has an "Other" variant rendering a generic identifier badge), but set its `Type` property to indicate it's a partner placeholder.
+
+NEVER ship a Connect macket with `Icon / Small / Building` visible as the partner logo — it's the unconfigured default and looks wrong.
+
+### Banned generic templates for Connect
+
+If you find yourself building any of these inside a Connect 947×812 frame, you've misread Connect as onboarding:
+- "Welcome to Sumsub ID" title with email-signup form below
+- "Continue with email" / "Continue with Google" CTAs
+- "Fast verification / Reusable identity / Private and secure" benefit stack
+- 3-bullet "Sumsub ID benefits" section without partner reference
+- Any Sign-up flow chrome
+
+These belong to **Sumsub ID Account onboarding** (different product, file `F38QSCQ62kCVe8ROwpXdvn`), not Connect. Connect always references the specific partner integrating with Sumsub ID.
 
 ### Source pages — Sumsub ID Connect
 
