@@ -209,7 +209,44 @@ After the build, audit must verify Body has at least one content component (Card
 
 **Required audit checks (run all, in order):**
 
-1. **Default-text leak scan (visible TEXT only).** Walk the built tree, find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
+1. **Default-text leak scan — TWO modes (visible TEXT only).**
+   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
+   - **Mode B (added v3.84): main-component-default comparison.** For every INSTANCE, walk its mainComponent's TEXT children, build a map `name → defaultCharacters`. Then walk the instance's TEXT children — if an instance TEXT has the **same name AND same characters** as the mainComponent's default, it's a LEAK. This catches long plausible-looking placeholders that Mode A misses, e.g. Title component shipping with `"Select type and issuing country of your "` — Mode A doesn't match `Title`/`Label`/etc., but Mode B sees the instance text == main's default text → FAIL.
+
+   Reason Mode B exists: live user testing on Connect (May 2026, v3.83) — agent claimed `default_text_leaks_fixed: 4` and audit returned PASS, but the Title instance kept its main's default `"Select type and issuing country of your "` because Mode A's banned-strings list didn't include that exact phrase. Mode B (compare with `instance.mainComponent.children`) catches it deterministically without needing a curated string list.
+
+   ```js
+   // Mode B implementation sketch
+   async function modeB(root) {
+     const fails = [];
+     async function walk(n) {
+       if (n.type === "INSTANCE" && n.mainComponent) {
+         const main = n.mainComponent;
+         const defaultsByName = {};
+         function collectDefaults(node) {
+           if (node.type === "TEXT") defaultsByName[node.name] = node.characters;
+           if ("children" in node && node.children) for (const c of node.children) collectDefaults(c);
+         }
+         collectDefaults(main);
+         function checkInstance(node) {
+           if (node.type === "TEXT" && node.visible !== false) {
+             const def = defaultsByName[node.name];
+             if (def && def === node.characters && def.trim().length > 0) {
+               fails.push({path: getPath(node), name: node.name, value: node.characters});
+             }
+           }
+           if ("children" in node && node.children) for (const c of node.children) checkInstance(c);
+         }
+         checkInstance(n);
+       }
+       if ("children" in n && n.children) for (const c of n.children) await walk(c);
+     }
+     await walk(root);
+     return fails;
+   }
+   ```
+
+   Skill MUST run both modes. Mode A is a fast heuristic; Mode B is the deterministic check.
 2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
 3. **Empty Body check** (rule above).
 4. **Visible-content check (added v3.81 — DO NOT skip).** For every imported content component (Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button — anything that's not chrome) verify `visible === true` AND `visibleToRoot() === true`. If a content component has `visible=false`, audit FAILS — even if its TEXTs are correctly overridden. Default-text scan operating on visible-only TEXTs misses leaks INSIDE hidden subtrees, so it cannot substitute for this check. **Reason this rule exists:** in Sim 1 (v3.80) the build accidentally hid Partners Wrapper via a Stage 4 retry loop using stale node references; default-text audit returned PASS because no TEXT was visible to scan; user opened the macket and saw a sidebar + empty right side.

@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.84.0 — 2026-05-06
+**Default-text scan missed long plausible placeholders (live Sim 2 Connect MiniPay).** Skill claimed `default_text_leaks_fixed: 4` and audit PASSED, but Title instance kept its main component's default `"Select type and issuing country of your "` because the banned-strings list (Label/Title/Subtitle/etc.) didn't include that long phrase. User opened the macket and saw obvious placeholder text where "Share your Sumsub ID data with Noah" should have been.
+
+### Fix: two-mode default-text leak scan
+
+- **Mode A (existing):** banned-strings list — fast heuristic for `Label`/`Title`/`Subtitle`/`Slot component`/`Text`/`Caption`/`Placeholder`/`Button`/`Number`/`Tab`/`Item`/`123`.
+- **Mode B (new in v3.84):** for every INSTANCE, walk its `mainComponent`'s TEXT children, build map `name → defaultCharacters`. Then walk the instance's TEXT children — if instance TEXT has the **same name AND same characters** as the mainComponent's default, that's a LEAK regardless of how long or plausible the string looks. Catches long-form defaults (Title, Header subtitles, Tips items, etc.) deterministically.
+
+Skill MUST run both modes. Mode A is fast filter; Mode B is deterministic.
+
+### Sim 2 audit was wrong
+
+The `audit_verdict: PASS` on Sim 2 was incorrect — Mode B would have flagged the Title instance's two TEXT leaks. Going forward, audit reporting `default_text_leaks_fixed: N` AND `audit_verdict: PASS` while macket has visible default placeholders = bug, almost certainly Mode B was skipped.
+
+---
+
 ## v3.83.0 — 2026-05-06
 **Skill placed section overlapping existing canonical mackets (live user report on v3.82).** Build itself was good — pre-flight ran, section had correct name + fill, content was filled, audit returned PASS — but section was placed at coordinates that visually overlapped existing prod-canonical Account screens on the same page.
 
