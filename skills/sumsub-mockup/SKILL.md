@@ -716,16 +716,31 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    root.x = 40;   // offset inside the section, NOT page coordinates
    root.y = 160;  // leave room for annotations above
 
-   // 4. Size the section to fit its contents
+   // 4. Size the section to fit its contents — MUST come AFTER appendChild(root)
    section.resizeWithoutConstraints(root.width + 80, root.height + 200);
+   ```
+
+   **Order matters: resize is step 4, AFTER appendChild in step 3.** If you size the section BEFORE adding root, the section stays at its pre-root dimensions and root visually leaks outside the section box. Caught in v3.89 user testing — `parentType` was `SECTION` (correct), but `section.bbox` didn't contain `root.bbox` because resize was called too early. Audit 7.51 verifies containment.
+
+   For builds with multiple screens / annotations / extra widgets inside a section, recompute the bounding box at the end:
+
+   ```js
+   // After all children are appended (root, annotations, extra screens)
+   let maxR = 0, maxB = 0;
+   for (const c of section.children) {
+     maxR = Math.max(maxR, c.x + c.width);
+     maxB = Math.max(maxB, c.y + c.height);
+   }
+   section.resizeWithoutConstraints(maxR + 80, maxB + 80);   // 80px padding all around
    ```
 
    **Banned patterns:**
    - `figma.currentPage.appendChild(root)` — root frame directly on page
    - `root.x = spot.x; root.y = spot.y` when spot came from `findFreeCanvasSpot()` — misusing the helper
    - Appending to page first, then "moving into section later" — audit reads structure, not intent
+   - `section.resizeWithoutConstraints()` called BEFORE `section.appendChild(root)` — section sized to pre-root dimensions, root leaks outside (audit 7.51 catches this)
 
-   Audit check 7.45 verifies that the root frame's direct parent is a SECTION (not the PAGE itself). If it fires, the frame was appended to the page directly — fix by wrapping it in a section and removing the direct page child.
+   Audit check 7.45 verifies that the root frame's direct parent is a SECTION (not the PAGE itself). If it fires, the frame was appended to the page directly — fix by wrapping it in a section and removing the direct page child. Audit 7.51 verifies the section's bounding box contains the root's bounding box.
 
 7.6. **Multi-screen layout — grid, not one long row.** When building ≥4 screens for a single task, arrange them in a grid inside the SECTION, not in a single horizontal row. 6 screens × 1440px = 9000+ px wide and unreviewable. Use 3 or 4 columns:
 
@@ -2588,6 +2603,31 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
            );
            break;   // one overlap is enough to fail the audit
          }
+       }
+     }
+   }
+
+   // 7.51. Section bbox must contain root bbox.
+   // Caught in v3.89 user testing: skill called section.resizeWithoutConstraints
+   // BEFORE appendChild(root), so section was sized to pre-root dimensions and
+   // root visually leaked outside section. parentType=SECTION is correct but
+   // bbox containment is broken. Build code must call resize AFTER append; this
+   // audit catches regressions when the order is forgotten.
+   {
+     let sec2 = root.parent;
+     while (sec2 && sec2.type !== "SECTION") sec2 = sec2.parent;
+     if (sec2 && sec2.type === "SECTION") {
+       const rL = root.x, rT = root.y;
+       const rR = root.x + root.width, rB = root.y + root.height;
+       const sW = sec2.width, sH = sec2.height;
+       const tolerance = 2;
+       if (rL < -tolerance || rT < -tolerance || rR > sW + tolerance || rB > sH + tolerance) {
+         issues.push(
+           `7.51 section-contains-root: root frame "${root.name}" leaks outside section "${sec2.name}" bbox. ` +
+           `Section is ${Math.round(sW)}x${Math.round(sH)}; root is at (${Math.round(rL)},${Math.round(rT)}) size ${Math.round(root.width)}x${Math.round(root.height)} (right edge ${Math.round(rR)}, bottom ${Math.round(rB)}). ` +
+           `Cause: section.resizeWithoutConstraints was called BEFORE appendChild(root) — section was sized to pre-root dimensions. ` +
+           `Fix: call section.resizeWithoutConstraints(root.width + 80, root.height + 200) AFTER appending root, so section grows to encompass it.`
+         );
        }
      }
    }

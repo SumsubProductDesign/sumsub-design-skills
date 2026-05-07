@@ -4,6 +4,25 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.90.0 — 2026-05-07 (section containment audit)
+**Sim 2 on v3.89 (post-revert): pre-flight worked correctly, Mode A/B audits returned 0 leaks, fix-loop applied 5 corrections (Subtitle, hidden Tips/Item count, Toolbar labels, Tips icon swap, Tips Status default).** Real progress. One remaining bug: section bbox didn't contain root bbox.
+
+### Bug class
+
+`figma.createSection()` followed by `section.resizeWithoutConstraints(W, H)` followed by `section.appendChild(root)` — section is sized to pre-root dimensions, root visually leaks outside section box. `parentType` is correctly `SECTION` so existing audits pass, but containment is broken visually.
+
+### Two-part fix
+
+1. **Audit 7.51 — section-contains-root.** Walks from root up to its SECTION ancestor. Verifies `section.x ≤ root.x` etc. (root in section-local coords). FAIL with diagnostic if root leaks outside any edge by more than 2px. Catches the bug regardless of how it was introduced.
+
+2. **Section creation example in SKILL.md updated.** Order is now explicit: create section → place section → appendChild(root) → THEN resize. Plus a snippet for multi-child sections (recompute max-right and max-bottom across all children before resize). Banned pattern added: "section.resizeWithoutConstraints called BEFORE appendChild(root)".
+
+### What's still working
+
+Pre-flight check fired correctly on the new build (no mismatch warning needed, plugin synced). Mode A and Mode B audits caught and fixed 5 default leaks. Class-not-symptom rule held — the section containment was a NEW class of bug, not a re-bypass of pre-flight.
+
+---
+
 ## v3.89.0 — 2026-05-07 (revert v3.82 + v3.88, restore prior working pre-flight)
 **User feedback:** "до сегодняшнего дня pre-flight всегда работал, проблемы не было" + "не надо хуйни про обязательный перезапуск Claude". Two reverts.
 
