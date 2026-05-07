@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.109.0 — 2026-05-08 (fake bump to test v3.108 AUTO-UPDATE on VM)
+No-op. User on v3.108; this remote = MINOR mismatch. Tests:
+1. Does pre-flight detect v3.108 → v3.109?
+2. Does agent immediately run Bash with the two update commands instead of asking?
+3. Does it output `⚠️ vLOCAL → vREMOTE — обновляю...` then `✅ Обновлено. Продолжаю.`?
+4. Does it actually continue to the user's task without further interruption?
+
+---
+
 ## v3.108.0 — 2026-05-08 (AUTO-UPDATE on mismatch — no choice menu, no asking)
 **VM test on v3.107 exposed:** when pre-flight detected v3.106 → v3.107 mismatch, agent did stop (good — v3.106 HARD STOP held), but then output its own paraphrased choice menu telling user: "Обновите плагин. Варианты: 1. /plugin → найти sumsub-design → обновить. 2. marketplace переустановить. После обновления вернитесь в этот чат и пришлите тот же запрос".
 
