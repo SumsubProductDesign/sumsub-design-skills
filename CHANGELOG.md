@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.99.0 — 2026-05-07 (fake bump #5)
+No-op. User updated to v3.98, this remote = mismatch.
+
+---
+
 ## v3.98.0 — 2026-05-07 (fake bump for pre-flight test)
 No-op. User on v3.97, this remote = mismatch on next figma tool call.
 
