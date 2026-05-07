@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.101.0 — 2026-05-07 (fake bump for anti-SemVer test)
+No-op. User on v3.100, this remote = MINOR mismatch (typical case where SemVer prior would say "1-2 minor behind, low risk, proceed"). v3.100 explicitly bans that thought — verify on real prompt.
+
+---
+
 ## v3.100.0 — 2026-05-07 (anti-SemVer prior framing)
 **Identified root cause of pre-flight bypass: trained SemVer convention beats text rule.** Agent showed an explicit threshold rubric (MAJOR=stop, 3+MINOR=recommend, 1-2 MINOR=ignore-with-flag, PATCH=ignore) that's NOT in SKILL.md — it's from training. Standard SemVer "PATCH = safe bug fix" is well-known and heavyweight; our skill text rule "any diff = STOP" is one string of context, lightweight. Training wins.
 
