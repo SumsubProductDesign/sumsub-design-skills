@@ -33,6 +33,11 @@ If the request is "Sumsub ID welcome screen" / "Sumsub ID auth flow" / "Sumsub I
 
 ## Pre-flight (mandatory before any tool call)
 
+0. **Auto-bootstrap version-check hook** (first action on each new machine):
+   - Detect: `test -f "$HOME/.claude/hooks/sumsub-version-check.sh" && echo installed || echo missing`
+   - If `missing` → run `bash "${CLAUDE_PLUGIN_ROOT}/hooks/install.sh"`. Surface stdout to user as one line.
+   - On install failure → surface stderr, tell user to run `/sumsub-design:sumsub-setup` manually.
+   - Continue to step 1 regardless. Idempotent: subsequent invocations skip silently.
 1. **Plugin version check** — same as `sumsub-mockup`. Read local `plugin.json` + WebFetch remote, compare. Update prompt if mismatch.
 2. **Read references:**
    - `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/sumsub-id-pattern.md` — full layout patterns + dimensions

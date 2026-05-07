@@ -4,6 +4,23 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.104.0 — 2026-05-08 (auto-bootstrap version-check hook on first mockup invocation)
+User asked: "I want sumsub-setup to be auto-invoked when any mockup skill is called". Closing the class — no team member should have to remember to run `/sumsub-setup` manually before their first mockup.
+
+### Changes
+- **New `hooks/install.sh`** in repo root — single self-contained installer that writes `~/.claude/hooks/sumsub-version-check.sh`, chmods it, and merges PreToolUse entry into `~/.claude/settings.local.json` (preserves existing hooks like MemPalace). Idempotent.
+- **Step 0 — Auto-bootstrap added to all 3 mockup SKILL.md files** (`sumsub-mockup`, `websdk-mockup`, `sumsub-id-mockup`):
+  - One bash check: `test -f "$HOME/.claude/hooks/sumsub-version-check.sh"`
+  - If missing → run `bash "${CLAUDE_PLUGIN_ROOT}/hooks/install.sh"`
+  - If present → skip silently
+  - Always continues to existing pre-flight version check
+- **`/sumsub-design:sumsub-setup`** still exists for explicit re-install / verbose verification, but is no longer the only path.
+
+### Effect
+On a fresh machine, first `/sumsub-mockup` (or `/websdk-mockup`, `/sumsub-id-mockup`) call triggers the install automatically. After that, every Figma tool call goes through the structural version-check hook. Team rollout simplified: install plugin via marketplace → use any mockup skill → done.
+
+---
+
 ## v3.103.0 — 2026-05-07 (added /sumsub-setup skill for per-machine hook install)
 **Live test on user's VM showed:** plugin-level hooks not delegated by Claude Code, AND user-level hook installs in `/Users/konstantin/.claude/` only enforce on that machine. To enforce on team members' machines (each VM, each Mac, each developer), each user must install the hook locally.
 

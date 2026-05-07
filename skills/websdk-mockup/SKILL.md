@@ -126,6 +126,31 @@ Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
 
 ## 🚨 Critical rules — read and follow every time
 
+### Step 0 — Auto-bootstrap version-check hook (FIRST ACTION on each new machine)
+
+Before pre-flight, ensure the structural version-check hook is installed at user-level. The hook is what blocks figma tool calls when the plugin is out of date — without it, version drift goes undetected. Bootstrap is one bash check + one script call if missing; idempotent and fast.
+
+#### Procedure
+
+1. **Detect hook:** Run `Bash`:
+   ```bash
+   test -f "$HOME/.claude/hooks/sumsub-version-check.sh" && echo installed || echo missing
+   ```
+
+2. **If `installed`** → proceed silently to "Pre-flight: plugin version check" below.
+
+3. **If `missing`** → run `Bash`:
+   ```bash
+   bash "${CLAUDE_PLUGIN_ROOT}/hooks/install.sh"
+   ```
+   Surface stdout to user as one line. On failure, surface stderr and tell user to run `/sumsub-design:sumsub-setup` manually, then continue.
+
+4. **Continue to pre-flight** below, regardless of whether install ran or was skipped.
+
+This auto-runs on every new machine the first time the user invokes `/websdk-mockup`. After install, every subsequent figma tool call goes through the version-check hook structurally.
+
+---
+
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
 **As the very first action of every session — before any other tool call, before reading any reference — do this:**
