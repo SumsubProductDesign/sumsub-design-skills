@@ -4,6 +4,30 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.108.0 — 2026-05-08 (AUTO-UPDATE on mismatch — no choice menu, no asking)
+**VM test on v3.107 exposed:** when pre-flight detected v3.106 → v3.107 mismatch, agent did stop (good — v3.106 HARD STOP held), but then output its own paraphrased choice menu telling user: "Обновите плагин. Варианты: 1. /plugin → найти sumsub-design → обновить. 2. marketplace переустановить. После обновления вернитесь в этот чат и пришлите тот же запрос".
+
+This is a paraphrase of the v3.91 choice menu the rule used to require. The choice menu — even with the auto-Bash option — gave the agent slack to drop the auto-update path entirely and delegate to user. Class-not-symptom: remove the choice menu, force auto-update.
+
+### Fix: AUTO-UPDATE IMMEDIATELY, no asking
+
+In `sumsub-mockup` and `websdk-mockup` SKILL.md pre-flight:
+- **Old step 5–9 (verbatim choice menu + wait for yes/update/continue anyway + branch on reply):** REMOVED.
+- **New step 5:** on mismatch, output `⚠️ sumsub-design vLOCAL → vREMOTE — обновляю...`, then run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`.
+- **Step 6:** on Bash success → `✅ Обновлено до vREMOTE. Продолжаю.` + continue task.
+- **Step 7:** on Bash failure → surface stderr, ask `retry / manual / continue anyway`. (The "continue anyway" option survives only inside the failure branch where it's actually needed.)
+
+Banned agent paraphrases added to skill:
+- "Обновите плагин до X. Варианты: 1. /plugin 2. marketplace"
+- "После обновления вернитесь в этот чат и пришлите тот же запрос"
+- "Что нужно сделать вам: обновить плагин"
+
+Same anti-pattern as v3.100 (SemVer prior) and v3.106 (proceed-on-faith): agent had a documented choice that included a passive option. Remove the choice. Force the action.
+
+Also fixed: websdk-mockup pre-flight was still using "Compare SemVer" (legacy from before v3.100). Updated to "Compare exact strings (NOT SemVer logic)" matching sumsub-mockup.
+
+---
+
 ## v3.107.0 — 2026-05-08 (fake bump to test v3.106 HARD STOP on VM)
 No-op. User on v3.106; this remote = MINOR mismatch. Tests:
 1. Does pre-flight WebFetch succeed on VM (or 404 like before)?

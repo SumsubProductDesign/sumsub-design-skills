@@ -384,34 +384,44 @@ You do not have an internal threshold for this plugin. Every diff requires user 
 2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
 3. **Compare exact strings (NOT SemVer logic).** If local string ≠ remote string → continue to step 4 regardless of which side of the diff is "PATCH" or "MINOR" or "MAJOR". If local string = remote string → proceed silently to Rule #0.
 4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
-5. **STOP and show the user this message verbatim** (matches the v3.91 hook output, in Russian — this is what worked best historically per user feedback 2026-05-07):
+5. **AUTO-UPDATE IMMEDIATELY — no asking, no choice menu (NEW v3.108).** Output one short line:
 
    ```
-   ⚠️ sumsub-design plugin update available
+   ⚠️ sumsub-design vLOCAL → vREMOTE — обновляю...
+   ```
 
-   Твоя версия: vLOCAL · Последняя: vREMOTE
+   Then run `Bash`:
+   ```
+   claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design
+   ```
 
-   Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
+6. **On Bash success:** output `✅ Обновлено до vREMOTE. Продолжаю.` and continue with the task. Claude Code reloads plugin SKILL.md on the next tool call automatically — no restart required.
 
-   Я могу обновить прямо сейчас двумя командами:
+7. **On Bash failure (network, auth, command not found, etc.):** surface the exact stderr to the user and ask:
 
-     claude plugin marketplace update sumsub-design
-     claude plugin update sumsub-design@sumsub-design
+   ```
+   ❌ Auto-update failed:
+   <stderr>
 
    Ответь:
-     • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
-     • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
+     • retry            — попробую ещё раз
+     • manual           — обновишь сам, я подожду
+     • continue anyway  — работаем на vLOCAL (фиксируется на сессию)
    ```
 
-   **Do NOT add "будешь должен мне 100 долларов"-style preamble. Do NOT add "Continuing — but flagging" or similar bypass framing. Output the message verbatim, then stop.**
+   Wait for explicit reply.
 
-6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
+8. **Once update lands (either auto-success or user-manual confirmation), don't re-check this conversation.**
 
-7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task — Claude Code reloads plugin SKILL.md on the next tool call automatically, no restart required. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
+---
 
-8. **If `continue anyway`:** cache the decision for this conversation, proceed to Rule #0.
+**Rationale for auto-update (no ask):** User is in auto mode and the update is always the correct action on mismatch. The previous "yes/update vs continue anyway" choice menu was paraphrased by the agent into "Обнови плагин сам через /plugin → найти sumsub-design → обновить, и возвращайся" (observed on VM 2026-05-08), which is the worst of both worlds — agent stops AND delegates to user. Class-not-symptom: remove the choice menu, force the auto-update path. The "continue anyway" option only appears in the failure branch where it's actually needed.
 
-9. **Once done (either updated or continue-anyway), don't re-check this conversation.**
+**Banned agent paraphrases that signal the v3.107 bug recurring:**
+- "Обновите плагин до X.Y.Z. Варианты: 1. /plugin → найти sumsub-design 2. marketplace переустановить"
+- "После обновления вернитесь в этот чат и пришлите тот же запрос"
+- "Что нужно сделать вам: обновить плагин"
+- Anything that asks the user to update via UI or marketplace, instead of running Bash auto-update
 
 **Banned bypass phrases** — any of these is a rule break, period:
 - "proceeding on current version in auto mode"
