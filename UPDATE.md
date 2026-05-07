@@ -17,12 +17,9 @@ via Bash and report the output.
 
 Claude will run both commands via its Bash tool and show you the output.
 
-## 3. Fully quit and reopen Claude Desktop
+## 3. Continue working
 
-- **macOS:** `⌘ Q`, then relaunch
-- **Windows:** right-click the tray icon → Quit → reopen
-
-This step is required — Claude Desktop only loads the new plugin version on a fresh launch. Closing the window without quitting isn't enough.
+Claude Code reloads the plugin's SKILL.md on the next tool call automatically — no restart needed. The next time the skill runs, it picks up the new version.
 
 ## 4. Verify (optional)
 
@@ -49,7 +46,7 @@ When you start a new `/sumsub-design:sumsub-mockup` chat, the skill auto-checks 
 >
 > Reply `yes` / `update` to run, or `continue anyway`.
 
-Reply `yes` and the skill runs the commands for you. Then just quit and reopen Desktop.
+Reply `yes` and the skill runs the commands for you. The next tool call picks up the new version automatically.
 
 ---
 
@@ -57,4 +54,4 @@ Reply `yes` and the skill runs the commands for you. Then just quit and reopen D
 
 - **"command not found: claude"** — the CLI isn't on your PATH. See `INSTALL.md` section "Part 1" for PATH setup.
 - **"Failed to update marketplace"** — check your network, try again. Or run the commands in a regular terminal as a fallback.
-- **Version didn't change after restart** — you closed the window but didn't Quit. Really quit (`⌘Q` / tray → Quit) and reopen.
+- **Version didn't change** — try a fresh chat to force plugin reload, or as a last resort fully quit and relaunch Claude Desktop.

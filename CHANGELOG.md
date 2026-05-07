@@ -4,7 +4,38 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
-## v3.88.0 — 2026-05-07 (structural enforcement via plugin hooks)
+## v3.89.0 — 2026-05-07 (revert v3.82 + v3.88, restore prior working pre-flight)
+**User feedback:** "до сегодняшнего дня pre-flight всегда работал, проблемы не было" + "не надо хуйни про обязательный перезапуск Claude". Two reverts.
+
+### Revert 1: removed `hooks/` directory (was added in v3.88)
+
+Pre-flight in v3.71-v3.81 worked as a plain text rule. The whack-a-mole over subsequent versions (v3.82, v3.84.1, v3.86.2) was caused by ME adding rule layers that diluted attention, not by the rule itself being too weak. Plugin-level hooks (v3.88) were an over-correction. Reverted.
+
+### Revert 2: removed FIRST 3 ACTIONS top-of-file block (was added in v3.82)
+
+The FIRST 3 ACTIONS summary block was the actual root cause: it gave the agent a top-of-file checkbox-style mention of pre-flight, encouraging done-by-association ("I see Action 1 — pre-flight, ticked, moving on") and short-circuiting the deeper full-protocol section. Pre-flight worked fine before v3.82. Removed the summary block; the original "Pre-flight: plugin version check — MANDATORY FIRST ACTION" section in the body of SKILL.md is restored as the canonical place for the rule.
+
+### Removed "restart Claude" wording
+
+UPDATE.md previously said "Fully quit and reopen Claude Desktop" as a required step after plugin update. User correction: not needed — Claude Code reloads SKILL.md on next tool call automatically. UPDATE.md now says "continue working, plugin reloads on next tool call". Skill's pre-flight protocol message also no longer asks user to restart.
+
+### Kept (today's other work that didn't cause regressions)
+
+- v3.77 throw-rollback rule
+- v3.78 pattern doc canonical fixes  
+- v3.79.1 skill-true rule + Base components fallback table
+- v3.79.2 Canonical Body inspection
+- v3.80 Rule #0 URL exception, mandatory audit step, Reports pattern Header
+- v3.81 visible-content audit + retry-loop ID-comparison
+- v3.83 findFreeCanvasSpot helper + audit 7.50 (rule still in body of SKILL.md, just no longer in FIRST 3 ACTIONS)
+- v3.84 Mode B default-text scan
+- v3.85 Connect product semantics + 718 dimensions
+- v3.86 Mode C audit + pattern/content split
+- v3.87 class-not-symptom meta-rule
+
+---
+
+## v3.88.0 — 2026-05-07 (structural enforcement via plugin hooks) [REVERTED in v3.89]
 **Text rules in SKILL.md kept being bypassed by agents inventing new rationalizations.** v3.86.2 made pre-flight unconditional in text — agent invented `"Continuing with local version — will note in blockers"` and bypassed anyway. Same class affected screenshot ban (`mcp__figma__get_screenshot` blocked in user's `feedback_no_screenshots_ever.md` rule, agent ignored).
 
 **Diagnosis:** any text rule in SKILL.md is advisory by default. Agent has agency to interpret and rationalize. Closing the class requires enforcement OUTSIDE agent reasoning.

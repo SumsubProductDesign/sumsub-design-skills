@@ -34,92 +34,6 @@ If the agent (or its maintainer) catches itself writing a fix that addresses ONL
 
 This rule is permanent. It applies to every patch, every session, every maintainer. There is no "for this session only" version of it.
 
-### ⚡ FIRST 3 ACTIONS OF EVERY SKILL INVOCATION (do not reorder, do not skip)
-
-This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 10, 12 (May 2026) all skipped pre-flight despite the rule existing further down in this file. Reading the file top-down means these have to be the very first concrete actions or they will be silently dropped:
-
-**Action 1 — pre-flight version check.** Before ANY other tool call:
-
-1. `Read` `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` → extract `version`
-2. `WebFetch` `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` → extract `version`
-3. SemVer compare:
-   - **If equal** — proceed silently to Action 2.
-   - **If different in any direction, by any amount, no exceptions** — HARD STOP. Output the verbatim user-facing message from the deeper "Pre-flight" section (CHANGELOG diff + update commands + reply options). Do NOT proceed until user replies `yes` / `update` / `continue anyway`.
-
-**You do not assess whether the mismatch is "material" — you do not have the information to make that call. The user does.**
-
-The changelog between your local version and remote may contain:
-- Silent skill-behavior changes (e.g. new audit gates, new banned-output patterns)
-- Pattern-doc fixes affecting the exact product you're building
-- Component key updates
-- Rule rewrites that change which actions are required
-
-You cannot know in advance whether a mismatch is "material" because you don't have a holistic view of the diff. The user, who can read the changelog, decides. Your only job is to surface the mismatch.
-
-**The unconditional rule:** **If you find yourself reasoning about whether the mismatch matters, you are already in violation.**
-
-Every one of these thoughts is a rationalization the rule explicitly bans. They look reasonable; they are not:
-- "X canonical hasn't materially changed"
-- "this is a minor patch version"
-- "the relevant pattern doc looks unchanged from what I have"
-- "I'll note it in the final report but proceed"
-- "the diff doesn't affect Connect / the diff doesn't affect the product I'm building"
-- "user is testing, they'll tolerate a small mismatch"
-- "proceeding on current version in auto mode"
-- "auto mode said prefer action, so continuing"
-- "I'll mention the mismatch at the end"
-- "auto-accepting outdated plugin"
-- "non-interactive mode, continuing with local version"
-- "keeping momentum, will re-check after this run"
-- "first tool is get_libraries, so no check needed yet"
-- "doing the check later, after inspection"
-- "memory says plugin is current, skipping"
-- "the user's prompt expects a deliverable, so I continued past the mismatch"
-- "I surfaced the mismatch but continued under auto mode to deliver"
-- "to deliver the JSON log this sim expects"
-
-The list above is not exhaustive. You will be tempted to invent a new phrase the list doesn't have. **The temptation itself is the violation.** If a thought of the form "the mismatch is OK because <reason>" enters your head — stop, output the user message, wait for reply. No exceptions.
-
-**If you must skip pre-flight for any reason, the only acceptable path is: user replied `continue anyway` IN THIS CONVERSATION** in response to your version-mismatch message. Memory, prior sessions, "I checked recently", auto-mode, sim-deliverable-pressure, your own assessment of whether the patch matters — none are acceptable substitutes for an explicit user reply.
-
-**Action 2 — destination resolution (Rule #0).** If user prompt contains a Figma URL → use that fileKey + Drafts page (URL exception). Otherwise STOP and ask the 4-option destination question.
-
-**Action 3 — section wrapper + free-spot placement.** Before creating any frame:
-
-```js
-// 3a. Create the SECTION wrapper with required name + fill
-const section = figma.createSection();
-section.name = "<Task name> (made by Claude)";    // suffix REQUIRED
-section.fills = [{type:"SOLID", color:{r:0x40/255, g:0x40/255, b:0x40/255}}];   // #404040 REQUIRED
-draftsPage.appendChild(section);
-
-// 3b. CRITICAL: find a free spot on the page — DO NOT place at (0,0) or arbitrary coords
-const spot = findFreeCanvasSpot({ width: <root_w_+_padding>, height: <root_h_+_padding>, gap: 200 });
-section.x = spot.x;
-section.y = spot.y;
-
-// 3c. Then create root frame INSIDE section
-const root = figma.createFrame();
-section.appendChild(root);
-root.x = 40; root.y = 160;   // offset INSIDE section, leaves room for annotations above
-```
-
-`findFreeCanvasSpot()` walks all existing top-level nodes on the current page, finds their bounding boxes, returns the first empty rectangular slot of the requested size (with `gap` margin). Helper is defined in `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`.
-
-If you place the section at (0,0) or at some hard-coded coordinate without `findFreeCanvasSpot()`, you WILL overlap existing canonical mackets on the page. This was reported in live user testing (May 2026, v3.82 build) — skill placed Connections macket at coordinates that overlapped existing prod-canonical Account screens, even though the build itself was correct.
-
-**No build is "delivered" without (a) `(made by Claude)` section suffix, (b) `#404040` fill, (c) section position from `findFreeCanvasSpot()`. All three are hard audit gates, not stylistic preferences.**
-
-**Banned skill-output patterns** (any of these = skill executed without proper init):
-- "Skipping pre-flight, plugin is recently installed" → still required, no exceptions
-- "Created macket at <URL>" with no mention of section name and fill in the response → skill bypassed Action 3
-- "Section created" without `(made by Claude)` suffix shown verbatim → wrong, name must include suffix
-- "I'll wrap in a section at the end" → Action 3 must be the wrapper FIRST, not retrofit
-- Section placed at hard-coded `x=0, y=0` (or any coord not from `findFreeCanvasSpot()`) → overlap risk, banned
-- Section visually overlaps existing canonical content on the page → audit 7.50 (canvas overlap) fails
-
-If a sim/build run in the wild reaches "I'm done" without all 3 actions visible in the output → that's a skill execution bug.
-
 ### Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions
 
 If a canonical version of the screen you're being asked to build exists somewhere — in the same source file, in a published library, in the design system — **find it first, capture its exact dimensions, and match them**. Do not "build with reasonable defaults" and call it good. The canonical reference IS the spec.
@@ -435,7 +349,7 @@ This applies to ALL retry/walk loops in build scripts, not just visibility toggl
 
 6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 
-7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On success, tell user to fully quit and reopen Claude Desktop, wait for `restarted`, then continue. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task — Claude Code reloads plugin SKILL.md on the next tool call automatically, no restart required. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
 
 8. **If `continue anyway`:** cache the decision for this conversation, proceed to Rule #0.
 
