@@ -267,6 +267,33 @@ After the build, audit must verify Body has at least one content component (Card
    ```
 
    Skill MUST run both modes. Mode A is a fast heuristic; Mode B is the deterministic check.
+
+   - **Mode C (added v3.86): default property leak — variants, booleans, instance-swaps.** For every imported INSTANCE, compare its `componentProperties[k].value` with the mainComponent's default value for that property. If equal AND the property controls VISIBILITY of a child (BOOLEAN named like `Show*` / `*Visible*` / slot toggle) OR controls VARIANT selection — that's a leak. The instance shipped "with default state" instead of being configured for this specific build.
+
+   Reason Mode C exists: live Sim 2 v3 (Connect MiniPay) — Title/Subtitle/Tips texts were correctly overridden, but `Sumsub ID / Connect / Logos` instance was left at default variant which HIDES the main 72×72 logos and SHOWS a small 49×24 mini-bar. Audit Mode A and B passed because no TEXT was on default; audit said PASS while the Logos block visually had wrong content showing. Same with Tips items: ID-icons hidden, generic Dot visible — default property choice.
+
+   Mode C is a **warning**, not always a hard FAIL — sometimes the canonical IS the default. But skill must report Mode C findings: "Instance X is using its component's default for properties Y, Z. If canonical for this screen uses different values, override them."
+
+### Use canonical's variant/property values, don't accept main-component defaults
+
+When the build inspects a canonical reference (per "Canonical-first build" + "Canonical Body inspection" rules above), it must capture not just structure (component types, positions) but also each canonical instance's `componentProperties` map. When creating the corresponding instance in your build, apply that exact property set via `setProperties`. Defaults from the main component are a fallback ONLY when canonical has no equivalent instance.
+
+```js
+// ❌ Wrong — instance ships with mainComponent defaults
+const logos = (await figma.importComponentByKeyAsync(LOGOS_KEY)).createInstance();
+// Default Logo property hides large logos, shows mini-bar — wrong for Welcome screen
+
+// ✅ Right — copy canonical's property values
+const canonicalLogos = canonicalRoot.findOne(n => n.name === "Sumsub ID / Connect / Logos");
+const logos = canonicalLogos.mainComponent.createInstance();
+const props = {};
+for (const k of Object.keys(canonicalLogos.componentProperties)) {
+  props[k] = canonicalLogos.componentProperties[k].value;
+}
+logos.setProperties(props);
+```
+
+This is mandatory for any "non-trivial" component (Logos, Header, complex SET) — anything where defaults visibly differ from canonical's configured state. Trivial components (Button, Input with simple Label) usually work with defaults once Mode A/B leaks are fixed.
 2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
 3. **Empty Body check** (rule above).
 4. **Visible-content check (added v3.81 — DO NOT skip).** For every imported content component (Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button — anything that's not chrome) verify `visible === true` AND `visibleToRoot() === true`. If a content component has `visible=false`, audit FAILS — even if its TEXTs are correctly overridden. Default-text scan operating on visible-only TEXTs misses leaks INSIDE hidden subtrees, so it cannot substitute for this check. **Reason this rule exists:** in Sim 1 (v3.80) the build accidentally hid Partners Wrapper via a Stage 4 retry loop using stale node references; default-text audit returned PASS because no TEXT was visible to scan; user opened the macket and saw a sidebar + empty right side.

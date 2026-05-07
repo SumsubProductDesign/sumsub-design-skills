@@ -4,6 +4,19 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.86.0 — 2026-05-06
+**Sim 2 v3 (Connect MiniPay): visibility defaults shipped through with PASS audit.** Title/Subtitle/Tips texts correctly overridden, layout right, copy right. But Logos block left at default property variant which hides the main 72×72 logos and shows a small mini-bar. Tips items left at default which hide the type-specific icons (ID/Address/Selfie) and show generic Dot. Mode A and B passed because no TEXT was on default; audit said PASS while the visible content wasn't matching canonical.
+
+### Fix: Mode C audit + "use canonical property values, not defaults" rule
+
+- **Mode C (warning):** for every imported INSTANCE, compare `componentProperties[k].value` with the mainComponent's `componentPropertyDefinitions[k].defaultValue`. If equal for VARIANT/BOOLEAN/INSTANCE_SWAP types, flag as potential leak. Catches "instance shipped with default state" cases.
+- **New rule "Use canonical's variant/property values":** when canonical inspection (Rule 7.4 / Canonical Body inspection) finds an instance, the build must capture its `componentProperties` and apply identically to the new instance. Defaults are fallback ONLY when canonical has no equivalent.
+- Code example included for the canonical-property-copy pattern.
+
+Mode C is a WARNING (not always FAIL — sometimes canonical IS default), but skill must surface findings to user with explicit prompt: "instance X is using defaults for Y, Z — confirm canonical values or override".
+
+---
+
 ## v3.85.0 — 2026-05-06
 **Connect built as onboarding when it's actually a permission-grant flow (Sim 2 v2 result).** After v3.84.1 fixed pre-flight, agent rebuilt Sim 2 — Title leak fixed, sections added, but agent built a sign-up screen ("Welcome to Sumsub ID" + email input + "Continue with email") instead of the Connect permission-grant flow ("Share your Sumsub ID data with Noah" + "Noah will be able to reuse: ID/address/selfie" + Allow/Cancel).
 
