@@ -4,6 +4,29 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.100.0 — 2026-05-07 (anti-SemVer prior framing)
+**Identified root cause of pre-flight bypass: trained SemVer convention beats text rule.** Agent showed an explicit threshold rubric (MAJOR=stop, 3+MINOR=recommend, 1-2 MINOR=ignore-with-flag, PATCH=ignore) that's NOT in SKILL.md — it's from training. Standard SemVer "PATCH = safe bug fix" is well-known and heavyweight; our skill text rule "any diff = STOP" is one string of context, lightweight. Training wins.
+
+### Fix: explicit anti-prior framing in pre-flight section
+
+Added new "⚠️ CRITICAL — read this BEFORE you reach for SemVer reasoning" block at the top of pre-flight section. Content:
+- Explicit acknowledgment that the agent has SemVer training priors
+- Concrete reasons why this plugin breaks SemVer convention (PATCH bumps ship audit gates, banned patterns, pattern-doc corrections)
+- List of trigger thoughts that signal the prior firing ("1-2 minor behind, low risk", "PATCH — игнорирую", etc.)
+- Direct instruction: STOP when prior fires; this plugin's rule is opposite of SemVer
+
+Also changed step 3 phrasing from "Compare SemVer" (which invokes training prior) to "Compare exact strings (NOT SemVer logic). If local string ≠ remote string → continue regardless of which side is PATCH/MINOR/MAJOR".
+
+This is option 2 of the four ways to beat trained priors:
+1. Harness hook (didn't work — Claude Code doesn't honor plugin hooks)
+2. **Explicit anti-prior text framing in skill (this commit)**
+3. Custom fine-tune (impractical)
+4. Different model (out of control)
+
+Per architecture, text-vs-training is still probabilistic. But explicit reasoning that contradicts the training prior shifts the weight closer to even. Hopefully enough.
+
+---
+
 ## v3.99.0 — 2026-05-07 (fake bump #5)
 No-op. User updated to v3.98, this remote = mismatch.
 
