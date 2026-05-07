@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.97.0 — 2026-05-07 (un-rollback: restore v3.94 SKILL.md + hooks)
+**User direction:** the pre-rollback version (v3.94) built mockups well. Bring SKILL.md and hooks back from v3.94. Version enforcement is a separate problem to solve later.
+
+Restored from v3.94.0:
+- `skills/sumsub-mockup/SKILL.md` (3538 lines — includes FIRST 3 ACTIONS block, Mode A/B/C audits, class-not-symptom rule, audit 7.50/7.51, retry-loop ID-comparison, all pattern improvements)
+- `hooks/check-version.sh` + `hooks/hooks.json` (plugin-level hooks — even though Claude Code didn't honor them in last test, leaving in place for if/when delegation is fixed upstream)
+
+Pattern docs and component catalogs (which were never the regression source) remain untouched.
+
+### Open question for next sessions
+
+Pre-flight enforcement: text rules are bypassable at low probability, plugin-level hooks aren't delegated as PreToolUse blocks. Future work: investigate user-level hook install via `/sumsub-setup` slash command, or wait for Claude Code to support plugin-shipped hooks officially.
+
+---
+
 ## v3.96.0 — 2026-05-07 (no-op fake bump #3)
 Test bump after v3.95 rollback. User on v3.95 (= v3.81 SKILL.md baseline, no hooks), this remote bump = mismatch on next figma tool call. Verifies whether the pre-rollback SKILL.md text-rule pre-flight correctly stops + asks user.
 
