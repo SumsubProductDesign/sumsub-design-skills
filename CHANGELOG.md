@@ -4,6 +4,31 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.81.0 — 2026-05-06
+**Skill audit caught lying — fixes from real Sim 1 build that passed audit while content was invisible.**
+
+User ran Sim 1 (Sumsub ID Account, Connections page) on a fresh session with v3.80 plugin. Skill returned `audit_verdict: PASSED (0 issues)`. User opened macket and saw sidebar + empty right side. Independent Figma read confirmed: Partners Wrapper component WAS imported, populated with 6 partners (MiniPay, Binance, Coinbase…), title overrides applied — but had `visible=false`, hiding all the work. Skill's default-text leak scan only sees VISIBLE TEXTs, so hidden subtree had no leak signal, so audit happily passed.
+
+### Three new audit checks
+
+1. **Visible-content check (audit step 4 added).** Every imported content component (non-chrome: Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button) must have `visible === true` AND `visibleToRoot() === true`. If any content component is hidden, audit FAILS.
+
+2. **Visual-fill check (audit step 5 added).** Body must have visible content covering ≥40% of Body height. <40% = sparse build, FAIL with hint "likely missing blocks vs canonical".
+
+3. **Default-text scan now scoped to VISIBLE TEXTs only.** Previously walked everything; now skips invisible subtrees because hidden defaults are not user-visible. The visible-content check covers the case where everything correctly populated but accidentally hidden.
+
+### Retry/walk loop bug class
+
+Live skill in Sim 1 hit a real bug: a Stage 4 retry loop captured a node reference and compared `child !== savedNode` to skip the kept node. Between iterations the `await` invalidated the JS object identity (same Figma `.id`, different JS object), comparison failed, kept node got hidden by visibility-toggle.
+
+**New rule in SKILL.md:** When iterating children to apply visibility/state changes, capture the keep-node by `.id` BEFORE the await chain. Compare `child.id !== keepId`, never `child !== keepRef`. Code example included.
+
+### Banned new audit-output pattern
+
+`Audit: PASSED (0 issues)` while the built macket has hidden content components is now an explicit banned pattern — means audit step 4 was skipped.
+
+---
+
 ## v3.80.0 — 2026-05-06
 **Sub-agent simulation testing → 3 SKILL.md fixes from real failure modes.** Spawned sub-agents that ran the skill from a user-style prompt; collected JSON logs per sim. Six logs reveal three reproducible failures + one pattern-doc drift.
 

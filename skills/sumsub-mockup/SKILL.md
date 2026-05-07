@@ -162,11 +162,13 @@ After the build, audit must verify Body has at least one content component (Card
 
 **Required audit checks (run all, in order):**
 
-1. **Default-text leak scan.** Walk the built tree, find every TEXT node whose `characters` matches one of: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
+1. **Default-text leak scan (visible TEXT only).** Walk the built tree, find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
 2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
 3. **Empty Body check** (rule above).
-4. **Canonical-match check** (rule 7.45 — frame W/H, fill, instance pos/dims/variant within 2px tolerance vs canonicalMap).
-5. **Body content match** (canonical Body walk — same component sequence as canonical).
+4. **Visible-content check (added v3.81 — DO NOT skip).** For every imported content component (Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button — anything that's not chrome) verify `visible === true` AND `visibleToRoot() === true`. If a content component has `visible=false`, audit FAILS — even if its TEXTs are correctly overridden. Default-text scan operating on visible-only TEXTs misses leaks INSIDE hidden subtrees, so it cannot substitute for this check. **Reason this rule exists:** in Sim 1 (v3.80) the build accidentally hid Partners Wrapper via a Stage 4 retry loop using stale node references; default-text audit returned PASS because no TEXT was visible to scan; user opened the macket and saw a sidebar + empty right side.
+5. **Visual-fill check (added v3.81).** Body's content area must contain visible component instances totalling ≥40% of Body height (sum of visible content INSTANCE heights / Body height). If <40%, FAIL with message "Body looks sparse — likely missing blocks vs canonical (e.g. canonical had 3 sections, you placed 1)". Acceptable below 40% only if canonical Body itself is that sparse (rare — verify against canonical Body walk).
+6. **Canonical-match check** (rule 7.45 — frame W/H, fill, instance pos/dims/variant within 2px tolerance vs canonicalMap).
+7. **Body content match** (canonical Body walk — same component sequence as canonical).
 
 **Fix-loop, not detect-only.** If any FAIL: skill must attempt to fix via setProperties (set realistic values from prompt context, or "[needs review]" placeholder if no realistic data is inferrable). Then re-audit. Repeat up to 3 iterations. After 3rd iteration if still FAIL — surface the residual failures to the user with a clear "I cannot fix these without you specifying X / Y" message instead of pretending it's done.
 
@@ -177,6 +179,37 @@ After the build, audit must verify Body has at least one content component (Card
 - "audit_verdict: SKIPPED" in any sim log → bug
 - Default text "Label" / "Title" visible in delivered macket → bug
 - Sub-agent saying "the build doesn't introduce custom TEXT so I skipped audit" → wrong, audit covers default leaks INSIDE imported instances too
+- Audit `PASSED (0 issues)` while the built macket has hidden content components → audit was incomplete; check 4 (visible-content) was skipped
+
+### Retry/walk loops: compare nodes by `.id`, never by reference equality
+
+**Bug class** (caught in Sim 1, v3.80): retry/walk loops use a captured node reference and compare with `node !== savedReference` to "skip the special node we already configured". Between iterations the skill `await`s some MCP call which may invalidate the in-memory node object — even though the underlying Figma node still exists with the same `.id`. The next iteration's children list contains a DIFFERENT JS object representing the same node, the `!==` comparison returns `false` (i.e., the special node is NOT skipped), and the loop body runs on it. If the loop body sets `visible = false` to hide siblings, it accidentally hides the kept node too.
+
+**Symptom:** the macket "loses" content between Stage 3 (where it was visible) and Stage 4 (where it isn't). Audit's default-text scan can't see the leaked default texts inside the now-hidden subtree, so audit returns PASS. The user opens the file and sees a skeleton.
+
+**Rule:** When iterating children to apply visibility/state changes, capture the keep-node by `.id` BEFORE the await chain, then compare by id:
+
+```js
+// ❌ WRONG — reference comparison breaks across awaits
+const keepNode = body.findOne(n => n.name === "Partners Wrapper");
+for (const child of body.children) {
+  await something(child);   // any await may invalidate node references
+  if (child !== keepNode) {  // FALSE-POSITIVE: keepNode object is stale
+    child.visible = false;
+  }
+}
+
+// ✅ CORRECT — capture .id, compare by id
+const keepId = body.findOne(n => n.name === "Partners Wrapper").id;
+for (const child of body.children) {
+  await something(child);
+  if (child.id !== keepId) {
+    child.visible = false;
+  }
+}
+```
+
+This applies to ALL retry/walk loops in build scripts, not just visibility toggles. Property overrides, swap operations, or any iteration that captures a "do not modify this one" reference must use `.id`.
 
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
