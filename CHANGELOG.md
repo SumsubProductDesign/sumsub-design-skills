@@ -4,6 +4,32 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.95.0 — 2026-05-07 (full SKILL.md rollback to v3.81)
+**User direction:** stop adding layers, take SKILL.md from the last known-good version (v3.81.0) verbatim.
+
+### Restored
+
+- `skills/sumsub-mockup/SKILL.md` — full content from v3.81.0 (`git checkout v3.81.0 -- skills/sumsub-mockup/SKILL.md`). All my v3.82-v3.94 SKILL.md additions reverted: FIRST 3 ACTIONS block, materiality-assessment ban, Mode B/C audits, pattern/content split, class-not-symptom meta-rule, audit 7.50/7.51, hook output mirror.
+
+### Removed
+
+- Plugin `hooks/` directory (was added in v3.91, restored verbose format in v3.93). Plugin-level hooks weren't being delegated as PreToolUse blocks by Claude Code's harness — verified live (agent on v3.93 still rationalized "minor version drift, will note and proceed").
+- User's `~/.claude/hooks/sumsub-version-check.sh` and the corresponding PreToolUse entry in `~/.claude/settings.local.json` (added experimentally; removed per rollback direction).
+
+### Kept (today's work outside SKILL.md, valuable, not source of regression)
+
+- Pattern doc fixes in `reference/products/`: TM Settings 257/56, Reports Header restored, Connect product semantics, Sumsub ID Connect 718 dimensions, Applicant page 1440+360+1080, Questionnaires list 1920, Sign-up Drawer left.
+- Sim result logs in `sim-results/`.
+- Component catalog updates.
+
+### Why
+
+Today's text-rule additions on top of SKILL.md created a chain reaction: each "fix" diluted attention to existing rules, agents bypassed via new rationalization phrases, I patched with more text rules, repeat. v3.81 is the last commit before this regression cycle. Rolling back to that text-rule baseline.
+
+The bypass class is real (text rules have an upper limit on enforcement), but additional layers were making it worse, not better. Returning to clean baseline.
+
+---
+
 ## v3.94.0 — 2026-05-07 (no-op fake bump #2)
 Fake version bump so user (on v3.93) sees mismatch when triggering any figma tool. Verifies the v3.93 hook actually delegates as PreToolUse from the plugin manifest.
 

@@ -14,26 +14,6 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
-### Class-not-symptom rule — applies to every fix this skill writes
-
-When the user reports a bug, BEFORE writing any fix:
-
-1. Ask: **"Is what they pointed at a single instance, or a symptom of a class of bugs?"**
-2. If it's a class — the fix must close the class, not one instance.
-3. Whack-a-mole patches (banning a specific phrase, fixing a specific number, hiding a specific node) are a sign the meta-thinking step was skipped.
-
-Concrete examples of this failure mode that have happened in this codebase:
-
-- User: "skill bypassed pre-flight via phrase X". Wrong response: ban phrase X. Right response: notice that the skill has agency to invent ANY rationalization phrase, and remove that agency by making the rule unconditional ("you do not assess materiality").
-- User: "skill produced default text 'Label'". Wrong response: add 'Label' to a banned-strings list. Right response: notice that any defaults from any main component will leak, so audit must compare every instance against `mainComponent` defaults (Mode B).
-- User: "skill placed section overlapping existing macket". Wrong response: tell the skill "don't overlap". Right response: require `findFreeCanvasSpot()` helper at every section creation, plus an audit check that walks page siblings.
-
-The pattern: the user reports ONE example. The fix must reason "what's the class of bugs that produces this kind of example?" and close the class, not the example.
-
-If the agent (or its maintainer) catches itself writing a fix that addresses ONLY the literal thing the user pointed at — that's a signal the class-thinking step was skipped, and the fix is incomplete.
-
-This rule is permanent. It applies to every patch, every session, every maintainer. There is no "for this session only" version of it.
-
 ### Canonical-first build: match the source-file reference EXACTLY, do not invent dimensions
 
 If a canonical version of the screen you're being asked to build exists somewhere — in the same source file, in a published library, in the design system — **find it first, capture its exact dimensions, and match them**. Do not "build with reasonable defaults" and call it good. The canonical reference IS the spec.
@@ -182,97 +162,7 @@ After the build, audit must verify Body has at least one content component (Card
 
 **Required audit checks (run all, in order):**
 
-1. **Default-text leak scan — TWO modes (visible TEXT only).**
-   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
-   - **Mode B (added v3.84): main-component-default comparison.** For every INSTANCE, walk its mainComponent's TEXT children, build a map `name → defaultCharacters`. Then walk the instance's TEXT children — if an instance TEXT has the **same name AND same characters** as the mainComponent's default, it's a LEAK. This catches long plausible-looking placeholders that Mode A misses, e.g. Title component shipping with `"Select type and issuing country of your "` — Mode A doesn't match `Title`/`Label`/etc., but Mode B sees the instance text == main's default text → FAIL.
-
-   Reason Mode B exists: live user testing on Connect (May 2026, v3.83) — agent claimed `default_text_leaks_fixed: 4` and audit returned PASS, but the Title instance kept its main's default `"Select type and issuing country of your "` because Mode A's banned-strings list didn't include that exact phrase. Mode B (compare with `instance.mainComponent.children`) catches it deterministically without needing a curated string list.
-
-   ```js
-   // Mode B implementation sketch
-   async function modeB(root) {
-     const fails = [];
-     async function walk(n) {
-       if (n.type === "INSTANCE" && n.mainComponent) {
-         const main = n.mainComponent;
-         const defaultsByName = {};
-         function collectDefaults(node) {
-           if (node.type === "TEXT") defaultsByName[node.name] = node.characters;
-           if ("children" in node && node.children) for (const c of node.children) collectDefaults(c);
-         }
-         collectDefaults(main);
-         function checkInstance(node) {
-           if (node.type === "TEXT" && node.visible !== false) {
-             const def = defaultsByName[node.name];
-             if (def && def === node.characters && def.trim().length > 0) {
-               fails.push({path: getPath(node), name: node.name, value: node.characters});
-             }
-           }
-           if ("children" in node && node.children) for (const c of node.children) checkInstance(c);
-         }
-         checkInstance(n);
-       }
-       if ("children" in n && n.children) for (const c of n.children) await walk(c);
-     }
-     await walk(root);
-     return fails;
-   }
-   ```
-
-   Skill MUST run both modes. Mode A is a fast heuristic; Mode B is the deterministic check.
-
-   - **Mode C (added v3.86): default property leak — variants, booleans, instance-swaps.** For every imported INSTANCE, compare its `componentProperties[k].value` with the mainComponent's default value for that property. If equal AND the property controls VISIBILITY of a child (BOOLEAN named like `Show*` / `*Visible*` / slot toggle) OR controls VARIANT selection — that's a leak. The instance shipped "with default state" instead of being configured for this specific build.
-
-   Reason Mode C exists: live Sim 2 v3 (Connect MiniPay) — Title/Subtitle/Tips texts were correctly overridden, but `Sumsub ID / Connect / Logos` instance was left at default variant which HIDES the main 72×72 logos and SHOWS a small 49×24 mini-bar. Audit Mode A and B passed because no TEXT was on default; audit said PASS while the Logos block visually had wrong content showing. Same with Tips items: ID-icons hidden, generic Dot visible — default property choice.
-
-   Mode C is a **warning**, not always a hard FAIL — sometimes the canonical IS the default. But skill must report Mode C findings: "Instance X is using its component's default for properties Y, Z. If canonical for this screen uses different values, override them."
-
-### Match canonical's PATTERN, not its CONTENT
-
-The skill's job is NOT to clone canonical 1:1. It builds NEW screens based on existing patterns — qualitatively right, maximally similar in structure and visual logic, but with new context-specific content.
-
-Split every component's properties into two classes:
-
-**Pattern properties** (copy from canonical):
-- VARIANT selectors — define the structural layout (`State=Have docs`, `Layout=Two columns`, `Type=Compact`)
-- BOOLEAN visibility toggles that control layout — `Show Logo`, `Show Counter`, `Show Subtitle`, `Show Description`
-- BOOLEAN feature toggles that change pattern — `With Avatar`, `With Footer`, `With Search`
-
-These define the visual/structural pattern. If canonical Logos has variant set to "show large 72×72 logos with repeat icon between", the new build's Logos must use the same variant — otherwise the pattern breaks (mini-bar appears instead).
-
-**Content properties** (new for this build, NOT copied from canonical):
-- TEXT properties — partner name, screen title, button labels — must reflect the new context
-- INSTANCE_SWAP properties — specific icon/logo target — replace with the new build's asset (MiniPay logo, not Noah logo)
-
-```js
-// Build inspects canonical instance once
-const canonical = canonicalRoot.findOne(n => n.name === "Sumsub ID / Connect / Logos");
-const main = canonical.mainComponent;
-const propDefs = main.componentPropertyDefinitions;
-
-// Create new instance from same component
-const newInstance = main.createInstance();
-const propsToSet = {};
-
-for (const k of Object.keys(canonical.componentProperties)) {
-  const propType = propDefs[k]?.type;
-  const canonicalValue = canonical.componentProperties[k].value;
-
-  if (propType === "VARIANT" || (propType === "BOOLEAN" && /^(Show|With|Display)/i.test(k))) {
-    // Pattern property — copy from canonical
-    propsToSet[k] = canonicalValue;
-  }
-  // TEXT and INSTANCE_SWAP — leave for content-override phase
-}
-newInstance.setProperties(propsToSet);
-
-// Then override CONTENT for the new build context
-// (TEXT properties = your specific copy; INSTANCE_SWAP = your specific assets)
-```
-
-If you can't tell whether a property is pattern or content (BOOLEAN with ambiguous name like `Optional`, `Required`), default to copying from canonical. It's safer — you preserve the pattern.
-
-**Why Mode C above is a WARNING not FAIL:** instances using defaults are sometimes correct (canonical IS default for that property). The pattern-vs-content split tells the skill when to override and when to leave alone. Mode C surfaces the warning; this rule tells the skill what to do about each finding.
+1. **Default-text leak scan (visible TEXT only).** Walk the built tree, find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
 2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
 3. **Empty Body check** (rule above).
 4. **Visible-content check (added v3.81 — DO NOT skip).** For every imported content component (Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button — anything that's not chrome) verify `visible === true` AND `visibleToRoot() === true`. If a content component has `visible=false`, audit FAILS — even if its TEXTs are correctly overridden. Default-text scan operating on visible-only TEXTs misses leaks INSIDE hidden subtrees, so it cannot substitute for this check. **Reason this rule exists:** in Sim 1 (v3.80) the build accidentally hid Partners Wrapper via a Stage 4 retry loop using stale node references; default-text audit returned PASS because no TEXT was visible to scan; user opened the macket and saw a sidebar + empty right side.
@@ -329,30 +219,27 @@ This applies to ALL retry/walk loops in build scripts, not just visibility toggl
 2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
 3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently to Rule #0.
 4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
-5. **STOP and show the user this message verbatim** (matches the v3.91 hook output, in Russian — this is what worked best historically per user feedback 2026-05-07):
+5. **STOP and show the user this verbatim:**
 
    ```
    ⚠️ sumsub-design plugin update available
+   Your local version: vLOCAL · Latest: vREMOTE
 
-   Твоя версия: vLOCAL · Последняя: vREMOTE
+   What's new since your version:
+   <paste CHANGELOG entries extracted in step 4>
 
-   Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
-
-   Я могу обновить прямо сейчас двумя командами:
-
+   I can update it for you right now by running:
      claude plugin marketplace update sumsub-design
      claude plugin update sumsub-design@sumsub-design
 
-   Ответь:
-     • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
-     • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
+   Reply:
+     - yes / update — I'll run the two commands via Bash
+     - continue anyway — use current (older) version for this session
    ```
-
-   **Do NOT add "будешь должен мне 100 долларов"-style preamble. Do NOT add "Continuing — but flagging" or similar bypass framing. Output the message verbatim, then stop.**
 
 6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 
-7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task — Claude Code reloads plugin SKILL.md on the next tool call automatically, no restart required. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On success, tell user to fully quit and reopen Claude Desktop, wait for `restarted`, then continue. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
 
 8. **If `continue anyway`:** cache the decision for this conversation, proceed to Rule #0.
 
@@ -719,31 +606,16 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    root.x = 40;   // offset inside the section, NOT page coordinates
    root.y = 160;  // leave room for annotations above
 
-   // 4. Size the section to fit its contents — MUST come AFTER appendChild(root)
+   // 4. Size the section to fit its contents
    section.resizeWithoutConstraints(root.width + 80, root.height + 200);
-   ```
-
-   **Order matters: resize is step 4, AFTER appendChild in step 3.** If you size the section BEFORE adding root, the section stays at its pre-root dimensions and root visually leaks outside the section box. Caught in v3.89 user testing — `parentType` was `SECTION` (correct), but `section.bbox` didn't contain `root.bbox` because resize was called too early. Audit 7.51 verifies containment.
-
-   For builds with multiple screens / annotations / extra widgets inside a section, recompute the bounding box at the end:
-
-   ```js
-   // After all children are appended (root, annotations, extra screens)
-   let maxR = 0, maxB = 0;
-   for (const c of section.children) {
-     maxR = Math.max(maxR, c.x + c.width);
-     maxB = Math.max(maxB, c.y + c.height);
-   }
-   section.resizeWithoutConstraints(maxR + 80, maxB + 80);   // 80px padding all around
    ```
 
    **Banned patterns:**
    - `figma.currentPage.appendChild(root)` — root frame directly on page
    - `root.x = spot.x; root.y = spot.y` when spot came from `findFreeCanvasSpot()` — misusing the helper
    - Appending to page first, then "moving into section later" — audit reads structure, not intent
-   - `section.resizeWithoutConstraints()` called BEFORE `section.appendChild(root)` — section sized to pre-root dimensions, root leaks outside (audit 7.51 catches this)
 
-   Audit check 7.45 verifies that the root frame's direct parent is a SECTION (not the PAGE itself). If it fires, the frame was appended to the page directly — fix by wrapping it in a section and removing the direct page child. Audit 7.51 verifies the section's bounding box contains the root's bounding box.
+   Audit check 7.45 verifies that the root frame's direct parent is a SECTION (not the PAGE itself). If it fires, the frame was appended to the page directly — fix by wrapping it in a section and removing the direct page child.
 
 7.6. **Multi-screen layout — grid, not one long row.** When building ≥4 screens for a single task, arrange them in a grid inside the SECTION, not in a single horizontal row. 6 screens × 1440px = 9000+ px wide and unreviewable. Use 3 or 4 columns:
 
@@ -2576,62 +2448,6 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
          `Create a section (fill #404040, name ending in "(made by Claude)"), append the root inside it, ` +
          `and remove it from the page directly (Rule 7.5).`
        );
-     }
-   }
-
-   // 7.50. Canvas overlap — section must not visually overlap any pre-existing top-level node.
-   // Caught in v3.82 user testing: skill placed Connections section at coords that overlapped
-   // existing canonical Account screens. findFreeCanvasSpot() exists in helpers.js but skill
-   // sometimes skips it and uses (0,0) or hard-coded coords.
-   {
-     // Find the SECTION ancestor of root
-     let sec = root.parent;
-     while (sec && sec.type !== "SECTION") sec = sec.parent;
-     if (sec && sec.parent?.type === "PAGE") {
-       const page = sec.parent;
-       const myL = sec.x, myT = sec.y, myR = sec.x + sec.width, myB = sec.y + sec.height;
-       for (const sibling of page.children) {
-         if (sibling.id === sec.id) continue;
-         // Only check top-level FRAMEs and SECTIONs (skip vector/text/image clutter)
-         if (sibling.type !== "FRAME" && sibling.type !== "SECTION") continue;
-         if (typeof sibling.x !== "number") continue;
-         const sL = sibling.x, sT = sibling.y, sR = sibling.x + sibling.width, sB = sibling.y + sibling.height;
-         // Standard rectangle overlap check
-         const overlaps = !(myR <= sL || sR <= myL || myB <= sT || sB <= myT);
-         if (overlaps) {
-           issues.push(
-             `Section "${sec.name}" overlaps existing top-level node "${sibling.name}" (${sibling.type}) on the page. ` +
-             `Move the section to a free spot via findFreeCanvasSpot() helper (Rule 7.50 / Action 3). ` +
-             `Section bbox=(${myL},${myT})-(${myR},${myB}); overlapping sibling bbox=(${sL},${sT})-(${sR},${sB}).`
-           );
-           break;   // one overlap is enough to fail the audit
-         }
-       }
-     }
-   }
-
-   // 7.51. Section bbox must contain root bbox.
-   // Caught in v3.89 user testing: skill called section.resizeWithoutConstraints
-   // BEFORE appendChild(root), so section was sized to pre-root dimensions and
-   // root visually leaked outside section. parentType=SECTION is correct but
-   // bbox containment is broken. Build code must call resize AFTER append; this
-   // audit catches regressions when the order is forgotten.
-   {
-     let sec2 = root.parent;
-     while (sec2 && sec2.type !== "SECTION") sec2 = sec2.parent;
-     if (sec2 && sec2.type === "SECTION") {
-       const rL = root.x, rT = root.y;
-       const rR = root.x + root.width, rB = root.y + root.height;
-       const sW = sec2.width, sH = sec2.height;
-       const tolerance = 2;
-       if (rL < -tolerance || rT < -tolerance || rR > sW + tolerance || rB > sH + tolerance) {
-         issues.push(
-           `7.51 section-contains-root: root frame "${root.name}" leaks outside section "${sec2.name}" bbox. ` +
-           `Section is ${Math.round(sW)}x${Math.round(sH)}; root is at (${Math.round(rL)},${Math.round(rT)}) size ${Math.round(root.width)}x${Math.round(root.height)} (right edge ${Math.round(rR)}, bottom ${Math.round(rB)}). ` +
-           `Cause: section.resizeWithoutConstraints was called BEFORE appendChild(root) — section was sized to pre-root dimensions. ` +
-           `Fix: call section.resizeWithoutConstraints(root.width + 80, root.height + 200) AFTER appending root, so section grows to encompass it.`
-         );
-       }
      }
    }
 
