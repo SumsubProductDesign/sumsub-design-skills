@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.92.0 — 2026-05-07 (no-op test bump)
+**Fake version bump to verify v3.91 hook actually triggers** when local installation lags remote. No real code changes. After user updates to 3.92, hook firing path is verified working end-to-end.
+
+---
+
 ## v3.91.0 — 2026-05-07 (pre-flight enforced via plugin hook)
 **Text-rule pre-flight bypass class is closed structurally.** All-day record:
 - "continued under auto mode"
