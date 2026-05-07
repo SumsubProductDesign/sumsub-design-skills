@@ -19,13 +19,32 @@ These are non-negotiable. Violating any of them is treated as a bug:
 This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 10, 12 (May 2026) all skipped pre-flight despite the rule existing further down in this file. Reading the file top-down means these have to be the very first concrete actions or they will be silently dropped:
 
 **Action 1 — pre-flight version check.** Before ANY other tool call:
+
 1. `Read` `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` → extract `version`
 2. `WebFetch` `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` → extract `version`
 3. SemVer compare:
-   - **If local ≥ remote** — proceed silently to Action 2.
-   - **If local < remote** — HARD STOP. Output the verbatim user-facing message from the deeper "Pre-flight" section (CHANGELOG diff + update commands + reply options). **Do not proceed until user replies `yes` / `update` / `continue anyway`.**
+   - **If equal** — proceed silently to Action 2.
+   - **If different in any direction, by any amount, no exceptions** — HARD STOP. Output the verbatim user-facing message from the deeper "Pre-flight" section (CHANGELOG diff + update commands + reply options). Do NOT proceed until user replies `yes` / `update` / `continue anyway`.
 
-**Banned bypasses for Action 1** — every one of these phrases is a rule break, period. **Do not output any of these. Do not do any action that matches the spirit of these phrases:**
+**You do not assess whether the mismatch is "material" — you do not have the information to make that call. The user does.**
+
+The changelog between your local version and remote may contain:
+- Silent skill-behavior changes (e.g. new audit gates, new banned-output patterns)
+- Pattern-doc fixes affecting the exact product you're building
+- Component key updates
+- Rule rewrites that change which actions are required
+
+You cannot know in advance whether a mismatch is "material" because you don't have a holistic view of the diff. The user, who can read the changelog, decides. Your only job is to surface the mismatch.
+
+**The unconditional rule:** **If you find yourself reasoning about whether the mismatch matters, you are already in violation.**
+
+Every one of these thoughts is a rationalization the rule explicitly bans. They look reasonable; they are not:
+- "X canonical hasn't materially changed"
+- "this is a minor patch version"
+- "the relevant pattern doc looks unchanged from what I have"
+- "I'll note it in the final report but proceed"
+- "the diff doesn't affect Connect / the diff doesn't affect the product I'm building"
+- "user is testing, they'll tolerate a small mismatch"
 - "proceeding on current version in auto mode"
 - "auto mode said prefer action, so continuing"
 - "I'll mention the mismatch at the end"
@@ -36,12 +55,12 @@ This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 1
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
 - "the user's prompt expects a deliverable, so I continued past the mismatch"
-- "I surfaced the mismatch but continued under auto mode to deliver" — exact phrase from a real failed run, banned
-- "to deliver the JSON log this sim expects" — sim/test framing does NOT override pre-flight; banned
+- "I surfaced the mismatch but continued under auto mode to deliver"
+- "to deliver the JSON log this sim expects"
 
-**Why these are banned:** auto-mode / "continue anyway" framing in the prompt or in your reasoning does NOT override Action 1. Action 1 is local-scope to this skill and takes precedence over Claude Code's `auto mode`, `minimize interruptions`, `prefer action over planning` directives. If you find yourself thinking "the user's prompt format expects me to keep going" — STOP. The user explicitly added pre-flight to this skill so it ALWAYS fires, including in test/sim contexts.
+The list above is not exhaustive. You will be tempted to invent a new phrase the list doesn't have. **The temptation itself is the violation.** If a thought of the form "the mismatch is OK because <reason>" enters your head — stop, output the user message, wait for reply. No exceptions.
 
-If you must skip pre-flight for any reason, the only acceptable path is: user replied `continue anyway` IN THIS CONVERSATION. Memory, prior sessions, "I checked recently", auto-mode, sim-deliverable-pressure are NOT acceptable.
+**If you must skip pre-flight for any reason, the only acceptable path is: user replied `continue anyway` IN THIS CONVERSATION** in response to your version-mismatch message. Memory, prior sessions, "I checked recently", auto-mode, sim-deliverable-pressure, your own assessment of whether the patch matters — none are acceptable substitutes for an explicit user reply.
 
 **Action 2 — destination resolution (Rule #0).** If user prompt contains a Figma URL → use that fileKey + Drafts page (URL exception). Otherwise STOP and ask the 4-option destination question.
 

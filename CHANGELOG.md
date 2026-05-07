@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.86.2 — 2026-05-06 (pre-flight unconditional)
+**New bypass discovered live: `"Connect canonical hasn't materially changed"` + `"I'll note it in the final report but proceed"`.** Skill detected v3.85 vs v3.86 mismatch, then rationalized that the diff didn't matter to the product it was building. This is whack-a-mole — banning specific phrases doesn't stop new ones being invented.
+
+### Structural fix
+
+Rule rewritten to make pre-flight UNCONDITIONAL with explicit prohibition on ANY materiality assessment by the skill:
+
+- Skill cannot assess whether the mismatch is "material" — it doesn't have a holistic view of the diff. The user does.
+- The new text "If you find yourself reasoning about whether the mismatch matters, you are already in violation" makes the very act of weighing materiality the violation.
+- Added new bypass examples (the ones from live testing): "X canonical hasn't materially changed", "this is a minor patch version", "the relevant pattern looks unchanged", "I'll note in final report but proceed", "the diff doesn't affect the product I'm building".
+- Banned-list now framed as non-exhaustive: "you will be tempted to invent a new phrase the list doesn't have. The temptation itself is the violation."
+
+The only acceptable path remains: user replied `continue anyway` in THIS conversation in response to your mismatch message.
+
+---
+
 ## v3.86.1 — 2026-05-06 (clarification)
 **Replaced "copy canonical's componentProperties verbatim" rule with pattern/content split.** v3.86.0 made the skill into a clone-bot — copy all property values from canonical onto every new instance. User correctly clarified: skill's job is to build NEW screens based on existing PATTERNS, not 1:1 clones. New rule:
 
