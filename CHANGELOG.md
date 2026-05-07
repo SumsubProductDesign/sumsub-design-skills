@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.94.0 — 2026-05-07 (no-op fake bump #2)
+Fake version bump so user (on v3.93) sees mismatch when triggering any figma tool. Verifies the v3.93 hook actually delegates as PreToolUse from the plugin manifest.
+
+---
+
 ## v3.93.0 — 2026-05-07 (hook+rule message format restored)
 **User feedback:** v3.91/3.92 hook output was too sparse. Old text-rule format (when it worked correctly) was structured: ⚠️ header, version comparison, brief "what's new" hint, code block with update commands, reply options yes/update vs continue anyway. User showed reference screenshot of working behavior.
 
