@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.98.0 — 2026-05-07 (fake bump for pre-flight test)
+No-op. User on v3.97, this remote = mismatch on next figma tool call.
+
+---
+
 ## v3.97.0 — 2026-05-07 (un-rollback: restore v3.94 SKILL.md + hooks)
 **User direction:** the pre-rollback version (v3.94) built mockups well. Bring SKILL.md and hooks back from v3.94. Version enforcement is a separate problem to solve later.
 
