@@ -4,6 +4,43 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.91.0 — 2026-05-07 (pre-flight enforced via plugin hook)
+**Text-rule pre-flight bypass class is closed structurally.** All-day record:
+- "continued under auto mode"
+- "canonical hasn't materially changed"
+- "Continuing with local version — will note in blockers"
+- "minor mismatch. Proceeding (no breaking changes typical for patch bump)"
+
+Each new bypass triggered another whack-a-mole banlist patch. None of them held — agent invents a new phrase the next time. This is the structural limit of text rules: any agent with reading comprehension can rationalize past any text instruction.
+
+### Fix: `hooks/check-version.sh` — re-introduced from v3.88, scoped to version check only
+
+Plugin now ships a PreToolUse hook that fires before `mcp__figma__use_figma`, `mcp__figma__create_new_file`, or `mcp__figma__generate_figma_design`. Hook compares local vs remote version (curl GitHub raw); if mismatch, exits with code 2 and a stderr message. Code 2 blocks the tool call at the harness level — agent cannot proceed regardless of what it tells itself.
+
+User flow when mismatch is detected:
+1. Skill tries to call a Figma tool
+2. Hook fires, prints update instructions, exits 2
+3. Agent sees the block, cannot continue
+4. User reads the message, runs the two `claude plugin` commands, re-sends the original prompt
+5. Hook now passes (versions match), tool call proceeds
+
+Override (when user has explicitly chosen to proceed on older version):
+```
+SUMSUB_SKIP_VERSION_CHECK=1
+```
+
+### What's NOT in this release vs v3.88
+
+- No `block-screenshot.sh` hook this time. v3.88 included it; user said scope it back to version check only.
+- No `FIRST 3 ACTIONS` block in SKILL.md (v3.89 removed it; staying out).
+- No materiality-assessment ban text (v3.86.2 added it; v3.89 reverted; staying reverted because hook makes it unnecessary).
+
+### POSIX-only deps
+
+`grep`, `sed`, `curl`. No jq or python. Works on any teammate's machine.
+
+---
+
 ## v3.90.0 — 2026-05-07 (section containment audit)
 **Sim 2 on v3.89 (post-revert): pre-flight worked correctly, Mode A/B audits returned 0 leaks, fix-loop applied 5 corrections (Subtitle, hidden Tips/Item count, Toolbar labels, Tips icon swap, Tips Status default).** Real progress. One remaining bug: section bbox didn't contain root bbox.
 
