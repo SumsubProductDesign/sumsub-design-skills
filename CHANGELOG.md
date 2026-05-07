@@ -4,6 +4,16 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.86.1 — 2026-05-06 (clarification)
+**Replaced "copy canonical's componentProperties verbatim" rule with pattern/content split.** v3.86.0 made the skill into a clone-bot — copy all property values from canonical onto every new instance. User correctly clarified: skill's job is to build NEW screens based on existing PATTERNS, not 1:1 clones. New rule:
+
+- **Pattern properties** (VARIANT, layout-controlling BOOLEAN like `Show Logo` / `Show Counter` / `With Avatar`) → COPY from canonical. These define visual/structural pattern.
+- **Content properties** (TEXT, INSTANCE_SWAP) → DO NOT copy. Override with new context-specific values (this build's partner name, this build's logo asset).
+
+When BOOLEAN name is ambiguous (Optional, Required) → default to copying from canonical to preserve pattern.
+
+Code example updated to split props by type before setProperties.
+
 ## v3.86.0 — 2026-05-06
 **Sim 2 v3 (Connect MiniPay): visibility defaults shipped through with PASS audit.** Title/Subtitle/Tips texts correctly overridden, layout right, copy right. But Logos block left at default property variant which hides the main 72×72 logos and shows a small mini-bar. Tips items left at default which hide the type-specific icons (ID/Address/Selfie) and show generic Dot. Mode A and B passed because no TEXT was on default; audit said PASS while the visible content wasn't matching canonical.
 

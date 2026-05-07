@@ -274,26 +274,52 @@ After the build, audit must verify Body has at least one content component (Card
 
    Mode C is a **warning**, not always a hard FAIL — sometimes the canonical IS the default. But skill must report Mode C findings: "Instance X is using its component's default for properties Y, Z. If canonical for this screen uses different values, override them."
 
-### Use canonical's variant/property values, don't accept main-component defaults
+### Match canonical's PATTERN, not its CONTENT
 
-When the build inspects a canonical reference (per "Canonical-first build" + "Canonical Body inspection" rules above), it must capture not just structure (component types, positions) but also each canonical instance's `componentProperties` map. When creating the corresponding instance in your build, apply that exact property set via `setProperties`. Defaults from the main component are a fallback ONLY when canonical has no equivalent instance.
+The skill's job is NOT to clone canonical 1:1. It builds NEW screens based on existing patterns — qualitatively right, maximally similar in structure and visual logic, but with new context-specific content.
+
+Split every component's properties into two classes:
+
+**Pattern properties** (copy from canonical):
+- VARIANT selectors — define the structural layout (`State=Have docs`, `Layout=Two columns`, `Type=Compact`)
+- BOOLEAN visibility toggles that control layout — `Show Logo`, `Show Counter`, `Show Subtitle`, `Show Description`
+- BOOLEAN feature toggles that change pattern — `With Avatar`, `With Footer`, `With Search`
+
+These define the visual/structural pattern. If canonical Logos has variant set to "show large 72×72 logos with repeat icon between", the new build's Logos must use the same variant — otherwise the pattern breaks (mini-bar appears instead).
+
+**Content properties** (new for this build, NOT copied from canonical):
+- TEXT properties — partner name, screen title, button labels — must reflect the new context
+- INSTANCE_SWAP properties — specific icon/logo target — replace with the new build's asset (MiniPay logo, not Noah logo)
 
 ```js
-// ❌ Wrong — instance ships with mainComponent defaults
-const logos = (await figma.importComponentByKeyAsync(LOGOS_KEY)).createInstance();
-// Default Logo property hides large logos, shows mini-bar — wrong for Welcome screen
+// Build inspects canonical instance once
+const canonical = canonicalRoot.findOne(n => n.name === "Sumsub ID / Connect / Logos");
+const main = canonical.mainComponent;
+const propDefs = main.componentPropertyDefinitions;
 
-// ✅ Right — copy canonical's property values
-const canonicalLogos = canonicalRoot.findOne(n => n.name === "Sumsub ID / Connect / Logos");
-const logos = canonicalLogos.mainComponent.createInstance();
-const props = {};
-for (const k of Object.keys(canonicalLogos.componentProperties)) {
-  props[k] = canonicalLogos.componentProperties[k].value;
+// Create new instance from same component
+const newInstance = main.createInstance();
+const propsToSet = {};
+
+for (const k of Object.keys(canonical.componentProperties)) {
+  const propType = propDefs[k]?.type;
+  const canonicalValue = canonical.componentProperties[k].value;
+
+  if (propType === "VARIANT" || (propType === "BOOLEAN" && /^(Show|With|Display)/i.test(k))) {
+    // Pattern property — copy from canonical
+    propsToSet[k] = canonicalValue;
+  }
+  // TEXT and INSTANCE_SWAP — leave for content-override phase
 }
-logos.setProperties(props);
+newInstance.setProperties(propsToSet);
+
+// Then override CONTENT for the new build context
+// (TEXT properties = your specific copy; INSTANCE_SWAP = your specific assets)
 ```
 
-This is mandatory for any "non-trivial" component (Logos, Header, complex SET) — anything where defaults visibly differ from canonical's configured state. Trivial components (Button, Input with simple Label) usually work with defaults once Mode A/B leaks are fixed.
+If you can't tell whether a property is pattern or content (BOOLEAN with ambiguous name like `Optional`, `Required`), default to copying from canonical. It's safer — you preserve the pattern.
+
+**Why Mode C above is a WARNING not FAIL:** instances using defaults are sometimes correct (canonical IS default for that property). The pattern-vs-content split tells the skill when to override and when to leave alone. Mode C surfaces the warning; this rule tells the skill what to do about each finding.
 2. **Default-property leak scan.** Walk every INSTANCE, read `componentProperties`, flag any TEXT-type property whose value is `Label` / `Title` / `Number`.
 3. **Empty Body check** (rule above).
 4. **Visible-content check (added v3.81 — DO NOT skip).** For every imported content component (Block wrapper, Partners Wrapper, Card, Table Starter, Collapsible Card, Tab Button — anything that's not chrome) verify `visible === true` AND `visibleToRoot() === true`. If a content component has `visible=false`, audit FAILS — even if its TEXTs are correctly overridden. Default-text scan operating on visible-only TEXTs misses leaks INSIDE hidden subtrees, so it cannot substitute for this check. **Reason this rule exists:** in Sim 1 (v3.80) the build accidentally hid Partners Wrapper via a Stage 4 retry loop using stale node references; default-text audit returned PASS because no TEXT was visible to scan; user opened the macket and saw a sidebar + empty right side.
