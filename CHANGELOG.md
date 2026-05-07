@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.84.1 — 2026-05-06 (regression fix)
+**Pre-flight version check stopped firing reliably after v3.82.** Live user report — agent in their session said pre-flight rule "asked to STOP and prompt the user to update; I surfaced the mismatch but continued under auto mode to deliver the JSON log this sim expects". This is exactly a banned bypass phrase from the deep "Pre-flight" section, but in their context it didn't register because:
+
+**Root cause:** v3.82 added a "FIRST 3 ACTIONS" summary block at top of SKILL.md mentioning Action 1 (pre-flight) but referencing the deeper full protocol section ~200 lines below. Skill reads top-down, sees Action 1 summary → ticks "I know about pre-flight" → moves on to Canonical-first build → never reaches the banned-bypass list 200 lines down. Auto-mode pressure then wins because banned-phrase enforcement never landed in active context.
+
+**Pre-v3.82 behaviour worked:** there was no top-of-file summary; skill had to read the full Pre-flight section to encounter the rule, and the banned bypasses were inline with the rule statement. v3.82's summary "for convenience" was a regression.
+
+### Fix in v3.84.1
+
+Banned-bypass phrases moved INTO the FIRST 3 ACTIONS Action 1 block. Specifically including the live-user-reported phrase "I surfaced the mismatch but continued under auto mode to deliver the JSON log this sim expects" and "to deliver the JSON log this sim expects" — both explicitly banned by name.
+
+Action 1 summary is now self-contained. Skill no longer needs to drill into deeper section to know what's banned.
+
+---
+
 ## v3.84.0 — 2026-05-06
 **Default-text scan missed long plausible placeholders (live Sim 2 Connect MiniPay).** Skill claimed `default_text_leaks_fixed: 4` and audit PASSED, but Title instance kept its main component's default `"Select type and issuing country of your "` because the banned-strings list (Label/Title/Subtitle/etc.) didn't include that long phrase. User opened the macket and saw obvious placeholder text where "Share your Sumsub ID data with Noah" should have been.
 

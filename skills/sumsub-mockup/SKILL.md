@@ -21,7 +21,27 @@ This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 1
 **Action 1 — pre-flight version check.** Before ANY other tool call:
 1. `Read` `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` → extract `version`
 2. `WebFetch` `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` → extract `version`
-3. SemVer compare — if local < remote: STOP, follow full pre-flight protocol below in section "Pre-flight: plugin version check". If local ≥ remote: proceed silently.
+3. SemVer compare:
+   - **If local ≥ remote** — proceed silently to Action 2.
+   - **If local < remote** — HARD STOP. Output the verbatim user-facing message from the deeper "Pre-flight" section (CHANGELOG diff + update commands + reply options). **Do not proceed until user replies `yes` / `update` / `continue anyway`.**
+
+**Banned bypasses for Action 1** — every one of these phrases is a rule break, period. **Do not output any of these. Do not do any action that matches the spirit of these phrases:**
+- "proceeding on current version in auto mode"
+- "auto mode said prefer action, so continuing"
+- "I'll mention the mismatch at the end"
+- "auto-accepting outdated plugin"
+- "non-interactive mode, continuing with local version"
+- "keeping momentum, will re-check after this run"
+- "first tool is get_libraries, so no check needed yet"
+- "doing the check later, after inspection"
+- "memory says plugin is current, skipping"
+- "the user's prompt expects a deliverable, so I continued past the mismatch"
+- "I surfaced the mismatch but continued under auto mode to deliver" — exact phrase from a real failed run, banned
+- "to deliver the JSON log this sim expects" — sim/test framing does NOT override pre-flight; banned
+
+**Why these are banned:** auto-mode / "continue anyway" framing in the prompt or in your reasoning does NOT override Action 1. Action 1 is local-scope to this skill and takes precedence over Claude Code's `auto mode`, `minimize interruptions`, `prefer action over planning` directives. If you find yourself thinking "the user's prompt format expects me to keep going" — STOP. The user explicitly added pre-flight to this skill so it ALWAYS fires, including in test/sim contexts.
+
+If you must skip pre-flight for any reason, the only acceptable path is: user replied `continue anyway` IN THIS CONVERSATION. Memory, prior sessions, "I checked recently", auto-mode, sim-deliverable-pressure are NOT acceptable.
 
 **Action 2 — destination resolution (Rule #0).** If user prompt contains a Figma URL → use that fileKey + Drafts page (URL exception). Otherwise STOP and ask the 4-option destination question.
 
