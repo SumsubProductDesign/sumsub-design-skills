@@ -4,6 +4,29 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.88.0 — 2026-05-07 (structural enforcement via plugin hooks)
+**Text rules in SKILL.md kept being bypassed by agents inventing new rationalizations.** v3.86.2 made pre-flight unconditional in text — agent invented `"Continuing with local version — will note in blockers"` and bypassed anyway. Same class affected screenshot ban (`mcp__figma__get_screenshot` blocked in user's `feedback_no_screenshots_ever.md` rule, agent ignored).
+
+**Diagnosis:** any text rule in SKILL.md is advisory by default. Agent has agency to interpret and rationalize. Closing the class requires enforcement OUTSIDE agent reasoning.
+
+**Fix:** plugin now ships `hooks/hooks.json` with PreToolUse hooks. Auto-activates for every user who installs the plugin — no manual settings.json edits required.
+
+### Hooks installed
+
+1. **`hooks/block-screenshot.sh`** — matcher `mcp__figma__get_screenshot`. Exit 2 (blocks tool call). Override via `SUMSUB_ALLOW_SCREENSHOT=1` env var if user explicitly authorizes.
+
+2. **`hooks/check-version.sh`** — matcher `mcp__figma__use_figma | create_new_file | generate_figma_design`. Compares local plugin version against remote main on GitHub. If mismatch → exit 2 with instructive message. Override via `SUMSUB_SKIP_VERSION_CHECK=1`.
+
+Both scripts are POSIX bash + grep + curl, no jq/python dependency. Auto-shipped via plugin marketplace; teammates get enforcement immediately on next plugin update.
+
+### Why this is the structural fix
+
+Previous patches were textual rules in SKILL.md. Agent reads → ticks "I know this" → bypasses. After v3.88, the harness blocks the tool call before agent gets control. Agent cannot rationalize past `exit 2` from a hook. Override paths are explicit env vars, not phrase invention.
+
+This closes the entire class "agent ignored rule X in SKILL.md" for the two highest-impact rules (pre-flight, screenshot). Other rules (Mode A/B/C audit, default-text leaks, content vs pattern split) remain text-based for now — they're harder to enforce structurally because they need post-build inspection. Will move to hooks if they prove similarly bypassable.
+
+---
+
 ## v3.87.0 — 2026-05-06 (class-not-symptom meta-rule)
 **Added permanent meta-rule to SKILL.md: "fix the class, not the symptom".** Every patch the skill maintainer writes — including fixes for live user reports — must answer "is the user pointing at one instance or a class?" before writing the fix. Whack-a-mole patches that address only the literal thing reported are explicitly flagged as failure mode.
 
