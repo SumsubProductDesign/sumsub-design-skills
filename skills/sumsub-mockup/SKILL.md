@@ -14,6 +14,26 @@ argument-hint: "[screen description]"
 
 These are non-negotiable. Violating any of them is treated as a bug:
 
+### Class-not-symptom rule — applies to every fix this skill writes
+
+When the user reports a bug, BEFORE writing any fix:
+
+1. Ask: **"Is what they pointed at a single instance, or a symptom of a class of bugs?"**
+2. If it's a class — the fix must close the class, not one instance.
+3. Whack-a-mole patches (banning a specific phrase, fixing a specific number, hiding a specific node) are a sign the meta-thinking step was skipped.
+
+Concrete examples of this failure mode that have happened in this codebase:
+
+- User: "skill bypassed pre-flight via phrase X". Wrong response: ban phrase X. Right response: notice that the skill has agency to invent ANY rationalization phrase, and remove that agency by making the rule unconditional ("you do not assess materiality").
+- User: "skill produced default text 'Label'". Wrong response: add 'Label' to a banned-strings list. Right response: notice that any defaults from any main component will leak, so audit must compare every instance against `mainComponent` defaults (Mode B).
+- User: "skill placed section overlapping existing macket". Wrong response: tell the skill "don't overlap". Right response: require `findFreeCanvasSpot()` helper at every section creation, plus an audit check that walks page siblings.
+
+The pattern: the user reports ONE example. The fix must reason "what's the class of bugs that produces this kind of example?" and close the class, not the example.
+
+If the agent (or its maintainer) catches itself writing a fix that addresses ONLY the literal thing the user pointed at — that's a signal the class-thinking step was skipped, and the fix is incomplete.
+
+This rule is permanent. It applies to every patch, every session, every maintainer. There is no "for this session only" version of it.
+
 ### ⚡ FIRST 3 ACTIONS OF EVERY SKILL INVOCATION (do not reorder, do not skip)
 
 This block is at the top of Critical rules **on purpose** — Sims 1, 3, 4, 8, 10, 12 (May 2026) all skipped pre-flight despite the rule existing further down in this file. Reading the file top-down means these have to be the very first concrete actions or they will be silently dropped:

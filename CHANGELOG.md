@@ -4,6 +4,18 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.87.0 — 2026-05-06 (class-not-symptom meta-rule)
+**Added permanent meta-rule to SKILL.md: "fix the class, not the symptom".** Every patch the skill maintainer writes — including fixes for live user reports — must answer "is the user pointing at one instance or a class?" before writing the fix. Whack-a-mole patches that address only the literal thing reported are explicitly flagged as failure mode.
+
+Concrete examples documented:
+- "Skill bypassed via phrase X" → DON'T ban phrase X. Make rule unconditional.
+- "Default text 'Label' leaked" → DON'T add 'Label' to banlist. Compare every instance vs mainComponent default.
+- "Section overlapped" → DON'T add a "no overlap" warning. Require findFreeCanvasSpot helper + sibling-check audit.
+
+Permanent rule, no "for this session only" version. Lives in SKILL.md at the top of Critical rules so every skill invocation reads it.
+
+---
+
 ## v3.86.2 — 2026-05-06 (pre-flight unconditional)
 **New bypass discovered live: `"Connect canonical hasn't materially changed"` + `"I'll note it in the final report but proceed"`.** Skill detected v3.85 vs v3.86 mismatch, then rationalized that the diff didn't matter to the product it was building. This is whack-a-mole — banning specific phrases doesn't stop new ones being invented.
 
