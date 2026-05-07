@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.106.0 — 2026-05-08 (HARD STOP on remote-check failure — class-not-symptom)
+**VM test exposed:** when WebFetch on `raw.githubusercontent.com/.../plugin.json` returns non-200 (or any non-JSON), the agent rationalizes "proceeding with local version" and skips the version check entirely. The fallback rule line in SKILL.md ("could not verify plugin version, proceeding on faith") was itself the bypass — gave the agent cover to invent paraphrases like "Remote check returned 404 (repo not publicly accessible at that path) — proceeding with local version".
+
+URL is in fact reachable from at least the maintainer's machine (curl returns 200, version field intact). Either VM-network blocks GitHub raw, or WebFetch tool behaves differently than curl, or agent hallucinated. All three classes cause silent skip — same root: agent has an option to proceed on remote-check failure.
+
+### Fix: removed the proceed-on-faith fallback. HARD STOP on any remote-check failure.
+
+In `sumsub-mockup` and `websdk-mockup` SKILL.md:
+- New "Remote-check failure handling" subsection: if WebFetch doesn't return clean JSON with a `version` field, agent must show user the failure (status, first 300 chars of body) and ask `retry / continue anyway / update`.
+- Added paraphrase phrases to banned-bypass list: "Remote check returned 404 — proceeding with local version", "could not verify plugin version, proceeding on faith", "repo not publicly accessible at that path, continuing", "WebFetch failed, defaulting to local".
+- Old fallback line ("warn once and continue — don't block on infrastructure issues") DELETED.
+
+This is the same class-not-symptom pattern as the SemVer-prior fix in v3.100. The agent had a documented escape hatch; remove the hatch instead of banning specific paraphrases of it.
+
+---
+
 ## v3.105.0 — 2026-05-08 (fake bump to test v3.104 auto-bootstrap on VM)
 No-op. User on v3.104 with auto-bootstrap Step 0; this remote = MINOR mismatch. Tests:
 1. Did Step 0 fire on first `/sumsub-mockup` after v3.104 install on VM?

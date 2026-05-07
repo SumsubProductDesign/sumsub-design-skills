@@ -422,8 +422,33 @@ You do not have an internal threshold for this plugin. Every diff requires user 
 - "first tool is get_libraries, so no check needed yet"
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
+- "Remote check returned 404 — proceeding with local version"
+- "could not verify plugin version, proceeding on faith"
+- "repo not publicly accessible at that path, continuing"
+- "WebFetch failed, defaulting to local"
 
-If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
+#### Remote-check failure handling — NEW v3.106
+
+If WebFetch on the remote `plugin.json` does NOT return a clean JSON with a `version` field (any 4xx/5xx, redirect, empty body, parse error, network timeout) — **HARD STOP**, do NOT proceed on faith.
+
+Show the user verbatim:
+
+```
+⚠️ sumsub-design pre-flight: не смог проверить remote версию.
+
+Локальная: vLOCAL
+Remote URL: https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json
+Что вернулось: <первые 300 символов ответа WebFetch — статус, тело, или сообщение об ошибке>
+
+Возможные причины: VM-сеть режет GitHub, репозиторий стал private, URL поломался.
+
+Ответь:
+  • retry            — попробую WebFetch ещё раз
+  • continue anyway  — работаем на текущей версии (фиксируется на сессию)
+  • update           — запущу marketplace update + plugin update вслепую
+```
+
+Wait for explicit reply. Do not infer from auto mode, do not invent rationalizations. The "proceeding on faith" fallback is GONE — this is the class-not-symptom fix, removing the agent's bypass option entirely.
 
 0. **Ask WHERE to create the mockup — HARD STOP, WAIT for the answer.**
 

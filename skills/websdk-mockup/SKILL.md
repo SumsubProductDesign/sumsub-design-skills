@@ -192,6 +192,28 @@ This auto-runs on every new machine the first time the user invokes `/websdk-moc
 - "non-interactive mode, continuing with local version"
 - "keeping momentum, will re-check after this run"
 - "memory says plugin is current, skipping"
+- "Remote check returned 404 — proceeding with local version"
+- "could not verify plugin version, proceeding on faith"
+- "repo not publicly accessible at that path, continuing"
+- "WebFetch failed, defaulting to local"
+
+#### Remote-check failure handling — NEW v3.106
+
+If WebFetch on the remote `plugin.json` does NOT return clean JSON with a `version` field (any 4xx/5xx, redirect, empty body, parse error, network timeout) — **HARD STOP**, do NOT proceed on faith.
+
+Show user verbatim:
+
+```
+⚠️ sumsub-design pre-flight: не смог проверить remote версию.
+
+Локальная: vLOCAL
+Remote URL: https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json
+Что вернулось: <первые 300 символов ответа WebFetch>
+
+Ответь: retry / continue anyway / update
+```
+
+Wait for explicit reply. The "proceeding on faith" fallback is GONE — class-not-symptom fix.
 
 ---
 
