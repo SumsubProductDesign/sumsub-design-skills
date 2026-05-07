@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.105.0 — 2026-05-08 (fake bump to test v3.104 auto-bootstrap on VM)
+No-op. User on v3.104 with auto-bootstrap Step 0; this remote = MINOR mismatch. Tests:
+1. Did Step 0 fire on first `/sumsub-mockup` after v3.104 install on VM?
+2. Did `${CLAUDE_PLUGIN_ROOT}` resolve correctly in the Bash tool?
+3. Did `hooks/install.sh` install the hook + register PreToolUse?
+4. Does the now-installed hook block this tool call with the v3.104→v3.105 mismatch message?
+
+---
+
 ## v3.104.0 — 2026-05-08 (auto-bootstrap version-check hook on first mockup invocation)
 User asked: "I want sumsub-setup to be auto-invoked when any mockup skill is called". Closing the class — no team member should have to remember to run `/sumsub-setup` manually before their first mockup.
 
