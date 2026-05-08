@@ -4,6 +4,21 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.117.0 — 2026-05-08 (inline pre-flight into ALL skills — full per-skill drift closure)
+After v3.115 fixed sumsub-id-mockup, audit revealed same delegation bug in `sumsub-component` ("Identical to sumsub-mockup Rule pre-flight"), and three skills with NO pre-flight at all (`sumsub-specs-docs`, `sumsub-screen-annotations`, `sumsub-design-review`). Per the lesson from v3.115 ("agent doesn't cross-fetch, delegated phrasing IS the rule"), inlined the same 9-step verbatim pre-flight block into all four:
+- `sumsub-component` — replaced 1-line delegation
+- `sumsub-specs-docs` — added at top after intro
+- `sumsub-screen-annotations` — added at top after intro
+- `sumsub-design-review` — added at top after intro
+
+`sumsub-mockup` and `websdk-mockup` already had self-contained pre-flight; untouched.
+
+`sumsub-local-component/` is an empty directory at v3.90 baseline; nothing to add.
+
+After this all 7 active skills have identical pre-flight enforcement.
+
+---
+
 ## v3.116.0 — 2026-05-08 (fake bump to test v3.115 sumsub-id-mockup pre-flight inline)
 No-op. User on v3.115; this remote = MINOR mismatch. Tests whether the new inlined pre-flight in sumsub-id-mockup now stops and asks (matching sumsub-mockup behavior), instead of "пропускаю как необязательный".
 

@@ -9,6 +9,43 @@ argument-hint: "[figma-file-url]"
 > Add Scenarios annotation blocks above mockup screens describing key functionality.
 > Proactively suggest adding annotations if they're missing.
 
+## 🚨 Pre-flight: plugin version check — MANDATORY FIRST ACTION
+
+**As the very first action of every session — before any other tool call, before reading any reference — do this:**
+
+1. **Read local version:** `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Extract the `version` field.
+2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
+3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently.
+4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
+5. **STOP and show the user this verbatim:**
+
+   ```
+   ⚠️ sumsub-design plugin update available
+   Your local version: vLOCAL · Latest: vREMOTE
+
+   What's new since your version:
+   <paste CHANGELOG entries extracted in step 4>
+
+   I can update it for you right now by running:
+     claude plugin marketplace update sumsub-design
+     claude plugin update sumsub-design@sumsub-design
+
+   Reply:
+     - yes / update — I'll run the two commands via Bash
+     - continue anyway — use current (older) version for this session
+   ```
+
+6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task. On Bash failure, surface the exact stderr.
+8. **If `continue anyway`:** cache the decision for this conversation, proceed.
+9. **Once done, don't re-check this conversation.**
+
+**Banned bypass phrases:** "proceeding on current version in auto mode", "will mention at the end", "auto-accepting outdated plugin", "non-interactive mode, continuing with local version", "memory says plugin is current, skipping", "Plugin version check passed as optional / not blocking", "пропускаю как необязательный".
+
+If local plugin.json read or remote WebFetch fails (network / file missing), warn once ("could not verify plugin version, proceeding on faith") and continue.
+
+---
+
 ## What & Why
 
 Scenarios annotations are standardized blocks placed above each screen in a Figma flow. They describe what the screen shows and what the user does, helping reviewers and developers understand the flow without guessing.
