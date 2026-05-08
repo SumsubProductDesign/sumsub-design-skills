@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.114.0 — 2026-05-08 (fake bump for sumsub-mockup version-check test)
+No-op. User testing version-check behavior of sumsub-mockup at v3.90 baseline (no pre-flight section vs ad-hoc behavior).
+
+---
+
 ## v3.113.0 — 2026-05-08 (deeper rollback to v3.90.0 state)
 Per user instruction "нужно откатывать на какуюто версию около 3.90 там вроде бы было ок". Sumsub ID Connect output observed on Mockup made-by-Claude section showed regression — dimensions wrong, mixed DS libraries (Account Header + WebSDK Tips/Toolbar + Dashboard buttons), inverted single→double-column layout. v3.111 rollback to v3.102 was insufficient; rolling further back to v3.90 (commit fa8a0c0, "audit 7.51 + resize-AFTER-append rule") which is BEFORE the v3.91 plugin-hook saga began.
 
