@@ -33,11 +33,62 @@ If the request is "Sumsub ID welcome screen" / "Sumsub ID auth flow" / "Sumsub I
 
 ## Pre-flight (mandatory before any tool call)
 
-1. **Plugin version check** — same as `sumsub-mockup`. Read local `plugin.json` + WebFetch remote, compare. Update prompt if mismatch.
-2. **Read references:**
-   - `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/sumsub-id-pattern.md` — full layout patterns + dimensions
-   - `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/reusable-identity-pattern.md` — Reusable KYC layout
-3. **Locate canonical:** the source files for canonical references are:
+### Step 1 — Plugin version check (MANDATORY FIRST ACTION, inlined from sumsub-mockup)
+
+**As the very first action of every session — before any other tool call, before reading any reference — do this:**
+
+1. **Read local version:** `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Extract the `version` field.
+2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
+3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently to step 2 of Pre-flight (Read references) below.
+4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
+5. **STOP and show the user this verbatim:**
+
+   ```
+   ⚠️ sumsub-design plugin update available
+   Your local version: vLOCAL · Latest: vREMOTE
+
+   What's new since your version:
+   <paste CHANGELOG entries extracted in step 4>
+
+   I can update it for you right now by running:
+     claude plugin marketplace update sumsub-design
+     claude plugin update sumsub-design@sumsub-design
+
+   Reply:
+     - yes / update — I'll run the two commands via Bash
+     - continue anyway — use current (older) version for this session
+   ```
+
+6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
+
+7. **If `yes` / `update`:** run `Bash` with `claude plugin marketplace update sumsub-design && claude plugin update sumsub-design@sumsub-design`. On Bash success, continue with the task — Claude Code reloads plugin SKILL.md on the next tool call automatically, no restart required. On Bash failure, surface the exact stderr and fall back to asking user to run manually.
+
+8. **If `continue anyway`:** cache the decision for this conversation, proceed to step 2 below.
+
+9. **Once done (either updated or continue-anyway), don't re-check this conversation.**
+
+**Banned bypass phrases** — any of these is a rule break, period:
+- "proceeding on current version in auto mode"
+- "will mention at the end"
+- "auto-accepting outdated plugin"
+- "non-interactive mode, continuing with local version"
+- "keeping momentum, will re-check after this run"
+- "first tool is get_libraries, so no check needed yet"
+- "doing the check later, after inspection"
+- "memory says plugin is current, skipping"
+- "Plugin version check passed as optional / not blocking"
+- "пропускаю как необязательный"
+
+If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
+
+### Step 2 — Read references
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/sumsub-id-pattern.md` — full layout patterns + dimensions
+- `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-id-mockup/reference/reusable-identity-pattern.md` — Reusable KYC layout
+
+### Step 3 — Locate canonical
+
+The source files for canonical references are:
 
 | Sub-product | Source fileKey | Pattern |
 |---|---|---|
@@ -45,7 +96,9 @@ If the request is "Sumsub ID welcome screen" / "Sumsub ID auth flow" / "Sumsub I
 | Sumsub ID Connect | `Z87D5m8KArTvQWH13Nwmmo` | C — 947×812 embed (light + dark) |
 | Reusable KYC | `Fp0igOPOHzi00ZDqOsO5mk` | P1 — 1440 + Sidebar 257 + Content 1183 |
 
-4. **Rule #0 — ASK where to create.** Same as `sumsub-mockup`. Don't default to a fileKey from memory or pattern docs.
+### Step 4 — Rule #0: ASK where to create
+
+Same as `sumsub-mockup`. Don't default to a fileKey from memory or pattern docs.
 
 ---
 

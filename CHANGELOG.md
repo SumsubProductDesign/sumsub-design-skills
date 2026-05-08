@@ -4,6 +4,26 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.115.0 — 2026-05-08 (inline pre-flight into sumsub-id-mockup — close per-skill drift)
+**Confirmed root cause of the v3.91-v3.111 saga:** `sumsub-id-mockup` SKILL.md had a 1-line vague pre-flight ("Plugin version check — same as sumsub-mockup. Read local + WebFetch remote, compare. Update prompt if mismatch") since v3.85. The 8 saga iterations (v3.91-v3.110) only edited `sumsub-mockup` SKILL.md — never propagated to `sumsub-id-mockup`. Result: when user tested via `/sumsub-id-mockup` the agent saw the vague delegation, paraphrased "update prompt" as "skip if not blocking", silently bypassed all enforcement. When user tested `/sumsub-mockup` the strong rule there held.
+
+User confirmed live test 2026-05-08: same plugin v3.114, same mismatch — sumsub-mockup stopped and asked, sumsub-id-mockup skipped as optional.
+
+### Fix: inline the full sumsub-mockup pre-flight verbatim into sumsub-id-mockup
+
+Replaced the 1-line delegation with the same 9-step procedure from sumsub-mockup (read local, fetch remote, compare SemVer, fetch CHANGELOG, STOP+verbatim message, wait for reply, run Bash on yes/update, etc.). Added two new banned-bypass phrases caught from this saga:
+- "Plugin version check passed as optional / not blocking"
+- "пропускаю как необязательный"
+
+Restructured pre-flight into Steps 1-4 (Plugin check / Read references / Locate canonical / Rule #0).
+
+### General rule learned (recorded in user's memory)
+When editing rules that should apply across multiple skills in the same plugin: grep `skills/*/SKILL.md` for the section, edit ALL of them, never trust delegation phrases like "same as X". Agent does not cross-fetch SKILL.md files — the delegated phrasing IS the active rule.
+
+`websdk-mockup` already has its own self-contained pre-flight, so no edit needed there. `sumsub-mockup` baseline (v3.90) untouched.
+
+---
+
 ## v3.114.0 — 2026-05-08 (fake bump for sumsub-mockup version-check test)
 No-op. User testing version-check behavior of sumsub-mockup at v3.90 baseline (no pre-flight section vs ad-hoc behavior).
 
