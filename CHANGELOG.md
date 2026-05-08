@@ -4,6 +4,27 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.119.0 — 2026-05-08 (INSTALL.md rewrite — Claude Code CLI install is Part 1, plugin install is Part 2)
+**Live install attempt 2026-05-08** by team member on macOS Tahoe beta failed because INSTALL.md claimed "Claude Desktop ships `claude` CLI bundled" and put plugin install commands first. Reality: newer Claude Desktop on Tahoe doesn't bundle `claude` on PATH, and team member spent 6 hours hacking Cowork's local plugin storage trying to bypass.
+
+### Rewrite
+INSTALL.md now structured as two explicit parts:
+1. **Part 1 — Install Claude Code CLI** as primary topic. Native installer for macOS/Linux + Windows, plus Homebrew / WinGet / npm / manual binary / Claude menu alternatives for environments where `curl | bash` is blocked.
+2. **Part 2 — Install plugin** (marketplace add + plugin install) — only after Part 1 verified.
+
+Troubleshooting section expanded with content adapted from official Claude Code docs (https://code.claude.com/docs/en/troubleshoot-install):
+- `command not found: claude` — per-shell PATH fix (zsh / bash / fish / Windows PowerShell / CMD)
+- Multiple `claude` binaries causing version mismatch — list and remove conflicting installs
+- Install script returns HTML — regional block / temporary disruption
+- TLS/SSL/proxy errors — corporate CA bundle, NODE_EXTRA_CA_CERTS, HTTPS_PROXY
+- Existing entries (skills don't appear, /plugin not available, SSH known_hosts, Figma tools missing) preserved
+
+Skill list updated from 4 to 8 (sumsub-mockup / websdk-mockup / sumsub-id-mockup / sumsub-component / sumsub-local-component / sumsub-specs-docs / sumsub-screen-annotations / sumsub-design-review). Available commands table updated.
+
+Team-wide auto-install section now notes that each member still needs Part 1 (CLI) on their machine.
+
+---
+
 ## v3.118.0 — 2026-05-08 (Applicant page Pattern 2 — remove 52px Sidebar, document file-varying dimensions)
 **Live simulation 2026-05-08 on `Di7nvHaOxXiWuDAN1oa0hK`** revealed `applicant-page-pattern.md` and `layout-patterns.md` Pattern 2 still had stale "Sidebar 52 + Summary 380 + Body 1008 = 1440" math throughout the body of the doc. v3.78 only added a top-warning that this was wrong, didn't update the body or assembly recipe. Agent followed the assembly recipe, built with sidebar at x=0/52 — wrong layout.
 
