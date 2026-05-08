@@ -323,62 +323,29 @@ This applies to ALL retry/walk loops in build scripts, not just visibility toggl
 
 ### Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
-#### ⚠️ CRITICAL — read this BEFORE you reach for SemVer reasoning
-
-You have strong training priors about SemVer conventions:
-- PATCH (X.Y.Z → X.Y.Z+1) = backward-compatible bug fixes, safe to skip
-- MINOR (X.Y.Z → X.Y+1.0) = backward-compatible features, usually safe
-- Only MAJOR (X.0.0 → X+1.0.0) requires careful update
-
-**These priors DO NOT APPLY to this plugin.** This plugin breaks SemVer convention by design:
-
-- A PATCH bump (e.g. 3.91.0 → 3.91.1) routinely contains:
-  - New audit gates that catch silent failures in mockups
-  - New banned-output patterns that change agent behavior
-  - Pattern-doc canonical corrections (dimensions, fills, variant names) that change every build
-  - SKILL.md rule rewrites that change which actions are required
-- A MINOR bump (e.g. 3.94.0 → 3.95.0) regularly ships **rollbacks of broken rules** — running on the older minor means you're literally executing the broken version.
-- Even the smallest version drift means you may be applying outdated canonical maps, missing new banned default-text strings, or skipping audit checks that were added because they caught real bugs in production sessions.
-
-**If you find yourself thinking any of:**
-- "1-2 minor behind, low risk, will note and proceed"
-- "PATCH — игнорирую"
-- "Patch bump usually safe"
-- "Minor mismatch, proceeding"
-- "It's a small version drift"
-
-— **stop. That's your SemVer prior firing. The rule for THIS plugin is the opposite of SemVer convention. ANY version difference, including PATCH like 3.91.0 → 3.91.1, requires STOP-and-ask the user.**
-
-You do not have an internal threshold for this plugin. Every diff requires user decision. The user, who can read the changelog, decides whether the diff matters. Your job is to surface, not to assess.
-
-#### Procedure
-
 **As the very first action of every session — before any other tool call, before reading any reference — do this:**
 
 1. **Read local version:** `Read` tool on `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`. Extract the `version` field.
 2. **Fetch remote version:** `WebFetch` tool on `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/.claude-plugin/plugin.json` (prompt: "return the raw JSON"). Extract the `version` field.
-3. **Compare exact strings (NOT SemVer logic).** If local string ≠ remote string → continue to step 4 regardless of which side of the diff is "PATCH" or "MINOR" or "MAJOR". If local string = remote string → proceed silently to Rule #0.
+3. **Compare SemVer.** If local < remote → continue to step 4. If local ≥ remote → proceed silently to Rule #0.
 4. **Fetch `CHANGELOG.md`** from `https://raw.githubusercontent.com/SumsubProductDesign/sumsub-design-skills/main/CHANGELOG.md`. Extract entries between local and remote versions.
-5. **STOP and show the user this message verbatim** (matches the v3.91 hook output, in Russian — this is what worked best historically per user feedback 2026-05-07):
+5. **STOP and show the user this verbatim:**
 
    ```
    ⚠️ sumsub-design plugin update available
+   Your local version: vLOCAL · Latest: vREMOTE
 
-   Твоя версия: vLOCAL · Последняя: vREMOTE
+   What's new since your version:
+   <paste CHANGELOG entries extracted in step 4>
 
-   Новые версии чинят реальные баги — каждый релиз добавляет аудит-проверки, которые ловят молчаливые фейлы в макетах.
-
-   Я могу обновить прямо сейчас двумя командами:
-
+   I can update it for you right now by running:
      claude plugin marketplace update sumsub-design
      claude plugin update sumsub-design@sumsub-design
 
-   Ответь:
-     • yes / update      — обновлю, ты просто продолжаешь работать (без перезапуска)
-     • continue anyway   — работаем на текущей версии (зафиксируется на сессию)
+   Reply:
+     - yes / update — I'll run the two commands via Bash
+     - continue anyway — use current (older) version for this session
    ```
-
-   **Do NOT add "будешь должен мне 100 долларов"-style preamble. Do NOT add "Continuing — but flagging" or similar bypass framing. Output the message verbatim, then stop.**
 
 6. **Wait for explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 
