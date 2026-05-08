@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.116.0 — 2026-05-08 (fake bump to test v3.115 sumsub-id-mockup pre-flight inline)
+No-op. User on v3.115; this remote = MINOR mismatch. Tests whether the new inlined pre-flight in sumsub-id-mockup now stops and asks (matching sumsub-mockup behavior), instead of "пропускаю как необязательный".
+
+---
+
 ## v3.115.0 — 2026-05-08 (inline pre-flight into sumsub-id-mockup — close per-skill drift)
 **Confirmed root cause of the v3.91-v3.111 saga:** `sumsub-id-mockup` SKILL.md had a 1-line vague pre-flight ("Plugin version check — same as sumsub-mockup. Read local + WebFetch remote, compare. Update prompt if mismatch") since v3.85. The 8 saga iterations (v3.91-v3.110) only edited `sumsub-mockup` SKILL.md — never propagated to `sumsub-id-mockup`. Result: when user tested via `/sumsub-id-mockup` the agent saw the vague delegation, paraphrased "update prompt" as "skip if not blocking", silently bypassed all enforcement. When user tested `/sumsub-mockup` the strong rule there held.
 
