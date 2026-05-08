@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.112.0 — 2026-05-08 (fake bump for VM theory test)
+No-op. User testing a theory on rolled-back v3.111 pre-flight behavior.
+
+---
+
 ## v3.111.0 — 2026-05-08 (rollback to v3.102.0 state)
 Reverts everything from v3.103.0 onwards. Removes `/sumsub-setup` skill, `hooks/install.py`, Step 0 auto-bootstrap blocks, and the v3.106/v3.108/v3.110 pre-flight additions. Pre-flight returns to its v3.102.0 form (text rule, no hook, no auto-update).
 
