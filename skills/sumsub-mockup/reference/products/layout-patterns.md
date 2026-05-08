@@ -43,27 +43,30 @@
 
 ## Pattern 2 — Detail Full-Screen Page (Applicant style)
 
-> Applicant page, Transaction detail — has **collapsed 52px global Sidebar** as a real column (NOT an overlay)
+> Applicant page — full-bleed Header + Summary + Body. **No sidebar.**
 
 ```
 [1440 × scroll]
-├── *Sidebar*         x=0,   y=0,   w=52,   h=1024  ← collapsed DS sidebar, own column
-├── Page header       x=52,  y=0,   w=1388, h=152   ← starts AFTER sidebar
-├── Summary/Left      x=52,  y=152, w=380,  h=auto
-└── Body/Content      x=432, y=152, w=1008, h=auto  (432 = 52 + 380)
-    └── (padding 32px each side)
-        └── Cards     w=944
+├── Page header       x=0,   y=0,   w=1440,    h=152            ← FULL WIDTH (no sidebar offset)
+├── Summary/Left      x=0,   y=152, w=~360-380, h=auto           ← varies per file
+└── Body/Content      x=Summary.width, y=152, w=1440-Summary.width, h=auto
+    └── (padding 32px each side, padding-bottom 64)
+        └── Cards     w=Body.width − 64
 ```
 
 **Key metrics:**
-- Collapsed DS Sidebar: **52px** own column (variant `Type=Applicants, Collapsed=True`)
-- Page header: **152px tall**, w=**1388** (1440−52), starts at x=52
-- Summary panel: **380px** fixed at x=52 (Summary SET `Collapsed=No, Role=Admin`, native 380×747)
-- Body: **1008px** at x=432 (52 + 380 = 432)
-- Layout sum: **52 + 380 + 1008 = 1440** ✓
-- Card padding: 32px → card width = 1008 − 64 = **944px**
+- Page header: **152px tall**, full width 1440 from x=0
+- Summary panel: width varies per canonical (360–380 observed); always height ~748 at y=152
+- Body: width = 1440 − Summary.width; padding 24/32/64/32
+- Layout sum: **0 + Summary.width + Body.width = 1440** ✓
+- Card padding: 32px → card width = Body.width − 64
 
-> ⚠️ **Common mistake:** treating the 52px sidebar as a floating overlay and extending header/body to full 1440px. The DS sidebar occupies its own left column — everything else is shifted right by 52px.
+> ⚠️ **Pre-v3.118 docs claimed a 52px collapsed Sidebar.** That was based on a stale canonical. Modern AP layout has **no sidebar slot**. If you see code building `*Sidebar* Type=Applicants Collapsed=True` at x=0 — delete it.
+
+> 📌 **Always inspect canonical first.** Per-file Summary.width / Body.width vary slightly:
+> - `Di7nvHaOxXiWuDAN1oa0hK/17501:30301` (2026-05-08): Summary 380, Body 1060
+> - `13395:21886/14441:253969` (v3.78 scan): Summary 360, Body 1080
+> Both are valid — measure the canonical AP frame in YOUR target file before building.
 
 ---
 
@@ -160,9 +163,9 @@ Content frame (w=1183)
 └── padding: 24px all sides
     └── inner: w=1135, starts at x=24, y=24
 
-Detail pages — Body (w=1008, at x=432 right of 52px sidebar + 380px summary)
-└── padding: 32px sides
-    └── cards: w=944
+Detail pages — Body (varies per file, ~1060-1080, starts at x=Summary.width, no sidebar slot)
+└── padding: 32px sides, 64 bottom
+    └── cards: w=Body.width − 64
 
 Case page — Left area (w=992)
 └── padding: 32px left
@@ -178,7 +181,7 @@ Is there a full-width (257px) global Sidebar?
 ├── YES → Standard page (Pattern 1 or 4)
 │   ├── Has table/list → Pattern 1 (Standard List)
 │   └── Has canvas → Pattern 4 (Builder)
-└── NO → Detail page (may still have a collapsed 52px sidebar)
-    ├── Collapsed 52px sidebar + Header h=152, summary 380px → Pattern 2 (Applicant)
-    └── No sidebar + Header h=96, left 992 + right 448 → Pattern 3 (Case)
+└── NO → Detail page (no sidebar at all)
+    ├── Header h=152, Summary 360-380 + Body 1060-1080 → Pattern 2 (Applicant)
+    └── Header h=96, left 992 + right 448 → Pattern 3 (Case)
 ```

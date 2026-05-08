@@ -1,55 +1,53 @@
 # Applicant Page — Layout Pattern (Detail Full-Screen Page)
 
 > Extracted from `Di7nvHaOxXiWuDAN1oa0hK` (Applicant-page) and `vNWBKCNOPwyTQWJwR5euAl` (Actions).
-> Scan date: 2026-04-14.
+> Last canonical scan: 2026-05-08 (`Di7nvHaOxXiWuDAN1oa0hK/17501:30301`).
 
 ---
 
 ## Screen Structure
 
-⚠️ **Corrected v3.78** from canonical `14441:253969` (KYC page in `13395:21886`): Modern AP screens have **NO 52px sidebar** at top level. Layout is full-bleed Header 1440 + Summary 360 (not 380) + Body 1080 (not 1008).
+⚠️ **Modern AP layout has NO 52px sidebar.** Header is full-bleed 1440. Summary + Body fill the remaining space with no sidebar slot. Exact column widths vary slightly between files — **always inspect the target file's canonical AP frame and use those exact dimensions**, not the numbers below.
 
 ```
 Root (1440 × 900+, NONE layout, fill #ffffff)
 │
-├── AP page header  (INSTANCE, 1440×152 at x=0, y=0)         ← FULL WIDTH (key 65f821c2c7ee3fa60d6d16bef7d6eac140b732fe)
+├── AP page header  (INSTANCE, 1440×152 at x=0, y=0)         ← FULL WIDTH
 │   ├── Sandbox flag bar (20px, yellow #faad14)
 │   ├── Header row (96px, HORIZONTAL, pad: 16/32/16/32)
 │   └── Subheader (56px, VERTICAL, pad: 0/32/1/32) → *Tab Basic*
 │
-├── Summary  (INSTANCE, 360×748 at x=0, y=152)               ← key c1b844754f6352b82d43119aa620e6ce99c67658
+├── Summary  (INSTANCE, ~360–380 wide × ~748 tall at x=0, y=152)
 │   └── Summary / Level / Steps
 │
-└── Body (1080×h at x=360, y=152, VERTICAL, gap=16..20, pad: 24/32/64/32)
+└── Body (~1060–1080 wide × scroll-height at x=Summary.width, y=152)
     ├── APCardCollapsible (collapsed/expanded cards)
     ├── Section title rows (HORIZONTAL: text + button)
     ├── HORIZONTAL card grids (gap=16)
     └── Content blocks / tables
 ```
 
-### Positions (absolute, no auto-layout on root)
-| Element | x | y | w | h |
+### Canonical samples (per file, as observed)
+
+| Source file | Summary.width | Body.width | Body.x | Layout sum |
 |---|---|---|---|---|
-| *Sidebar* (collapsed) | 0 | 0 | 52 | 1024 |
-| Page header | 52 | 0 | 1388 | 152 |
-| Summary panel | 52 | 152 | 380 | 747 |
-| Body | 432 | 152 | 1008 | h (scrollable) |
+| `Di7nvHaOxXiWuDAN1oa0hK` (`17501:30301`, 2026-05-08) | 380 | 1060 | 380 | 380 + 1060 = 1440 ✓ |
+| `13395:21886` (`14441:253969`, v3.78 scan) | 360 | 1080 | 360 | 360 + 1080 = 1440 ✓ |
 
-**Layout sum:** 52 + 380 + 1008 = 1440 ✓
+> **Rule:** before building, run `get_metadata` on the target file's AP frame and read `summary.width` / `body.width` from the actual canonical. Do NOT hardcode 360/380 or 1060/1080 — they vary by file.
 
-### Key Dimensions
+### Key Dimensions (constants — do not vary)
+
 | Metric | Value |
 |---|---|
 | Screen width | 1440px |
-| Screen height | 900px (viewport) / taller for scroll |
-| Sidebar width (collapsed, own column) | 52px |
-| Page header | 1388×152 at x=52 (20 sandbox + 96 header + 36 subheader) |
-| Summary panel | 380×747 at x=52, y=152 |
-| Body | 1008px wide at x=432, padding 24/32/64/32 (top/right/bottom/left) |
+| Screen height | 900px viewport / taller for scroll |
+| Page header | 1440×152 at (0, 0) — full width, no x-offset |
+| Body padding | 24/32/64/32 (top/right/bottom/left) |
 | Body gap | 16px (between cards), 20px (between sections) |
-| Card content width | 944px (1008 - 32×2 padding) |
+| Card content width | Body.width − 64 (= 32×2 padding) |
 
-> ⚠️ **Common mistake:** treating the 52px sidebar as a floating overlay and extending header/body to full 1440px. The sidebar occupies its own column — everything else starts at x=52.
+> ⚠️ **Pre-v3.118 docs incorrectly claimed a 52px collapsed Sidebar at x=0.** This was based on a stale canonical. Modern AP screens do NOT include the 52px Sidebar slot. If you see code that builds `*Sidebar* Type=Applicants Collapsed=True` at x=0 — DELETE it. The sidebar bin is gone.
 
 ---
 
@@ -139,17 +137,11 @@ Root (1440 × 900+, NONE layout, fill #ffffff)
 
 ---
 
-## *Sidebar* on Applicant Page
+## *Sidebar* on Applicant Page (DEPRECATED — do not include)
 
-Uses the Organisms *Sidebar* in **collapsed mode** as a real left column (NOT an overlay):
-```
-compSetKey: 60be5cbb4d070ccc4853589a555d949c3f23f62e
-Variant: Type=Applicants, Collapsed=True
-Size: 52px wide × 1024px tall
-Position: x=0, y=0
-```
+⚠️ **Legacy section. Modern AP screens (post-v3.78 canonical) DO NOT include the 52px collapsed Sidebar.** Header is full-bleed 1440 from x=0. Summary starts at x=0. There is no sidebar slot at all.
 
-The sidebar occupies its own 52px column. Header, Summary panel, and Body all start at x=52 (to the right of the sidebar) — they do NOT extend underneath.
+Pre-v3.78 docs claimed this was used as a real left column. That was based on a stale canonical. If you find code that imports `*Sidebar*` Type=Applicants Collapsed=True at x=0, **remove it**.
 
 ---
 
@@ -221,23 +213,19 @@ Frame (HORIZONTAL, gap=10, h=48)
 
 ---
 
-## Sidebar Variant for Applicant Page
-
-```js
-const sidebarSet = await figma.importComponentSetByKeyAsync("60be5cbb4d070ccc4853589a555d949c3f23f62e");
-// Find the collapsed applicant variant
-const variant = sidebarSet.children.find(c => 
-  c.name.includes("Categoty=Applicant page") && c.name.includes("Type=No active items")
-);
-const sidebar = variant.createInstance();
-```
-
----
-
 ## Assembly Recipe (Plugin API)
 
+⚠️ **First: read canonical Summary.width and Body.width from the target file.** The values below are placeholders — replace with real measurements before building.
+
 ```js
-// Layout columns: 52 (sidebar) + 380 (summary) + 1008 (body) = 1440
+// 0. Read canonical dimensions from the target file FIRST
+//    Find AP frame in the file (e.g. "Applicant page", "🟢 Applicant page", "KYC applicant"),
+//    inspect children, capture: Summary.width, Body.width, Body.x.
+//    Layout sum must equal 1440. There is NO sidebar slot.
+
+const SUMMARY_W = /* read from canonical, ~360-380 */;
+const BODY_X    = SUMMARY_W;       // body starts where summary ends
+const BODY_W    = 1440 - SUMMARY_W;
 
 // 1. Create root frame
 const root = figma.createFrame();
@@ -246,8 +234,7 @@ root.resize(1440, 900);
 root.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }];
 root.clipsContent = true;
 
-// 2. AP page header (x=52, w=1388 — shifted right of the 52px sidebar column)
-// KEY: use library key afde096f..., NOT macket key d0fbee02...
+// 2. AP page header — FULL WIDTH (no sidebar offset)
 const headerSet = await figma.importComponentSetByKeyAsync("afde096fe83bb6a2e474c175e55dd73856303a1a");
 const headerVariant = headerSet.children.find(c => c.name.includes("Client type=Any") && c.name.includes("User type=Admin") && c.name.includes("In review=No"));
 const header = headerVariant.createInstance();
@@ -256,19 +243,20 @@ header.setProperties({
   "Sandbox#3392:8": true,  // show sandbox bar
 });
 root.appendChild(header);
-header.x = 52; header.y = 0;
-header.resize(1388, header.height);
+header.x = 0; header.y = 0;
+header.resize(1440, header.height);
 
-// 3. Summary panel (x=52, y=152, w=380) — AP's own left panel
+// 3. Summary panel — starts at x=0 (NO sidebar column)
 const summarySet = await figma.importComponentSetByKeyAsync("92422f0c18fc1fee864b481b5c9d2728a8f5d70b");
 const summaryVariant = summarySet.children.find(c =>
   c.name.includes("Collapsed=No") && c.name.includes("Role=Admin")
 );
 const summary = summaryVariant.createInstance();
 root.appendChild(summary);
-summary.x = 52; summary.y = 152;
+summary.x = 0; summary.y = 152;
+summary.resize(SUMMARY_W, summary.height);
 
-// 4. Body (x=432, y=152, w=1008 — right of sidebar + summary)
+// 4. Body — starts where summary ends
 const body = figma.createFrame();
 body.name = "Body";
 body.layoutMode = "VERTICAL";
@@ -279,24 +267,14 @@ body.primaryAxisSizingMode = "AUTO";      // hugs content vertically
 body.counterAxisSizingMode = "FIXED";     // fixed width
 body.fills = [];
 root.appendChild(body);
-body.resize(1008, 748);
-body.x = 432; body.y = 152;
+body.resize(BODY_W, 748);
+body.x = BODY_X; body.y = 152;
 
-// 5. Add content cards to body (children will be 944px = 1008 - 32×2 padding)
+// 5. Add content cards to body (children will be BODY_W - 64 wide after padding)
 const cardSet = await figma.importComponentSetByKeyAsync("cc6745d97b3b9e7ac0a149ad577630de096b8bc1");
 const card = cardSet.children.find(c => c.name.includes("Collapsed=No")).createInstance();
 body.appendChild(card);
 card.layoutSizingHorizontal = "FILL";
 
-// 6. Sidebar (collapsed 52px, own column at x=0)
-const sidebarSet = await figma.importComponentSetByKeyAsync("60be5cbb4d070ccc4853589a555d949c3f23f62e");
-const sidebarVariant = sidebarSet.children.find(c =>
-  c.name.includes("Type=Applicants") && c.name.includes("Collapsed=True")
-);
-const sidebar = sidebarVariant.createInstance();
-root.appendChild(sidebar);
-// NOTE: root has layoutMode=NONE, so children are positioned by x/y directly.
-// Do NOT set layoutPositioning = "ABSOLUTE" — that only works with auto-layout parents.
-sidebar.x = 0; sidebar.y = 0;
-// Keep sidebar last in z-order so it sits above any content that might bleed left.
+// NO SIDEBAR. Do not import 60be5cbb... Type=Applicants Collapsed=True. The 52px sidebar column doesn't exist in modern AP layouts.
 ```

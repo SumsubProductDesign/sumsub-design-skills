@@ -4,6 +4,25 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.118.0 — 2026-05-08 (Applicant page Pattern 2 — remove 52px Sidebar, document file-varying dimensions)
+**Live simulation 2026-05-08 on `Di7nvHaOxXiWuDAN1oa0hK`** revealed `applicant-page-pattern.md` and `layout-patterns.md` Pattern 2 still had stale "Sidebar 52 + Summary 380 + Body 1008 = 1440" math throughout the body of the doc. v3.78 only added a top-warning that this was wrong, didn't update the body or assembly recipe. Agent followed the assembly recipe, built with sidebar at x=0/52 — wrong layout.
+
+Additionally, the v3.78 correction said "Summary 360 / Body 1080", but actual canonical in `Di7nvHaOxXiWuDAN1oa0hK/17501:30301` is **Summary 380 / Body 1060**. Per-file variation: another file (`13395:21886/14441:253969`) has 360/1080. Both valid, both 1440 sum.
+
+### Changes
+- **`applicant-page-pattern.md` body fully rewritten:** removed all references to 52px sidebar, x=52 offsets, x=432 body, 1008 body width. Replaced with file-vary table showing observed per-file dimensions.
+- **Assembly recipe rewritten:** placeholder constants `SUMMARY_W` / `BODY_W` agent must populate from canonical inspection BEFORE building. Header at x=0 full-width 1440. Body starts at x=Summary.width.
+- **"*Sidebar* on Applicant Page" section marked DEPRECATED** with explicit "do not include" instruction.
+- **`layout-patterns.md` Pattern 2 updated:** structure diagram, key metrics, decision tree all reflect no-sidebar layout. Added per-file canonical samples.
+
+### Existing audit framework still correct
+Audit 7.45 already does canonical-match against `canonicalMap` populated during Phase 2 inspection. The bug was that pattern doc gave WRONG hints which agent might use as canonicalMap fallback. With doc corrected, agents that genuinely inspect canonical first will produce matching builds.
+
+### Lesson for skill rules
+When pattern doc and inspected canonical disagree → **canonical wins**, doc is updated. Pattern docs are guidance, not authoritative dimensions.
+
+---
+
 ## v3.117.0 — 2026-05-08 (inline pre-flight into ALL skills — full per-skill drift closure)
 After v3.115 fixed sumsub-id-mockup, audit revealed same delegation bug in `sumsub-component` ("Identical to sumsub-mockup Rule pre-flight"), and three skills with NO pre-flight at all (`sumsub-specs-docs`, `sumsub-screen-annotations`, `sumsub-design-review`). Per the lesson from v3.115 ("agent doesn't cross-fetch, delegated phrasing IS the rule"), inlined the same 9-step verbatim pre-flight block into all four:
 - `sumsub-component` — replaced 1-line delegation
