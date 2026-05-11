@@ -147,15 +147,65 @@ Pre-v3.78 docs claimed this was used as a real left column. That was based on a 
 
 ## Body Content Patterns
 
-### Single full-width card
+### 🚨 Default expansion = OPEN, with REAL content from AP organisms (NEW v3.120)
+
+**Default state of cards: `Collapsed=No` (expanded), filled with realistic data from the matching AP organism.** Do NOT default to `Collapsed=Yes` to avoid filling content — that's the banned-class behavior that triggered the v3.120 fix. User asks for an Applicant page → user expects an expanded page with content, not a list of collapsed headers.
+
+Use `Collapsed=Yes` ONLY when:
+- User explicitly says "collapsed view" / "compact list" / "section headers only"
+- The card content has no canonical organism AND no realistic data is available
+
+### 🚨 Card content: use AP organisms, NEVER fabricate custom Row × N (NEW v3.120)
+
+Each AP section (Personal info / Document / Selfie / Phone / Email / AML / Risk labels / Notes / Events / Address) has a dedicated AP organism with pre-built `Static data` / `DataList` rows, status icons, action buttons. **Import the organism as INSTANCE and configure it via properties — do NOT fabricate `Row × N` custom frames that mimic DataList structure.**
+
+Banned-class behavior from v3.119 sim:
+- 8 custom expanded cards, each with 7 custom `Row` frames (HORIZONTAL, Label TEXT + value TEXT)
+- 56 fabricated rows total
+- Skill asked AFTER building "maybe I should have used *Properties* / *DataList*?" — should have checked canonical FIRST
+
+### Organism-per-section map (use these instances, not custom frames)
+
+| Card section | Use this AP organism (INSTANCE) | Key | Where to find content |
+|---|---|---|---|
+| Personal info | `Personal info / Applicant data` SET | `72b025c8c706a7e7b277e7ee2183b8012bfab6b5` | Properties: first/last name, DoB, etc. |
+| Provided personal info | `Content / Provided Personal Info` COMP | `f942a2e20774d529d7e53074afab4023eceea425` | Pre-baked Static data rows |
+| Profile information (Email / Phone / Applicant language / Source key) | `Profile information` COMP | (composite — see `17501:30311` canonical) | 4 Static data columns with Label + value + Success icon |
+| Address | `Personal info / Address` SET | `25085e3400dba5aa032f7698097ae71fb9a0fde1` | State=1 address / 2 addresses / Empty |
+| ID Document | `Document` SET | `34687e2ab77282287cc7b44a2bb06b0aa8bd9b36` | Doc photos + OCR data + checks |
+| Document form (OCR fields) | `Document / Form` SET | `27812c1486949b9e7d16758fa296b32d69fabf86` | Variants for new UI / Empty state / Doc type |
+| Selfie | `Photo` SET | `9352939d0664d385ca99d63b25cdff6a4ee1404b` | Type=Photo uploaded / Photo deleted / Empty |
+| Phone verification | `Applicant notes / Input` style or custom | `ca9a7f23a77be86287d21dd0f1a3b318b7ec0e33` | Or check `Document / Actions block` patterns |
+| Email verification | Same approach as Phone | — | — |
+| AML Screening | `APCardCollapsible/HeaderChecks` (Status=Approved/Pending/Rejected) | `0c607889293e21820454545de96d23d10f928439` | Or canonical Profile information variant |
+| Risk labels | `Risk labels block` COMP | `78e549bc6b45b0af94ca01cdbf8e82b3ae64ff5a` | Sub-organisms per category |
+| Applicant notes | `Applicant notes` COMP | `0f1ba9b45209163bb9ae5ba43abdca89cc806ff7` | Set "Added Notes" bool + view more |
+| Events log | `.Events` SET (used via Body composite) | `3888bd1c362d50b9df21f346e3a32b4090d702ad` | Or `Events Block` for ad-hoc |
+
+### Build rule
+
 ```
-APCardCollapsible (1376×h, Collapsed=No)
-├── APCardCollapsible/HeaderChecks (1376×56, Status=Default)
+For each Body section:
+1. Import the matching AP organism via importComponentByKeyAsync / importComponentSetByKeyAsync
+2. Find the right variant (e.g. State=Filled, Collapsed=No, Empty=No)
+3. createInstance() → append to Body
+4. Set instance properties for content (applicant name, document type, country, etc.)
+5. DO NOT create custom Frames named "Row" / "Field" / "DataList" / "Static data" — these belong to the organism
+```
+
+### Audit check (added v3.120)
+
+If Body contains 5+ custom FRAME nodes named matching `/^(Row|Field|Data ?Row|Static data|Property)/i` directly under section cards → likely fabricated content, FAIL audit. Replace with AP organism instance.
+
+### Single full-width card structure (when no specific organism applies)
+```
+APCardCollapsible (BodyW − 64 × h, Collapsed=No)
+├── APCardCollapsible/HeaderChecks (BodyW − 64 × 56, Status=Default/Approved/Pending/Rejected)
 │   ├── Icon (normal/{name})
 │   ├── Title text
 │   └── Chevron + status badges
-└── Content (1376-padding × h, VERTICAL, gap=16, pad: 16/20/24/20)
-    └── [section-specific content]
+└── Content (inner × h, VERTICAL, gap=16, pad: 16/20/24/20)
+    └── [organism instance for this section type — from table above]
 ```
 
 ### Horizontal card grid (2 columns)

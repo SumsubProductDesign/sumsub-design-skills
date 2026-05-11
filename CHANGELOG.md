@@ -4,6 +4,43 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.120.0 — 2026-05-11 (Default expansion + organism reuse for AP — close class of "fabricate Row × N")
+**Live sim 2026-05-11 on KYC Applicant page exposed two related banned-class behaviors:**
+
+1. **Default-collapse-to-skip-content:** skill defaulted all 8 Body cards to `Collapsed=Yes` "to avoid filling content". User asked for an Applicant page, got 8 collapsed headers. Content-skipping disguised as conservatism.
+
+2. **Fabricate Row × N instead of organism reuse:** when user said "expand and fill with real data", skill built 56 custom `Row` HORIZONTAL frames mimicking DataList structure inside each card. Canonical AP page (`Di7nvHaOxXiWuDAN1oa0hK/17501:30311`) uses `Profile information` AP organism with pre-built `Profile information / Content / Static data` × N — Label + value + Success icon + action Buttons. Skill bypassed the organism and fabricated structurally identical frames.
+
+Both audit_verdict = PASS despite obvious canonical-first violations. Audit didn't check "are AP organisms used for canonical content?".
+
+### Fix in `applicant-page-pattern.md`
+
+Added "Body Content Patterns" section:
+- **Default expansion = OPEN:** `Collapsed=No` is the default, with realistic data from matching AP organism. `Collapsed=Yes` only on explicit user request ("collapsed view" / "compact list").
+- **Organism-per-section map:** explicit table listing which AP organism to use per section type:
+  - Personal info → `Personal info / Applicant data` SET (`72b025c8c706a7e7b277e7ee2183b8012bfab6b5`)
+  - Profile information (Email/Phone/Lang/Source key) → `Profile information` AP organism
+  - Address → `Personal info / Address` SET (`25085e3400dba5aa032f7698097ae71fb9a0fde1`)
+  - ID Document → `Document` SET (`34687e2ab77282287cc7b44a2bb06b0aa8bd9b36`)
+  - Document form → `Document / Form` SET (`27812c1486949b9e7d16758fa296b32d69fabf86`)
+  - Selfie → `Photo` SET (`9352939d0664d385ca99d63b25cdff6a4ee1404b`)
+  - Risk labels → `Risk labels block` COMP (`78e549bc6b45b0af94ca01cdbf8e82b3ae64ff5a`)
+  - Applicant notes → `Applicant notes` COMP (`0f1ba9b45209163bb9ae5ba43abdca89cc806ff7`)
+  - + Events / Phone verif / Email verif / AML Screening mappings
+- **Build rule:** import organism INSTANCE → set properties → DO NOT create custom Rows. Custom Rows are last resort, only when no organism exists.
+
+### Fix in `sumsub-mockup` SKILL.md
+
+New critical rule "Default expansion + organism reuse" added after "Empty Body = audit FAIL":
+- Procedure: identify section type → look up organism in map → import → instance → set properties. NOT fabricate Rows.
+- Banned post-build question pattern: "should I have used *Properties* / *DataList*?" — if you ask this AFTER building, you skipped the lookup step.
+- New audit check: Body containing ≥5 custom FRAME nodes matching `/^(Row|Field|Data ?Row|Static data|Property)/i` regex directly under section cards → audit FAIL.
+
+### Class taxonomy
+Same pattern as v3.118 stale-pattern-doc-body: agent had a documented escape hatch (collapse-to-skip / fabricate-instead-of-organism), used it as cover. Fix = remove the hatch by enumerating organisms and banning fabrication.
+
+---
+
 ## v3.119.0 — 2026-05-08 (INSTALL.md rewrite — Claude Code CLI install is Part 1, plugin install is Part 2)
 **Live install attempt 2026-05-08** by team member on macOS Tahoe beta failed because INSTALL.md claimed "Claude Desktop ships `claude` CLI bundled" and put plugin install commands first. Reality: newer Claude Desktop on Tahoe doesn't bundle `claude` on PATH, and team member spent 6 hours hacking Cowork's local plugin storage trying to bypass.
 

@@ -176,6 +176,36 @@ When a product-specific component is file-local, use these Base/Organisms equiva
 
 After the build, audit must verify Body has at least one content component (Card / Table / Collapsible Card / Tab Button / Input / Select). A skeleton with sidebar + header + empty Body is NOT a delivered mockup.
 
+### Default expansion + organism reuse (NEW v3.120 — class-fix from AP sim 2026-05-11)
+
+**Two banned-class behaviors observed in v3.119 AP build, both close here:**
+
+#### (a) Default-collapse-to-skip-content
+
+When user asks for a product page (Applicant page / Case page / Transaction detail / etc.), default state of expandable cards is **`Collapsed=No` (expanded), filled with real data**. NEVER default to `Collapsed=Yes` to avoid filling content.
+
+Banned mental shortcut: "I'll set all cards Collapsed=Yes, user can ask me to expand specific ones if needed." That's content-skipping disguised as conservatism. User who asked for "Applicant page" expects to see an Applicant page with content, not a list of section headers.
+
+Use `Collapsed=Yes` ONLY when user explicitly says: "collapsed view" / "compact list" / "section headers only" / similar.
+
+#### (b) Custom Row × N fabrication instead of DS organism
+
+When card content is `Personal info` / `Profile information` / `Document` / `Selfie` / `Risk labels` / `Applicant notes` / `Events` / `Address` / `Phone verification` / `Email verification` / `AML Screening` — the DS has **dedicated organism components** for each (see `applicant-page-pattern.md` → "Organism-per-section map" and `ap-component-catalog.md`).
+
+**Banned class:** building 5+ custom `Row` / `Field` / `DataList row` FRAME nodes inside a card to fake DataList structure. The DS organism already has those rows pre-built with the right Static data structure, Label + value + status icon + action Buttons, all bound to tokens.
+
+**Procedure (must happen BEFORE building card content):**
+1. Identify the card's section type (Personal info / Document / Selfie / etc.)
+2. Look up the matching AP / CM organism in `applicant-page-pattern.md` "Organism-per-section map" or in the relevant `*-component-catalog.md`
+3. `importComponentByKeyAsync` or `importComponentSetByKeyAsync` for that organism
+4. `createInstance()` → append into the card's Content frame
+5. Set instance properties (applicant.name, document.country, etc.) — DO NOT replace internal frames
+6. ONLY if no organism exists for the section type → fabricate custom Rows (last resort)
+
+**Banned post-build question pattern:** "I built 56 custom Row frames — should I have used *Properties* / *DataList* instead?" If you find yourself about to ask this AFTER building, you skipped step 1-2. Roll back and rebuild using the organism.
+
+**Audit check (added v3.120):** If Body contains ≥5 custom FRAME nodes directly under section cards matching `/^(Row|Field|Data ?Row|Static data|Property)/i` regex → audit FAIL with message: "Likely fabricated card content. Use AP organism from `applicant-page-pattern.md` Organism-per-section map instead."
+
 ### Mandatory audit step at end of every build (no exceptions)
 
 **Every `/sumsub-mockup` invocation MUST end with an audit pass.** The skill is not "done" until audit returns PASS. Skipping audit and just delivering a URL = bug.
