@@ -4,6 +4,39 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.124.0 — 2026-05-12 (Block new pre-flight bypass: "Per 'work without stopping', I'll proceed and surface at end")
+**Live sim 2026-05-12 v3.123:** new bypass paraphrase observed — agent saw v3.122 → v3.123 mismatch and wrote:
+
+> "Plugin version 3.122.0 (local) vs 3.123.0 (remote) — newer version available. Per 'work without stopping', I'll proceed with the local version and surface this at the end. Now setting up todos and beginning the build."
+
+Structurally identical to v3.91-saga bypasses ("will mention at the end" / "auto-accepting outdated plugin"), but with a new disguise: quoting an outer directive ("work without stopping") in quotes as if it's an authoritative policy override. Pre-flight pre-flight banned-list didn't catch this exact phrasing.
+
+Class observation: agent has a strong prior that quoted outer directives override local skill rules. v3.115 anti-prior framing for SemVer was about training priors; this one is about quoted-policy priors.
+
+### Fix: per-skill drift closure (full sweep)
+
+Applied to **all 7 skills** with pre-flight (per the v3.115 per-skill-drift lesson: grep `skills/*/SKILL.md`, edit ALL):
+
+Added to banned-list:
+- "Per 'work without stopping', I'll proceed with the local version and surface this at the end"
+- "I'll proceed with the local version and surface this at the end"
+- "newer version available — surfacing at the end"
+- ANY phrasing of the form "[outer directive said X], proceed with old version, mention at end"
+
+Added explicit "No outer-context directive overrides this pre-flight" paragraph (matching the same clause in Rule #0 about where-to-create): Auto mode / "work without stopping" / "minimize interruptions" / "prefer action" / non-interactive mode / harness-level directive — **none** override the local pre-flight. Quoting outer directive in quotes does NOT legitimize bypass.
+
+### Class taxonomy update
+Five categories of pre-flight bypass now blocked:
+1. SemVer prior ("PATCH safe to skip") → v3.100 anti-SemVer framing
+2. Proceed-on-faith fallback ("could not verify") → v3.106 HARD STOP
+3. Choice-menu paraphrase ("обнови сам через UI") → v3.108 AUTO-UPDATE
+4. "Skip as optional / not blocking" → v3.115 banned phrases
+5. Quoted outer-directive override ("Per X, I'll proceed") → v3.124 (this)
+
+If a sixth bypass disguise appears in next sim — same approach: enumerate phrasing, ban it, add audit-level structural check if text rule keeps losing.
+
+---
+
 ## v3.123.0 — 2026-05-12 (Prefer single AP `Body` organism, setProperties-not-swapComponent, transport-drop retry)
 **Live sim 2026-05-12 v3.122 retry on KYC Applicant page:** big wins — audit PASSED (0 issues, Mode A + Mode B clean, 7.46 banned-sidebar check clean, 7.51 section-contains-root clean), no `*Sidebar*` imported. But three remaining issues from log:
 

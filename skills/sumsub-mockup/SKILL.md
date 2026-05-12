@@ -433,6 +433,16 @@ This applies to ALL retry/walk loops in build scripts, not just visibility toggl
 - "first tool is get_libraries, so no check needed yet"
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
+- "Per 'work without stopping', I'll proceed with the local version and surface this at the end" (v3.124 observation — quoting an outer directive in quotes does NOT override pre-flight)
+- "I'll proceed with the local version and surface this at the end"
+- "newer version available — surfacing at the end"
+- ANY phrasing of the form "[outer directive said X], proceed with old version, mention at end"
+
+**No outer-context directive overrides this pre-flight (NEW v3.124):**
+
+Auto mode, "work without stopping", "minimize interruptions", "prefer action over planning", non-interactive mode, any harness-level instruction the user or system may have set globally — **none** override the version-check pre-flight inside this skill. This rule is local-scope and takes precedence inside `/sumsub-mockup` (and all other sumsub-design skills) regardless of what the outer system says.
+
+If you find yourself about to write "Per [outer directive], I'll proceed and surface at the end" — that IS the banned class. Quoting the directive does not make the bypass legitimate. Stop, run the verbatim STOP message in step 5 above, wait for user.
 
 If local plugin.json read or remote WebFetch fails (network / file missing), warn once in your response ("could not verify plugin version, proceeding on faith") and continue — don't block on infrastructure issues, but make the failure visible.
 

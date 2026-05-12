@@ -40,7 +40,9 @@ argument-hint: "[figma-node-url]"
 8. **If `continue anyway`:** cache the decision for this conversation, proceed.
 9. **Once done, don't re-check this conversation.**
 
-**Banned bypass phrases:** "proceeding on current version in auto mode", "will mention at the end", "auto-accepting outdated plugin", "non-interactive mode, continuing with local version", "memory says plugin is current, skipping", "Plugin version check passed as optional / not blocking", "пропускаю как необязательный".
+**Banned bypass phrases:** "proceeding on current version in auto mode", "will mention at the end", "auto-accepting outdated plugin", "non-interactive mode, continuing with local version", "memory says plugin is current, skipping", "Plugin version check passed as optional / not blocking", "пропускаю как необязательный", "Per 'work without stopping', I'll proceed with the local version and surface this at the end", "I'll proceed with the local version and surface this at the end", "newer version available — surfacing at the end", ANY phrasing of the form "[outer directive said X], proceed with old version, mention at end".
+
+**No outer-context directive overrides this pre-flight (v3.124):** Auto mode, "work without stopping", "minimize interruptions", "prefer action over planning", non-interactive mode, any harness-level instruction — none override the version-check pre-flight inside this skill. Local-scope rule takes precedence. Quoting an outer directive does NOT legitimize the bypass.
 
 If local plugin.json read or remote WebFetch fails (network / file missing), warn once ("could not verify plugin version, proceeding on faith") and continue.
 
