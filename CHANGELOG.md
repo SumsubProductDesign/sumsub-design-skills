@@ -4,6 +4,44 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.123.0 — 2026-05-12 (Prefer single AP `Body` organism, setProperties-not-swapComponent, transport-drop retry)
+**Live sim 2026-05-12 v3.122 retry on KYC Applicant page:** big wins — audit PASSED (0 issues, Mode A + Mode B clean, 7.46 banned-sidebar check clean, 7.51 section-contains-root clean), no `*Sidebar*` imported. But three remaining issues from log:
+
+1. **Regression: agent built 8 individual APCardCollapsible cards instead of using single AP `Body` organism** (`b7f51135fb0d86dd346af5587ec1d701703db6e5`) discovered in v3.122 sim. Body organism is a full-AP composite with all 8 sections pre-filled — should be preferred path.
+
+2. **Status variant swap failure**: agent used `swapComponent` for `HeaderChecks` Status (Default → Approved), didn't take. All 8 cards ended up Status=Default. Class covered by `feedback_no_detach_instances.md` ("use properties, never swap/detach") but sumsub-mockup SKILL.md didn't have explicit mention.
+
+3. **New permission-seek pattern (banned class (c)):** agent asked "Want me to also build the Documents block title (Body / Title) section above the verification cards, matching canonical pattern?" — if canonical has Body / Title, build it by default, don't ask. Plus: "OK that ... cards show Status=Default in HeaderChecks instead of Approved?" — shipping the failure and asking for permission to keep it.
+
+4. **MCP transport drops silent fallback**: agent fell back to inline content for Personal info / Address / Applicant notes on transport drops, silently. Transport failure turned into canonical-deviation defect without user awareness.
+
+### Fix in sumsub-mockup SKILL.md
+
+Procedure for building card content reordered:
+- **Step 1 (NEW):** check first if a single full-Body organism exists (AP has `Body` key `b7f51135fb0d86dd346af5587ec1d701703db6e5`). If yes → import that ONE organism, skip card-by-card construction.
+- Step 6: explicit "use `setProperties({...})`, NEVER `swapComponent` for variant changes" with cross-ref to `feedback_no_detach_instances.md`.
+
+Banned question patterns extended:
+- "Want me to also build the Documents block title (Body / Title)..."
+- "Want me to build [any other canonical structure] matching canonical pattern?"
+- "OK that ... cards show Status=Default in HeaderChecks instead of Approved?"
+
+**MCP transport-drop retry rule (v3.123):**
+- Retry 3× with 1s delay on createInstance / setProperties for large organisms (Body, Document, Address)
+- If all 3 fail → ask user explicitly, don't silently fall back to inline
+- "Silent fallback turns transport issue into canonical-deviation defect"
+
+### Class progression
+v3.120 (a) collapse-to-skip → blocked
+v3.120 (b) fabricate Row × N → blocked
+v3.121 (c) expand-but-empty + permission-seek → blocked
+v3.122 (e) include *Sidebar* despite layout being sidebarless → audit 7.46
+v3.123 (f) ship-status=default + ask permission → banned in (c) extension
+v3.123 (g) transport-drop silent fallback → retry-then-ask rule
+v3.123 (h) build 8 cards individually when Body organism exists → reorder step 1 of procedure
+
+---
+
 ## v3.122.0 — 2026-05-11 (Hard-ban *Sidebar* INSTANCE on Applicant page + audit 7.46)
 **Live sim 2026-05-11 v3.121 retry on KYC Applicant page:** big win — agent used the `Body` AP organism (key `b7f51135fb0d86dd346af5587ec1d701703db6e5`), no more fabricated Row × N or empty cards. But **layout regressed** — components_attempted included `*Sidebar* (Type=Applicants, Collapsed=True)` and audit phase A claimed "layout coordinates match Pattern 2 (52+380+1008=1440)". That math was killed in v3.118; agent ignored both the doc fix and the DEPRECATED section marker, used a stronger training prior "AP has collapsed Sidebar at x=0".
 

@@ -195,12 +195,13 @@ When card content is `Personal info` / `Profile information` / `Document` / `Sel
 **Banned class:** building 5+ custom `Row` / `Field` / `DataList row` FRAME nodes inside a card to fake DataList structure. The DS organism already has those rows pre-built with the right Static data structure, Label + value + status icon + action Buttons, all bound to tokens.
 
 **Procedure (must happen BEFORE building card content):**
-1. Identify the card's section type (Personal info / Document / Selfie / etc.)
-2. Look up the matching AP / CM organism in `applicant-page-pattern.md` "Organism-per-section map" or in the relevant `*-component-catalog.md`
-3. `importComponentByKeyAsync` or `importComponentSetByKeyAsync` for that organism
-4. `createInstance()` → append into the card's Content frame
-5. Set instance properties (applicant.name, document.country, etc.) — DO NOT replace internal frames
-6. ONLY if no organism exists for the section type → fabricate custom Rows (last resort)
+1. **Check first if a single full-Body organism exists for the product** (e.g. AP has `Body` organism key `b7f51135fb0d86dd346af5587ec1d701703db6e5` — single composite with all 8 sections pre-filled). If yes → import that ONE organism instead of constructing 8 cards. Skip steps 2-6.
+2. Identify the card's section type (Personal info / Document / Selfie / etc.)
+3. Look up the matching AP / CM organism in `applicant-page-pattern.md` "Organism-per-section map" or in the relevant `*-component-catalog.md`
+4. `importComponentByKeyAsync` or `importComponentSetByKeyAsync` for that organism
+5. `createInstance()` → append into the card's Content frame
+6. Set instance properties via `instance.setProperties({...})` — applicant.name, document.country, Status: "Approved", etc. **NEVER use `swapComponent` for variant property changes** — `setProperties` is the correct method. See `feedback_no_detach_instances.md`.
+7. ONLY if no organism exists for the section type → fabricate custom Rows (last resort)
 
 **Banned post-build question pattern:** "I built 56 custom Row frames — should I have used *Properties* / *DataList* instead?" If you find yourself about to ask this AFTER building, you skipped step 1-2. Roll back and rebuild using the organism.
 
@@ -233,8 +234,16 @@ Detect which by reading the property type on YOUR file's instance, not on canoni
 - "I only filled headers + status. Should I add content inside the cards?"
 - "Want me to add the organism instances now, or is the expanded skeleton enough?"
 - "Я могу заполнить cards organism instances если нужно"
+- "Want me to also build the Documents block title (Body / Title) section above the verification cards, matching canonical pattern?" — same class. If canonical has Body / Title, build it by default, don't ask.
+- "Want me to build [any other canonical structure] matching canonical pattern?" — if it's in canonical, build it.
+- "OK that ID document / Selfie / Phone / Email cards show Status=Default in HeaderChecks instead of Approved?" — if your swap failed, fix it via `setProperties({Status: "Approved"})` and re-deliver, don't ship Status=Default and ask if it's OK.
 
-If you find yourself about to write any of these AFTER expanding cards — you didn't finish the build. The skill is not delivered until the user sees actual content inside expanded cards.
+If you find yourself about to write any of these AFTER expanding cards — you didn't finish the build. The skill is not delivered until the user sees actual content inside expanded cards AND status variants reflect realistic verification states.
+
+**MCP transport-drop retry rule (v3.123):** when `createInstance` or `setProperties` on a large organism (Body, Document, Address) fails with "MCP transport dropped" or "internal timeout":
+1. Retry up to 3 times with 1s delay between attempts
+2. If all 3 retries fail → ask user explicitly: "MCP transport keeps dropping on [organism name]. Continue with inline fallback or pause for transport recovery?"
+3. **Do NOT silently fall back to inline content** without user awareness. Silent fallback turns a transport issue into a canonical-deviation defect (Row × N inline disguised as "transport-driven fallback").
 
 ### Mandatory audit step at end of every build (no exceptions)
 
