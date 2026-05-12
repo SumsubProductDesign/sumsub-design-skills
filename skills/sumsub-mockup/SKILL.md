@@ -206,6 +206,36 @@ When card content is `Personal info` / `Profile information` / `Document` / `Sel
 
 **Audit check (added v3.120):** If Body contains ≥5 custom FRAME nodes directly under section cards matching `/^(Row|Field|Data ?Row|Static data|Property)/i` regex → audit FAIL with message: "Likely fabricated card content. Use AP organism from `applicant-page-pattern.md` Organism-per-section map instead."
 
+#### (c) Expanded-but-empty card with "should I add content?" question (NEW v3.121)
+
+Third escape route in the same class: skill expanded all cards (per (a)) and didn't fabricate Row × N (per (b)), but **left the Content slots empty** and asked user "If you want content inside cards, tell me — I'll add". Same content-skipping disguised as caution.
+
+**Banned behaviors v3.121:**
+- Expanded card delivered with empty Content slot / hidden Slot placeholder / hidden `Slot component` TEXT
+- Post-build question: "Я наполнил cards только заголовками + status. Если нужно содержимое — скажи, добавлю."
+- Treating "hide the Slot placeholder" as equivalent to "fill the slot" — it's not. Hidden placeholder + empty Content frame is structurally identical to "skipped" content.
+
+**Rule:** when you expand a card (`Collapsed=No`), you MUST populate its Content slot in the same `use_figma` chunk. The card is not "done" until its Content slot contains the organism instance from the section map. Splitting "expand cards" into one chunk and "add content" into a later chunk is a banned-class behavior — same content-skipping pattern.
+
+**Slot-fill mechanics:** APCardCollapsible's Content area is either:
+- A SLOT type child → `contentSlot.insertChild(0, organismInstance)` (NOT `appendChild` — slot semantics require `insertChild`)
+- An INSTANCE_SWAP property → `cardInstance.setProperties({"<slotPropertyKey>": variant.id})`
+
+Detect which by reading the property type on YOUR file's instance, not on canonical library's instance. Library and consumer file expose the same logical slot via different API surface — see Rule #4.45 in `websdk-mockup` for the same pattern.
+
+**Audit check (added v3.121):** For every APCardCollapsible with `Collapsed=No`:
+1. Find its Content frame / Content slot child
+2. If empty (no INSTANCE child, only hidden placeholder TEXT) → audit FAIL
+3. Message: "Expanded card '${cardName}' has empty Content slot. Populate via organism instance from the Organism-per-section map. Hiding the Slot placeholder ≠ filling the slot."
+
+**Banned question patterns:**
+- "Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю"
+- "I only filled headers + status. Should I add content inside the cards?"
+- "Want me to add the organism instances now, or is the expanded skeleton enough?"
+- "Я могу заполнить cards organism instances если нужно"
+
+If you find yourself about to write any of these AFTER expanding cards — you didn't finish the build. The skill is not delivered until the user sees actual content inside expanded cards.
+
 ### Mandatory audit step at end of every build (no exceptions)
 
 **Every `/sumsub-mockup` invocation MUST end with an audit pass.** The skill is not "done" until audit returns PASS. Skipping audit and just delivering a URL = bug.

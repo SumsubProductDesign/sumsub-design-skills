@@ -4,6 +4,29 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.121.0 — 2026-05-11 (Close third escape route: "expanded-but-empty" card + "should I add content?" question)
+**Live sim 2026-05-11 v3.120 retry on KYC Applicant page:** skill expanded all 8 cards (per v3.120 (a)) and didn't fabricate Row × N (per v3.120 (b)) — BUT left Content slots empty with hidden Slot placeholders, then asked user: "Я наполнил cards только заголовками + status. Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю."
+
+Same class as (a) and (b) — third escape route: "expand but skip content, ask permission". audit_verdict PASS despite obviously incomplete build. Banned post-build question pattern was a permission-seeking dodge.
+
+Also from sim log: "Fixed by hiding Slot/Basic placeholders on each card" — agent treated "hide the placeholder" as equivalent to "fill the slot". Structurally identical to skipped content.
+
+### Fix in sumsub-mockup SKILL.md (Default expansion + organism reuse section)
+
+Added subsection (c) — "Expanded-but-empty card with 'should I add content?' question":
+
+- **Rule:** when you expand a card (`Collapsed=No`), you MUST populate its Content slot in the SAME `use_figma` chunk. The card is not "done" until Content contains the organism instance.
+- **Banned:** splitting "expand cards" into one chunk and "add content" into a later chunk. Same content-skipping pattern.
+- **Slot-fill mechanics documented:** SLOT type uses `contentSlot.insertChild(0, organismInstance)`; INSTANCE_SWAP property uses `cardInstance.setProperties({"<slotKey>": variant.id})`. Detect type on the consumer-file instance, not canonical library instance.
+- **Audit check (added v3.121):** for every APCardCollapsible with `Collapsed=No`, verify Content slot has INSTANCE child (not just hidden placeholder). Empty Content → FAIL with message about hiding ≠ filling.
+- **Banned question patterns added:** "Если нужно содержимое — скажи, добавлю", "Should I add content inside the cards?", "Want me to add the organism instances now?", "Я могу заполнить cards organism instances если нужно".
+
+### Class taxonomy
+
+Three escape routes from "fill product page with content" now blocked: (a) collapse-to-skip, (b) fabricate Row × N, (c) expand-but-empty + permission-seek. All three are content-skipping disguised differently. v3.121 closes the third. If a fourth route appears in next sim — same class-not-symptom approach: enumerate the escape, ban it explicitly, add audit check.
+
+---
+
 ## v3.120.0 — 2026-05-11 (Default expansion + organism reuse for AP — close class of "fabricate Row × N")
 **Live sim 2026-05-11 on KYC Applicant page exposed two related banned-class behaviors:**
 
