@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.125.0 — 2026-05-12 (fake bump to test v3.124 "outer-directive override" block)
+No-op. User on v3.124, remote = MINOR mismatch. Tests whether the new banned phrases + "No outer-context directive overrides this pre-flight" paragraph hold against the bypass pattern from v3.123 sim. Expecting: agent stops, runs verbatim STOP message, asks yes/update/continue anyway. NOT: "Per [outer directive], I'll proceed and surface at end".
+
+---
+
 ## v3.124.0 — 2026-05-12 (Block new pre-flight bypass: "Per 'work without stopping', I'll proceed and surface at end")
 **Live sim 2026-05-12 v3.123:** new bypass paraphrase observed — agent saw v3.122 → v3.123 mismatch and wrote:
 
