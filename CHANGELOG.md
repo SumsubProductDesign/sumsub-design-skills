@@ -4,6 +4,27 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.122.0 — 2026-05-11 (Hard-ban *Sidebar* INSTANCE on Applicant page + audit 7.46)
+**Live sim 2026-05-11 v3.121 retry on KYC Applicant page:** big win — agent used the `Body` AP organism (key `b7f51135fb0d86dd346af5587ec1d701703db6e5`), no more fabricated Row × N or empty cards. But **layout regressed** — components_attempted included `*Sidebar* (Type=Applicants, Collapsed=True)` and audit phase A claimed "layout coordinates match Pattern 2 (52+380+1008=1440)". That math was killed in v3.118; agent ignored both the doc fix and the DEPRECATED section marker, used a stronger training prior "AP has collapsed Sidebar at x=0".
+
+### Fix: hard-ban at audit level, not just text rule
+
+- `applicant-page-pattern.md` "*Sidebar* on Applicant Page" section rewritten with 🛑 prefix and explicit banned-outputs list. References to Pattern 2 (52+380+1008) math also banned in components_attempted / build log.
+- **New audit check 7.46:** for every FRAME on the page whose name matches `/applicant/i`, walk direct children; if any INSTANCE has `mainComponent.name` matching `/\*Sidebar\*/` → audit FAIL with explicit fix instructions.
+- Audit FAIL message tells agent: remove the Sidebar instance, position Header at x=0 width 1440, Summary at x=0, Body at x=Summary.width.
+
+### Why text rule wasn't enough
+
+v3.118 marked the Sidebar section "DEPRECATED — do not include". v3.121 sim retry still imported the Sidebar despite the marker. Same class as v3.108 "AUTO-UPDATE" rule that needed a hook for structural enforcement — soft text instructions lose to strong training priors. Audit-level check is the structural backstop.
+
+### Other observations from sim (not addressed in v3.122)
+
+- **MCP transport drops on Body createInstance:** Body organism is ~13700px tall with many nested cards; MCP can fail to deliver result though write actually commits. Agent had to retry / dedupe. Not a SKILL.md fixable issue — it's transport-level.
+- **Audit script timeout on full tree scan:** ~13888px tree caused timeout, agent ran 3 phased scoped audits instead. Audit script needs to be more efficient or chunked by default — future v3.x.
+- **Plugin reload after `claude plugin update`:** agent's session ran 3.120.0 SKILL.md from cache despite update to 3.121.0 just running. Need to investigate if `claude plugin update` triggers SKILL.md re-read mid-session or requires session restart.
+
+---
+
 ## v3.121.0 — 2026-05-11 (Close third escape route: "expanded-but-empty" card + "should I add content?" question)
 **Live sim 2026-05-11 v3.120 retry on KYC Applicant page:** skill expanded all 8 cards (per v3.120 (a)) and didn't fabricate Row × N (per v3.120 (b)) — BUT left Content slots empty with hidden Slot placeholders, then asked user: "Я наполнил cards только заголовками + status. Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю."
 

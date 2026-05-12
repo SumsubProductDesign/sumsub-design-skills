@@ -2142,6 +2142,27 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.46. Applicant page — banned *Sidebar* instance (v3.122).
+   // Modern AP layout has NO collapsed Sidebar slot. v3.118 removed the slot
+   // from layout-patterns.md and applicant-page-pattern.md, v3.121 retry sim
+   // still imported `*Sidebar*` Type=Applicants Collapsed=True at x=0 anyway
+   // because the deprecated section was "soft block". v3.122 hard-bans the
+   // INSTANCE at audit level: any *Sidebar* INSTANCE child directly under an
+   // AP root frame → FAIL.
+   {
+     const apRoots = page.findAll(n => n.type === "FRAME" && /applicant/i.test(n.name));
+     for (const root of apRoots) {
+       if (!root.children) continue;
+       for (const child of root.children) {
+         try {
+           if (child.type === "INSTANCE" && /\*Sidebar\*/.test(child.mainComponent?.name || "")) {
+             issues.push(`7.46 banned-sidebar-on-AP: frame "${root.name}" contains *Sidebar* INSTANCE. Modern AP layout has NO 52px sidebar slot (canonical 'Di7nvHaOxXiWuDAN1oa0hK/17501:30301' has none, all post-v3.78 AP files match). Remove the *Sidebar* instance, position Header full-bleed at x=0 width 1440, Summary at x=0, Body at x=Summary.width. Layout math: 0 + Summary.width + Body.width = 1440. See applicant-page-pattern.md.`);
+           }
+         } catch(e) { /* skip child if mainComponent inaccessible */ }
+       }
+     }
+   }
+
    // 7.44. Case page (Pattern B) — Frame 270990504 wrapper + Container paddings.
    // Observed (Workflow Builder file build, v3.60): skill placed
    // `Case page Overview tab content` directly into root at x=0, w=992. The

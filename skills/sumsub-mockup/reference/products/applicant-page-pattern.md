@@ -137,11 +137,39 @@ Root (1440 × 900+, NONE layout, fill #ffffff)
 
 ---
 
-## *Sidebar* on Applicant Page (DEPRECATED — do not include)
+## 🛑 *Sidebar* on Applicant Page — BANNED (v3.122)
 
-⚠️ **Legacy section. Modern AP screens (post-v3.78 canonical) DO NOT include the 52px collapsed Sidebar.** Header is full-bleed 1440 from x=0. Summary starts at x=0. There is no sidebar slot at all.
+**Do not import `*Sidebar*` Type=Applicants Collapsed=True (key `60be5cbb4d070ccc4853589a555d949c3f23f62e`) when building an Applicant page.**
 
-Pre-v3.78 docs claimed this was used as a real left column. That was based on a stale canonical. If you find code that imports `*Sidebar*` Type=Applicants Collapsed=True at x=0, **remove it**.
+The 52px collapsed Sidebar slot has not existed in canonical AP layout since the post-v3.78 redesign. Modern AP is full-bleed: Header 1440 from x=0, Summary at x=0, Body at x=Summary.width. There is NO sidebar slot at all.
+
+### Banned outputs
+
+Any of the following in components_attempted / build log → audit FAIL:
+- `*Sidebar* (Type=Applicants, Collapsed=True)`
+- `*Sidebar* (Type=Applicants, ...)` at x=0 in an AP root frame
+- Reference to "Pattern 2 (52+380+1008=1440)" math — that math is dead, current math is 0+Summary.width+Body.width=1440
+- Header positioned at x=52 with width=1388
+
+### Why this section needs a hard-ban, not just a "deprecated" note
+
+v3.118 marked this DEPRECATED with "do not include" text. v3.121 sim retry still imported the Sidebar anyway. Agent has a strong training prior "AP has collapsed Sidebar at x=0"; a soft "deprecated" marker doesn't override the prior.
+
+Hard rule: if your build script contains `importComponentSetByKeyAsync("60be5cbb...")` **followed by** placing the result at x=0 in an AP root → that's a v3.122 banned action. The audit script catches `*Sidebar*` INSTANCE children directly under an AP root frame and FAILs.
+
+### Audit check (v3.122)
+
+```js
+// In audit script
+const apRoots = page.findAll(n => n.type === "FRAME" && /applicant/i.test(n.name));
+for (const root of apRoots) {
+  for (const child of root.children) {
+    if (child.type === "INSTANCE" && /\*Sidebar\*/.test(child.mainComponent?.name || "")) {
+      issues.push(`7.46 banned-sidebar-on-AP: frame "${root.name}" contains *Sidebar* INSTANCE. AP layout has NO sidebar slot. Remove the *Sidebar* instance and re-position Header/Summary/Body per applicant-page-pattern.md.`);
+    }
+  }
+}
+```
 
 ---
 
