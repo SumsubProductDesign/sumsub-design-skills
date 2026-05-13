@@ -4,6 +4,28 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.127.0 — 2026-05-13 (Audit fixes: hidden-tab false positive + canonical-raw spacing exceptions)
+**Live sim 2026-05-13 v3.126 on TM Transaction detail page (Finance txn):** clean build using Pattern 4 canonical components (Header/Finance, *Tab Basic* 5 tabs, Customers card / Finance, AML checks, Properties, Matched rules, Events Block, Notes, Transaction details). Build was correct, but audit returned FAIL on 2 false-positive checks:
+
+### Fix (a) — "Double tabs" false positive on hidden sub-instance
+
+Audit walked `headerInst.findOne(... /Type=Tabs/.test(mainComponent.name))` and matched a HIDDEN sub-instance inside Header/Finance variant. Combined with the standalone visible *Tab Basic* below, audit flagged "Double tabs" even though only one is rendered.
+
+v3.127: walk hidden-ancestor chain before considering the Subheader=Tabs match. Now requires the sub-instance to be visible all the way up to Header root for it to count as "Header has Subheader=Tabs". Standalone tabs check also now filters `visible !== false`.
+
+### Fix (b) — Audit 7.16 acceptable-raw spacing values
+
+Canonical TM Pattern 4 uses spacing values 40 (Columns gap, Main column gap), 48 (Right panel gap), 64 (Body paddingBottom, Columns row gap). Sumsub Base spacing tokens stop at `spacing/3xl=32` — no `spacing/4xl=40`, `spacing/5xl=48`, `spacing/6xl=64` exist. Canonical builds use these values RAW because no token resolves to them.
+
+v3.127 audit 7.16 exception: `CANONICAL_RAW_SPACING_VALUES = [40, 48, 64]` list of known canonical-raw values. If spacing is unbound but value is in this list → skip the check (canonical itself is unbound at the same value, not a defect).
+
+Expand the list as more canonical patterns are observed. Long-term: either DS team ships the missing tokens (`spacing/4xl/5xl/6xl`) or this exception stays. Either way, audit should not FAIL builds that match canonical exactly.
+
+### Why this isn't a skill build issue
+TM Transaction detail sim v3.126 was substantively perfect. Both FAIL residuals were audit script bugs, NOT build defects. v3.127 aligns audit with canonical reality.
+
+---
+
 ## v3.126.0 — 2026-05-13 (Audit 7.47 root-height-contains-children + 7.48 ap-body-width canonical-match)
 **Live sim 2026-05-13 v3.125:** new defect class — agent built AP correctly (no Sidebar, used Body organism, setProperties for header), but:
 

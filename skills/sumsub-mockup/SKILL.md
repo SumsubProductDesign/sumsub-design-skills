@@ -1226,16 +1226,26 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    }
 
    // 3. Double-tabs — *Tab Basic* outside Header when Header.Subheader=Tabs
+   // v3.127: only count VISIBLE Subheader=Tabs inside Header (hidden sub-instances
+   // exist in some Header variants like TM Pattern 4 Header/Finance and don't render).
    if (headerInst) {
-     const headerHasTabs = !!headerInst.findOne(n =>
-       n.type === "INSTANCE" && /Type=Tabs/.test(n.mainComponent?.name || "")
-     );
+     const headerHasVisibleTabs = !!headerInst.findOne(n => {
+       if (n.type !== "INSTANCE") return false;
+       if (!/Type=Tabs/.test(n.mainComponent?.name || "")) return false;
+       // walk up to root checking visibility — if any ancestor is hidden, this sub-instance doesn't render
+       let cur = n;
+       while (cur && cur !== headerInst) {
+         if (cur.visible === false) return false;
+         cur = cur.parent;
+       }
+       return true;
+     });
      const standaloneTabs = all.filter(n =>
-       n.type === "INSTANCE" && n.name === "*Tab Basic*" &&
+       n.type === "INSTANCE" && n.name === "*Tab Basic*" && n.visible !== false &&
        !headerInst.findAll(x => x === n).length
      );
-     if (headerHasTabs && standaloneTabs.length) {
-       issues.push(`Double tabs: Header has Subheader=Tabs AND ${standaloneTabs.length} standalone *Tab Basic* below — keep only one`);
+     if (headerHasVisibleTabs && standaloneTabs.length) {
+       issues.push(`Double tabs: Header has VISIBLE Subheader=Tabs AND ${standaloneTabs.length} standalone *Tab Basic* below — keep only one`);
      }
    }
 
@@ -1449,6 +1459,13 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    // Every non-zero paddingLeft/Right/Top/Bottom, itemSpacing and cornerRadius
    // on a custom FRAME (outside instances) must be bound to a design-token variable.
    // Zero values don't need binding.
+   //
+   // v3.127 exception: known canonical raw values that have NO matching DS token.
+   // E.g. TM Pattern 4 uses 40/48/64 (Body padB=64, Columns gap=40/48, Main gap=40).
+   // Sumsub Base spacing tokens stop at spacing/3xl=32; no spacing/4xl/5xl/6xl.
+   // Marking these as unbound creates false positives. They're acceptable-raw —
+   // canonical itself is unbound at the same values.
+   const CANONICAL_RAW_SPACING_VALUES = [40, 48, 64];  // expand as more canonical patterns observed
    const spacingProps = ["paddingLeft","paddingRight","paddingTop","paddingBottom","itemSpacing"];
    const radiusProps = ["topLeftRadius","topRightRadius","bottomLeftRadius","bottomRightRadius"];
    const unboundBy = {}; // aggregate by frame to avoid spam
@@ -1462,6 +1479,8 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
        if (typeof val !== "number" || val === 0) continue;
        const bound = n.boundVariables?.[prop];
        if (!bound) {
+         // v3.127: skip canonical-raw values that have no DS token
+         if (CANONICAL_RAW_SPACING_VALUES.includes(val)) continue;
          unboundBy[n.name] = unboundBy[n.name] || { spacing: [], radius: [] };
          unboundBy[n.name].spacing.push(`${prop}=${val}px`);
        }
