@@ -237,6 +237,9 @@ Detect which by reading the property type on YOUR file's instance, not on canoni
 - "Want me to also build the Documents block title (Body / Title) section above the verification cards, matching canonical pattern?" — same class. If canonical has Body / Title, build it by default, don't ask.
 - "Want me to build [any other canonical structure] matching canonical pattern?" — if it's in canonical, build it.
 - "OK that ID document / Selfie / Phone / Email cards show Status=Default in HeaderChecks instead of Approved?" — if your swap failed, fix it via `setProperties({Status: "Approved"})` and re-deliver, don't ship Status=Default and ask if it's OK.
+- "Body width: keep at intrinsic 942px (current) or stretch to canonical 1060px (may distort inner cards)?" (v3.126) — canonical wins, always. Resize the organism to canonical width via `instance.resize(canonicalW, intrinsicH)`. "May distort inner cards" is not a valid concern when the organism is designed to be resized.
+- ANY phrasing of the form "X (intrinsic) vs Y (canonical) — which do you want?" — canonical wins by default per v3.118 rule.
+- "Want me to swap the static demo data (Germany / Mexico / sample dates / IP) for a coherent persona, or is the DS preset realistic enough?" (v3.126) — if the DS preset doesn't match the requested applicant (e.g. user said KYC and demo data is generic), swap by default. Don't ask permission to make data coherent.
 
 If you find yourself about to write any of these AFTER expanding cards — you didn't finish the build. The skill is not delivered until the user sees actual content inside expanded cards AND status variants reflect realistic verification states.
 
@@ -2178,6 +2181,62 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
              issues.push(`7.46 banned-sidebar-on-AP: frame "${root.name}" contains *Sidebar* INSTANCE. Modern AP layout has NO 52px sidebar slot (canonical 'Di7nvHaOxXiWuDAN1oa0hK/17501:30301' has none, all post-v3.78 AP files match). Remove the *Sidebar* instance, position Header full-bleed at x=0 width 1440, Summary at x=0, Body at x=Summary.width. Layout math: 0 + Summary.width + Body.width = 1440. See applicant-page-pattern.md.`);
            }
          } catch(e) { /* skip child if mainComponent inaccessible */ }
+       }
+     }
+   }
+
+   // 7.47. Root must contain ALL children — auto-expand root height (v3.126).
+   // Observed sim 2026-05-13: agent built AP root at 1440x900 default, placed
+   // Body instance of height 13744 inside. Root didn't auto-expand → content
+   // clipped. audit_verdict was PASS because section-contains-root (7.51)
+   // only checks section bbox vs root bbox, not root vs children.
+   // After building, every child's (y + height) must be ≤ root.height. If a
+   // child overflows root → root.resize(root.width, max(childY + childH))
+   // for all visible children.
+   {
+     const allFrames = page.findAll(n => n.type === "FRAME" && (n.name.includes("(made by Claude)") || /\(by Claude\)/.test(n.name)));
+     for (const root of allFrames) {
+       if (!root.children) continue;
+       let maxChildBottom = 0;
+       for (const child of root.children) {
+         if (child.visible === false) continue;
+         const bottom = (child.y || 0) + (child.height || 0);
+         if (bottom > maxChildBottom) maxChildBottom = bottom;
+       }
+       if (maxChildBottom > root.height + 2) {
+         issues.push(`7.47 root-height-contains-children: frame "${root.name}" height=${Math.round(root.height)} but children extend to y=${Math.round(maxChildBottom)}. Content is clipped. After placing all children, run: root.resize(root.width, ${Math.round(maxChildBottom)}). Also verify root.clipsContent is false if you want visible scroll/overflow.`);
+       }
+     }
+   }
+
+   // 7.48. Organism instance must use canonical width, NOT intrinsic (v3.126).
+   // Observed sim 2026-05-13: agent imported AP `Body` organism (intrinsic
+   // 942 wide), placed at x=380. Canonical Body in target file is 1060 wide.
+   // Agent kept intrinsic "to avoid distorting nested cards" — banned per
+   // v3.118 rule "Use the canonical instance width, not the variant's
+   // intrinsic width." Layout result: 380 + 942 = 1322, gap 118 on right.
+   // Resize after createInstance: bodyInstance.resize(canonicalW, intrinsicH).
+   {
+     const apRoots = page.findAll(n => n.type === "FRAME" && /applicant/i.test(n.name));
+     for (const root of apRoots) {
+       if (!root.children) continue;
+       // Find Body instance (anything that's INSTANCE and its mainComponent name contains "Body")
+       const bodyInstance = root.children.find(c => {
+         try {
+           return c.type === "INSTANCE" && /^Body/.test(c.mainComponent?.parent?.name || c.mainComponent?.name || "");
+         } catch(e) { return false; }
+       });
+       if (!bodyInstance) continue;
+       // Find Summary on same root
+       const summaryInstance = root.children.find(c => {
+         try {
+           return c.type === "INSTANCE" && /^Summary/.test(c.mainComponent?.parent?.name || c.mainComponent?.name || "");
+         } catch(e) { return false; }
+       });
+       const summaryW = summaryInstance ? summaryInstance.width : 380;
+       const expectedBodyW = 1440 - summaryW;
+       if (Math.abs(bodyInstance.width - expectedBodyW) > 2) {
+         issues.push(`7.48 ap-body-width: frame "${root.name}" Body instance width=${Math.round(bodyInstance.width)} ≠ canonical ${expectedBodyW} (1440 − Summary.width ${summaryW}). Agent likely kept the organism's intrinsic width. Resize: bodyInstance.resize(${expectedBodyW}, bodyInstance.height). Banned class: "kept at intrinsic to avoid distorting nested cards".`);
        }
      }
    }

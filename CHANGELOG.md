@@ -4,6 +4,26 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.126.0 — 2026-05-13 (Audit 7.47 root-height-contains-children + 7.48 ap-body-width canonical-match)
+**Live sim 2026-05-13 v3.125:** new defect class — agent built AP correctly (no Sidebar, used Body organism, setProperties for header), but:
+
+1. **Body kept at intrinsic 942 wide instead of canonical 1060.** Math: 380 + 942 = 1322, gap 118 on right. Agent rationalized "kept at intrinsic to avoid distorting nested cards" — banned per v3.118 ("Use the canonical instance width, not the variant's intrinsic width").
+2. **Root not auto-expanded to fit Body of height 13744.** Content clipped/hidden. Audit 7.51 PASSED because it checks section-contains-root, not root-contains-children.
+3. **New banned permission-seek patterns:**
+   - "Body width: keep at intrinsic 942px (current) or stretch to canonical 1060px (may distort inner cards)?" — canonical wins, don't ask.
+   - "Want me to swap the static demo data (Germany / Mexico / sample dates / IP) for a coherent persona, or is the DS preset realistic enough?" — if preset doesn't match request, swap by default.
+
+### New audit checks
+- **7.47 root-height-contains-children:** for each "(made by Claude)" frame, max(child.y + child.height) must be ≤ root.height. Otherwise FAIL with explicit resize instruction.
+- **7.48 ap-body-width:** for each AP root, Body instance.width must equal (1440 − Summary.width). If intrinsic ≠ canonical → FAIL with resize instruction. Banned-class message: "kept at intrinsic to avoid distorting nested cards" is the bypass.
+
+### Extended banned questions
+- "X (intrinsic) vs Y (canonical) — which?" — generic class, canonical wins
+- "Body width: keep 942 or stretch to 1060?" — specific instance
+- "DS preset realistic enough or want persona swap?" — if doesn't match request, swap
+
+---
+
 ## v3.125.0 — 2026-05-12 (fake bump to test v3.124 "outer-directive override" block)
 No-op. User on v3.124, remote = MINOR mismatch. Tests whether the new banned phrases + "No outer-context directive overrides this pre-flight" paragraph hold against the bypass pattern from v3.123 sim. Expecting: agent stops, runs verbatim STOP message, asks yes/update/continue anyway. NOT: "Per [outer directive], I'll proceed and surface at end".
 
