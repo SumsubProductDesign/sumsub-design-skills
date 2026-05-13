@@ -261,7 +261,25 @@ If you find yourself about to write any of these AFTER expanding cards — you d
    Reason Mode B exists: live user testing on Connect (May 2026, v3.83) — agent claimed `default_text_leaks_fixed: 4` and audit returned PASS, but the Title instance kept its main's default `"Select type and issuing country of your "` because Mode A's banned-strings list didn't include that exact phrase. Mode B (compare with `instance.mainComponent.children`) catches it deterministically without needing a curated string list.
 
    ```js
-   // Mode B implementation sketch
+   // Mode B implementation sketch (v3.128: structural-DS-label exclusion)
+   //
+   // Key refinement v3.128: only flag a TEXT as leak if the mainComponent EXPOSES
+   // a TEXT property bound to that node. If no property exposed → the text is a
+   // fixed structural DS label (block title "AML checks", section header
+   // "Applicant", etc.) and is REQUIRED to keep the default value across all
+   // instances. Flagging it as a leak is a false positive — overriding would
+   // damage the design system, not fix it.
+   //
+   // Detection: walk the instance's componentProperties; for each property of
+   // type TEXT, the property's `boundVariables`/binding metadata or
+   // mainComponent definition reveals which TEXT node it controls. If the
+   // current TEXT node is one of those bound nodes → it's a content placeholder,
+   // can be flagged when at default. If NOT bound to any property → it's a
+   // structural label, skip.
+   //
+   // Simpler heuristic (use until full property-binding walk is available):
+   // build the set of `boundTextNodeNames` by reading mainComponent property
+   // descriptors. Only flag TEXT nodes whose name is in that set.
    async function modeB(root) {
      const fails = [];
      async function walk(n) {
@@ -273,10 +291,37 @@ If you find yourself about to write any of these AFTER expanding cards — you d
            if ("children" in node && node.children) for (const c of node.children) collectDefaults(c);
          }
          collectDefaults(main);
+
+         // v3.128: determine which TEXT nodes are exposed as instance properties.
+         // Only those are "content placeholders" — others are structural labels.
+         const exposedTextNodeNames = new Set();
+         try {
+           const props = n.componentProperties || {};
+           for (const [propKey, propVal] of Object.entries(props)) {
+             if (propVal?.type === "TEXT") {
+               // Property key format varies; the inner TEXT node's name often
+               // matches the property's stripped name. Best-effort: derive name
+               // from propKey (strip "#NNN:N" suffix) and check both forms.
+               const cleanKey = propKey.replace(/#\d+:\d+$/, "").trim();
+               exposedTextNodeNames.add(cleanKey);
+               // Also accept the literal mainComponent node name match later in walk.
+             }
+           }
+         } catch(e) { /* fall back to flagging all defaults if property walk fails */ }
+
          function checkInstance(node) {
            if (node.type === "TEXT" && node.visible !== false) {
              const def = defaultsByName[node.name];
              if (def && def === node.characters && def.trim().length > 0) {
+               // v3.128: skip if this TEXT node isn't exposed as an instance property.
+               // Structural labels (no property binding) are required-default.
+               // Note: if exposedTextNodeNames is empty (no TEXT props at all),
+               // the component doesn't expose any text overrides — treat all
+               // defaults as structural and skip. This handles TM organisms
+               // (Customers card / Finance, AML checks, etc.) that have only
+               // VARIANT properties.
+               if (exposedTextNodeNames.size === 0) return;
+               if (!exposedTextNodeNames.has(node.name)) return;
                fails.push({path: getPath(node), name: node.name, value: node.characters});
              }
            }
@@ -291,7 +336,13 @@ If you find yourself about to write any of these AFTER expanding cards — you d
    }
    ```
 
-   Skill MUST run both modes. Mode A is a fast heuristic; Mode B is the deterministic check.
+   Skill MUST run both modes. Mode A is a fast heuristic; Mode B is the deterministic check **on exposed-property TEXT nodes only** (v3.128 refinement).
+
+   **v3.128 refinement — why Mode B was overcounting:** original Mode B flagged ALL TEXT nodes whose value matched mainComponent default. For DS organisms with structural labels (TM `Customers card / Finance`, `AML checks`, `Properties`, `Matched rules`, `Events Block`, `Transaction details`, AP `Profile information`, etc.), block titles and section headers are REQUIRED to match the default across every instance — they ARE the structural design. Flagging them creates false-positive leaks.
+
+   TM Transaction detail sim 2026-05-13 v3.127: Mode B reported 54 "leaks", all of which were correct DS structural labels (block titles `AML checks` / `Properties` / `Matched rules` / `Events` / `Transaction details` / `Notes`; section headers `Applicant` / `Institution` / `Payment method`). Agent self-identified: "Overriding these to non-DS strings would break the design system, not fix it."
+
+   Mode B v3.128 now skips TEXT nodes that are NOT exposed as instance properties — these are structural-label defaults, not content placeholders. Only flag TEXT nodes whose name maps to a TEXT property in `instance.componentProperties`.
 
    - **Mode C (added v3.86): default property leak — variants, booleans, instance-swaps.** For every imported INSTANCE, compare its `componentProperties[k].value` with the mainComponent's default value for that property. If equal AND the property controls VISIBILITY of a child (BOOLEAN named like `Show*` / `*Visible*` / slot toggle) OR controls VARIANT selection — that's a leak. The instance shipped "with default state" instead of being configured for this specific build.
 

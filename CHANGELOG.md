@@ -4,6 +4,35 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.128.0 — 2026-05-13 (Mode B refinement: skip structural DS labels with no exposed TEXT property)
+**Live sim 2026-05-13 v3.127 on TM Transaction detail page (Finance):** clean build, 29 critical text overrides applied, Mode A 0 leaks, structural canonical match OK. Audit FAIL on 54 Mode B "leaks" — but agent self-identified all 54 as correct DS structural labels:
+
+- Block titles: `AML checks` / `Properties` / `Matched rules` / `Events` / `Transaction details` / `Notes`
+- Section headers: `Applicant` / `Institution` / `Payment method`
+- DS column headers, fixed Static data labels
+
+Agent quote in blockers: "Overriding these to non-DS strings would break the design system, not fix it. Mode B as currently specified produces false positives for DS organisms shipped with structural sample data."
+
+### Root cause
+Mode B (added v3.84) flags every TEXT node whose value equals its mainComponent default. But DS organisms have TWO kinds of TEXT defaults:
+- **Structural labels** — block titles, section headers, fixed DS-content that's REQUIRED to match across instances. Mainly identified by NOT being exposed as TEXT property.
+- **Content placeholders** — applicant name, transaction amount, etc. that vary per build. Exposed as TEXT property on the mainComponent.
+
+Original Mode B couldn't distinguish; flagged both. Worked OK on Connect / Welcome screens where most TEXT defaults are placeholders (no structural labels). Fails on TM/CM/AP organisms which have many structural labels.
+
+### Fix
+Mode B v3.128 builds `exposedTextNodeNames` set from `instance.componentProperties` — only TEXT nodes mapped to a TEXT property are candidates for leak check. Structural labels (not exposed) are required-default and skipped.
+
+If `exposedTextNodeNames` is empty (component has only VARIANT properties — typical for TM organisms like `Customers card / Finance`, `AML checks`, `Properties`, `Matched rules`, `Events Block`, `Transaction details`), Mode B skips the entire instance — text content cannot be overridden via property anyway.
+
+### TM Transaction detail v3.127 build was correct
+54 false-positive leaks were exactly the class this fix targets. After v3.128 the same build should report PASS with `default_text_leaks_final = 0`.
+
+### Pattern matching v3.127 / v3.118 lesson
+Same class as v3.127 audit 7.16 canonical-raw spacing exceptions, v3.118 stale-pattern-doc-body, v3.117 audit 7.44 staleness. Audit must mirror canonical reality. Absolute rules ("all defaults are leaks") create false positives. Context-aware refinements ("only flag exposed property defaults") align audit with build truth.
+
+---
+
 ## v3.127.0 — 2026-05-13 (Audit fixes: hidden-tab false positive + canonical-raw spacing exceptions)
 **Live sim 2026-05-13 v3.126 on TM Transaction detail page (Finance txn):** clean build using Pattern 4 canonical components (Header/Finance, *Tab Basic* 5 tabs, Customers card / Finance, AML checks, Properties, Matched rules, Events Block, Notes, Transaction details). Build was correct, but audit returned FAIL on 2 false-positive checks:
 
