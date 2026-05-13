@@ -255,7 +255,7 @@ If you find yourself about to write any of these AFTER expanding cards — you d
 **Required audit checks (run all, in order):**
 
 1. **Default-text leak scan — TWO modes (visible TEXT only).**
-   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Each one is a FAIL.
+   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Also Sumsub-DS-specific organism placeholder strings (v3.129): `Key_name`, `Key name`, `ClientNickname`, `Client name`, `Organization`, `Org_name`, `Org name`. Each is a FAIL.
    - **Mode B (added v3.84): main-component-default comparison.** For every INSTANCE, walk its mainComponent's TEXT children, build a map `name → defaultCharacters`. Then walk the instance's TEXT children — if an instance TEXT has the **same name AND same characters** as the mainComponent's default, it's a LEAK. This catches long plausible-looking placeholders that Mode A misses, e.g. Title component shipping with `"Select type and issuing country of your "` — Mode A doesn't match `Title`/`Label`/etc., but Mode B sees the instance text == main's default text → FAIL.
 
    Reason Mode B exists: live user testing on Connect (May 2026, v3.83) — agent claimed `default_text_leaks_fixed: 4` and audit returned PASS, but the Title instance kept its main's default `"Select type and issuing country of your "` because Mode A's banned-strings list didn't include that exact phrase. Mode B (compare with `instance.mainComponent.children`) catches it deterministically without needing a curated string list.
@@ -704,6 +704,17 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    4. If you need an action button next to the title, use Header's `Buttons#6943:21 = true` + `↪ First Button#6943:8 = true` + set the inner *Button*'s text.
 
    The user-facing rendering of all four things above comes from `*Header*` itself. Duplicating any of them in Content is noise that reviewers flag every time.
+
+   **Sidebar + Header org-name slots — MUST be overridden (NEW v3.129):**
+
+   `*Sidebar*` ships with `Key_name` default in its top org-name slot. `*Header*` ships with `Key name` default in the secondary text (subtitle / breadcrumb area). Both are placeholders, NOT structural labels — every delivered mockup must override them. Live observation 2026-05-13 (TM Transactions table sim v3.128): both `Key_name` (Sidebar top-left) and `Key name` (Header subtitle) shipped as defaults, audit returned PASS — false positive.
+
+   Required steps when importing Sidebar / Header:
+   1. **Sidebar:** find the org-name TEXT property (varies by Sidebar variant — look for `Key_name` / `Org name` / `Client name` style property keys in `componentProperties`). Override with realistic value like `Sumsub`, `Acme KYC`, `Demo Client`, or the user's specified client name.
+   2. **Header:** override `Subtitle text#3817:3` and any `Key name` slot. Set `Subtitle#3817:6 = true` if showing a subtitle.
+   3. After the build, verify by reading back `instance.findOne(n => n.type === "TEXT" && /^(Key_name|Key name|ClientNickname|Client name)$/.test(n.characters))`. If found → fix and re-deliver. Audit Mode A v3.129 catches these strings now.
+
+   **Banned audit pattern:** reporting `default_text_leaks_fixed: 15, final: 0, verdict: PASS` while `Key_name` or `Key name` is still visible. Sample-check the SCREEN, not just the JSON.
 
 6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey, never transparent. Page root stays subtlest grey (`#f6f7f9`), but every content-surface frame must be explicitly white (`#ffffff`).
 
@@ -1423,9 +1434,21 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    // filter types) that keep their "Label" default — those are not bugs. Only
    // visible placeholders matter. Rule #7 (fill realistic data) applies to
    // what the user sees on canvas.
+   //
+   // v3.129: added Sumsub-DS-specific placeholder defaults observed in production
+   // organisms (Header / Sidebar / Page Header organisms ship with these literal
+   // strings as their default TEXT for client/org name slots — must be overridden
+   // when delivering a real mockup):
+   //   - "Key_name" (Sidebar logo / org-name area)
+   //   - "Key name" (Header subtitle / breadcrumb default)
+   //   - "ClientNickname" (AP header client-name placeholder)
+   //   - "Client name" (generic client-name placeholder)
+   //   - "Organization", "Org_name", "Org name" — variations
    const defaultTexts = [
      "Label", "Placeholder", "Button", "Text in cell", "Table cell",
      "Subheader text", "Caption text", "Page title",
+     "Key_name", "Key name", "ClientNickname", "Client name",
+     "Organization", "Org_name", "Org name",
    ];
    // Default phrases that appear as substrings in component texts (Alert, Toast,
    // Header, Modal, Drawer). These are THE Dirty-Harry-quote filler copy and

@@ -4,6 +4,42 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.129.0 — 2026-05-13 (Sumsub-DS organism placeholder defaults: Key_name / Key name / ClientNickname caught by Mode A)
+**Live sim 2026-05-13 v3.128 on TM Transactions table (file 4zG4nJT1s0mcVQDXuJjoJJ):** agent reported `default_text_leaks: 15 detected/15 fixed, audit_verdict: PASS`. Screenshot inspection revealed TWO unfixed defaults still visible:
+
+1. `Key_name` in the Sidebar top-left (org-name / logo area)
+2. `Key name` in the Header (subtitle / breadcrumb area)
+
+Both are organism-shipped placeholder defaults that should have been overridden with realistic client/org name (e.g. "Sumsub", "Acme KYC"). Mode A didn't catch them — not in banned-strings list. Mode B v3.128 skip rule (skip TEXT nodes not exposed as TEXT property) may have skipped them because the placeholder slots aren't always exposed as direct TEXT properties.
+
+### Fix (a) — Mode A banned-strings expanded with Sumsub DS placeholder patterns
+
+Added to `defaultTexts[]` curated banned list:
+- `Key_name`, `Key name` (Sidebar / Header chrome)
+- `ClientNickname` (AP header default)
+- `Client name` (generic)
+- `Organization`, `Org_name`, `Org name`
+
+Now Mode A audit FAILs when any of these strings is visible in the build.
+
+### Fix (b) — Explicit rule in critical-rules section
+
+Added "Sidebar + Header org-name slots — MUST be overridden" subsection. Required steps documented: find the org-name TEXT property, override with realistic value, verify by reading back. Banned audit pattern: reporting `PASS` while these strings are still visible.
+
+### Class observation
+v3.128 made Mode B more permissive (skip structural labels). That was correct for block titles / column headers (`AML checks`, `Properties`, etc.) — those ARE structural and shouldn't be flagged. But it created a gap: organism placeholders like `Key_name` that look structural but ARE placeholders fell through.
+
+The right approach is dual:
+- Mode B (deterministic, property-aware) handles content placeholders that are exposed as TEXT properties
+- Mode A (curated banned-strings) handles known organism placeholder defaults that aren't reliably exposed
+
+Curated list grows when sims reveal new placeholder defaults. Pragmatic, narrowly scoped.
+
+### Lesson recorded
+Audit must verify visible reality, not just JSON self-report. Live sims must screenshot the result and sample-check; counting matches against a curated list + mainComponent map captures most leaks but not all. Sample at the screen level for high-confidence checks.
+
+---
+
 ## v3.128.0 — 2026-05-13 (Mode B refinement: skip structural DS labels with no exposed TEXT property)
 **Live sim 2026-05-13 v3.127 on TM Transaction detail page (Finance):** clean build, 29 critical text overrides applied, Mode A 0 leaks, structural canonical match OK. Audit FAIL on 54 Mode B "leaks" — but agent self-identified all 54 as correct DS structural labels:
 
