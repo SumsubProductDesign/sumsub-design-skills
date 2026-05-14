@@ -4,6 +4,33 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.130.0 — 2026-05-14 (TM Pattern 3 Rule Editor: canonical has sidebar, 88 padding raw, Radiobutton defaults caught)
+**Live sim 2026-05-14 v3.129 on TM Create rule page (file `bbp6LvphVT5J6QytzGJY6z`):** clean build mostly, but screenshot revealed three issues:
+
+1. **Radio buttons labeled "Radio button" / "Radio button"** — default Radiobutton mainComponent text NOT in Mode A `defaultTexts[]`. Visible in delivered mockup. Audit reported PASS.
+2. **Main content used `spacing/3xl=32` padding instead of canonical 88** — agent flagged in Q3: "Wrapper inner form uses spacing/3xl (32) padding on Main content instead of canonical 88 (no DS token for 88). Visual: form is 60px wider than canonical." Same canonical-deviation class as v3.127 spacing 40/48/64.
+3. **TM Pattern 3 doc claimed "no sidebar"** — agent observed canonical has 52px collapsed Sidebar at x=0, matched canonical (right call), flagged the doc discrepancy in Q1. Same class as v3.118 AP fix where stale pattern doc lied about sidebar.
+
+### Fix (a) — Mode A: Radiobutton / Checkbox defaults
+`defaultTexts[]` expanded with `Radio button`, `Radiobutton`, `Checkbox`, `Check box`. Now any visible TEXT with these strings = audit FAIL.
+
+### Fix (b) — CANONICAL_RAW_SPACING_VALUES extended to include 88
+Previously `[40, 48, 64]` (TM Pattern 4). Now `[40, 48, 64, 88]`. Canonical TM Pattern 3 uses 88 padding on Main content — no `spacing/4xl=88` DS token exists. Builds matching canonical 88 raw should pass audit.
+
+### Fix (c) — TM Pattern 3 doc corrected
+`tm-layout-patterns.md` Pattern 3 rewritten:
+- Pre-v3.130: "No sidebar, Main 1000 + Settings 440 = 1440"
+- v3.130 reality: "52px Sidebar + 1388 wrapper (Header chrome 56h + Body) at x=52. 52 + 1388 = 1440."
+- Canonical confirmed from `bbp6LvphVT5J6QytzGJY6z/82:11585`: root 1440×902, Sidebar 52×902 at (0,0), Header+body 1388×902 at (52,0).
+
+### Open items NOT in v3.130 (caught visually, deferred)
+- **Two "Linked levels" buttons at top right** — likely Header property duplicate or one is leaked default. Need property inspection of `Rules / header` (custom Rule editor header) to verify second button label. Possibly a Header *Button* with no override applied. Note in audit but not block.
+
+### Class observation
+TM Rule Editor build was mostly correct (audit PASS), but two false-positive PASSes again (Radio button + 88 padding + sidebar-vs-doc). Same pattern as recent sims — agent matches canonical, audit's absolute rules fail the canonical-correct build. Repeated fix: align audit with canonical, not absolutes.
+
+---
+
 ## v3.129.0 — 2026-05-13 (Sumsub-DS organism placeholder defaults: Key_name / Key name / ClientNickname caught by Mode A)
 **Live sim 2026-05-13 v3.128 on TM Transactions table (file 4zG4nJT1s0mcVQDXuJjoJJ):** agent reported `default_text_leaks: 15 detected/15 fixed, audit_verdict: PASS`. Screenshot inspection revealed TWO unfixed defaults still visible:
 

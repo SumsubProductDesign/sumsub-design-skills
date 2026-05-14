@@ -255,7 +255,7 @@ If you find yourself about to write any of these AFTER expanding cards — you d
 **Required audit checks (run all, in order):**
 
 1. **Default-text leak scan — TWO modes (visible TEXT only).**
-   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Also Sumsub-DS-specific organism placeholder strings (v3.129): `Key_name`, `Key name`, `ClientNickname`, `Client name`, `Organization`, `Org_name`, `Org name`. Each is a FAIL.
+   - **Mode A: short-stub strings.** Find every TEXT node WHERE `visibleToRoot()` is true AND `characters` matches: `Label`, `Title`, `Subtitle`, `Slot component`, `Text`, `Caption`, `Placeholder`, `Button`, `Number`, `Tab`, `Item`, `123`. Also Sumsub-DS-specific organism placeholder strings: `Key_name`, `Key name`, `ClientNickname`, `Client name`, `Organization`, `Org_name`, `Org name` (v3.129). Plus form-control defaults: `Radio button`, `Radiobutton`, `Checkbox`, `Check box` (v3.130). Each is a FAIL.
    - **Mode B (added v3.84): main-component-default comparison.** For every INSTANCE, walk its mainComponent's TEXT children, build a map `name → defaultCharacters`. Then walk the instance's TEXT children — if an instance TEXT has the **same name AND same characters** as the mainComponent's default, it's a LEAK. This catches long plausible-looking placeholders that Mode A misses, e.g. Title component shipping with `"Select type and issuing country of your "` — Mode A doesn't match `Title`/`Label`/etc., but Mode B sees the instance text == main's default text → FAIL.
 
    Reason Mode B exists: live user testing on Connect (May 2026, v3.83) — agent claimed `default_text_leaks_fixed: 4` and audit returned PASS, but the Title instance kept its main's default `"Select type and issuing country of your "` because Mode A's banned-strings list didn't include that exact phrase. Mode B (compare with `instance.mainComponent.children`) catches it deterministically without needing a curated string list.
@@ -1449,6 +1449,10 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      "Subheader text", "Caption text", "Page title",
      "Key_name", "Key name", "ClientNickname", "Client name",
      "Organization", "Org_name", "Org name",
+     // v3.130: Sumsub Radiobutton / Checkbox component defaults observed on
+     // Rule editor sim 2026-05-14 — radio labels left at "Radio button" string.
+     "Radio button", "Radiobutton",
+     "Checkbox", "Check box",
    ];
    // Default phrases that appear as substrings in component texts (Alert, Toast,
    // Header, Modal, Drawer). These are THE Dirty-Harry-quote filler copy and
@@ -1539,7 +1543,10 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    // Sumsub Base spacing tokens stop at spacing/3xl=32; no spacing/4xl/5xl/6xl.
    // Marking these as unbound creates false positives. They're acceptable-raw —
    // canonical itself is unbound at the same values.
-   const CANONICAL_RAW_SPACING_VALUES = [40, 48, 64];  // expand as more canonical patterns observed
+   // v3.130: TM Pattern 3 Rule Editor canonical uses 88 padding on Main content
+   // (no spacing/4xl=88 DS token). Added so audit 7.16 doesn't fail when build
+   // matches canonical 88-padding exactly.
+   const CANONICAL_RAW_SPACING_VALUES = [40, 48, 64, 88];
    const spacingProps = ["paddingLeft","paddingRight","paddingTop","paddingBottom","itemSpacing"];
    const radiusProps = ["topLeftRadius","topRightRadius","bottomLeftRadius","bottomRightRadius"];
    const unboundBy = {}; // aggregate by frame to avoid spam

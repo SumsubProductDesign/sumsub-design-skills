@@ -62,30 +62,36 @@ Root (1440 × 1154+ scrollable)
 
 ---
 
-## Pattern 3 — Rule Editor (Full-Screen Builder, No Sidebar)
+## Pattern 3 — Rule Editor (Collapsed Sidebar + Full-Width Header)
 
-> Used for: **Rule page 2.0** (Create/Edit rule flow).
-> Full-screen editor — no global Sidebar. Similar to global `Pattern D` in `case-management-pattern.md`.
+> Used for: **Rule page 2.0** (Create/Edit rule flow), file `bbp6LvphVT5J6QytzGJY6z`.
+
+⚠️ **Corrected v3.130** — pre-v3.130 docs claimed "no sidebar". **Canonical actually has 52px collapsed `*Sidebar*` at x=0** with `Type=<contextual>` + `Collapsed=True`. Same lesson as v3.118 AP fix: when pattern doc and canonical disagree, canonical wins, doc gets updated.
 
 ```
 Root (1440 × 902+, scrollable)
-├── *Header Full Screen Page*  (1440 × 64, x=0, y=0)  ← full-width, NO sidebar
-└── Body (1440 × h, x=0, y=64)
-    └── Page Content (HORIZONTAL, gap=64)
-        ├── Main content  (1000px, paddingL=88, paddingR=88)
-        │   └── Wrapper  (824px = 1000 - 88×2 — rule form content)
-        └── Settings panel  (440px — right panel, sticky)
+├── *Sidebar*                     (52 × 902, x=0, y=0, Collapsed=True)
+└── Header + body wrapper         (1388 × 902, x=52, y=0)
+    ├── *Header*                  (1388 × 56, custom Rule editor header chrome)
+    └── Body (1388 × h, y=56)
+        └── Page Content (HORIZONTAL)
+            ├── Main content  (≈964px, paddingL=88, paddingR=88, inner ≈788px)
+            └── Settings panel (≈440px — right panel, sticky)
 ```
 
-**Layout math:** 1000 + 440 = 1440 ✓
-**Inner form width:** 1000 - 88 - 88 = **824px**
+**Layout math:** 52 + 1388 = 1440 ✓
+**Inner: 52 (Sidebar) + (Main + Settings = 1388, NO gap between) = 1440**
 
-**Confirmed from `bbp6LvphVT5J6QytzGJY6z`:**
+**Confirmed from `bbp6LvphVT5J6QytzGJY6z` canonical 82:11585:**
+- Frame name: `Create rule`, root 1440×902
+- Sidebar: 52×902 at (0, 0), Collapsed=True
+- Header + body: 1388×902 at (52, 0), wraps header chrome + body
+- Header chrome: 1388×56 at top (custom Rule editor header, NOT standard *Header* 64-high)
+- Body: 1388 × scroll-height starts at y=56
+- Page Content inside Body: HORIZONTAL split between Main content + Settings panel
 - Screen height varies with content: 902 / 1087 / 1294 / 1449 / 2246px
-- Frame names: `Create rule`
-- Body child: `Page Content` (HORIZONTAL, gap=64) at x=0
-- Left `Main content` has `paddingLeft=88, paddingRight=88, gap=10`
-- Right `Settings` panel: w=440, h=954
+
+**88 padding on Main content:** canonical uses raw 88 (no `spacing/4xl=88` token exists in DS). Added to `CANONICAL_RAW_SPACING_VALUES` so audit 7.16 doesn't fail. Keep canonical 88 raw, don't substitute with `spacing/3xl=32` — that creates 60px wider inner form.
 
 ---
 
