@@ -4,6 +4,26 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.131.0 — 2026-05-14 (CM Pattern C Blueprint editor: hard-ban 257 expanded Sidebar when editor header present)
+**Live sim 2026-05-14 v3.130 on CM Blueprint editor (file `dtgJZJmVO1VPCr3fI5MohS`):** agent imported `*Sidebar* Type=Case management, Collapsed=False, w=257` and `Blueprint header 1183×112 at x=257`. Canonical Blueprint header is exclusively `1388×112 at x=52` OR `1440×112 at x=0`. Never `1183×112 at x=257`. Frankenstein layout — Pattern A sidebar + Pattern C header.
+
+### Fix (a) — case-management-pattern.md Pattern C rewritten with HARD RULE
+- v3.131 HARD RULE: Pattern C uses COLLAPSED 52 Sidebar, NEVER 257 expanded
+- Banned outputs enumerated: `*Sidebar* Collapsed=False`, `*Header*` standard, `1183×112` dimensions
+- Pattern keyword detection: "blueprint editor", "edit blueprint", "create blueprint", "rule editor", "create rule", "edit rule" → Pattern C / Pattern 3 (52 Sidebar)
+- Body+Side split banned: Blueprint body is single organism 1388 wide
+
+### Fix (b) — Audit check 7.49 — pattern-c-editor-needs-collapsed-sidebar
+New audit: if INSTANCE with key in `editorHeaderKeys` set is on page + any sibling `*Sidebar*` INSTANCE has `width >= 200` → FAIL with explicit fix instructions. Currently `editorHeaderKeys` includes Blueprint header (`304aa0d1...`). Expand as more editor-page headers observed (TM Rule editor, Workflow Builder, etc.).
+
+### Pattern recognition lesson
+Agent has strong prior for Pattern A (default list with 257 sidebar). When user prompt says "editor" / "builder" / "setup", agent must override the prior to Pattern C. Same class as v3.122 banned-Sidebar-on-AP — text rule loses to prior, audit is the structural backstop.
+
+### Reported but not addressed in v3.131
+User mentioned "black background instead of white" — not visible in inspected screenshot at scaled-down view of the 1440×2726 page. Either in a part not shown, or refers to section frame #404040 (intentional convention). Pending user clarification.
+
+---
+
 ## v3.130.0 — 2026-05-14 (TM Pattern 3 Rule Editor: canonical has sidebar, 88 padding raw, Radiobutton defaults caught)
 **Live sim 2026-05-14 v3.129 on TM Create rule page (file `bbp6LvphVT5J6QytzGJY6z`):** clean build mostly, but screenshot revealed three issues:
 

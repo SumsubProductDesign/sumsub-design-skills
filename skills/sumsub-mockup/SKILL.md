@@ -2285,6 +2285,43 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      }
    }
 
+   // 7.49. Pattern C / Pattern 3 editor pages — banned 257 expanded Sidebar (v3.131).
+   // When a build includes a Pattern-C / Pattern-3 specific header organism (Blueprint
+   // header `304aa0d104cb87315bf1a6578681b6b266bc70ee`, or TM Rules / header
+   // file-local), the Sidebar MUST be the COLLAPSED 52-wide variant, not the
+   // 257-wide expanded variant. Mixing Pattern A sidebar (257) with Pattern C
+   // header creates a Frankenstein layout that doesn't match canonical anywhere.
+   //
+   // Observed sim 2026-05-14 v3.130 (CM Blueprint editor): agent imported
+   // `*Sidebar* Type=Case management, Collapsed=False, w=257` plus Blueprint header
+   // at x=257 width 1183. Canonical Blueprint header is exclusively at
+   // x=52 width 1388 OR x=0 width 1440. Never x=257 width 1183.
+   const editorHeaderKeys = new Set([
+     "304aa0d104cb87315bf1a6578681b6b266bc70ee",  // CM Blueprint header
+     // Add other editor-page header keys as observed (TM Rule editor, Workflow Builder, etc.)
+   ]);
+   for (const node of all) {
+     if (node.type !== "INSTANCE" || !node.mainComponent) continue;
+     const mainKey = node.mainComponent.key;
+     if (!editorHeaderKeys.has(mainKey)) continue;
+     // Found an editor-page header. Search the same root for a *Sidebar* INSTANCE.
+     let rootFrame = node;
+     while (rootFrame.parent && rootFrame.parent.type !== "PAGE" && rootFrame.parent.type !== "SECTION") {
+       rootFrame = rootFrame.parent;
+     }
+     if (!rootFrame.children) continue;
+     for (const child of rootFrame.children) {
+       try {
+         if (child.type === "INSTANCE" && /\*Sidebar\*/.test(child.mainComponent?.name || "")) {
+           // Detect if it's the 257-expanded variant
+           if (child.width >= 200) {
+             issues.push(`7.49 pattern-c-editor-needs-collapsed-sidebar: frame "${rootFrame.name}" has Pattern-C editor header ("${node.mainComponent.name}") but uses EXPANDED Sidebar (w=${Math.round(child.width)}). Pattern C / Pattern 3 require COLLAPSED 52-wide Sidebar. Re-import sidebar with variant Collapsed=True, set width 52. Position Blueprint header at x=52 width 1388 (NOT x=257 width 1183). See case-management-pattern.md Pattern C / tm-layout-patterns.md Pattern 3.`);
+           }
+         }
+       } catch(e) { /* skip */ }
+     }
+   }
+
    // 7.47. Root must contain ALL children — auto-expand root height (v3.126).
    // Observed sim 2026-05-13: agent built AP root at 1440x900 default, placed
    // Body instance of height 13744 inside. Root didn't auto-expand → content

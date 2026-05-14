@@ -124,26 +124,46 @@ Layout sum: `0 + 992 + 0 + 424 + 24 = 1440` ✓
 
 ## Pattern C — Editor / Builder (collapsed Sidebar 52 + custom 112 header)
 
-> Used for: **Blueprint detail page** in `dtgJZJmVO1VPCr3fI5MohS`.
-> Variant of `Pattern 2 — Detail Full-Screen Page` from `layout-patterns.md`, but with a 112px header instead of 152px.
+> Used for: **Blueprint editor / Edit blueprint / Create blueprint** in `dtgJZJmVO1VPCr3fI5MohS`.
+
+⚠️ **v3.131 HARD RULE — Pattern C uses COLLAPSED 52 Sidebar, NEVER 257 expanded.**
+
+Pre-v3.131 sim 2026-05-14: agent imported `*Sidebar*` with `Type=Case management, Collapsed=False, w=257` and `Blueprint header 1183×112 at x=257` (Pattern A layout applied to a Pattern C page). Canonical Blueprint header is exclusively `1388×112 at x=52` OR `1440×112 at x=0`. Never `1183×112 at x=257`.
 
 ```
 Root (1440 × 900+, scrollable)
-├── *Sidebar*  (52 × 900, COLLAPSED variant)         ← own left column
+├── *Sidebar*  (52 × 900+, Collapsed=True)           ← HARD-REQUIRED, NOT 257 expanded
 ├── Blueprint header  (1388 × 112)                   ← x=52, full remaining width
 └── Content  (1388 × scrollable)                     ← x=52, y=112
-    └── (blueprint editor blocks: overview / case content / routing / etc.)
+    └── Blueprint body INSTANCE  (1388 × scroll)     ← single organism, NOT Body+Side split
 ```
 
-**Confirmed dimensions** from `Blueprint settings - Edit blueprint`:
-- `*Sidebar* 52 × 900` (collapsed)
-- `Blueprint header` INSTANCE: `1388 × 112` at x=52, y=0
+**Confirmed dimensions** from canonical `dtgJZJmVO1VPCr3fI5MohS`:
+- `*Sidebar* 52 × 900` (Collapsed=True) at x=0
+- `Blueprint header` INSTANCE: `1388 × 112` at x=52, y=0 (key `304aa0d104cb87315bf1a6578681b6b266bc70ee`)
 - `Content` FRAME: `1388 × 1330` (scrollable) at x=52, y=112
-- `Scroll / Thumb` overlay for visual scroll indicator: `6 × 380`
+- Inside Content: `Blueprint body` INSTANCE (key `ba1944a3ab5236a21edf7c7319a3ac232914326d`) — single organism, full 1388 wide
 
 **Layout sum:** 52 + 1388 = 1440 ✓
 
-**Blueprint header** is a CM-specific component (key `304aa0d104cb87315bf1a6578681b6b266bc70ee`), NOT the standard `*Header*`. Don't use the generic Header here.
+### Banned in Pattern C (v3.131)
+
+- `*Sidebar* Type=Case management, Collapsed=False` (257 wide) → use `Collapsed=True` (52 wide)
+- `*Header*` standard component → use file-local `Blueprint header` (key `304aa0d104cb87315bf1a6578681b6b266bc70ee`)
+- Body+Side split (Pattern B-style Case page layout 992+424) → use single `Blueprint body` 1388 wide. Reviewer/Maker role panels live INSIDE the Blueprint body organism, NOT as separate side column.
+- `1183 × 112` header (Pattern A wrapper width) — canonical Blueprint header is `1388 × 112` only.
+
+### Pattern keyword detection — agent must use Pattern C when user prompt contains
+
+- "blueprint editor", "edit blueprint", "create blueprint", "blueprint page"
+- "rule editor", "create rule", "edit rule" (this is **TM Pattern 3**, structurally identical: Sidebar 52 collapsed + 1388 wrapper)
+- General pattern: editor / builder / setup page with **dedicated single-purpose content** (not a list, not a detail-with-related-cases)
+
+If unsure between Pattern A (list with full sidebar) and Pattern C (editor with collapsed sidebar):
+1. Inspect canonical source file for the page being built
+2. List pages (e.g. "Settings - Blueprints" table, "All cases" table) → Pattern A (257 sidebar)
+3. Edit / create / configure pages → Pattern C (52 sidebar)
+4. If still ambiguous → ASK user before defaulting
 
 ---
 
