@@ -4,6 +4,35 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.133.0 — 2026-05-15 (CM Pattern D corrected: Drawer LEFT, not RIGHT)
+**Live sim 2026-05-15 v3.132 on CM Report template builder:** clean build, but maintainer's first review wrongly called it "inverted layout" comparing to pattern doc. Inspected canonical (`86VzYfJdRwSvvpdJ2cGsX0/3234:70980`) — turns out canonical is:
+
+- `*Drawer Basic*` at **x=0, y=56, w=400, h=844** — LEFT permanent column with field picker
+- `Report builder fields` instance inside main wrapper at **x=400 w=1040** (Main RIGHT, with 200/200 horizontal padding centering 640-wide fields)
+- Header chrome 1440×56 full-width at top
+
+Pre-v3.133 pattern doc claimed Content on LEFT + Drawer on RIGHT (`x=1040`). That was WRONG. Agent in v3.132 sim correctly followed canonical with Drawer on LEFT — pattern doc misled the audit/review.
+
+### Fix — `case-management-pattern.md` Pattern D rewritten
+- **Drawer Basic on LEFT** (x=0, w=400), not right
+- **Main content on RIGHT** (x=400, w=1040), inner padding 200/200 around Report builder fields 640
+- Banned outputs documented: drawer on right (x=1040) is Cross-Check Rules Advance test pattern, not Report builder. Don't substitute.
+- Decision tree updated.
+
+### Class observation
+Fourth stale-pattern-doc correction in the canonical-vs-doc series:
+- v3.118 — AP Pattern 2 (no Sidebar 52, doc said 52)
+- v3.130 — TM Pattern 3 (has Sidebar 52, doc said no sidebar)
+- v3.131/132 — CM Pattern C TWO variants (Edit w/ 52, New w/o)
+- v3.133 — CM Pattern D (Drawer LEFT, doc said RIGHT)
+
+Pattern: when reviewer compares build to pattern doc and detects "deviation", FIRST check canonical to verify doc is current. Agent following canonical is correct behavior; stale doc is the bug.
+
+### Lesson recorded
+Reviewer / maintainer must validate against canonical, not just against pattern doc, before flagging the agent for "wrong layout". 4 false-flags in this saga where agent matched canonical but doc had drifted.
+
+---
+
 ## v3.132.0 — 2026-05-15 (CM Pattern C clarification: TWO valid canonical variants — Edit (52 sidebar) and New (no sidebar))
 **Live sim 2026-05-15 v3.131 retry on CM Blueprint editor:** clean build, visually correct. Agent correctly identified that canonical "Blueprint settings - New blueprint" (frame `5131:59952`) uses the **no-sidebar** variant with full-width 1440 Blueprint header. v3.131 HARD RULE phrasing said "Pattern C uses COLLAPSED 52 Sidebar" — too strict. Audit 7.49 actually correctly allows no-sidebar (fails only when Sidebar present AND wide), but pattern doc text contradicted itself.
 

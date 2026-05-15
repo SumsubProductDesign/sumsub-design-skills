@@ -185,26 +185,35 @@ If unsure between Pattern A (list with full sidebar) and Pattern C (editor with 
 
 ---
 
-## Pattern D — Full-Screen Builder (no Sidebar, full-width 64 header, drawer)
+## Pattern D — Full-Screen Builder (no Sidebar, full-width header, drawer LEFT)
 
 > Used for: **Edit / Create report template** in `86VzYfJdRwSvvpdJ2cGsX0`.
 
+⚠️ **v3.133 corrected from pre-v3.132 doc:** Drawer is on the **LEFT** (x=0), not the right. Content/Main is on the RIGHT (x=400). Pre-v3.133 docs claimed the opposite; canonical inspection 2026-05-15 (`86VzYfJdRwSvvpdJ2cGsX0/3234:70980`) confirmed Drawer Basic at x=0 w=400, Report builder fields inside main wrapper at x=400 w=1040.
+
 ```
 Root (1440 × 900)
-├── *Header Full Screen Page*  (1440 × 64)           ← full-width chrome with breadcrumbs
-└── (below header)
-    ├── Content  (1040 × 836)                         ← x=0, y=64. Form / report fields
-    └── *Drawer Basic*  (400 × 836)                   ← x=1040, y=64. Field picker
+├── Header chrome  (1440 × 56)                       ← full-width breadcrumbs / actions
+└── (below header, y=56)
+    ├── *Drawer Basic*  (400 × 844)                   ← x=0, y=56. PERMANENT LEFT column with field picker
+    └── Content / Main  (1040 × 844)                  ← x=400, y=56. Form / report fields, inner padding ~200/200
+        └── Report builder fields  (640 × ...)         ← centered inside main, x=200 relative
 ```
 
-**Confirmed dimensions** from `New report template`:
-- `*Header Full Screen Page* 1440 × 64`
-- `Content 1040 × 836`
-- `*Drawer Basic* 400 × 836` (NOT an overlay — full-height column)
+**Confirmed dimensions** from canonical `Create report template` / `Edit report template`:
+- Header chrome: `1440 × 56` at (0, 0)
+- `*Drawer Basic*`: `400 × 844` at (0, 56) — LEFT permanent column (NOT overlay, no scrim/tint)
+- Main wrapper: `1040 × 844` at (400, 56)
+- `Report builder fields` INSTANCE: `640 × scroll` at (200, 24) relative to main (centered with 200/200 horizontal padding)
 
-**Layout sum:** 1040 + 400 = 1440 ✓
+**Layout sum:** 400 + 1040 = 1440 ✓
 
-This is **the only CM pattern where the drawer is a permanent right column**, not a modal overlay. Use for builder/editor flows where reference content needs to stay visible.
+This is **the only CM pattern where the drawer is a permanent column**, not a modal overlay. Drawer is on the LEFT (field picker / available fields), Content on the RIGHT (form / build area being authored).
+
+### Banned in Pattern D
+- Drawer on the RIGHT side (x=1040) — that's Cross-Check Rules Advance test pattern, NOT Report template builder. Don't substitute.
+- Modal-style drawer with Tint/scrim — Drawer is permanent column, no modal behavior.
+- Standard `*Header*` 64-tall — Report builder uses custom 56-tall full-width header chrome.
 
 ---
 
@@ -222,7 +231,7 @@ What kind of CM screen?
 │   → Pattern C (sidebar 52 + Blueprint header 112 + Content 1388)
 │
 └── Editing a report template (Create / Edit)
-    → Pattern D (Header Full Screen Page 64 + Content 1040 + Drawer 400)
+    → Pattern D (Header chrome 56 + Drawer 400 LEFT + Main 1040 RIGHT)
 ```
 
 ---
