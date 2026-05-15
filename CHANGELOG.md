@@ -4,6 +4,26 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.132.0 — 2026-05-15 (CM Pattern C clarification: TWO valid canonical variants — Edit (52 sidebar) and New (no sidebar))
+**Live sim 2026-05-15 v3.131 retry on CM Blueprint editor:** clean build, visually correct. Agent correctly identified that canonical "Blueprint settings - New blueprint" (frame `5131:59952`) uses the **no-sidebar** variant with full-width 1440 Blueprint header. v3.131 HARD RULE phrasing said "Pattern C uses COLLAPSED 52 Sidebar" — too strict. Audit 7.49 actually correctly allows no-sidebar (fails only when Sidebar present AND wide), but pattern doc text contradicted itself.
+
+### Fix — case-management-pattern.md Pattern C rewritten with TWO valid variants
+- **Variant 1 — "Edit blueprint"**: 52 collapsed Sidebar + Blueprint header 1388×112 at x=52 + Blueprint body 1388 wide
+- **Variant 2 — "New / Create blueprint"**: no Sidebar + Blueprint header 1440×112 at x=0 + Blueprint general settings 1440 wide
+
+Component keys documented:
+- `Blueprint header` `304aa0d1...` (variants: `BP created=Yes` for Edit, `BP created=No` for New)
+- `Blueprint body` `ba1944a3...` (Edit variant content)
+- `Blueprint general settings` `176257c2...` (New variant initial setup form)
+
+Variant selection rule documented: user prompt "edit" / "existing" → Variant 1; "create" / "new" / no qualifier → Variant 2 (more typical first state). v3.131 HARD RULE wording corrected — was "ALWAYS 52 sidebar", now "52 OR no sidebar, NEVER 257".
+
+### Open backlog
+- **Deep-nested setProperties unreliable** — v3.131 sim observed Textarea Basic label override 3+ levels deep didn't persist after MCP boundary. Build limitation, not audit issue. Workaround: walk to TEXT node, set `.characters` directly. Add SKILL.md guidance when next sim hits this.
+- **"Description" as legitimate form field label** — Mode B may flag it as default-text-equals-mainComponent-default, but in form-field context it's a real label. Tolerate as known false-positive minor, don't expand exception list yet.
+
+---
+
 ## v3.131.0 — 2026-05-14 (CM Pattern C Blueprint editor: hard-ban 257 expanded Sidebar when editor header present)
 **Live sim 2026-05-14 v3.130 on CM Blueprint editor (file `dtgJZJmVO1VPCr3fI5MohS`):** agent imported `*Sidebar* Type=Case management, Collapsed=False, w=257` and `Blueprint header 1183×112 at x=257`. Canonical Blueprint header is exclusively `1388×112 at x=52` OR `1440×112 at x=0`. Never `1183×112 at x=257`. Frankenstein layout — Pattern A sidebar + Pattern C header.
 

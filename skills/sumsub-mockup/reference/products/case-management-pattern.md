@@ -126,25 +126,43 @@ Layout sum: `0 + 992 + 0 + 424 + 24 = 1440` ✓
 
 > Used for: **Blueprint editor / Edit blueprint / Create blueprint** in `dtgJZJmVO1VPCr3fI5MohS`.
 
-⚠️ **v3.131 HARD RULE — Pattern C uses COLLAPSED 52 Sidebar, NEVER 257 expanded.**
+⚠️ **HARD RULE — Pattern C: COLLAPSED 52 Sidebar OR no Sidebar at all, NEVER 257 expanded.**
 
-Pre-v3.131 sim 2026-05-14: agent imported `*Sidebar*` with `Type=Case management, Collapsed=False, w=257` and `Blueprint header 1183×112 at x=257` (Pattern A layout applied to a Pattern C page). Canonical Blueprint header is exclusively `1388×112 at x=52` OR `1440×112 at x=0`. Never `1183×112 at x=257`.
+Canonical Blueprint editor has **TWO valid variants** (v3.132 clarification, observed in canonical):
+
+| Variant | Page name in source | Sidebar | Blueprint header |
+|---|---|---|---|
+| **Variant 1 — Edit blueprint** | "Blueprint settings - Edit blueprint" | 52 collapsed at x=0 | 1388×112 at x=52 |
+| **Variant 2 — New / Create blueprint** | "Blueprint settings - New blueprint" | none | 1440×112 at x=0 (full-width) |
+
+Both are canonical. Audit 7.49 allows both (fails only when `*Sidebar*` present AND `width≥200`).
+
+Pre-v3.131 sim 2026-05-14 was wrong because agent built `*Sidebar* Collapsed=False, w=257` with `Blueprint header 1183×112 at x=257`. That matches NEITHER canonical variant. v3.131 banned it.
 
 ```
+Variant 1 — Edit blueprint (52 sidebar present):
 Root (1440 × 900+, scrollable)
-├── *Sidebar*  (52 × 900+, Collapsed=True)           ← HARD-REQUIRED, NOT 257 expanded
-├── Blueprint header  (1388 × 112)                   ← x=52, full remaining width
-└── Content  (1388 × scrollable)                     ← x=52, y=112
-    └── Blueprint body INSTANCE  (1388 × scroll)     ← single organism, NOT Body+Side split
+├── *Sidebar*  (52 × 900+, Collapsed=True)
+├── Blueprint header  (1388 × 112, x=52)
+└── Content  (1388 × scrollable, x=52)
+    └── Blueprint body INSTANCE  (1388 × scroll)
+
+Variant 2 — New / Create blueprint (no sidebar):
+Root (1440 × 900+, scrollable)
+├── Blueprint header  (1440 × 112, x=0, full-width)
+└── Content  (1440 × scrollable, x=0)
+    └── Blueprint general settings  (1440 × scroll)
 ```
 
-**Confirmed dimensions** from canonical `dtgJZJmVO1VPCr3fI5MohS`:
-- `*Sidebar* 52 × 900` (Collapsed=True) at x=0
-- `Blueprint header` INSTANCE: `1388 × 112` at x=52, y=0 (key `304aa0d104cb87315bf1a6578681b6b266bc70ee`)
-- `Content` FRAME: `1388 × 1330` (scrollable) at x=52, y=112
-- Inside Content: `Blueprint body` INSTANCE (key `ba1944a3ab5236a21edf7c7319a3ac232914326d`) — single organism, full 1388 wide
+**Component keys:**
+- `Blueprint header`: `304aa0d104cb87315bf1a6578681b6b266bc70ee` (variants: `BP created=Yes` for Edit, `BP created=No` for New)
+- `Blueprint body`: `ba1944a3ab5236a21edf7c7319a3ac232914326d` (Edit variant content)
+- `Blueprint general settings`: `176257c2384cabe2db5319159678a1428d6d9f0c` (New variant — initial setup form)
 
-**Layout sum:** 52 + 1388 = 1440 ✓
+**Variant selection rule:**
+- User prompt "Edit blueprint" / "Blueprint editor" (editing existing) → Variant 1 (52 sidebar)
+- User prompt "Create blueprint" / "New blueprint" / no qualifier → Variant 2 (no sidebar). The "New" variant is more typical first state.
+- If unsure → check user prompt for "edit" / "existing" keywords; default to Variant 2 if no edit context.
 
 ### Banned in Pattern C (v3.131)
 
