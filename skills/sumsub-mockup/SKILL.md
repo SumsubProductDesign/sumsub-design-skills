@@ -229,6 +229,22 @@ Detect which by reading the property type on YOUR file's instance, not on canoni
 2. If empty (no INSTANCE child, only hidden placeholder TEXT) → audit FAIL
 3. Message: "Expanded card '${cardName}' has empty Content slot. Populate via organism instance from the Organism-per-section map. Hiding the Slot placeholder ≠ filling the slot."
 
+**v3.135 extension — applies to Base `*Collapsible Card*` too, not just AP `APCardCollapsible`:**
+
+Live KYB Level editor sim 2026-05-18 v3.134: agent expanded 2 `*Collapsible Card*` (Base, key `db0df8e75407eeebbf40e0762905eec0d3691851`) with `Expanded=Yes`, left default `Card content` placeholder visible. Agent reported `audit_verdict: PASS — 0 user-visible residual` while screenshot showed `Card content` text twice on canvas.
+
+Banned behaviors v3.135:
+- Visible `Card content` text in any expanded `*Collapsible Card*` instance → FAIL
+- `*Collapsible Card*` with `Expanded=Yes` and Content slot containing only the default placeholder TEXT or empty FRAME → FAIL
+
+**Build rule:** when importing `*Collapsible Card*` (Base) with `Expanded=Yes`, fill its Content slot with real content matching the section type:
+- KYB Level "General" card → form fields (level name input, description, WebSDK select, country settings) — match canonical `General / Default` organism (file-local) or build with Base form components
+- KYB Level "Step" cards (Company data / Phone verification / etc.) → step-specific config fields matching canonical step screens
+
+If you don't know what content goes inside an expanded card → check canonical source file for an expanded version of the same card type, OR ask user, but NEVER ship with `Card content` placeholder visible.
+
+**Audit Mode A** catches `Card content` as banned string in `defaultTexts[]` (added v3.135).
+
 **Banned question patterns:**
 - "Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю"
 - "I only filled headers + status. Should I add content inside the cards?"
@@ -1453,6 +1469,11 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      // Rule editor sim 2026-05-14 — radio labels left at "Radio button" string.
      "Radio button", "Radiobutton",
      "Checkbox", "Check box",
+     // v3.135: Base *Collapsible Card* ships with "Card content" placeholder
+     // in its Content slot when expanded. Observed KYB Level editor sim 2026-05-18:
+     // agent expanded 2 cards but left default "Card content" placeholder visible.
+     // Audit reported PASS — false positive. Now caught by Mode A.
+     "Card content",
    ];
    // Default phrases that appear as substrings in component texts (Alert, Toast,
    // Header, Modal, Drawer). These are THE Dirty-Harry-quote filler copy and

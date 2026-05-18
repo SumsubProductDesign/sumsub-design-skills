@@ -4,6 +4,28 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.135.0 — 2026-05-18 (Base *Collapsible Card* "Card content" placeholder caught by Mode A)
+**Live sim 2026-05-18 v3.134 KYB Level editor retest:** layout now correct (NO Sidebar, KYB Headers 1440×120, Body 640 centered, Overview 380 right with full step list). But agent expanded 2 `*Collapsible Card*` (Base) with `Expanded=Yes` and left default `Card content` placeholder visible inside both. Reported `audit_verdict: PASS — 0 user-visible residual` while `Card content` text was clearly visible on canvas twice.
+
+Same class as v3.121 expand-but-empty escape route (c), but in new disguise: Base `*Collapsible Card*` has different placeholder text (`Card content`) than AP `APCardCollapsible` (which had `Slot component` / hidden Slot placeholder). v3.121 audit check covered only AP variant.
+
+### Fix (a) — Mode A defaultTexts += "Card content"
+Now any visible TEXT matching `Card content` = audit FAIL. Catches Base Collapsible Card placeholder.
+
+### Fix (b) — v3.121 rule extended to Base `*Collapsible Card*`
+Critical rule "Expanded-but-empty card" section now explicitly covers BOTH:
+- AP `APCardCollapsible` (organism slot, content from AP organism map)
+- Base `*Collapsible Card*` (form fields / text matching the section type)
+
+Build rule documented: when importing Base Collapsible Card with `Expanded=Yes`, fill Content slot with real content matching section type. For KYB Level "General" → form fields. For "Step" cards → step-specific config. If unsure, check canonical for expanded version of same card type, OR ask user — but NEVER ship `Card content` placeholder visible.
+
+### Class observation
+v3.121 audit caught AP card empty Content, but skill assumed AP-specific placeholder strings. Base Collapsible Card ships with different placeholder (`Card content`). Each DS organism family has its own placeholder strings; curated `defaultTexts[]` grows as sims reveal new ones.
+
+Pattern: Mode A is the curated-strings safety net. Mode B catches property-exposed defaults. Together they cover most cases; sample-level screen review catches the rest.
+
+---
+
 ## v3.134.0 — 2026-05-18 (KYB Level editor: Pattern B HARD RULE + Body 640 + Overview 380 documented)
 **Live sim 2026-05-18 v3.133 on KYB Level editor (file `EP9kfSkVRzQT9jBZe3LqZH`):** agent built complete отсебятина:
 - `*Sidebar*` 257 expanded (canonical has NO Sidebar at all)
