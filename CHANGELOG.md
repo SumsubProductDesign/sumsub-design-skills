@@ -4,6 +4,25 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.139.0 — 2026-05-18 (Flow Builder nodes: HARD RULE configured=true + empty=false)
+**Live sim 2026-05-18 v3.138 Workflow Builder canvas:** clean build (Sidebar 257, Builder Header, Canvas with Top/Right/Bottom bars, 7 curved bezier connectors with correct colors per branch type, 7 nodes from `Node / Canvas` set with correct types). Audit PASS. But user flagged: "ноды флоубилдера всегда должны быть с configured=true и empty=false".
+
+Agent used default BOOLEAN values on Node / Canvas instances — `configured=false, empty=true` — which is the "drop me on canvas / configure me" tutorial state, not the "real configured workflow" state user expects when asking for a workflow mockup.
+
+### Fix — `workflow-builder-pattern.md` adds HARD RULE on node BOOLEAN properties
+- Every `Node / Canvas` instance must have `configured=true, empty=false` for real workflow mockups
+- Default `configured=false, empty=true` is the placeholder/onboarding state
+- Banned: delivering workflow mockup with placeholder-state nodes
+- Exception: only when user explicitly says "show empty / unconfigured nodes" / "drop-node placeholder state"
+- Code example documented showing `setProperties({configured: "true", empty: "false", ...})`
+
+### Class observation
+Same class as v3.120 (a) default-collapse-to-skip: agent uses DS component's default state which is conservative "empty/unconfigured" placeholder, instead of fully populated production state. Each DS component family has its own such default → pattern doc must enumerate which BOOLEAN/VARIANT defaults to override for "real production" mockups.
+
+For Flow Builder specifically: nodes default to "drop and configure" tutorial state. Real workflow build = configured nodes.
+
+---
+
 ## v3.138.0 — 2026-05-18 (KYB Level editor canonical step content map — inspect canonical step pages, not fabricate)
 **Live sim 2026-05-18 v3.137 KYB Level editor retest:** layout structurally perfect (no Sidebar, Headers 1440×120, Body 640 centered, Overview 380 right, 3 expanded step cards). But agent fabricated Slot content for all 3 step cards: "Step 1 / Content (by Claude)" / "Step 2 / Content (by Claude)" / "Step 3 / Content (by Claude)" with custom Field/Toggle/Checkbox frames invented from prompt text description.
 

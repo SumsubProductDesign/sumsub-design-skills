@@ -55,6 +55,29 @@ Variants and keys (each variant has its own key since they live in one SET — p
 
 All have 3 axes: `Type`, `State` (Default/Hover/Active/Selected), `Status` (Default/Danger/Warning/Success).
 
+### 🚨 Node BOOLEAN properties — HARD RULE (v3.139)
+
+Every `Node / Canvas` instance has BOOLEAN properties for `configured` and `empty`. **Default values are `configured=false, empty=true`** — that's the "drop me on canvas / configure me" state shown when user just drops a node from sidebar.
+
+**For real workflow mockups (the typical user request), ALWAYS set:**
+- `configured = true` (node is configured with real settings)
+- `empty = false` (node has data, not empty placeholder)
+
+```js
+const node = nodeCanvasSet.children.find(c => c.name.includes("Type=Level Step")).createInstance();
+node.setProperties({
+  "configured": "true",   // or true (depends on property type — check via componentProperties)
+  "empty": "false",       // or false
+  // ... other properties (title text, status, etc.)
+});
+```
+
+Live sim 2026-05-18 v3.138: agent built clean Workflow Builder canvas with correct nodes + bezier connectors, but used default `configured=false, empty=true` variants — all nodes rendered in placeholder/onboarding state instead of "real flow" state. User flagged: "ноды флоубилдера всегда должны быть с configured=true и empty=false".
+
+**Banned default state on Flow Builder nodes:** delivering a workflow mockup with `configured=false` / `empty=true` nodes = banned. User asked for a workflow, not a tutorial onboarding state.
+
+**Exception:** ONLY when user explicitly says "show empty / unconfigured nodes" / "drop-node placeholder state" / similar.
+
 ### Node sub-components (attached above/beside nodes)
 
 Attached at negative Y (above node) or at x=230 (right edge):
