@@ -45,20 +45,42 @@ Root (1440 × 900, NONE layout, fill #ffffff)
 
 > Pages `49:38035` (General), `58:316097` (Company data), `58:430651` (Company documents), `61:161930` (Associated parties), etc.
 
+⚠️ **v3.134 HARD RULE — KYB Level editor uses Pattern B, NEVER Pattern A.** Pre-v3.134 sim 2026-05-18: agent built Pattern A layout (`*Sidebar* 257 + standard *Header* + invented tabs Steps/Settings/Webhooks + 6 wide cards`). That matches NO canonical frame in `EP9kfSkVRzQT9jBZe3LqZH`. Agent invented tabs that don't exist in product.
+
 ```
 Root (1440 × scroll, NONE layout, fill #ffffff)
-├── Headers   (1440 × 120, INSTANCE)          ← KYB Levels-specific page chrome
-└── Content   (1440 × scroll, x=0, y=120)
-    └── (form blocks, settings, verification step config)
+├── Headers INSTANCE       (1440 × 120, at (0, 0))     ← KYB-specific chrome (key 04cd3e49...)
+└── Content FRAME          (1440 × scroll, at (0, 120))
+    ├── Body FRAME         (640 × scroll, at (178, 32))   ← CENTERED, with Collapsible Cards + Steps
+    └── Overview INSTANCE  (380 × ~341, at (882, 32))     ← RIGHT side panel
 ```
 
-**Confirmed dimensions** from `Create level - default screen`:
-- Headers INSTANCE: 1440 × 120 at (0, 0)
-- Content FRAME: 1440 × 1382 (scrolling) at y=120
-- Page total height: 1502 (varies — 1494 for Company data)
-- Optional: Scroll / Thumb at right edge (x=1425, w=6, h=380)
+**Confirmed dimensions** from canonical `Create level - default screen` (`58:303278`):
+- `Headers` INSTANCE: 1440×120 at (0, 0)
+- `Content` FRAME: 1440×1382 (scrolling) at (0, 120), fill #ffffff
+- `Body` FRAME: **640×scroll at (178, 32)** inside Content (left content column, centered with 178px horizontal padding)
+  - Contains: `*Collapsible Card*` instances 640 wide + `Steps` subframes with Title+Description + nested cards
+- `Overview` INSTANCE: **380×~341 at (882, 32)** inside Content (right side panel)
+- Body→Overview gap: 64px (882 - (178 + 640) = 64)
+- Right margin: 178px (1440 - (882 + 380) = 178)
+- Page total height: 1502 (varies — 1494 for Company data, etc.)
+- Optional: `Scroll / Thumb` at right edge (x=1425, w=6, h=380)
 
-**Headers component** (key `04cd3e499850f1bb02c988f565948833c2474046`) is KYB-Levels-specific. NOT the standard `*Header*` from Organisms. Has 2 variants. Includes breadcrumbs + level title + actions.
+**Layout math:** 178 + 640 + 64 + 380 + 178 = 1440 ✓
+
+### Banned in Pattern B (v3.134)
+- `*Sidebar*` instance — Level editor has NO Sidebar at all
+- Standard `*Header*` 64-tall — must use file-local `Headers` 1440×120 (key `04cd3e499850f1bb02c988f565948833c2474046`)
+- `*Tab Basic*` with "Steps / Settings / Webhooks" tabs — these don't exist in canonical KYB Level editor. NEVER invent tabs.
+- Body 1183 wide with full-width Collapsible Cards — canonical is **640 centered**, not 1183 full
+- Missing `Overview` right side panel — canonical always has it at x=882 w=380
+
+### Pattern keyword detection
+- User prompt contains "Level editor", "KYB Level", "Create level", "Edit level", "verification step config" → Pattern B (this section)
+- User prompt contains "KYB Levels list", "Levels table" → Pattern A (Levels list with Sidebar 257)
+
+### Headers component
+`Headers` (key `04cd3e499850f1bb02c988f565948833c2474046`) is KYB-Levels-specific. NOT the standard `*Header*` from Organisms. Has 2 variants. Includes breadcrumbs + level title + actions (Save changes, etc.).
 
 ---
 

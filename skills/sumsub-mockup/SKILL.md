@@ -2298,6 +2298,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    // x=52 width 1388 OR x=0 width 1440. Never x=257 width 1183.
    const editorHeaderKeys = new Set([
      "304aa0d104cb87315bf1a6578681b6b266bc70ee",  // CM Blueprint header
+     "04cd3e499850f1bb02c988f565948833c2474046",  // KYB Levels Headers (v3.134)
      // Add other editor-page header keys as observed (TM Rule editor, Workflow Builder, etc.)
    ]);
    for (const node of all) {

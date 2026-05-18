@@ -4,6 +4,48 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.134.0 — 2026-05-18 (KYB Level editor: Pattern B HARD RULE + Body 640 + Overview 380 documented)
+**Live sim 2026-05-18 v3.133 on KYB Level editor (file `EP9kfSkVRzQT9jBZe3LqZH`):** agent built complete отсебятина:
+- `*Sidebar*` 257 expanded (canonical has NO Sidebar at all)
+- Standard `*Header*` 64-tall (canonical uses file-local `Headers` 1440×120)
+- `*Tab Basic*` with invented tabs "Steps / Settings / Webhooks" (these don't exist in canonical KYB Level editor — pure invention)
+- 6 `*Collapsible Card*` full-width 1183 wide (canonical has cards 640 wide centered)
+
+Canonical inspection (`58:303278` "Create level - default screen"):
+- NO Sidebar
+- `Headers` INSTANCE 1440×120 at (0, 0)
+- Content 1440×1382 at (0, 120) split:
+  - Body 640 at (178, 32) — CENTERED with cards
+  - Overview 380 at (882, 32) — RIGHT side panel
+- Layout: 178 + 640 + 64 + 380 + 178 = 1440 ✓
+- No tabs anywhere in canonical
+
+Same misclassification class as v3.130 (TM Rule editor) + v3.131 (CM Blueprint editor): agent defaults to Pattern A for any "page" prompt, ignores Pattern B / C / D specifics.
+
+### Fix — `kyb-levels-pattern.md` Pattern B rewritten
+- v3.134 HARD RULE: KYB Level editor uses Pattern B, NEVER Pattern A
+- Layout diagram updated with Body 640 centered + Overview 380 right side
+- Banned outputs enumerated: no Sidebar, no standard *Header*, NEVER invent tabs ("Steps / Settings / Webhooks"), no 1183 full-width cards (canonical 640)
+- Pattern keyword detection: "Level editor" / "Create level" / "Edit level" / "verification step config" → Pattern B
+- Banned invented tabs: "Skill should NEVER invent tabs that aren't in canonical"
+
+### Audit 7.49 extended
+`editorHeaderKeys` set now includes KYB `Headers` key `04cd3e499850f1bb02c988f565948833c2474046`. Future builds that use this header organism + 257 Sidebar will FAIL audit 7.49.
+
+### Limitation
+Agent in v3.133 sim used standard `*Header*` not KYB `Headers` — audit 7.49 wouldn't trigger because no editorHeader key was present. Misclassification root cause is agent picking wrong pattern, not wrong components within right pattern. Pattern-doc HARD RULE + keyword detection is the primary defense.
+
+### 5th stale-pattern-doc / wrong-pattern correction
+- v3.118 — AP Pattern 2 (no Sidebar)
+- v3.130 — TM Pattern 3 (has Sidebar 52)
+- v3.131/132 — CM Pattern C TWO variants
+- v3.133 — CM Pattern D (Drawer LEFT)
+- v3.134 — KYB Pattern B (full structure documented, agent had been guessing)
+
+Pattern: agent has strong Pattern A prior, misclassifies non-list pages. Pattern docs need explicit HARD RULE + keyword detection + banned outputs to overcome the prior.
+
+---
+
 ## v3.133.0 — 2026-05-15 (CM Pattern D corrected: Drawer LEFT, not RIGHT)
 **Live sim 2026-05-15 v3.132 on CM Report template builder:** clean build, but maintainer's first review wrongly called it "inverted layout" comparing to pattern doc. Inspected canonical (`86VzYfJdRwSvvpdJ2cGsX0/3234:70980`) — turns out canonical is:
 
