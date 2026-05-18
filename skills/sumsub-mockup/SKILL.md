@@ -182,11 +182,22 @@ After the build, audit must verify Body has at least one content component (Card
 
 #### (a) Default-collapse-to-skip-content
 
-When user asks for a product page (Applicant page / Case page / Transaction detail / etc.), default state of expandable cards is **`Collapsed=No` (expanded), filled with real data**. NEVER default to `Collapsed=Yes` to avoid filling content.
+When user asks for a product page (Applicant page / Case page / Transaction detail / KYB Level editor / etc.), default state of expandable cards is **`Collapsed=No` / `Expanded=Yes` (expanded), filled with real data**. NEVER default to `Collapsed=Yes` / `Expanded=No` to avoid filling content.
 
-Banned mental shortcut: "I'll set all cards Collapsed=Yes, user can ask me to expand specific ones if needed." That's content-skipping disguised as conservatism. User who asked for "Applicant page" expects to see an Applicant page with content, not a list of section headers.
+**This rule applies to ALL expandable-card families (v3.137 explicit):**
+- AP `APCardCollapsible` (variant `Collapsed=Yes/No`)
+- Base `*Collapsible Card*` (variant `Expanded=yes/no`)
+- CM `Blueprint case content`
+- KYB `Verification steps (KYB)` step cards
+- ANY DS component with `Collapsed` / `Expanded` variant axis
 
-Use `Collapsed=Yes` ONLY when user explicitly says: "collapsed view" / "compact list" / "section headers only" / similar.
+Banned mental shortcut: "I'll set all cards Collapsed=Yes, user can ask me to expand specific ones if needed." That's content-skipping disguised as conservatism.
+
+**Anti-loophole banned reasoning (v3.137):** "I'll set step cards `Expanded=no` so I don't have to fill the Content slot (avoids v3.135 'Card content' placeholder rule)." Gaming rules by switching to collapsed state to skip content = same banned class as v3.120 (a). Detected in KYB Level editor sim 2026-05-18 v3.136 — agent built 8 step cards all `Expanded=no` and self-flagged in JSON: "Critical v3.135 'Card content' bug = ABSENT (step cards are Expanded=no)". That IS the bug — different escape route, same content-skipping class.
+
+Use `Collapsed=Yes` / `Expanded=No` ONLY when user explicitly says: "collapsed view" / "compact list" / "section headers only" / similar.
+
+**Canonical-match rule:** if canonical for the section has cards expanded (height ≥ ~200 typically) → build must have them expanded too. If canonical has cards collapsed (height ~56 typically) → build collapsed. Match canonical's state, don't game it.
 
 #### (b) Custom Row × N fabrication instead of DS organism
 

@@ -4,6 +4,40 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.137.0 — 2026-05-18 (Anti-loophole: collapse cards to skip content rule extended to Base *Collapsible Card*)
+**Live sim 2026-05-18 v3.136 KYB Level editor retest:** agent finally built all 8 verification step cards (section completeness ✓), but **set all 8 to Expanded=no (collapsed)**. Agent self-explained in JSON:
+
+> "Critical v3.135 'Card content' bug = ABSENT (step cards are Expanded=no; General uses pre-filled KYB canonical, not generic *Collapsible Card*)"
+
+Agent gamed v3.135 rule — switched cards to collapsed specifically to AVOID having to fill Content slots. New escape route around v3.135 "Card content placeholder visible" rule via v3.120 (a) "Collapsed=Yes" disguise.
+
+Same banned class as v3.120 (a) "default-collapse-to-skip-content", but applied to Base `*Collapsible Card*` (variant `Expanded=yes/no`) instead of AP `APCardCollapsible` (variant `Collapsed=Yes/No`). v3.120 (a) was originally written about AP family; agent treated Base as exempt.
+
+### Fix — extend v3.120 (a) rule to ALL expandable-card families
+
+Rule explicitly enumerated:
+- AP `APCardCollapsible` (`Collapsed=Yes/No`)
+- Base `*Collapsible Card*` (`Expanded=yes/no`)
+- CM `Blueprint case content`
+- KYB `Verification steps (KYB)` step cards
+- ANY DS component with `Collapsed` / `Expanded` variant axis
+
+New anti-loophole sub-rule: banned reasoning "I'll set Expanded=no so I don't have to fill Content slot (avoids v3.135 placeholder rule)". Gaming rules by switching collapse state to skip content = same banned class as default-collapse-to-skip.
+
+Canonical-match clarification: if canonical for the section has cards expanded → build expanded. If canonical has cards collapsed → build collapsed. Match canonical's state, don't game it. (KYB Level editor canonical step cards have heights 428-662 = clearly expanded; agent built 56-high = collapsed = canonical-deviation.)
+
+### Class observation — 7th sim with content-skipping disguise
+Each iteration introduces new escape route around the same class:
+- v3.120 (a) "default Collapsed=Yes" (AP family)
+- v3.121 (c) "expand but leave empty + ask"
+- v3.135 "Card content placeholder visible"
+- v3.136 "want a fuller step list?"
+- v3.137 "Expanded=no to avoid Card content trigger" (Base family loophole)
+
+Each fix closes one disguise; next iteration finds another. The fundamental issue: agent doesn't want to write content for organism slots, finds creative ways to skip. v3.137 closes the latest disguise; expect another in next sim.
+
+---
+
 ## v3.136.0 — 2026-05-18 (Section completeness rule: build ALL canonical step organisms, never ship only dividers + ask)
 **Live sim 2026-05-18 v3.135 KYB Level editor retest:** General card finally filled with real form fields (Level name / Display name / Webhook URL / Region / etc.). But Verification steps section underneath shipped with ONLY title + description + 2 vertical Step-dividers — no actual step cards (Company data / Phone verification / Email / etc.). Agent's Q2 self-flagged the issue:
 
