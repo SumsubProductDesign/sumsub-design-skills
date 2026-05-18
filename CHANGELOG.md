@@ -4,6 +4,41 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.138.0 — 2026-05-18 (KYB Level editor canonical step content map — inspect canonical step pages, not fabricate)
+**Live sim 2026-05-18 v3.137 KYB Level editor retest:** layout structurally perfect (no Sidebar, Headers 1440×120, Body 640 centered, Overview 380 right, 3 expanded step cards). But agent fabricated Slot content for all 3 step cards: "Step 1 / Content (by Claude)" / "Step 2 / Content (by Claude)" / "Step 3 / Content (by Claude)" with custom Field/Toggle/Checkbox frames invented from prompt text description.
+
+User question: "почему он не смотрит на оригинал и не пытается использовать его для сборки макета".
+
+Root cause identified via data inspection (no screenshots):
+1. Agent imports `*Collapsible Card*` BY KEY (Base library, `db0df8e7...`) → gets generic mainComponent default with empty Slot
+2. Real canonical step content lives as INSTANCE on separate PAGES in same file (Company data page `58:316097` has Card `58:414723` with populated Slot, Company documents `58:430651`, PoA `61:330908`, etc.)
+3. Pattern doc documented top-level Pattern B layout but NOT where step content lives
+4. Agent defaults to fabricating content from prompt-text descriptions instead of inspecting canonical step pages
+
+### Fix — `kyb-levels-pattern.md` adds CRITICAL "Canonical step content map"
+
+New table maps each KYB step → canonical page ID → canonical Card instance ID:
+- Company data → page `58:316097` → Card `58:414723`
+- Company documents → page `58:430651`
+- Associated parties → page `61:161930`
+- Phone verification → page `61:326418`
+- Email verification → page `61:329843`
+- Questionnaire → page `61:330180`
+- Proof of Address → page `61:330908`
+
+New procedure rule: for each step in build, agent must (1) look up canonical step page, (2) `get_design_context` on canonical Card instance, (3) reproduce SAME internal Slot structure (same components, same Fields, same labels).
+
+Banned outputs documented:
+- "Step N / Content (by Claude)" custom frames inside Collapsible Card Slot
+- Fabricated Field/Toggle/Checkbox rows from prompt description without canonical inspection
+
+### Class observation
+Same v3.120 (b) Custom Row × N fabrication class, applied to KYB step content. Pattern doc was incomplete — documented chrome (Headers + Body + Overview placement) but not content-per-step. Agent followed top-level structure correctly, fabricated content because no canonical step map existed in doc.
+
+This is the same gap as AP "Organism-per-section map" added v3.120 — without explicit canonical organism mapping, agent fabricates. Each product family with multiple section types needs its own canonical map.
+
+---
+
 ## v3.137.0 — 2026-05-18 (Anti-loophole: collapse cards to skip content rule extended to Base *Collapsible Card*)
 **Live sim 2026-05-18 v3.136 KYB Level editor retest:** agent finally built all 8 verification step cards (section completeness ✓), but **set all 8 to Expanded=no (collapsed)**. Agent self-explained in JSON:
 

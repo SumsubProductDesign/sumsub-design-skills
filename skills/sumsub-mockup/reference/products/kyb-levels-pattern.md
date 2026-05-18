@@ -82,6 +82,33 @@ Root (1440 × scroll, NONE layout, fill #ffffff)
 ### Headers component
 `Headers` (key `04cd3e499850f1bb02c988f565948833c2474046`) is KYB-Levels-specific. NOT the standard `*Header*` from Organisms. Has 2 variants. Includes breadcrumbs + level title + actions (Save changes, etc.).
 
+### 🚨 Canonical step content map (v3.138 — CRITICAL)
+
+**Each KYB step has its CANONICAL CONTENT inside a `*Collapsible Card*` instance located on a separate page in the same file.** Agent's typical mistake: import generic `*Collapsible Card*` by Base library key → get empty Slot → fabricate Field/Toggle rows. The fabricated content does NOT match canonical configuration UI.
+
+**Correct procedure (v3.138):**
+1. For each step in your build, look up the canonical step page below
+2. Use `get_design_context` on the canonical Card instance (the `*Collapsible Card*` inside that page's Body)
+3. Reproduce the SAME internal Slot structure in your build's step card
+
+| Step | Canonical page | Page ID | Canonical card instance (where content lives) |
+|---|---|---|---|
+| General (level setup) | "↪ General" | `49:38035` | Card `58:312239` (inside frame `58:303278/Body`) 640×662 |
+| Company data | "↪ Company data" | `58:316097` | Card `58:414723` (inside frame `58:414719/Body`) 640×662 |
+| Company documents | "↪ Company documents" | `58:430651` | (find `*Collapsible Card*` inside this page's Body) |
+| Associated parties | "↪ Associated parties" | `61:161930` | (find `*Collapsible Card*` inside this page's Body) |
+| Phone verification | "↪ Phone verification" | `61:326418` | (find `*Collapsible Card*` inside this page's Body) |
+| Email verification | "↪ Email verification" | `61:329843` | (find `*Collapsible Card*` inside this page's Body) |
+| Questionnaire | "↪ Questionnaire" | `61:330180` | (find `*Collapsible Card*` inside this page's Body) |
+| Proof of Address | "↪ Proof of Address" | `61:330908` | (find `*Collapsible Card*` inside this page's Body) |
+
+**Banned (v3.138):**
+- Importing generic `*Collapsible Card*` by Base library key, then fabricating Field/Toggle rows in Slot. Agent invents fields that don't match canonical.
+- "Step N / Content (by Claude)" custom frames inside Collapsible Card Slot. Reproduces v3.120 (b) Custom Row × N fabrication class.
+- Building checkbox lists / toggle rows / Fields tables from prompt-text description without inspecting canonical first.
+
+**If canonical content is too complex to reproduce exactly:** at minimum, inspect canonical via `get_design_context` and use the SAME components (which `*Input Basic*` / `*Select Basic*` / `*Toggle*` placements canonical uses, which Fields it includes, what labels). Don't invent.
+
 ---
 
 ## Pattern C — Configurations (multi-frame horizontal canvas)
