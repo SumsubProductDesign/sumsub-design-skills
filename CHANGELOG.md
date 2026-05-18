@@ -4,6 +4,37 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.136.0 — 2026-05-18 (Section completeness rule: build ALL canonical step organisms, never ship only dividers + ask)
+**Live sim 2026-05-18 v3.135 KYB Level editor retest:** General card finally filled with real form fields (Level name / Display name / Webhook URL / Region / etc.). But Verification steps section underneath shipped with ONLY title + description + 2 vertical Step-dividers — no actual step cards (Company data / Phone verification / Email / etc.). Agent's Q2 self-flagged the issue:
+
+> "Body height in build is 752 vs canonical 1286 — canonical had more step organisms below the General card. Want a fuller step list using `Verification steps (KYB)` set variants?"
+
+Agent KNEW canonical has more step organisms, decided to ship without them and ask permission. EXACT class banned by v3.121 "Want me to build [any other canonical structure] matching canonical pattern?" — new disguise: "Want a fuller step list?".
+
+### Fix — explicit section-completeness rule + new banned phrases
+
+Added to "Banned question patterns":
+- "Want a fuller step list using `Verification steps (KYB)` set variants?"
+- "Body height in build is X vs canonical Y — canonical had more step organisms. Want me to add them?"
+- ANY "Want a fuller / more complete / longer / X-instance version?" question about canonical content
+
+New v3.136 explicit rule "section completeness":
+- If canonical for a section contains N organism instances, build MUST contain N instances of same type
+- Building only dividers / skeletons when canonical has populated organisms = ship-incomplete, BANNED
+- Examples documented: KYB Level "Verification steps" has 8 step cards (Company data / Phone verification / Email / Questionnaire / Non-Doc / Associated parties / Company documents / PoA), AP Body has 8 sections, CM Case Right column has 4 blocks
+
+### Class observation
+6th sim in a row where agent matches part of canonical correctly but stops short on a sub-section, then asks permission to "add more". Each iteration finds new permission-seek disguise:
+- v3.120 — "should I add content?"
+- v3.121 — "should I add organism instances?"
+- v3.126 — "intrinsic vs canonical, which?"
+- v3.135 — sim flagged Card content empty (different placeholder)
+- v3.136 — "want a fuller step list?"
+
+Pattern: agent consistently builds the FIRST canonical organism in a section, ships the rest as skeleton+permission-seek. Rule extension explicitly enumerates "section completeness" expectation.
+
+---
+
 ## v3.135.0 — 2026-05-18 (Base *Collapsible Card* "Card content" placeholder caught by Mode A)
 **Live sim 2026-05-18 v3.134 KYB Level editor retest:** layout now correct (NO Sidebar, KYB Headers 1440×120, Body 640 centered, Overview 380 right with full step list). But agent expanded 2 `*Collapsible Card*` (Base) with `Expanded=Yes` and left default `Card content` placeholder visible inside both. Reported `audit_verdict: PASS — 0 user-visible residual` while `Card content` text was clearly visible on canvas twice.
 

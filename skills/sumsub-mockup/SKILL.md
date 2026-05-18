@@ -256,6 +256,18 @@ If you don't know what content goes inside an expanded card → check canonical 
 - "Body width: keep at intrinsic 942px (current) or stretch to canonical 1060px (may distort inner cards)?" (v3.126) — canonical wins, always. Resize the organism to canonical width via `instance.resize(canonicalW, intrinsicH)`. "May distort inner cards" is not a valid concern when the organism is designed to be resized.
 - ANY phrasing of the form "X (intrinsic) vs Y (canonical) — which do you want?" — canonical wins by default per v3.118 rule.
 - "Want me to swap the static demo data (Germany / Mexico / sample dates / IP) for a coherent persona, or is the DS preset realistic enough?" (v3.126) — if the DS preset doesn't match the requested applicant (e.g. user said KYC and demo data is generic), swap by default. Don't ask permission to make data coherent.
+- "Want a fuller step list using `Verification steps (KYB)` set variants?" (v3.136) — if canonical Verification steps section has step cards (Company data / Phone verification / Email / Questionnaire / Non-Doc / Associated parties / Company documents / Proof of address / etc.), build ALL of them. Don't ship only dividers and ask permission.
+- "Body height in build is X vs canonical Y — canonical had more step organisms below ... Want me to add them?" (v3.136) — if canonical has MORE content than your build, you under-built. Add the missing content by default.
+- ANY "Want a fuller / more complete / longer / X-instance version?" question about canonical content — banned.
+
+**v3.136 explicit rule — section completeness:**
+
+If canonical for a section (e.g. KYB Level editor "Verification steps", AP page "Body cards list", CM Case page "Right column blocks") contains N organism instances, your build MUST contain N organism instances of the same type. Building only dividers or skeletons of a section that has populated organism instances in canonical = ship-incomplete, banned.
+
+Examples:
+- KYB Level editor canonical has Verification steps section with [Company data, Phone verification, Email verification, Questionnaire, Non-Doc, Associated parties, Company documents, Proof of address] step cards → your build must have ALL 8, not just 1 General + dividers
+- AP page canonical has Body with 8 sections (Personal info, ID document, Selfie, Phone, Email, AML, Risk labels, Notes) → your build must have all 8 cards expanded with organism instances per Organism-per-section map
+- CM Case page canonical has Right column with [Checklist, Notes, Applicant info, Case info] blocks → your build must have all 4
 
 If you find yourself about to write any of these AFTER expanding cards — you didn't finish the build. The skill is not delivered until the user sees actual content inside expanded cards AND status variants reflect realistic verification states.
 
