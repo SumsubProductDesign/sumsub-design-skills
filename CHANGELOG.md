@@ -4,6 +4,47 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.140.0 — 2026-05-19 (Title Row deprecated in Content, audits 7.52 + 7.53, layout-patterns Pattern 1 corrected)
+**Live sim 2026-05-19 user Billing Invoices "Pay invoice + Add payment method":** audit_verdict PASS (per agent's self-report), but structural inspection (no screenshots) revealed multiple bugs:
+
+1. Custom `Title Row` frame inside Content with TEXT "Invoices" (body-m style, NOT heading) + sibling `*Button*` for "Pay invoice". Audit 1 (heading-style outside Header) didn't trigger because text style wasn't a heading. Both screens.
+2. Title Row + Filters frames at height=10px with children 32-60px tall. Children rendered at NEGATIVE Y coordinates (overflow above parent). Indicates `primaryAxisSizingMode=FIXED` left at default while children added — frame should have been AUTO/HUG.
+3. Header height 94 instead of canonical 64 (likely wrong variant).
+4. Agent's Q1 ("Хочешь проверить корректно ли отображаются данные?") + Q2 ("Если по задумке кнопка должна быть в шапке, скажи — перенесём") — both banned permission-seek class (v3.121).
+5. Doc inconsistency root cause: `layout-patterns.md` Pattern 1 showed "Title Row" inside Content as valid → agent followed legacy pattern. But SKILL.md / `feedback_page_title_in_header.md` ban it.
+
+### Fix (a) — `layout-patterns.md` Pattern 1 corrected
+- Title Row removed from layout diagram
+- Explicit instruction: page title + CTA via `*Header*` properties (`Title text#3817:0`, `Buttons#6943:21=true`, `↪ First Button#6943:8=true`)
+- Component Dimensions table: Title Row marked DEPRECATED v3.140
+- Banned outputs documented
+
+### Fix (b) — New audit 7.52: custom Title Row antipattern (name-based)
+Detect FRAME named matching `/^(title row|title stack|header row|page title)$/i` inside Content + child TEXT with content + sibling `*Button*` → FAIL with specific fix instructions (move to Header properties).
+
+Catches case where text style ISN'T heading (audit 1 misses it). Two checks now layer:
+- Audit 1 (heading-style heuristic) — catches well-styled titles
+- Audit 7.52 (frame-name + content heuristic) — catches sloppy `body-m` Titles
+
+### Fix (c) — New audit 7.53: auto-layout overflow
+For every FRAME with `layoutMode != NONE` AND `primaryAxisSizingMode = FIXED`:
+- If max(child.y + child.height) > frame.height by >2px → FAIL
+- If any child has y or x < -2px (negative coordinate) → FAIL with "parent was created too small, set primaryAxisSizingMode=AUTO"
+
+Catches `Title Row 10h with TEXT 24h at y=-7` class of bug instantly.
+
+### Fix (d) — banned permission-seek phrases expanded
+- "Кнопка X находится в строке заголовка страницы (title row внутри Content). Если по задумке она должна быть в шапке, скажи — перенесём" (v3.140)
+- "Хочешь проверить, корректно ли отображаются данные?" / "Want to verify the data displays correctly?"
+- "Таблица заполнена данными по-best-effort. Хочешь проверить?"
+
+If data fill is best-effort + unverified = incomplete build. Verify via read-back BEFORE delivery.
+
+### Class observation
+Stale-doc / banned-class hybrid: agent followed an outdated layout-patterns.md diagram + SKILL.md hard rule contradicted it. Agent default behavior was correct per legacy doc. Pattern docs need consistency audit — every "Title Row" / similar legacy pattern should be marked DEPRECATED with reference to current convention.
+
+---
+
 ## v3.139.0 — 2026-05-18 (Flow Builder nodes: HARD RULE configured=true + empty=false)
 **Live sim 2026-05-18 v3.138 Workflow Builder canvas:** clean build (Sidebar 257, Builder Header, Canvas with Top/Right/Bottom bars, 7 curved bezier connectors with correct colors per branch type, 7 nodes from `Node / Canvas` set with correct types). Audit PASS. But user flagged: "ноды флоубилдера всегда должны быть с configured=true и empty=false".
 

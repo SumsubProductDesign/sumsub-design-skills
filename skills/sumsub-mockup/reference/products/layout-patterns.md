@@ -17,19 +17,18 @@
 
 ## Pattern 1 — Standard List/Table Page
 
-> TM list, Applicants, Cases list, etc.
+> TM list, Applicants, Cases list, Billing Invoices, etc.
+
+⚠️ **v3.140 correction — page title + CTA live INSIDE `*Header*`, NOT in Content.** Pre-v3.140 docs showed a "Title Row" inside Content with Title Stack + CTA — that was a LEGACY layout. Modern convention: use `*Header*` properties (`Title text#3817:0`, `Subtitle text#3817:3`, `Buttons#6943:21=true` + `↪ First Button#6943:8=true`). No custom Title Row frame in Content.
 
 ```
 [1440 × 900]  (content may scroll beyond 900)
 ├── *Sidebar*           x=0,   y=0,  w=257,  h=900+
 └── Main
-    ├── *Header*        x=257, y=0,  w=1183, h=64
+    ├── *Header*        x=257, y=0,  w=1183, h=64       ← Title + Subtitle + CTA via properties
     └── Content frame   x=257, y=64, w=1183, h=836+
         └── (padding 24px)
-            ├── Title Row          h=52   → w=1135
-            │   ├── Title Stack (left)
-            │   └── CTA Button (right)
-            ├── Toolbar/Filters    h≈40   → w=1135
+            ├── Toolbar/Filters    h≈40   → w=1135      ← Filters + search go here, NOT title
             └── Table              h=fill → w=1135
 ```
 
@@ -38,6 +37,22 @@
 - Header: `x=256, y=0, w=1184, h=64`
 - Table: `x=256, y=64, w=1184, h=1382` (scrollable)
 - Drawer (closed): `x=1467` — **27px outside the 1440 frame**, hidden off-screen
+
+**Header property assignments:**
+```js
+header.setProperties({
+  "Title text#3817:0": "Invoices",                  // page title
+  "Subtitle#3817:6": false,                          // hide subtitle unless needed
+  "Buttons#6943:21": true,                           // enable button slot
+  "↪ First Button#6943:8": true,                    // show first button
+});
+// Set the inner first-button text/label via the button's own properties
+```
+
+**Banned (v3.140):**
+- Custom FRAME named `Title Row` / `Title Stack` / `Header Row` / `Page Title` inside Content with TEXT content matching page subject + sibling *Button* — title belongs in Header
+- Heading-style TEXT outside `*Header*` (caught by audit 1 since pre-v3.140)
+- Any duplicate title TEXT below Header (audit fail per Sumsub convention)
 
 ---
 
@@ -150,7 +165,7 @@
 | `*Header*` | 1183px | 64px | Main area header |
 | `*Drawer Basic*` | 400px | 900px | Full height |
 | `*Modal Basic* Medium` | 600px | ~200px | Varies by content |
-| Title Row | 1135px | 52px | Inside content (24px padding) |
+| ~~Title Row~~ | DEPRECATED v3.140 | — | Page title + CTA live in *Header* via properties, not as separate frame in Content |
 | Tab Basic bar | 1135px | 32px | Inside content |
 | Table | 1135px | fill | Inside content |
 

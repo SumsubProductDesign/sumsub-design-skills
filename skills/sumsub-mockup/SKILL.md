@@ -268,6 +268,9 @@ If you don't know what content goes inside an expanded card → check canonical 
 - ANY phrasing of the form "X (intrinsic) vs Y (canonical) — which do you want?" — canonical wins by default per v3.118 rule.
 - "Want me to swap the static demo data (Germany / Mexico / sample dates / IP) for a coherent persona, or is the DS preset realistic enough?" (v3.126) — if the DS preset doesn't match the requested applicant (e.g. user said KYC and demo data is generic), swap by default. Don't ask permission to make data coherent.
 - "Want a fuller step list using `Verification steps (KYB)` set variants?" (v3.136) — if canonical Verification steps section has step cards (Company data / Phone verification / Email / Questionnaire / Non-Doc / Associated parties / Company documents / Proof of address / etc.), build ALL of them. Don't ship only dividers and ask permission.
+- "Кнопка X находится в строке заголовка страницы (title row внутри Content). Если по задумке она должна быть в шапке (Header компонент), скажи — перенесём." (v3.140) — page title + CTA always in Header per `layout-patterns.md` Pattern 1 v3.140 + `feedback_page_title_in_header.md`. Don't put CTA in custom Title Row, don't ask permission to move it later. Place in Header from the start.
+- "Хочешь проверить, корректно ли отображаются данные?" / "Want to verify the data displays correctly?" (v3.140) — agent's job is to read back the build and verify itself, not ship and ask user to verify. Verification is part of "audit" step, not a permission-seek.
+- "Таблица заполнена данными по-best-effort. Хочешь проверить?" (v3.140) — same as above. If data fill is best-effort and unverified, that's an incomplete build. Inspect via read-back BEFORE delivery, fix any mismatches, then deliver.
 - "Body height in build is X vs canonical Y — canonical had more step organisms below ... Want me to add them?" (v3.136) — if canonical has MORE content than your build, you under-built. Add the missing content by default.
 - ANY "Want a fuller / more complete / longer / X-instance version?" question about canonical content — banned.
 
@@ -2388,6 +2391,58 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
        if (maxChildBottom > root.height + 2) {
          issues.push(`7.47 root-height-contains-children: frame "${root.name}" height=${Math.round(root.height)} but children extend to y=${Math.round(maxChildBottom)}. Content is clipped. After placing all children, run: root.resize(root.width, ${Math.round(maxChildBottom)}). Also verify root.clipsContent is false if you want visible scroll/overflow.`);
        }
+     }
+   }
+
+   // 7.52. Custom Title Row antipattern — page title belongs in Header (v3.140).
+   // Observed Billing Invoices sim 2026-05-19: agent created custom "Title Row"
+   // FRAME inside Content with TEXT "Invoices" (body-m style, not heading) +
+   // sibling *Button*. Audit 1 didn't catch — text style wasn't a heading.
+   // v3.140: name-based check catches this antipattern regardless of text style.
+   for (const f of all) {
+     if (f.type !== "FRAME") continue;
+     if (isInsideInstance(f)) continue;
+     const nameMatchesTitleRow = /^(title row|title stack|header row|page title)$/i.test(f.name);
+     if (!nameMatchesTitleRow) continue;
+     // Check if this frame contains a TEXT + sibling INSTANCE (typical title+CTA pattern)
+     const hasText = (f.children || []).some(c => c.type === "TEXT" && (c.characters || "").length > 0 && (c.characters || "").length <= 60);
+     const hasButton = (f.children || []).some(c => c.type === "INSTANCE" && /\*Button\*/.test(c.mainComponent?.name || ""));
+     if (hasText) {
+       const buttonNote = hasButton ? " + *Button*" : "";
+       issues.push(`7.52 custom-title-row: Frame "${f.name}" contains page-title TEXT${buttonNote}. Move title to Header instance via setProperties({"Title text#3817:0": "..."}). Move CTA via Header's "Buttons#6943:21": true + "↪ First Button#6943:8": true. Delete this custom frame. See layout-patterns.md Pattern 1 (v3.140 deprecated Title Row in Content).`);
+     }
+   }
+
+   // 7.53. Auto-layout overflow — children y+height > parent height (v3.140).
+   // Observed Billing Invoices sim 2026-05-19: agent created Title Row 10h with
+   // TEXT 24h at y=-7 (overflows above) and Button 32h at y=-11. Filters 10h
+   // with Input Basic 60h. Frame was FIXED-sized too small; children overflow
+   // with negative Y. Indicates primaryAxisSizingMode should have been AUTO/HUG.
+   for (const f of all) {
+     if (f.type !== "FRAME") continue;
+     if (isInsideInstance(f)) continue;
+     if (!f.layoutMode || f.layoutMode === "NONE") continue;
+     if (f.primaryAxisSizingMode !== "FIXED") continue;
+     if (!f.children || f.children.length === 0) continue;
+     // For VERTICAL layout: measure max(child.y + child.height) vs f.height
+     // For HORIZONTAL layout: measure max(child.x + child.width) vs f.width
+     // But for both, also check if children have NEGATIVE position (extends above/left)
+     let overflow = 0, negOffset = 0;
+     for (const c of f.children) {
+       if (c.visible === false) continue;
+       const cBottom = (c.y || 0) + (c.height || 0);
+       const cRight = (c.x || 0) + (c.width || 0);
+       if (f.layoutMode === "VERTICAL") {
+         overflow = Math.max(overflow, cBottom - f.height);
+         negOffset = Math.min(negOffset, c.y || 0);
+       } else if (f.layoutMode === "HORIZONTAL") {
+         overflow = Math.max(overflow, cRight - f.width);
+         negOffset = Math.min(negOffset, c.x || 0);
+       }
+     }
+     if (overflow > 2 || negOffset < -2) {
+       const axis = f.layoutMode === "VERTICAL" ? "height" : "width";
+       issues.push(`7.53 auto-layout-overflow: Frame "${f.name}" ${axis}=${Math.round(f.layoutMode === "VERTICAL" ? f.height : f.width)} but children overflow by ${Math.round(overflow)}px (and/or negOffset ${Math.round(negOffset)}). Set primaryAxisSizingMode="AUTO" so frame hugs children, OR resize frame to fit content. Negative child offset indicates parent was created too small.`);
      }
    }
 
