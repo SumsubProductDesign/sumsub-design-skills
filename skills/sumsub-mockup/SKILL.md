@@ -758,6 +758,33 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    **Banned audit pattern:** reporting `default_text_leaks_fixed: 15, final: 0, verdict: PASS` while `Key_name` or `Key name` is still visible. Sample-check the SCREEN, not just the JSON.
 
+   **walkAndReplace fallback when setProperties doesn't expose Key_name (v3.142):**
+
+   When the Sidebar variant doesn't expose `Key_name` as a top-level `componentProperties` TEXT (e.g. Sidebar `Type=Billing`, `Type=Settings` — observed v3.141 Billing Invoices sim claiming "DS limitation"), agent MUST try `walkAndReplace` pass on all nested TEXT nodes BEFORE writing `audit_signature` with leak as residual.
+
+   ```js
+   // walkAndReplace fallback — successfully used in v3.129 TM Transactions table sim
+   function walkAndReplace(node, replacements) {
+     if (node.type === "TEXT") {
+       const matchKey = Object.keys(replacements).find(k => node.characters === k);
+       if (matchKey) node.characters = replacements[matchKey];
+     }
+     if ("children" in node && node.children) {
+       for (const c of node.children) walkAndReplace(c, replacements);
+     }
+   }
+   walkAndReplace(sidebarInstance, {
+     "Key_name": "Sumsub",
+     "Key name": "Sumsub",
+     "ClientNickname": "Demo Client",
+     "Client name": "Demo Client",
+   });
+   ```
+
+   Direct `.characters` override on nested instance TEXT generally works for placeholder strings (verified working v3.129). If THIS specific TEXT node is protected (cannot be edited even via `.characters`), only THEN claim "DS limitation" in residuals with explicit note: `"DS limitation: walkAndReplace tried, .characters write didn't persist on protected nested TEXT inside <component path>"`.
+
+   **Banned (v3.142):** claiming "DS limitation" without first trying walkAndReplace fallback. Agent in v3.141 Billing Invoices sim claimed `Key_name` "DS limitation" but didn't try walkAndReplace despite using it successfully in earlier sim (v3.129 TM Transactions).
+
 6. **Main content area is always white**, bound to `semantic/background/neutral/inverse/normal`. Never grey, never transparent. Page root stays subtlest grey (`#f6f7f9`), but every content-surface frame must be explicitly white (`#ffffff`).
 
    **Frames that MUST have a white fill (never leave transparent):**
@@ -1551,12 +1578,39 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    ];
    const defaultTextCounts = {};
    const defaultPhraseHits = {};
+   // v3.142: Table cell multi-variant context — Table Row / Cell instances
+   // have multiple TEXT children for different Type variants (Text Regular,
+   // Status, Date+time, etc.). Type variant selects which is visually rendered,
+   // but `.visible` stays true on inactive variants. Audit can't distinguish
+   // active vs inactive variant TEXTs without inspecting variant property
+   // mechanics. Skip Mode A default-text check when TEXT is inside such cell.
+   function isInTableCellVariantContext(textNode) {
+     let p = textNode.parent;
+     let depth = 0;
+     while (p && depth < 10) {
+       if (p.type === "INSTANCE" && p.mainComponent) {
+         const mainName = (p.mainComponent.name || "") + " | " + (p.mainComponent.parent?.name || "");
+         if (/Table Row|Row Cell|Table cell|Table Starter|Cell$/i.test(mainName)) {
+           try {
+             const props = p.componentProperties || {};
+             const hasTypeVariant = Object.keys(props).some(k => /^Type/i.test(k));
+             if (hasTypeVariant) return true;
+           } catch (e) {}
+         }
+       }
+       p = p.parent;
+       depth++;
+     }
+     return false;
+   }
    for (const n of all) {
      if (n.type !== "TEXT") continue;
      if (!n.characters) continue;
      if (!isVisible(n)) continue; // skip hidden component slots
      // Exact match (default property values like "Label", "Button")
      if (defaultTexts.includes(n.characters)) {
+       // v3.142: skip if TEXT is inside Table cell multi-variant context
+       if (isInTableCellVariantContext(n)) continue;
        defaultTextCounts[n.characters] = (defaultTextCounts[n.characters] || 0) + 1;
      }
      // Substring match (Dirty-Harry-style component filler copy)

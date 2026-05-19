@@ -12,7 +12,7 @@
 Root (1440 × 900, fill #ffffff)
 ├── *Sidebar*  (257 × 900, x=0, Type=Billing, Collapsed=False)
 └── Main (1183 × 900, VERTICAL, x=257)
-    ├── *Header*  (1183 × 64, Title="Billing")
+    ├── *Header*  (1183 × 64, Title="Billing" or "Invoices", Subtitle=FALSE)
     └── Content (1183 × 836, fill semantic/background/neutral/inverse/normal #ffffff)
         ├── Cards Row    (1143 × 124)              ← 3 metric cards horizontally
         ├── Period Row   (1143 × 60)               ← Select Inline (period) + Filters group
@@ -21,6 +21,19 @@ Root (1440 × 900, fill #ffffff)
 
 Layout sum: `257 + 1183 = 1440` ✓
 Content padding: 20px (skill-built; TM Settings canonical uses 24px)
+
+### Header height — HARD RULE (v3.142)
+
+**Canonical Billing pages (Invoices, Billing overview, Plan Details) consistently use `*Header*` at `1183 × 64` with `Subtitle#3817:6 = false`.** Confirmed via canonical inspection 2026-05-19: all 5 Header instances in canonical Billing Invoices page (`8886:33106`) have height=64, no subtitle row.
+
+**Banned (v3.142):** Setting `Subtitle#3817:6 = true` on Billing pages and shipping Header at 94h. Observed v3.141 Billing Invoices sim: agent enabled Subtitle with text "sokin.com_84950" → Header rendered 94h (+30 from subtitle row). Canonical doesn't have this — domain/breadcrumb info goes in different chrome elements (Alert banner, Top Toolbar context), not Header subtitle.
+
+If you need to show contextual info (client domain, account name, breadcrumb) — put it in:
+- Alert banner (warning/info context — like Pay invoice warning)
+- Top Toolbar (filter context)
+- Breadcrumb row above Title (if canonical supports)
+
+NOT Header Subtitle on Billing pages.
 
 ---
 

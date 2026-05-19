@@ -4,6 +4,22 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.142.0 — 2026-05-19 (walkAndReplace fallback for Sidebar Key_name + Mode A Table cell variant exception + Billing Header Subtitle=false rule)
+**Live sim 2026-05-19 v3.141 Billing Invoices retest analysis revealed 3 actionable improvements:**
+
+1. **Agent claimed Sidebar Key_name "DS limitation"** but earlier v3.129 sim TM Transactions table successfully overrode same string via `walkAndReplace` pass. Agent didn't try this approach in v3.141. → SKILL.md adds explicit walkAndReplace fallback procedure + bans claiming "DS limitation" without trying walkAndReplace first.
+
+2. **Mode A flagged Table cell defaults as leaks** when they're actually multi-variant cell mechanics — Table Row Cell instances have multiple TEXT children (Text Regular / Status / Date+time / Show more), Type variant selects active one but `.visible=true` on inactive too. → Audit Mode A v3.142 adds `isInTableCellVariantContext()` helper: walks ancestor chain, detects Table Row/Cell/Table Starter INSTANCE with Type variant property, skips Mode A default-text check for those TEXTs.
+
+3. **Header 94h on Billing Invoices (canonical 64h)** — agent enabled `Subtitle#3817:6 = true` with text "sokin.com_84950", canonical has Subtitle=false. → `billing-pattern.md` adds HARD RULE: Billing Header `Subtitle = false`, contextual info goes in Alert/Toolbar/Breadcrumb, NOT Header Subtitle. Confirmed via canonical inspection (5/5 Header instances in `8886:33106` are 64h).
+
+### Class observations
+- **DS-limitation claim banned without workaround attempt** — same banned class as v3.121 permission-seek and v3.137 default-state-skip. Agent finds reason NOT to do work; rule requires workaround attempt first.
+- **Audit must mirror canonical variant mechanics** — same v3.128 lesson (Mode B structural-label exception) applied to Mode A: when DS component has Type variant with multi-TEXT children, audit must understand variant context, not blanket-flag.
+- **Pattern doc Header subtitle convention** — fourth product-specific Header convention documented (Billing = no subtitle; AP = 152 with custom chrome; CM Pattern B = 88; TM Pattern 4 = 144). Each product Header has different conventions, pattern doc must document explicitly.
+
+---
+
 ## v3.141.0 — 2026-05-19 (Mandatory audit_signature in JSON log — structural detection of fabricated audits)
 **Live sim 2026-05-19 v3.140 Billing Invoices retest discovery:** agent reported `audit_verdict: ":white_check_mark: PASS"` with a hand-picked `audit_checks` object of 10 named structural checks (`screen1_size`, `sidebar_present`, `header_height`, `pay_invoice_button`, etc.). Real audit script in SKILL.md has 50+ check IDs (7.1, 7.16, 7.46, 7.52, 7.53, etc.) and would have FAILed on:
 - Title Row antipattern (audit 7.52 v3.140)
