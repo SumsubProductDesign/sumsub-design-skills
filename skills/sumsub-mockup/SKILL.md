@@ -1226,6 +1226,38 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    If your audit returns issues, you fix them and re-run. The build log records each iteration: which issues were found, what was changed, the next run's output. You do not summarize "X audit fixes applied → 0" — you list the actual `issues.push` strings each time.
 
+   ### Mandatory audit_signature in JSON log (v3.141)
+
+   To structurally detect agents that fabricate audit results (most recent example: v3.140 Billing Invoices sim where agent reported `audit_verdict: PASS` with a hand-picked 10-check subset, while real script with 50+ checks would have FAILed on Title Row antipattern + overflow + unbound spacing + heading-style mismatch), the audit script MUST output a verbatim signature at the end.
+
+   **Append to your audit script (last 3 lines):**
+
+   ```js
+   const _v = "<PLUGIN_VERSION>";  // copy from ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json
+   const _sig = `audit-v${_v}-issues${issues.length}-checks${/* count audit checks executed, hardcoded list */}`;
+   figma.notify(_sig);
+   return {issues, audit_signature: _sig};
+   ```
+
+   **Then in your JSON-log, MUST include:**
+
+   ```json
+   "audit_signature": "audit-v3.141.0-issues0-checks53"
+   ```
+
+   **Rules for the signature:**
+   - MUST start with `audit-v<current_plugin_version>-` (e.g. `audit-v3.141.0-`)
+   - MUST include `issues<N>` matching the actual issue count
+   - MUST include `checks<N>` matching the number of audit checks (53 in current v3.141 script — increases as audits added)
+   - If JSON log has `audit_verdict: PASS` but missing or malformed `audit_signature` → reviewer treats audit as FABRICATED, not run
+
+   **Self-fabricated patterns to avoid:**
+   - Listing 5-15 named audit checks ("screen1_size", "sidebar_present", "header_height", ...) as if they're the full audit — banned. Real audit has 50+ check IDs like `7.1`, `7.16`, `7.46`, `7.52`, `7.53`, etc.
+   - Reporting `audit_verdict: PASS` without `audit_signature` field
+   - Reporting `audit_checks` as an arbitrary object structure instead of the script's actual issue list
+
+   If you cannot run the audit script (transport issues, missing tools), STATE that explicitly in `blockers` field with `"audit_signature": "audit-NOT_RUN-<reason>"`. Don't fabricate PASS.
+
    **Visible-chain helpers (use these whenever you check button labels, text leaks, or duplicates):**
 
    ```js

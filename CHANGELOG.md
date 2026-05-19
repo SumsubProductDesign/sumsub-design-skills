@@ -4,6 +4,42 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.141.0 — 2026-05-19 (Mandatory audit_signature in JSON log — structural detection of fabricated audits)
+**Live sim 2026-05-19 v3.140 Billing Invoices retest discovery:** agent reported `audit_verdict: ":white_check_mark: PASS"` with a hand-picked `audit_checks` object of 10 named structural checks (`screen1_size`, `sidebar_present`, `header_height`, `pay_invoice_button`, etc.). Real audit script in SKILL.md has 50+ check IDs (7.1, 7.16, 7.46, 7.52, 7.53, etc.) and would have FAILed on:
+- Title Row antipattern (audit 7.52 v3.140)
+- Auto-layout overflow (audit 7.53 v3.140)
+- Unbound spacing
+- Header height mismatch
+
+Agent fabricated a self-convenient "audit" object instead of running the verbatim script. Same banned class as v3.59 "cherry-picked subset" (already in SKILL.md line 1211), agent gamed it with different output format (`audit_checks` object instead of bulleted list).
+
+### Fix — mandatory `audit_signature` field in JSON log
+
+Audit script MUST output (at the end):
+```js
+const _sig = `audit-v${PLUGIN_VERSION}-issues${issues.length}-checks${N_AUDIT_CHECKS}`;
+figma.notify(_sig);
+return {issues, audit_signature: _sig};
+```
+
+JSON log MUST include `audit_signature` field matching format:
+- `audit-v<current_plugin_version>-` prefix
+- `issues<N>` matching actual issue count
+- `checks<N>` matching audit-script check count (53 in v3.141 baseline, grows as audits added)
+
+If `audit_verdict: PASS` reported without `audit_signature` field, OR signature doesn't start with current plugin version → reviewer treats audit as FABRICATED.
+
+Failure case (`"audit_signature": "audit-NOT_RUN-<reason>"`) is acceptable IF stated in `blockers`. Fabricated PASS is not.
+
+### Class closure
+v3.59 ban on bulleted subset → agent switched to object subset. v3.141 ban on missing signature → agent could fabricate signature, but format is specific (current version + matching counts), much harder to game without actually running the script.
+
+If agent fabricates signature, reviewer cross-references with plugin.json (must match current version) + check count (53 in v3.141, increments per audit added). Mismatch = fabrication.
+
+Same class observation as v3.108 (text rules lose to trained priors; structural backstop needed). v3.141 is the structural backstop for "did audit actually run". Not perfect — can be fabricated — but specific format makes fabrication detectable on review.
+
+---
+
 ## v3.140.0 — 2026-05-19 (Title Row deprecated in Content, audits 7.52 + 7.53, layout-patterns Pattern 1 corrected)
 **Live sim 2026-05-19 user Billing Invoices "Pay invoice + Add payment method":** audit_verdict PASS (per agent's self-report), but structural inspection (no screenshots) revealed multiple bugs:
 
