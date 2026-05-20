@@ -4,6 +4,28 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.143.0 — 2026-05-20 (Custom Checkbox imitation banned + audit 7.54 detection)
+**Live sim 2026-05-20 v3.142 Billing Invoices retest:** agent fabricated `Checkbox Plate` — a 16×16 blue RECTANGLE with rounded corners (`semantic/icon/blue/normal #1764ff`) next to TEXT "Save card for future payments" inside `Modal Body / Pay invoice — card binding` local component. The SAME build used real `*Checkbox*` DS instance properly inside Table Starter Header.
+
+**Selective fabrication class:** agent knows the DS component, uses it in one place, fabricates imitation elsewhere. Same v3.120 (b) Custom Row × N fabrication class — different control type.
+
+### Fix
+- Rule extended in critical section: ban Custom Rectangle/Frame imitations of form controls (Checkbox / Radio / Toggle). DS instances always (`*Checkbox*` `75d3375164...`, `Radiobutton` `7d3fe5b1...`, `*Toggle*` `99562b68...`).
+- New audit 7.54: detects RECTANGLE/FRAME ~14-22×14-22px with cornerRadius>0 + adjacent TEXT containing form-control keywords (`save card|agree|confirm|enable|allow|accept|opt-in|terms|consent|future payments|notifications`) → audit issue with explicit fix instructions (replace with *Checkbox*/Radiobutton/Toggle DS instance).
+
+### Sim also revealed (not addressed in v3.143, deferred backlog)
+- Table missing first column header label (Invoice ID column unlabeled while rows have INV-* values)
+- Pay action per-row Button not rendering (agent reported swap to `normal/install` icon, but action cell empty in data)
+- Header still 94h (v3.142 Billing Header=64 rule ignored — second time)
+- Input Basic placeholders empty in Modal Body (no setProperties for placeholder text on 5 input instances)
+
+These are real issues but separate root causes from the checkbox fabrication. Address in future sims when triggered.
+
+### Class observation
+Selective DS-component knowledge: agent imports & uses DS component in one location, fabricates equivalent in another. Pattern repeats across categories (v3.120 Row, v3.143 Checkbox). Hypothesis: agent decides "if needed in collection/table/list → use DS, if needed standalone in custom form → fabricate". Pattern docs should explicitly enumerate "use DS instance for form controls EVERYWHERE, not just in tables".
+
+---
+
 ## v3.142.0 — 2026-05-19 (walkAndReplace fallback for Sidebar Key_name + Mode A Table cell variant exception + Billing Header Subtitle=false rule)
 **Live sim 2026-05-19 v3.141 Billing Invoices retest analysis revealed 3 actionable improvements:**
 

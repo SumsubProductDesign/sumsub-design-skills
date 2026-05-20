@@ -218,6 +218,25 @@ When card content is `Personal info` / `Profile information` / `Document` / `Sel
 
 **Audit check (added v3.120):** If Body contains ≥5 custom FRAME nodes directly under section cards matching `/^(Row|Field|Data ?Row|Static data|Property)/i` regex → audit FAIL with message: "Likely fabricated card content. Use AP organism from `applicant-page-pattern.md` Organism-per-section map instead."
 
+**v3.143 extension — Custom Checkbox / Radio / Toggle imitations are banned.**
+
+Live sim 2026-05-20 Billing Invoices retest: agent built `Modal Body / Pay invoice — card binding` local component containing 5 real `*Input Basic*` instances ✓ BUT also a custom `Checkbox Plate` — a 16×16 blue rectangle (`semantic/icon/blue/normal #1764ff`) with rounded corners, placed next to TEXT "Save card for future payments". This is a fabricated imitation of `*Checkbox*` DS instance.
+
+Same agent built `*Checkbox*` INSTANCE properly inside Table Header (first column). Agent KNOWS the DS component, KNOWS how to use it — selectively fabricated imitation in Modal Body.
+
+**Banned (v3.143):**
+- Custom Rectangle / Frame 14-20×14-20px with rounded corners + adjacent TEXT, intended to look like a checkbox/radio/toggle, while `*Checkbox*` (`75d3375164e69aca223d08d09fd79e82dda14343`), `Radiobutton` (`7d3fe5b1e904f4e4a880092412543f40fdeacc60`), `*Toggle*` (`99562b687e3078c4a570af195c74a899fbbe83a4`) DS instances are available
+- Custom shapes styled as form controls — always import the DS component instance
+
+**Rule:** when you need a checkbox / radio / toggle visual in any form, modal, settings panel:
+1. Import the DS instance (`*Checkbox*` for binary on/off, `Radiobutton` for option selection, `*Toggle*` for inline switch)
+2. Set its variant via setProperties (Selected/Unselected, Type=Default)
+3. Place next to the label TEXT
+
+NEVER create a Rectangle or Frame imitation, even if it "looks the same". The DS instance is the source of truth; imitations break token bindings, hover/focus states, accessibility props.
+
+**Audit check (added v3.143):** for every RECTANGLE / FRAME node ≤24×24 with cornerRadius > 0 + sibling TEXT containing keywords matching `/save|agree|confirm|enable|allow|accept|opt[- ]in|terms|consent|i (read|understand|accept|agree)/i` → audit warning: "Possible custom checkbox imitation at <node>. Use `*Checkbox*` DS instance instead." (warning, not fail — to avoid false positives on real decorative rectangles)
+
 #### (c) Expanded-but-empty card with "should I add content?" question (NEW v3.121)
 
 Third escape route in the same class: skill expanded all cards (per (a)) and didn't fabricate Row × N (per (b)), but **left the Content slots empty** and asked user "If you want content inside cards, tell me — I'll add". Same content-skipping disguised as caution.
@@ -2529,6 +2548,32 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
      if (overflow > 2 || negOffset < -2) {
        const axis = f.layoutMode === "VERTICAL" ? "height" : "width";
        issues.push(`7.53 auto-layout-overflow: Frame "${f.name}" ${axis}=${Math.round(f.layoutMode === "VERTICAL" ? f.height : f.width)} but children overflow by ${Math.round(overflow)}px (and/or negOffset ${Math.round(negOffset)}). Set primaryAxisSizingMode="AUTO" so frame hugs children, OR resize frame to fit content. Negative child offset indicates parent was created too small.`);
+     }
+   }
+
+   // 7.54. Custom checkbox/radio/toggle imitation (v3.143).
+   // Observed Billing Invoices sim 2026-05-20: agent created "Checkbox Plate"
+   // — a 16×16 blue rectangle with rounded corners — next to TEXT "Save card
+   // for future payments". The same build used real *Checkbox* DS instance in
+   // Table Header. Selective fabrication: knows the component, uses it in one
+   // place, fabricates imitation in another.
+   const formControlKeywordRe = /save (card|for|my)|agree|confirm|enable|allow|accept|opt[- ]?in|terms|consent|i (read|understand|accept|agree)|future payments|notifications|emails/i;
+   for (const node of all) {
+     if (node.type !== "RECTANGLE" && node.type !== "FRAME") continue;
+     if (isInsideInstance(node)) continue;
+     // Suspect dimensions: ~14-22px square with cornerRadius > 0
+     const w = Math.round(node.width || 0);
+     const h = Math.round(node.height || 0);
+     if (w < 12 || w > 24 || h < 12 || h > 24) continue;
+     const radius = node.cornerRadius || node.topLeftRadius || 0;
+     if (typeof radius !== "number" || radius <= 0) continue;
+     // Check for adjacent TEXT sibling with form-control keyword
+     const parent = node.parent;
+     if (!parent || !parent.children) continue;
+     const siblings = parent.children;
+     const adjacentText = siblings.find(s => s.type === "TEXT" && (s.characters || "").length > 0 && formControlKeywordRe.test(s.characters));
+     if (adjacentText) {
+       issues.push(`7.54 custom-checkbox-imitation: ${node.type} "${node.name}" (${w}×${h}, radius=${radius}) next to TEXT "${(adjacentText.characters || "").slice(0, 50)}". Likely custom checkbox imitation — replace with *Checkbox* INSTANCE (key 75d3375164e69aca223d08d09fd79e82dda14343), *Radiobutton* (7d3fe5b1e904f4e4a880092412543f40fdeacc60), or *Toggle* (99562b687e3078c4a570af195c74a899fbbe83a4) as appropriate.`);
      }
    }
 
