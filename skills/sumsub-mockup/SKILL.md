@@ -176,6 +176,27 @@ When a product-specific component is file-local, use these Base/Organisms equiva
 
 After the build, audit must verify Body has at least one content component (Card / Table / Collapsible Card / Tab Button / Input / Select). A skeleton with sidebar + header + empty Body is NOT a delivered mockup.
 
+### Pre-build font loading (NEW v3.144 — MANDATORY first action of every use_figma write call)
+
+**Before any `setProperties`, `setInstanceText`, or direct `.characters` write, you MUST load Geist fonts:**
+
+```js
+await figma.loadFontAsync({ family: "Geist", style: "Regular" });
+await figma.loadFontAsync({ family: "Geist", style: "Medium" });
+await figma.loadFontAsync({ family: "Geist", style: "SemiBold" });
+await figma.loadFontAsync({ family: "Geist", style: "Bold" });
+```
+
+**Why:** Figma's text mutation API silently fails if the required font hasn't been loaded in the current `use_figma` execution context. Setting `.characters` or `setProperties({"Title text": "X"})` on a node that uses Geist Bold but no Bold style was loaded → no error, no warning, the text just doesn't change. Build looks correct in script flow but the delivered mockup shows default text.
+
+**Observed Sonnet sim 2026-05-20 v3.143 retest:** agent reported "Sidebar Key_name (Geist Bold not loaded — silent fail)" + "Modal Basic Title (same root cause: Geist Bold missing)". Opus retest same day: no font issue because Opus loads fonts as first step reflexively.
+
+**Banned (v3.144):**
+- Writing `setProperties` / `.characters` before calling `loadFontAsync` for all Geist variants used in the build
+- Reporting "Geist Bold not loaded — silent fail" as a known issue. If silent fail happened, you loaded it AFTER, then re-ran the mutation. Standard recovery: load fonts FIRST in every write chunk, no silent fails.
+
+**Rule:** every `use_figma` call that performs ANY text mutation begins with the 4 `loadFontAsync` calls above. No exceptions, even if you "think" the font is loaded from a previous call — each `use_figma` call is a separate execution context.
+
 ### Default expansion + organism reuse (NEW v3.120 — class-fix from AP sim 2026-05-11)
 
 **Two banned-class behaviors observed in v3.119 AP build, both close here:**
@@ -290,6 +311,10 @@ If you don't know what content goes inside an expanded card → check canonical 
 - "Кнопка X находится в строке заголовка страницы (title row внутри Content). Если по задумке она должна быть в шапке (Header компонент), скажи — перенесём." (v3.140) — page title + CTA always in Header per `layout-patterns.md` Pattern 1 v3.140 + `feedback_page_title_in_header.md`. Don't put CTA in custom Title Row, don't ask permission to move it later. Place in Header from the start.
 - "Хочешь проверить, корректно ли отображаются данные?" / "Want to verify the data displays correctly?" (v3.140) — agent's job is to read back the build and verify itself, not ship and ask user to verify. Verification is part of "audit" step, not a permission-seek.
 - "Таблица заполнена данными по-best-effort. Хочешь проверить?" (v3.140) — same as above. If data fill is best-effort and unverified, that's an incomplete build. Inspect via read-back BEFORE delivery, fix any mismatches, then deliver.
+- "out of scope for this task" (v3.144) — observed Sonnet sim v3.143 retest: "filling 7 rows would require per-cell key inspection... out of scope for this task". User asked for an Invoices page with Pay flow; rows showing real invoice data are NOT out of scope, they're the page's primary content. "Out of scope" claim banned when the skipped work is the page's core content.
+- "would require a separate pass" (v3.144) — separate passes are fine in build mechanics (transport-drop retries, font loading, etc.), but using this phrase to defer canonical content fill is banned. Do the pass.
+- "per-cell key inspection... not in scope" (v3.144) — every Table Starter row Cell exposes properties via `componentProperties`. Walk cells, set them. Not out of scope.
+- "Should the table rows show the actual N invoice records?" (v3.144) — if the page is about invoices, rows show invoice records. Don't ask permission to fill the page with its content.
 - "Body height in build is X vs canonical Y — canonical had more step organisms below ... Want me to add them?" (v3.136) — if canonical has MORE content than your build, you under-built. Add the missing content by default.
 - ANY "Want a fuller / more complete / longer / X-instance version?" question about canonical content — banned.
 
@@ -1291,16 +1316,20 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    "audit_signature": "audit-v3.141.0-issues0-checks53"
    ```
 
-   **Rules for the signature:**
-   - MUST start with `audit-v<current_plugin_version>-` (e.g. `audit-v3.141.0-`)
+   **Rules for the signature (v3.144 — strict regex format):**
+   - MUST match exact regex: `^audit-v\d+\.\d+\.\d+-issues\d+-checks\d+`
+   - Example valid: `audit-v3.143.0-issues0-checks54`, `audit-v3.144.0-issues3-checks54-roots2`
+   - Example INVALID (will be treated as fabricated): `sumsub-mockup-v3.143 / kHQyyYdPZjEyrSahRmBLUr / 2026-05-20` (observed Sonnet sim v3.143 retest 2026-05-20 — date-format signature, not audit-run structure)
    - MUST include `issues<N>` matching the actual issue count
-   - MUST include `checks<N>` matching the number of audit checks (53 in current v3.141 script — increases as audits added)
-   - If JSON log has `audit_verdict: PASS` but missing or malformed `audit_signature` → reviewer treats audit as FABRICATED, not run
+   - MUST include `checks<N>` matching the number of audit checks (54 in v3.144 script — increases as audits added; current count = 54 with audit 7.54)
+   - If JSON log has `audit_verdict: PASS` but `audit_signature` doesn't match the strict regex → reviewer treats audit as FABRICATED, not run
 
    **Self-fabricated patterns to avoid:**
-   - Listing 5-15 named audit checks ("screen1_size", "sidebar_present", "header_height", ...) as if they're the full audit — banned. Real audit has 50+ check IDs like `7.1`, `7.16`, `7.46`, `7.52`, `7.53`, etc.
+   - Listing 5-15 named audit checks ("screen1_size", "sidebar_present", "header_height", ...) as if they're the full audit — banned. Real audit has 50+ check IDs like `7.1`, `7.16`, `7.46`, `7.52`, `7.53`, `7.54`, etc.
    - Reporting `audit_verdict: PASS` without `audit_signature` field
    - Reporting `audit_checks` as an arbitrary object structure instead of the script's actual issue list
+   - Date-style signatures like `<skill>-v<X> / <fileKey> / <date>` (v3.144 ban) — that's not an audit signature, that's an identifier string. Use the regex format above.
+   - `audit_checks: "27/27"` style fraction reports — banned. Audit script doesn't tally; it accumulates `issues.push(...)` calls. If you wrote a fraction, you didn't run the script.
 
    If you cannot run the audit script (transport issues, missing tools), STATE that explicitly in `blockers` field with `"audit_signature": "audit-NOT_RUN-<reason>"`. Don't fabricate PASS.
 

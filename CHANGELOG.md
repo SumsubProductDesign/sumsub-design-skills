@@ -4,6 +4,42 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.144.0 — 2026-05-20 (Three Sonnet-class fixes: audit_signature strict regex + "out of scope" banned + mandatory font loading)
+**Comparison observation 2026-05-20: parallel Billing Invoices sims by Opus and Sonnet on v3.143** revealed material quality gap. Opus respected all v3.140+ rules (DS Checkbox, audit format, no permission-seek). Sonnet ignored three:
+
+1. **`audit_signature` wrong format:** Sonnet wrote `sumsub-mockup-v3.143 / kHQyyYdPZjEyrSahRmBLUr / 2026-05-20` (date-style ID, not audit-run structure). Plus `audit_checks: "27/27"` claim — Sonnet ran half the script or fabricated, since v3.143 has 54 check IDs.
+2. **Explicit "out of scope" claim:** "filling 7 rows would require per-cell key inspection... out of scope for this task" — refusal to fill the page's core content (invoice list on an Invoices page).
+3. **"Geist Bold not loaded — silent fail":** Sonnet noted this as known issue. Opus didn't have it because Opus loads fonts as first step reflexively.
+
+### Fix (a) — audit_signature strict regex validation
+SKILL.md now specifies regex: `^audit-v\d+\.\d+\.\d+-issues\d+-checks\d+`. Date-style signatures (`<skill>-v<X> / <file> / <date>`) and fraction reports (`audit_checks: "27/27"`) explicitly banned. Reviewer treats non-matching signatures as fabricated.
+
+### Fix (b) — Banned phrases for "out of scope" pattern
+- "out of scope for this task" (when the skipped work is the page's core content)
+- "would require a separate pass" (deferring canonical content fill)
+- "per-cell key inspection... not in scope" (Table cells expose componentProperties — walk them)
+- "Should the table rows show the actual N invoice records?" (don't ask permission to fill the page with its content)
+
+### Fix (c) — Mandatory pre-build font loading
+New critical rule "Pre-build font loading": every `use_figma` call performing ANY text mutation MUST begin with:
+```js
+await figma.loadFontAsync({ family: "Geist", style: "Regular" });
+await figma.loadFontAsync({ family: "Geist", style: "Medium" });
+await figma.loadFontAsync({ family: "Geist", style: "SemiBold" });
+await figma.loadFontAsync({ family: "Geist", style: "Bold" });
+```
+
+Figma's text mutation API silently fails if font isn't loaded in current execution context. Sonnet noted this as "silent fail"; Opus avoided by loading fonts first. v3.144 makes it mandatory rule for any model.
+
+Banned: writing `setProperties` / `.characters` before loadFontAsync. Banned: reporting "font not loaded — silent fail" as known issue (means you didn't load before mutating).
+
+### Class observation — model quality variance
+Opus internalizes nuanced rules (no permission-seek, no fabrication shortcuts, reflexive font load). Sonnet treats them more loosely. v3.144 closes three Sonnet-specific failure modes with concrete bans + audit_signature structural validation.
+
+Open question: how many more Sonnet-vs-Opus gaps exist? Future sims by Sonnet may reveal additional classes. Each closed = more concrete bans, but text rules have limits vs model-baseline behavior differences.
+
+---
+
 ## v3.143.0 — 2026-05-20 (Custom Checkbox imitation banned + audit 7.54 detection)
 **Live sim 2026-05-20 v3.142 Billing Invoices retest:** agent fabricated `Checkbox Plate` — a 16×16 blue RECTANGLE with rounded corners (`semantic/icon/blue/normal #1764ff`) next to TEXT "Save card for future payments" inside `Modal Body / Pay invoice — card binding` local component. The SAME build used real `*Checkbox*` DS instance properly inside Table Starter Header.
 
