@@ -31,82 +31,97 @@ Root (1440 × 900)
 
 ---
 
-## Pattern B — Case Detail (no Sidebar, custom 88px header, 2-column body)
+## Pattern B — Case Detail (52px collapsed Sidebar + custom 88px header + 2-column body)
 
 > Used for: **Case page** in `ieTGS0ab6tqr3zwXRYPHIu`.
+>
+> **⚠️ Updated v3.146 (2026-05-22):** canonical drift confirmed via metadata scan of `4045:2323380`. Earlier versions of this doc said "no Sidebar" — that was the pre-drift layout. **Current canonical has a 52px collapsed `*Sidebar*` at (0,0,52,900)**, and every other element is shifted right by 52px. Older recipe builds without Sidebar will visually clash with the modern Case page.
 
 ```
 Root (1440 × 900+, NONE layout, absolute positioning)
-├── Case page header (1440 × 88, INSTANCE)            ← x=0, y=0. Key: 070118da7e99...
+├── *Sidebar* (52 × 900, INSTANCE)                     ← x=0, y=0. Variant: Type=Case management, Collapsed=True
+│                                                        Key: 60be5cbb4d070ccc4853589a555d949c3f23f62e (full Sidebar set)
 │
-├── Frame 270990504 (992 × 804, left content WRAPPER)  ← x=0, y=96. VERTICAL, no padding, clipsContent=true
-│   ├── .Header Full Screen Page / Subheader (992 × 56, FRAME)   ← contains Tab Basic
+├── Case page header (1388 × 88, INSTANCE)             ← x=52, y=0. Key: 070118da7e99...
+│
+├── Frame 270990504 (964 × 812, left content WRAPPER)  ← x=52, y=88. VERTICAL, no padding, clipsContent=true
+│   ├── .Header Full Screen Page / Subheader (964 × 56, FRAME)   ← contains Tab Basic
 │   │   - HORIZONTAL, paddingL=32, paddingR=32, paddingT=0, paddingB=1
 │   │   - **primaryAxisAlignItems=CENTER, counterAxisAlignItems=MAX** (Tab Basic bottom-aligned at y=23)
-│   │   └── *Tab Basic* (928 × 32, layoutSizingHorizontal=FILL)
+│   │   └── *Tab Basic* (900 × 32, layoutSizingHorizontal=FILL)   ← MUST be FILL, NOT default HUG
 │   │       └── 6 tabs: Overview (selected) / AML / Related cases / Financial data / FIU reports / Events
 │   │
-│   └── Container (992 × 2401+, scrollable, FRAME)              ← real content
+│   └── Container (964 × 2401+, scrollable, FRAME)              ← real content
 │       - VERTICAL, paddingL=32, paddingR=24, paddingT=24, paddingB=24, itemSpacing=24
 │       - primaryAxisSizingMode=AUTO (hugs height to content), counterAxisSizingMode=FIXED
-│       └── Case page Overview tab content (932 × variable, INSTANCE)  ← key 937dcc91...
-│           - layoutSizingHorizontal=FIXED at 932
+│       └── Case page Overview tab content (908 × variable, INSTANCE)  ← key 937dcc91...
+│           - layoutSizingHorizontal=FIXED at 908
 │
-└── Case page right column (424 × 804, INSTANCE)      ← x=992, y=96. Key: 768dad45...
+└── Case page right column (424 × 812, INSTANCE)       ← x=1016, y=88. Key: 768dad45...
     - VERTICAL, no padding
     ├── .Right Column Header
     ├── .Case page checklist
     └── .Case page notes
 ```
 
+**Layout math (v3.146 canonical):** `52 (Sidebar) + 964 (Wrapper) + 424 (Right col) = 1440` ✓. Wrapper.x = Sidebar.x + Sidebar.width = 52. Right col.x = Wrapper.x + Wrapper.width = 52 + 964 = 1016. No gap between Sidebar and Wrapper, no gap between Wrapper and Right col, no right margin (Right col extends to canvas edge).
+
 ### Why two-level wrapping on the left
 
 The pattern is NOT "drop the Overview tab content directly into root". It's a deliberate two-level structure:
 
-1. **Frame 270990504** (the outer wrapper) — owns the 992×804 viewport at x=0, y=96. No padding. clipsContent=true so the inner Container scrolls without bleeding.
+1. **Frame 270990504** (the outer wrapper) — owns the 964×812 viewport at x=52, y=88. No padding. **MUST set `clipsContent=true` AND `layoutSizingVertical="FIXED"` at 812.** Without FIXED height, the wrapper hugs the 2400+px Container content and becomes 2500+ tall, expanding the entire root frame.
 2. **Subheader + Container** are children of Frame 270990504, stacked vertically:
    - Subheader is a thin 56px row that holds the Tab Basic with horizontal padding so tab labels align to x=32.
+   - **`*Tab Basic*` MUST have `layoutSizingHorizontal="FILL"`** so it fills the 900px between paddings. Without FILL, Tab Basic hugs its content (~515 wide) and the Subheader's `primaryAxisAlignItems="CENTER"` re-centers it at x=224.5 — visually the tab strip floats in the middle of the page instead of being left-aligned at x=32.
    - Container holds the scrollable Overview content with paddingL=32 paddingR=24 paddingT=24 paddingB=24 — these are the canonical Case page paddings. NEVER drop the Overview component directly without this Container.
 
-If you skip the wrappers and place the Overview component at root x=0 w=992, it gets stretched (intrinsic width is 932) AND the page loses its proper 32px left / 24px right gutters.
+If you skip the wrappers and place the Overview component at root x=52 w=964, it gets stretched (intrinsic width is 908) AND the page loses its proper 32px left / 24px right gutters.
+
+**Common regressions (v3.146 — caught in CM sim 2026-05-22):**
+- ❌ Wrapper height grew to 2552 instead of 812 → forgot `layoutSizingVertical="FIXED"` on wrapper after `appendChild`. Wrapper hugged the Container's 2400+px height.
+- ❌ Tab Basic at x=224.5 instead of x=32 → forgot `tabBasic.layoutSizingHorizontal="FILL"` after appendChild. Subheader's CENTER alignment then centered the HUG-sized Tab Basic.
 
 **Key differences from Applicant page (Pattern 2 in global `layout-patterns.md`):**
 
-| Metric | Applicant page | Case page |
+| Metric | Applicant page | Case page (v3.146 canonical) |
 |---|---|---|
-| Sidebar | Collapsed 52px | **None** |
+| Sidebar | Collapsed 52px | **Collapsed 52px** (variant Type=Case management) |
 | Page header height | 152px | **88px** |
-| Left content column | 1008 (after 52 sidebar + 380 summary) | **992** (no sidebar, no summary panel) |
+| Left content column | 1008 (after 52 sidebar + 380 summary) | **964** (after 52 sidebar, no summary panel) |
 | Right column / panel | 380 (Summary, fixed) | **424** (right column, sticky) |
-| Header x | 52 | **0** (full width) |
+| Header x | 52 | **52** (after 52 sidebar) |
 
-**Confirmed dimensions** from `4045:2323380` (Case page - Overview):
-- `Case page header` INSTANCE: `1440 × 88` at **x=0, y=0** (full width)
-- `Frame 270990504` (left wrapper): `992 × 804` at **x=0, y=96**
-- `Case page right column` INSTANCE: `424 × 804` at **x=992, y=96**
+**Confirmed dimensions** from `4045:2323380` (Case page - Overview), re-scanned 2026-05-22:
+- `*Sidebar*` INSTANCE: `52 × 900` at **x=0, y=0** (variant Type=Case management, Collapsed=True)
+- `Case page header` INSTANCE: `1388 × 88` at **x=52, y=0**
+- `Frame 270990504` (left wrapper): `964 × 812` at **x=52, y=88** (note: y=88, NOT y=96 — no 8px gap in current canonical)
+- `Case page right column` INSTANCE: `424 × 812` at **x=1016, y=88**
 - Drawer overlay (Financial data view): `*Drawer Basic* 600 × 900` from `4762:286760`
 
 **Critical spacing — page-level (root frame children):**
 
-- **8px gap below header** — content starts at y=96, NOT y=88.
-- **0px gap between left wrapper and right column** — right column at x=992, directly touching left wrapper's right edge.
-- **24px right margin** — right column ends at x=1416, leaving 24px to screen edge at 1440.
-- **0px left margin** — left wrapper at x=0 (no left page-edge padding).
+- **0px gap below header** — content starts at y=88, directly below the 88-tall header. (Pre-drift canonical had y=96; current canonical has no gap.)
+- **0px gap between Sidebar and Left wrapper** — Wrapper at x=52, directly touching Sidebar.right edge.
+- **0px gap between Left wrapper and Right column** — Right col at x=1016, directly touching Wrapper.right edge.
+- **0px right margin** — Right col ends at x=1440 (1016 + 424), at canvas edge.
+- **0px left margin** — Sidebar at x=0.
 
-Layout sum: `0 + 992 + 0 + 424 + 24 = 1440` ✓
+Layout sum: `0 + 52 + 964 + 424 = 1440` ✓
 
 **Critical spacing — INSIDE the left wrapper (Frame 270990504):**
 
-- Subheader: `paddingL=32, paddingR=32` (Tab Basic content sits between x=32 and x=960)
+- Subheader: `paddingL=32, paddingR=32` (Tab Basic content sits between x=32 and x=932)
 - Container: `paddingL=32, paddingR=24, paddingT=24, paddingB=24, itemSpacing=24`
-- Effective content area inside Container: `992 - 32 - 24 = 936` px wide. The Overview tab content INSTANCE is locked at 932 wide (FIXED), giving a 4px right-side scroll allowance.
+- Effective content area inside Container: `964 - 32 - 24 = 908` px wide. The Overview tab content INSTANCE is locked at 908 wide (FIXED).
 
-**The visual "32px left / 24px right" of Case page content lives inside the Container, NOT at root.** If you skip the Container wrapper and place content at root x=0 w=992, the entire 32/24 padding system disappears.
+**The visual "32px left / 24px right" of Case page content lives inside the Container, NOT at root.** If you skip the Container wrapper and place content at root, the entire 32/24 padding system disappears.
 
-> **Common mistakes** (caught in v3.60 build, file `DnjKrpmudNkdNio4P8yFQB`):
-> - Placing right column at `x = 1016` (992 + 24px gap) → 0px right margin. Wrong: gap is on the RIGHT, not BETWEEN.
-> - Placing Overview tab content directly at root `x=0, w=992` → stretches the component (intrinsic 932) AND removes the 32/24 internal gutters.
-> - Missing the 8px gap under header (using `y=88` instead of `y=96`).
+> **Common mistakes:**
+> - **v3.60 build (file `DnjKrpmudNkdNio4P8yFQB`):** placed right column at `x=1016` with 992-wide wrapper expecting 24px gap → wrong, gap doesn't exist. With **v3.146 canonical** the wrapper is 964 wide and right col at x=1016 is correct (no gap). Re-read measurements before building.
+> - Placing Overview tab content directly at root → stretches the component AND removes the 32/24 internal gutters.
+> - **v3.146 sim regression:** wrapper height grew to 2552 instead of 812 because `layoutSizingVertical="FIXED"` was not set after appendChild. Always assert wrapper height == 812 after build.
+> - **v3.146 sim regression:** Tab Basic centered at x=224.5 instead of left-aligned at x=32 because `layoutSizingHorizontal="FILL"` was not set on the Tab Basic instance. Always assert Tab Basic.x == 32 after build.
 
 **Tabs row** sits inside `Frame 270990504` at the top — typical Sumsub `*Tab Basic*` instance.
 
@@ -259,10 +274,11 @@ header.setProperties({ "Title text#3817:0": "All cases" });
 const caseTable = caseTableSet.children.find(v => v.name === "Empty=No").createInstance();
 ```
 
-### Pattern B — Case detail page
+### Pattern B — Case detail page (v3.146 canonical — with 52px collapsed Sidebar)
 
 ```js
 // Pre-cache imports
+const sidebarSet     = await figma.importComponentSetByKeyAsync("60be5cbb4d070ccc4853589a555d949c3f23f62e"); // *Sidebar*
 const cphSet         = await figma.importComponentSetByKeyAsync("070118da7e99782ee06a25dad0550673e6fe50cb"); // Case page header
 const tabBasicComp   = await figma.importComponentByKeyAsync("8b7caf090f6d71e8892fb33f649cab470552dc83");    // *Tab Basic*
 const overviewComp   = await figma.importComponentByKeyAsync("937dcc919d4d8006fd792aceda340bd7da1a0cd0");    // Case page Overview tab content
@@ -275,24 +291,36 @@ root.resize(1440, 900);
 root.layoutMode = "NONE";
 root.fills = [{type:"SOLID", color:{r:1, g:1, b:1}}];
 
-// 1. Case page header — full width, top
+// 0. Sidebar — collapsed 52px, variant Type=Case management, Collapsed=True
+const sidebar = sidebarSet.children.find(v =>
+  v.name.includes("Type=Case management") && v.name.includes("Collapsed=True")
+).createInstance();
+root.appendChild(sidebar);
+sidebar.x = 0; sidebar.y = 0;
+try { sidebar.layoutSizingVertical = "FIXED"; } catch(e){}
+sidebar.resize(52, 900);
+
+// 1. Case page header — at x=52 (after sidebar), 1388 wide
 const caseHeader = cphSet.defaultVariant.createInstance();
 root.appendChild(caseHeader);
-caseHeader.x = 0; caseHeader.y = 0;
+caseHeader.x = 52; caseHeader.y = 0;
 try { caseHeader.layoutSizingHorizontal = "FIXED"; } catch(e){}
-caseHeader.resize(1440, caseHeader.height);
+caseHeader.resize(1388, caseHeader.height);
 
-// 2. Left wrapper — Frame 270990504 (NO padding, clipsContent for scroll)
+// 2. Left wrapper — Frame 270990504 at (52, 88), 964×812
+//    CRITICAL: BOTH dimensions FIXED, clipsContent=true. Wrapper must NOT hug content height.
 const leftWrapper = figma.createFrame();
 leftWrapper.name = "Frame 270990504";
 leftWrapper.layoutMode = "VERTICAL";
-leftWrapper.primaryAxisSizingMode = "FIXED";
+leftWrapper.primaryAxisSizingMode = "FIXED";       // FIXED, not AUTO — wrapper does NOT hug Container
 leftWrapper.counterAxisSizingMode = "FIXED";
 leftWrapper.fills = [];
-leftWrapper.clipsContent = true;
+leftWrapper.clipsContent = true;                    // mandatory — Container overflows wrapper
 root.appendChild(leftWrapper);
-leftWrapper.x = 0; leftWrapper.y = 96;
-leftWrapper.resize(992, 804);
+leftWrapper.x = 52; leftWrapper.y = 88;
+leftWrapper.resize(964, 812);
+// Re-assert FIXED after appendChild (Figma sometimes flips to AUTO when parent is NONE layout):
+try { leftWrapper.layoutSizingHorizontal = "FIXED"; leftWrapper.layoutSizingVertical = "FIXED"; } catch(e){}
 
 // 2a. Subheader — Tab Basic row, CENTER/MAX alignment (Tab Basic ends up bottom-anchored at y=23)
 const subheader = figma.createFrame();
@@ -312,7 +340,10 @@ subheader.resize(subheader.width, 56);
 
 const tabBasic = tabBasicComp.createInstance();
 subheader.appendChild(tabBasic);
-try { tabBasic.layoutSizingHorizontal = "FILL"; } catch(e){}    // tab basic fills 928px (= 992 - 32 - 32)
+try { tabBasic.layoutSizingHorizontal = "FILL"; } catch(e){}    // MUST be FILL — without it, Subheader CENTER alignment floats Tab Basic at x=224.5 instead of x=32
+// NOTE: do NOT throw on mismatch here — terminal throw inside a build use_figma call rolls back deferred writes (SKILL.md rule, lines 119-135).
+// The verification belongs in the SEPARATE audit run (check #9 — Pattern B Tab Basic alignment).
+figma.notify(`Tab Basic.x = ${tabBasic.x} (expected 32). Audit will verify.`);
 
 // 6 tabs (NOT 5) — order from original Case page
 const caseTabs = ["Overview", "AML", "Related cases", "Financial data", "FIU reports", "Events"];
@@ -347,20 +378,20 @@ container.fills = [];
 leftWrapper.appendChild(container);
 container.layoutSizingHorizontal = "FILL";
 
-// 2c. Overview tab content — locked at 932 wide (intrinsic), HUG height
+// 2c. Overview tab content — locked at 908 wide (intrinsic per v3.146 canonical), HUG height
 const overview = overviewComp.createInstance();
 container.appendChild(overview);
 try { overview.layoutSizingHorizontal = "FIXED"; } catch(e){}
-overview.resize(932, overview.height);
+overview.resize(908, overview.height);
 
-// 3. Right column — directly after left wrapper (no gap), 24px right margin to edge
+// 3. Right column — at x=1016 (Sidebar 52 + Wrapper 964), no gap, no right margin
 const rightCol = rightColComp.createInstance();
 root.appendChild(rightCol);
-rightCol.x = 992;   // directly after left wrapper, NO gap between
-rightCol.y = 96;
+rightCol.x = 1016;   // 52 + 964 = 1016
+rightCol.y = 88;
 try { rightCol.layoutSizingHorizontal = "FIXED"; rightCol.layoutSizingVertical = "FIXED"; } catch(e){}
-rightCol.resize(424, 804);
-// Right edge: 992 + 424 = 1416 → 24px right margin to screen edge 1440
+rightCol.resize(424, 812);
+// Right edge: 1016 + 424 = 1440 → flush with canvas edge (NO right margin in v3.146 canonical)
 ```
 
 ### Pattern C — Blueprint editor

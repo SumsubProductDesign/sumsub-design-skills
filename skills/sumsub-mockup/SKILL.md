@@ -519,6 +519,31 @@ If you can't tell whether a property is pattern or content (BOOLEAN with ambiguo
 
    **Reason Patch B exists (v3.145):** Billing sim 2026-05-22 v3.143 shipped Frame `11941:11077` with Sidebar at x=0/w=257 and Main at x=230 — 27px overlap. Audit returned PASS because no TEXT leak, no empty body, no hidden content. Three integer comparisons would have caught it deterministically.
 
+9. **Pattern B (Case detail) layout integrity check (added v3.146 — class-fix from CM sim 2026-05-22).** When `productContext === "case-management"` AND build matches Pattern B signature (Sidebar 52 + Case page header + Frame 270990504), verify:
+   - **Frame 270990504 height === 812** (NOT auto-grown to wrap Container content). If wrapper height > 900, the build forgot `layoutSizingVertical = "FIXED"` — wrapper hugged the 2400+px Overview content. FAIL.
+   - **`*Tab Basic*` inside Subheader has x === 32** (left-aligned per canonical), not floating at ~224. If x > 50, the Tab Basic was not set to `layoutSizingHorizontal = "FILL"` and the Subheader's CENTER alignment centered the HUG-sized strip. FAIL.
+   - **Frame 270990504.x === 52** AND **Case page right column.x === 1016** (current v3.146 canonical, post-drift). FAIL if any differ — likely the recipe was built from the pre-v3.146 doc which had wrapper at x=0 and right col at x=992.
+
+   ```js
+   function patternBLayoutIntegrity(root) {
+     const fails = [];
+     const wrapper = root.findOne(n => n.name === "Frame 270990504");
+     if (!wrapper) return fails; // not a Pattern B build
+     if (wrapper.height > 900) fails.push({frame: "Frame 270990504", issue: `height=${wrapper.height}, expected 812 (wrapper grew because layoutSizingVertical not FIXED)`});
+     if (wrapper.x !== 52) fails.push({frame: "Frame 270990504", issue: `x=${wrapper.x}, expected 52 (canonical drift v3.146)`});
+     const subheader = wrapper.findOne(n => n.name === ".Header Full Screen Page / Subheader");
+     if (subheader) {
+       const tabBasic = subheader.findOne(n => n.name === "*Tab Basic*");
+       if (tabBasic && tabBasic.x > 50) fails.push({frame: "*Tab Basic*", issue: `x=${tabBasic.x}, expected 32 (Tab Basic centered instead of FILL)`});
+     }
+     const rightCol = root.findOne(n => n.name === "Case page right column");
+     if (rightCol && rightCol.x !== 1016) fails.push({frame: "Case page right column", issue: `x=${rightCol.x}, expected 1016 (canonical drift v3.146)`});
+     return fails;
+   }
+   ```
+
+   **Reason check #9 exists (v3.146):** CM sim 2026-05-22 v3.145 built Frame `13634:172468` with wrapper height 2552 (canonical 812 — 3× growth, page renders 3× longer than designed) and Tab Basic at x=224.5 (canonical 32 — tabs visually centered instead of left-aligned). Both regressions were invisible to checks 1-8: no TEXT leak, no overlap (Sidebar 0/52 + Wrapper 52 stays aligned), no hidden content. Three integer comparisons specific to Pattern B catch both deterministically.
+
 **Fix-loop, not detect-only.** If any FAIL: skill must attempt to fix via setProperties (set realistic values from prompt context, or "[needs review]" placeholder if no realistic data is inferrable). Then re-audit. Repeat up to 3 iterations. After 3rd iteration if still FAIL — surface the residual failures to the user with a clear "I cannot fix these without you specifying X / Y" message instead of pretending it's done.
 
 **Audit verdict goes into the response.** Final reply to the user must include: `Audit: PASS | FAIL — [count] leaks fixed, [count] residual` and URL only emitted on PASS or with explicit FAIL acknowledgement.
