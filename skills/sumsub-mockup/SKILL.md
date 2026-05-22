@@ -488,10 +488,48 @@ If you can't tell whether a property is pattern or content (BOOLEAN with ambiguo
 5. **Visual-fill check (added v3.81).** Body's content area must contain visible component instances totalling ≥40% of Body height (sum of visible content INSTANCE heights / Body height). If <40%, FAIL with message "Body looks sparse — likely missing blocks vs canonical (e.g. canonical had 3 sections, you placed 1)". Acceptable below 40% only if canonical Body itself is that sparse (rare — verify against canonical Body walk).
 6. **Canonical-match check** (rule 7.45 — frame W/H, fill, instance pos/dims/variant within 2px tolerance vs canonicalMap).
 7. **Body content match** (canonical Body walk — same component sequence as canonical).
+8. **Layout-sanity check (added v3.145 — class-fix from Billing sim 2026-05-22).** For every screen frame containing both a `*Sidebar*` instance and a sibling Main/Content frame, assert:
+   - `Sidebar.x + Sidebar.width === Main.x` (no overlap, no gap)
+   - `Sidebar.y === 0`
+   - `Sidebar.height >= Main.height`
+
+   Any violation = FAIL. This catches structural-overlap bugs that TEXT-leak / visibility / empty-body checks cannot see (they only inspect rendered content, not absolute positions).
+
+   ```js
+   function layoutSanity(root) {
+     const fails = [];
+     function walk(n) {
+       if (n.type === "FRAME" && n.children) {
+         const sidebar = n.children.find(c => c.type === "INSTANCE" && /\*Sidebar\*/.test(c.name));
+         const main = n.children.find(c => c !== sidebar && (c.name === "Main" || c.name === "Content" || c.type === "FRAME"));
+         if (sidebar && main) {
+           if (sidebar.x + sidebar.width !== main.x) {
+             fails.push({frame: n.name, issue: `Sidebar ends at x=${sidebar.x + sidebar.width}, Main starts at x=${main.x}`});
+           }
+           if (sidebar.y !== 0) fails.push({frame: n.name, issue: `Sidebar.y=${sidebar.y}, expected 0`});
+           if (sidebar.height < main.height) fails.push({frame: n.name, issue: `Sidebar.h=${sidebar.height} < Main.h=${main.height}`});
+         }
+       }
+       if (n.children) for (const c of n.children) walk(c);
+     }
+     walk(root);
+     return fails;
+   }
+   ```
+
+   **Reason Patch B exists (v3.145):** Billing sim 2026-05-22 v3.143 shipped Frame `11941:11077` with Sidebar at x=0/w=257 and Main at x=230 — 27px overlap. Audit returned PASS because no TEXT leak, no empty body, no hidden content. Three integer comparisons would have caught it deterministically.
 
 **Fix-loop, not detect-only.** If any FAIL: skill must attempt to fix via setProperties (set realistic values from prompt context, or "[needs review]" placeholder if no realistic data is inferrable). Then re-audit. Repeat up to 3 iterations. After 3rd iteration if still FAIL — surface the residual failures to the user with a clear "I cannot fix these without you specifying X / Y" message instead of pretending it's done.
 
 **Audit verdict goes into the response.** Final reply to the user must include: `Audit: PASS | FAIL — [count] leaks fixed, [count] residual` and URL only emitted on PASS or with explicit FAIL acknowledgement.
+
+**URL verification before emit (added v3.145 — class-fix from Billing sim 2026-05-22).** Before formatting and returning the final URL:
+
+1. Capture the **actual** root frame's `.id` from the last build's `use_figma` return value.
+2. Verify the node exists by calling `mcp__figma__get_metadata` with that `nodeId`. If the response includes an error ("node not found") — the URL would 404. Surface as FAIL, do not deliver.
+3. Format the URL strictly as `https://www.figma.com/design/<fileKey>/?node-id=<id-with-dash>` where `<id-with-dash>` is the actual id with `:` replaced by `-`. **Never** invent, paraphrase, or cache a node id from earlier intermediate frames.
+
+**Reason Patch C exists (v3.145):** Billing sim 2026-05-22 v3.143 returned `url: …?node-id=11906-7109`. That node did not exist in the file — the actual built section was `11940:10710`. Self-reported node id diverged from reality. One `get_metadata` call before emit would have caught the hallucination.
 
 **Banned skill-output patterns:**
 - "Macket built. URL: ..." with no audit mention → bug
@@ -3219,28 +3257,56 @@ Before starting, decide what the user actually wants:
 
 **If unclear, ask first.** Never default to wrapping a block in a full-page layout — that loses focus on the block itself. When building just a block, place it on free canvas near the original in the same file.
 
+## Add-to-existing-page mode (added v3.145)
+
+When the prompt asks to ADD a feature to an existing page (e.g. "add Pay invoice button to the invoices page", "добавь форму X на страницу Y"):
+
+1. **Inspect the existing canonical page in the target file FIRST.** Use `mcp__figma__get_metadata` on the existing top-level frame. Record every structural block in order: Header (height + properties), Cards Row, Period Row, Filters group, Table, etc.
+2. **Preserve all existing chrome.** The new build must contain the same block sequence as the canonical — the new feature is ADDED, not REPLACE-d. Replacing canonical's `*Filters group*` with ad-hoc `*Input Basic*` + `*Filter*` chips is a regression.
+3. **Match canonical Header variant and height.** If existing page uses Header h=94 with title+CTA, the new build's Header must too — not the default h=64 generic variant.
+4. **Audit's canonical-match check (#6) applies here.** Compare new build's block sequence with the canonical's. Missing canonical block = FAIL.
+5. **If you cannot find the existing page**, ask the user for the canonical node URL before building. Don't build a generic skeleton and hope it matches.
+
+**Reason this section exists:** Billing sim 2026-05-22 v3.143 prompt was "add Pay invoice button + card binding form modal to the existing Invoices page" in file `kHQyyYdPZjEyrSahRmBLUr`. Existing prod section (`11986:141361`, also "made by Claude" in an earlier session) had Header h=94 + Cards Row (3 metric cards) + Period Row (Select Inline + Export button) + Table Starter — canonical Billing chrome. New build had Header h=64 + ad-hoc Filters (Input + 2 Filter chips) + Table Starter — none of the canonical chrome preserved. Audit PASS-ed because each individual instance was internally clean; the structural regression was invisible to per-instance checks.
+
 ## Product-specific references (used by Critical rule #2)
 
 Before building anything, **open the matching reference file(s) with the `Read` tool first** and actually consume their content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
 
-**Read for EVERY build (Plugin API gotchas):**
-
-| Always read | Reference file |
-|---|---|
-| Plugin API pitfalls, library keys, patterns | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md` |
+**Reference path note (v3.145):** all product reference files live in `${CLAUDE_PLUGIN_ROOT}/reference/products/`. Earlier versions of this table pointed to `${CLAUDE_PLUGIN_ROOT}/reference/` (no `products/` segment) — those paths 404. If `Read` returns a "no such file" error on a path here, the file genuinely doesn't exist; do not guess alternates.
 
 **Read when building a specific product:**
 
-| Product | Reference file |
+| Product | Reference file(s) |
 |---|---|
-| Applicant page / Applicant flow | `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md` |
-| Transaction Monitoring — any TM screen | `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md` |
-| Flow Builder / Workflow canvas / Workflow nodes | `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md` |
-| Page layouts (table, detail, etc.) | `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
-| Design system components / variables | `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md` |
-| Blocks system (helpers + templates) | `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
+| Applicant page / Applicant flow | `${CLAUDE_PLUGIN_ROOT}/reference/products/applicant-page-pattern.md`, `…/ap-component-catalog.md` |
+| Transaction Monitoring — any TM screen | `${CLAUDE_PLUGIN_ROOT}/reference/products/tm-layout-patterns.md`, `…/tm-component-catalog.md` |
+| Case Management — any CM screen | `${CLAUDE_PLUGIN_ROOT}/reference/products/case-management-pattern.md`, `…/cm-component-catalog.md` |
+| Billing / Invoices / Plan details | `${CLAUDE_PLUGIN_ROOT}/reference/products/billing-pattern.md`, `…/billing-component-catalog.md` |
+| AML Screening | `${CLAUDE_PLUGIN_ROOT}/reference/products/aml-screening-pattern.md`, `…/aml-screening-component-catalog.md` |
+| Global Settings | `${CLAUDE_PLUGIN_ROOT}/reference/products/global-settings-pattern.md`, `…/global-settings-component-catalog.md` |
+| Settings (Profile/Team/Roles/Branding) | `${CLAUDE_PLUGIN_ROOT}/reference/products/settings-pattern.md`, `…/settings-component-catalog.md` |
+| Data Comparison / Cross-Check | `${CLAUDE_PLUGIN_ROOT}/reference/products/data-comparison-pattern.md`, `…/data-comparison-component-catalog.md` |
+| POA Settings | `${CLAUDE_PLUGIN_ROOT}/reference/products/poa-settings-pattern.md`, `…/poa-settings-component-catalog.md` |
+| KYB Levels | `${CLAUDE_PLUGIN_ROOT}/reference/products/kyb-levels-pattern.md` |
+| Questionnaires | `${CLAUDE_PLUGIN_ROOT}/reference/products/questionnaires-pattern.md` |
+| Appearance customisation | `${CLAUDE_PLUGIN_ROOT}/reference/products/appearance-customisation-pattern.md` |
+| Databases | `${CLAUDE_PLUGIN_ROOT}/reference/products/databases-pattern.md` |
+| Reports | `${CLAUDE_PLUGIN_ROOT}/reference/products/reports-pattern.md` |
+| Marketplace | `${CLAUDE_PLUGIN_ROOT}/reference/products/marketplace-pattern.md` |
+| Operator | `${CLAUDE_PLUGIN_ROOT}/reference/products/operator-pattern.md` |
+| Sign up / Auth | `${CLAUDE_PLUGIN_ROOT}/reference/products/signup-pattern.md` |
+| Flow Builder / Workflow canvas | `${CLAUDE_PLUGIN_ROOT}/reference/products/workflow-builder-pattern.md` |
+| Legacy dashboard pages (Statistics, Dev space, Home) | `${CLAUDE_PLUGIN_ROOT}/reference/products/legacy-dashboard-patterns.md` |
+| Page layouts (cross-product) | `${CLAUDE_PLUGIN_ROOT}/reference/products/layout-patterns.md` |
+| Design system components / variables / colors | `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md`, `…/color-usage.md` |
+| Blocks system (helpers + templates) | `${CLAUDE_PLUGIN_ROOT}/reference/products/BLOCKS.md` |
+| Dashboard project files (cross-product index) | `${CLAUDE_PLUGIN_ROOT}/reference/products/dashboard-project-files.md` |
+| Misc Dashboard component catalogs | `${CLAUDE_PLUGIN_ROOT}/reference/products/dashboard-misc-component-catalogs.md` |
 
 These references contain exact component keys, variant names, measured paddings, and gotchas. Do NOT guess — consult the reference.
+
+**Reason Patch A exists (v3.145):** Billing sim 2026-05-22 v3.143 built a generic Title+Toolbar+Table page when canonical Billing has Cards Row + Period Row + Filters group + Table. Pattern doc `billing-pattern.md` existed in `reference/products/` but was not in the obligatory-read table. Worse: existing entries used `reference/...` not `reference/products/...` — all paths in the old table returned 404, so skill silently skipped reference reading for ALL products, not just Billing.
 
 ## Text truncation — always enable
 
