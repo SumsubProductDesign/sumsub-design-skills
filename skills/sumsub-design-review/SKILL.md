@@ -303,12 +303,13 @@ Present findings as a structured summary:
 | `spacing/3xl` | 32px | `a2e089548b83ff33c8ee5e914fa24e67b889b38c` |
 
 ### Border Radius
+> 🔄 **2026-06-01 redesign: renamed `s`→`sm`, `m`→`md` + values DOUBLED.** Keys stable.
 | Token | Value | Key |
 |---|---|---|
-| `border-radius/s` | 2px | `885152d55a536fb853461592cc3eff926e94858d` |
-| `border-radius/m` | 4px | `311dc09093e9474a8b582c8fb7ccc7a628065a20` |
-| `border-radius/lg` | 8px | `95839af397884cd7f8fadb34a62d4763f88d68dd` |
-| `border-radius/xl` | 12px | `03884e014085a48cf26670632be200a02b5a160c` |
+| `border-radius/sm` (was `/s`) | 4px (was 2) | `885152d55a536fb853461592cc3eff926e94858d` |
+| `border-radius/md` (was `/m`) | 8px (was 4) | `311dc09093e9474a8b582c8fb7ccc7a628065a20` |
+| `border-radius/lg` | 12px (was 8) | `95839af397884cd7f8fadb34a62d4763f88d68dd` |
+| `border-radius/xl` | 16px (was 12) | `03884e014085a48cf26670632be200a02b5a160c` |
 
 ### Binding Example
 ```js
