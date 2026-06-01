@@ -1416,8 +1416,18 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    Audit checks 7.33, 7.39, 7.41 in v3.58 and earlier had this bug — they walked only up to the immediate container (footer / toolbar / header), missing the case where the container itself sits inside a hidden parent. Fixed in v3.59.
 
    ```js
-   // Audit script — paste and adapt ROOT_ID
+   // Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
    const root = figma.getNodeById("ROOT_ID_HERE");
+   // ⚠️ v3.151: productContext MUST be declared at the TOP — checks 7.44/7.45 (lines ~2452)
+   // reference it BEFORE the later "Product-required components" section. Declaring it only
+   // there caused a TDZ ReferenceError that forced agents to hand-fix the verbatim script.
+   // Set to "flow-builder" | "applicant-page" | "table-page" | "tm" | "case-management" | null,
+   // OR an object { canonicalMap, requiresCanonical } for canonical-match builds.
+   const productContext = null;
+   // ⚠️ v3.151: `page` is used by checks 7.46/7.47/7.48/7.45 (root must live on a Drafts page,
+   // section containment). Derive it from root's ancestor chain so those checks run verbatim.
+   let page = root.parent;
+   while (page && page.type !== "PAGE") page = page.parent;
    const issues = [];
    const all = root.findAll(n => true);
 
@@ -3014,7 +3024,8 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    // 8. Product-required components (fabrication check)
    // For product-specific mockups, these top-level pieces MUST be real component instances, not custom FRAMEs.
    // Detect product based on what's present or what the user asked for.
-   const productContext = /* set to "flow-builder" | "applicant-page" | "table-page" | null based on the task */ null;
+   // NOTE (v3.151): productContext is now declared at the TOP of this script (see line ~1420).
+   // Do NOT re-declare it here — `const productContext` twice is a SyntaxError.
 
    function requireInstance(label, matchFn, forbiddenFrameNames = []) {
      const hasInstance = all.some(n => n.type === "INSTANCE" && matchFn(n));
