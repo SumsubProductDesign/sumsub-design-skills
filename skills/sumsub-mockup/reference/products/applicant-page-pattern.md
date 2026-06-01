@@ -12,15 +12,15 @@
 ```
 Root (1440 × 900+, NONE layout, fill #ffffff)
 │
-├── AP page header  (INSTANCE, 1440×152 at x=0, y=0)         ← FULL WIDTH
-│   ├── Sandbox flag bar (20px, yellow #faad14)
-│   ├── Header row (96px, HORIZONTAL, pad: 16/32/16/32)
+├── AP page header  (INSTANCE, 1440×H at x=0, y=0)           ← FULL WIDTH. H read from canonical (Version=New → 144, Version=Old → 152)
+│   ├── Sandbox flag bar (20px, yellow #faad14) — hidden unless Sandbox=true
+│   ├── Header row (88px New / 96px Old, HORIZONTAL, pad: 16/32/16/32)
 │   └── Subheader (56px, VERTICAL, pad: 0/32/1/32) → *Tab Basic*
 │
-├── Summary  (INSTANCE, ~360–380 wide × ~748 tall at x=0, y=152)
+├── Summary  (INSTANCE, ~360–380 wide × ~748 tall at x=0, y=H)
 │   └── Summary / Level / Steps
 │
-└── Body (~1060–1080 wide × scroll-height at x=Summary.width, y=152)
+└── Body (~1060–1080 wide × scroll-height at x=Summary.width, y=H)
     ├── APCardCollapsible (collapsed/expanded cards)
     ├── Section title rows (HORIZONTAL: text + button)
     ├── HORIZONTAL card grids (gap=16)
@@ -34,7 +34,7 @@ Root (1440 × 900+, NONE layout, fill #ffffff)
 | `Di7nvHaOxXiWuDAN1oa0hK` (`17501:30301`, 2026-05-08) | 380 | 1060 | 380 | 380 + 1060 = 1440 ✓ |
 | `13395:21886` (`14441:253969`, v3.78 scan) | 360 | 1080 | 360 | 360 + 1080 = 1440 ✓ |
 
-> **Rule:** before building, run `get_metadata` on the target file's AP frame and read `summary.width` / `body.width` from the actual canonical. Do NOT hardcode 360/380 or 1060/1080 — they vary by file.
+> **Rule:** before building, run `get_metadata` on the target file's AP frame and read `summary.width` / `body.width` **AND `AP page header.height`** from the actual canonical. Do NOT hardcode 360/380, 1060/1080, or 152 — they vary by file/variant. Then position `Summary.y = header.height` and `Body.y = header.height` (content flush below header). **Note (v3.147):** `Version=New` AP header renders at **144** (88 header row + 56 subheader, sandbox hidden); `Version=Old` renders at 152 (96 row). Prefer `Version=New` for fresh builds. The 8px difference propagates to Summary.y/Body.y — read it, don't assume.
 
 ### Key Dimensions (constants — do not vary)
 
@@ -42,7 +42,7 @@ Root (1440 × 900+, NONE layout, fill #ffffff)
 |---|---|
 | Screen width | 1440px |
 | Screen height | 900px viewport / taller for scroll |
-| Page header | 1440×152 at (0, 0) — full width, no x-offset |
+| Page header | 1440×H at (0, 0) — full width, no x-offset. H = 144 (Version=New) / 152 (Version=Old). Read from canonical. |
 | Body padding | 24/32/64/32 (top/right/bottom/left) |
 | Body gap | 16px (between cards), 20px (between sections) |
 | Card content width | Body.width − 64 (= 32×2 padding) |
@@ -61,7 +61,7 @@ Root (1440 × 900+, NONE layout, fill #ffffff)
 | Variants | `Client type`: Any/KYC/KYB, `User type`: Admin/Moderator, `In review`: Yes/No |
 | Properties | `Applicant name#3392:7`, `↪ Client name#3392:3`, `Sandbox#3392:8` (bool), `KYB link#3392:2` (bool), `Client info#3392:4` (bool), `Notes#603:7` (bool), `Inactive#1456:0` (bool), `Score#3392:10` (bool), `Read-only applicant#2315:0` (bool) |
 | Source | Applicant-page-and-Tasks-components (`QKXZwWodIwPVsjAjj4gMnE`), page "Header" |
-| Height | 152px fixed, resizable to 1440px width |
+| Height | **Version=New → 144px**, Version=Old → 152px. Resizable to 1440px width. Read actual height from canonical, do NOT hardcode. |
 
 ### APCardCollapsible
 | Property | Value |
