@@ -52,7 +52,7 @@ Root (1440 × 900+, NONE layout, absolute positioning)
 │   │       └── 6 tabs: Overview (selected) / AML / Related cases / Financial data / FIU reports / Events
 │   │
 │   └── Container (964 × 2401+, scrollable, FRAME)              ← real content
-│       - VERTICAL, paddingL=32, paddingR=24, paddingT=24, paddingB=24, itemSpacing=24
+│       - VERTICAL, paddingL=32, paddingR=32, paddingT=24, paddingB=24, itemSpacing=24
 │       - primaryAxisSizingMode=AUTO (hugs height to content), counterAxisSizingMode=FIXED
 │       └── Case page Overview tab content (908 × variable, INSTANCE)  ← key 937dcc91...
 │           - layoutSizingHorizontal=FIXED at 908
@@ -74,7 +74,7 @@ The pattern is NOT "drop the Overview tab content directly into root". It's a de
 2. **Subheader + Container** are children of Frame 270990504, stacked vertically:
    - Subheader is a thin 56px row that holds the Tab Basic with horizontal padding so tab labels align to x=32.
    - **`*Tab Basic*` MUST have `layoutSizingHorizontal="FILL"`** so it fills the 900px between paddings. Without FILL, Tab Basic hugs its content (~515 wide) and the Subheader's `primaryAxisAlignItems="CENTER"` re-centers it at x=224.5 — visually the tab strip floats in the middle of the page instead of being left-aligned at x=32.
-   - Container holds the scrollable Overview content with paddingL=32 paddingR=24 paddingT=24 paddingB=24 — these are the canonical Case page paddings. NEVER drop the Overview component directly without this Container.
+   - Container holds the scrollable Overview content with paddingL=32 paddingR=32 paddingT=24 paddingB=24 — these are the canonical Case page paddings. NEVER drop the Overview component directly without this Container.
 
 If you skip the wrappers and place the Overview component at root x=52 w=964, it gets stretched (intrinsic width is 908) AND the page loses its proper 32px left / 24px right gutters.
 
@@ -112,8 +112,8 @@ Layout sum: `0 + 52 + 964 + 424 = 1440` ✓
 **Critical spacing — INSIDE the left wrapper (Frame 270990504):**
 
 - Subheader: `paddingL=32, paddingR=32` (Tab Basic content sits between x=32 and x=932)
-- Container: `paddingL=32, paddingR=24, paddingT=24, paddingB=24, itemSpacing=24`
-- Effective content area inside Container: `964 - 32 - 24 = 908` px wide. The Overview tab content INSTANCE is locked at 908 wide (FIXED).
+- Container: `paddingL=32, paddingR=32, paddingT=24, paddingB=24, itemSpacing=24` (L/R both bound to `spacing/3xl`=32, T/B to `spacing/2xl`=24 — verified canonical Container `4045:2323405`)
+- Content box = `964 - 32 - 32 = 900`. The Overview tab content INSTANCE is **908 wide (FIXED)** — it overflows the 900 content box by 8px, so the net VISUAL right gutter is `964 - (32 + 908) = 24`px. (This is why pre-drift docs wrongly recorded paddingR=24 — that's the visual gutter, not the padding property. The property is 32; v3.153 fix.)
 
 **The visual "32px left / 24px right" of Case page content lives inside the Container, NOT at root.** If you skip the Container wrapper and place content at root, the entire 32/24 padding system disappears.
 
@@ -365,13 +365,13 @@ for (let i = 0; i < tabItems.length; i++) {
   }
 }
 
-// 2b. Container — real content with 32/24/24/24 paddings
+// 2b. Container — real content with 32/32/24/24 paddings
 const container = figma.createFrame();
 container.name = "Container";
 container.layoutMode = "VERTICAL";
 container.primaryAxisSizingMode = "AUTO";   // hugs height; scrolls inside leftWrapper
 container.counterAxisSizingMode = "FIXED";
-container.paddingLeft = 32;  container.paddingRight = 24;
+container.paddingLeft = 32;  container.paddingRight = 32;
 container.paddingTop = 24;   container.paddingBottom = 24;
 container.itemSpacing = 24;
 container.fills = [];

@@ -1401,12 +1401,13 @@ for (const node of all) {
       // 7.44d — Container inside left wrapper
       const container = leftWrapper.children.find(c => c.type === "FRAME" && c.name === "Container");
       if (!container) {
-        issues.push(`Pattern B "${screen.name}": left wrapper has no Container FRAME. Required: VERTICAL frame named "Container", paddings 32/24/24/24, itemSpacing 24, holding "Case page Overview tab content" at width 908.`);
+        issues.push(`Pattern B "${screen.name}": left wrapper has no Container FRAME. Required: VERTICAL frame named "Container", paddings 32/32/24/24 (L/R/T/B), itemSpacing 24, holding "Case page Overview tab content" at width 908 (FIXED; overflows the 900 content box by 8 → 24px visual right gutter).`);
       } else {
-        const expectedPads = { paddingLeft: 32, paddingRight: 24, paddingTop: 24, paddingBottom: 24 };
+        // v3.153: pR=32 (was wrongly 24). Verified canonical Container 4045:2323405: L=R=32 (spacing/3xl), T=B=24 (spacing/2xl).
+        const expectedPads = { paddingLeft: 32, paddingRight: 32, paddingTop: 24, paddingBottom: 24 };
         for (const [side, expected] of Object.entries(expectedPads)) {
           if (container[side] !== expected) {
-            issues.push(`Pattern B "${screen.name}": Container ${side} = ${container[side]} — must be ${expected}. (Canonical Case page Container paddings: L=32, R=24, T=24, B=24, itemSpacing=24.)`);
+            issues.push(`Pattern B "${screen.name}": Container ${side} = ${container[side]} — must be ${expected}. (Canonical Case page Container paddings: L=32, R=32, T=24, B=24, itemSpacing=24.)`);
           }
         }
         if (container.itemSpacing !== 24) {
