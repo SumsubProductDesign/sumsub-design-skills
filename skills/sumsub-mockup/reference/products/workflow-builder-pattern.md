@@ -137,9 +137,9 @@ Do NOT color Level→Condition green. It's grey because it originates from a non
 ### Variable keys for connector colors (library)
 
 ```
-grey:  6d15db46390c9cc50aadb2e6880424e181718f2f  // base/neutral/50 #c4cad4
-green: 80ba43b65ffdf989bcac6df037d24dc5da2d1d2b  // base/green/50   #25b793
-blue:  bb75e253560dc7b3f54de0123ed73dd7bc7fb309  // base/blue/50    #1764ff
+grey:  6d15db46390c9cc50aadb2e6880424e181718f2f  // base/neutral/50 #99a1af (was #c4cad4, redesign 2026-06)
+green: 80ba43b65ffdf989bcac6df037d24dc5da2d1d2b  // base/green/50   #22c55e (was #25b793)
+blue:  bb75e253560dc7b3f54de0123ed73dd7bc7fb309  // base/blue/50    #3b82f6 (was #1764ff)
 ```
 
 ---

@@ -4,6 +4,15 @@
 
 > **RULE:** Always use `semantic/*` variables for custom nodes. Some older files use `base/*` directly — that's a legacy pattern, do NOT repeat it in new work.
 
+> 🔄 **2026-06-01 — DASHBOARD REDESIGN (Tailwind + blue→black).** Hex-значения в этом гайде УСТАРЕЛИ (pre-redesign). **Authoritative source теперь `design-system.md`** (Variable Patterns + Quick reference — там новые Tailwind hex, ключи стабильны). Якори для быстрой сверки:
+> - Text: default #1e2939 (был #373d4d), strong #030712, subtle #364153, subtler #4a5565
+> - **Primary action: ЧЁРНЫЙ #030712** (`semantic/background/primary/normal`) — НЕ синий. Синий (#2563eb) только для ссылок/info.
+> - Bg page #f3f4f6, card #ffffff, hover #e5e7eb · Border default #99a1af, subtler #d1d5dc
+> - Status: green #16a34a, red #dc2626, yellow #d27a0a · Link #2563eb
+> - border-radius переименован: sm=4 md=8 lg=12 xl=16 (был s=2 m=4 lg=8 xl=12)
+> - Dark mode существует — см. design-system.md «Dark Mode» секцию.
+> Hex ниже по тексту — pre-redesign, сверяйся с design-system.md.
+
 ---
 
 ## Backgrounds
