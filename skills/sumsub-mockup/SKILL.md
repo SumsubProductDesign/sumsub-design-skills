@@ -1394,7 +1394,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    - Date-style signatures like `<skill>-v<X> / <fileKey> / <date>` (v3.144 ban) — that's not an audit signature, that's an identifier string. Use the regex format above.
    - `audit_checks: "27/27"` style fraction reports — banned. Audit script doesn't tally; it accumulates `issues.push(...)` calls. If you wrote a fraction, you didn't run the script.
 
-   If you cannot run the audit script (transport issues, missing tools), STATE that explicitly in `blockers` field with `"audit_signature": "audit-NOT_RUN-<reason>"`. Don't fabricate PASS.
+   If you cannot run the audit script, STATE that explicitly in `blockers` field with `"audit_signature": "audit-NOT_RUN-<reason>"`. Don't fabricate PASS. **`audit-NOT_RUN` is valid ONLY when `use_figma` itself errors/is unavailable — NOT because of the 50KB code-param cap.** The audit ships as 3 pre-split part files (`audit-part1/2/3.js`), each < 50KB; run them and merge. "105KB > 50KB" / "can't fs-load the file" / "split wouldn't be verbatim" are BANNED reasons (TM sim v3.152 used them to skip — wrong; see the run protocol below).
 
    **Visible-chain helpers (use these whenever you check button labels, text leaks, or duplicates):**
 
@@ -1415,17 +1415,21 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    Audit checks 7.33, 7.39, 7.41 in v3.58 and earlier had this bug — they walked only up to the immediate container (footer / toolbar / header), missing the case where the container itself sits inside a hidden parent. Fixed in v3.59.
 
-   **The audit script lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/audit.js`** (extracted v3.151 — single source of truth; previously inlined here, which invited cherry-picking).
+   **The audit is split into THREE pre-built segment files (v3.153) — each < 50KB, comments intact, so each fits the use_figma code-param limit with NO stripping and NO transcription:**
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part1.js` (checks 1 → before 7.31, ~34KB)
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part2.js` (7.31 → before 7.48, ~37KB)
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part3.js` (7.48 → end, ~37KB)
+   (The full uncut script is `audit.js` — reference only; do NOT try to run it whole, it's 105KB > 50KB.)
 
-   **Run it:**
-   1. `Read` the whole `reference/products/audit.js`.
-   2. Edit ONLY `ROOT_ID_HERE` and `productContext` (the file's header documents allowed values). No other edits — reporting a buggy check to the user is allowed; silently softening or removing a check is not.
-   3. The file is ~105KB (comment-documented) and exceeds the use_figma 50KB code-param limit. Run modes (both documented in the file header):
-      - **MODE A:** strip comments → run in one call (still ~71KB; usually needs MODE B).
-      - **MODE B (split run):** run in 3 segments cut at check-comment boundaries (A: preamble→before `// 7.43.`; B: `// 7.43.`→before `// 8.`; C: `// 8.`→end), each segment prepended with the shared preamble (symbols: root, productContext, page, issues, infos, all, isInsideInstance, isVisible, sidebar) and ending `return JSON.stringify({issues, infos});`. Concatenate all issues/infos, compute the signature from the union.
-   4. Append the signature lines (see the `audit_signature` snippet in this section, just above) and report the verdict.
+   **Run protocol (MANDATORY — this is the supported path, no excuses):**
+   1. For EACH of the 3 part files: `Read` it, set `ROOT_ID_HERE` + `productContext` at the top (the ONLY two edits), run via `use_figma`. Each returns `{ issues, info }`.
+   2. Concatenate the three `issues` arrays (and `info` arrays). Total `issues.length === 0` → PASS.
+   3. Compute the signature from the union: `audit-v<PLUGIN_VERSION>-issues<totalIssues>-checks54`.
+   4. Each part is self-contained (shares the same preamble incl. `sidebar`/`infos`); running them in any order and merging is correct. A check is never split across parts.
 
-   > ⚠️ v3.151 fixed two bugs that previously forced hand-editing: `productContext` is declared at the TOP (was TDZ), and `page` is derived from root's ancestor (was undefined in checks 7.46/7.47/7.48). The file runs without structural hand-fixes — only ROOT_ID + productContext.
+   > 🚫 **`audit-NOT_RUN` is BANNED when the reason is "105KB > 50KB" / "can't fs-load" / "would not be verbatim".** That rationalization (observed in the TM sim v3.152) is wrong: the 3 part files each fit the 50KB cap as-is, and running them verbatim IS the verbatim audit — "verbatim" protects the check CONDITIONS, which the parts preserve byte-for-byte. `audit-NOT_RUN-<reason>` is valid ONLY if `use_figma` itself is unavailable/erroring, never because of size. Skipping the audit and shipping `audit_verdict: VERBATIM AUDIT NOT RUN` with a manual eyeball check = bug.
+
+   > ⚠️ v3.151 fixed two bugs that previously forced hand-editing: `productContext` is declared at the TOP (was TDZ), and `page` is derived from root's ancestor (was undefined in checks 7.46/7.47/7.48). The parts run without structural hand-fixes — only ROOT_ID + productContext.
 
    **Set `productContext`** at the top of the script to one of `"flow-builder" | "applicant-page" | "table-page" | "tm" | null` based on the user's task. This enables the targeted checks in #8. When `null`, #8 is skipped.
 

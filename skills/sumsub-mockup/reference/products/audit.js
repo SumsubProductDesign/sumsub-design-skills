@@ -1,6 +1,14 @@
 // ============================================================================
-// Sumsub Mockup — Verbatim Audit Script (single source of truth)
+// Sumsub Mockup — Verbatim Audit Script (FULL — reference only, 105KB)
 // ============================================================================
+// ⚠️ DO NOT run this file whole — it's 105KB, over the use_figma 50KB code-param
+// cap. To RUN the audit, use the 3 pre-split segment files (each <50KB, comments
+// intact, no stripping needed): audit-part1.js + audit-part2.js + audit-part3.js.
+// Read each, set ROOT_ID_HERE + productContext, run, then merge {issues, info}.
+// This audit.js is the uncut source of truth (regenerate the parts from it if
+// checks change: cut at the // 7.31. and // 7.48. boundaries; segments 2&3
+// prepend the preamble + `const infos=[]` + the `const sidebar=...` decl).
+// ----------------------------------------------------------------------------
 // HOW TO RUN (from sumsub-mockup SKILL.md "Mandatory audit step"):
 //   1. Read this whole file.
 //   2. Edit ONLY two things: ROOT_ID_HERE (line below) and `productContext`.
