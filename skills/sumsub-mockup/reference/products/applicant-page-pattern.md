@@ -175,6 +175,17 @@ for (const root of apRoots) {
 
 ## Body Content Patterns
 
+### ⚠️ Imported AP organisms may carry pre-redesign baked overrides (v3.155 — from AP sim 2026-06-01)
+
+The big `Body` organism (key `b7f51135fb0d86dd346af5587ec1d701703db6e5`) and its sub-organisms are imported from the AP UI kit (`QKXZwWodIwPVsjAjj4gMnE`). After the 2026-06 Dashboard redesign, **most** of their internals re-sync automatically (they bind Base semantic variables by stable key — verified: HeaderChecks bg #f3f4f6, Plain button text #2563eb, body text #1e2939/#030712, all Tailwind). **BUT some elements carry baked, non-variable fill overrides that do NOT track the redesign** — observed: a Primary `*Button*` inside the Body organism with a hardcoded background `#e3a93d` (gold) instead of the redesigned black `semantic/background/primary/normal` #030712. Its text/icon use proper component vars; only the bg fill is a raw override.
+
+This is a **design-source defect in the organism's main component**, NOT a plugin/skill/variable issue:
+- The redesign changes variable VALUES; baked raw fills (no `boundVariables.fills`) are unreachable by it.
+- The skill imports the organism faithfully; per the "never touch component-instance internals" rule, it must NOT rewrite fills inside a remote-instance subtree.
+- **Action: flag to the design team** to rebind the override to `components/button/primary/*` (or remove it) and re-publish the AP UI kit organism. Do NOT try to fix it in the build.
+
+Also note: the `Body` organism is a **2023-era kitchen-sink composite** — it includes a dated video-review block ("Frame 481413", a 2023 screenshot) and a deprecated `Documents block old` section. It renders EVERY possible AP section. That's expected from this organism; if the user wants a lean page, assemble specific sections instead (see organism-per-section map below) rather than dropping the whole Body.
+
 ### 🚨 Default expansion = OPEN, with REAL content from AP organisms (NEW v3.120)
 
 **Default state of cards: `Collapsed=No` (expanded), filled with realistic data from the matching AP organism.** Do NOT default to `Collapsed=Yes` to avoid filling content — that's the banned-class behavior that triggered the v3.120 fix. User asks for an Applicant page → user expects an expanded page with content, not a list of collapsed headers.
