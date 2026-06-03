@@ -1893,6 +1893,35 @@ if (productContext === "tm") {
   }
 }
 
+// 7.55. Table-organism instance must NOT have its internal padding zeroed (v3.156).
+// Table organisms (Txn table, Table Starter, Case table, etc.) ship with a baked
+// content inset — canonical Txn table top frame = padL=32 padR=32 padT=24 padB=24,
+// insetting the Top Toolbar + Body so rows get left/right gutters. A fresh
+// createInstance() inherits that inset; padding 0/0/0/0 only happens if the build
+// EXPLICITLY zeroed it (banned — strips the inset, slams content flush to the edge).
+// Observed: TM Transactions-table sim 2026-06-01, build zeroed Txn table to 0/0/0/0.
+{
+  // Narrowed to organisms whose canonical inset is VERIFIED. `Txn table` confirmed
+  // 32/32/24/24 (TM sim 2026-06-01). Do NOT add generic `*Table Starter*` here — its
+  // native inset is unverified and may legitimately be 0 (false-positive risk; see the
+  // 7.44d stale-value lesson). Add other organisms only after confirming canonical padding.
+  const tableOrgRe = /^Txn table$/;
+  const tableOrgs = all.filter(n =>
+    n.type === "INSTANCE" &&
+    tableOrgRe.test(n.name) &&
+    n.layoutMode === "VERTICAL" &&
+    n.width > 1000 &&
+    !isInsideInstance(n)
+  );
+  for (const t of tableOrgs) {
+    let pL, pT;
+    try { pL = t.paddingLeft; pT = t.paddingTop; } catch (e) { continue; }
+    if (pL === 0 && pT === 0) {
+      issues.push(`7.55 table-padding-stripped: "${t.name}" (${Math.round(t.width)}w) has padding 0/0/0/0 — its internal content inset was zeroed. Canonical Txn table = 32/32/24/24, insetting the Top Toolbar + Body so rows get gutters. A fresh createInstance inherits that; 0/0/0/0 = the build explicitly zeroed it. NEVER set padding on the Txn table instance; drop it and configure rows/State only. Fix: do NOT touch paddingLeft/Right/Top/Bottom.`);
+    }
+  }
+}
+
 return issues.length === 0
   ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
   : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);

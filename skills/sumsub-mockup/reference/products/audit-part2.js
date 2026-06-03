@@ -1,7 +1,7 @@
 // ===== AUDIT SEGMENT 2/3 (7.31 → before 7.48) =====
 // Run via use_figma: set ROOT_ID_HERE + productContext (top), run, collect {issues, info}.
-// After all 3 segments: concatenate issues + info, then audit-PASS iff total issues==0.
-// Each segment is self-contained (<50KB, comments intact — NO stripping needed).
+// After all 3 segments: concatenate issues + info; PASS iff total issues==0.
+// Self-contained (<50KB, comments intact, NO stripping).
 // Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
 const root = figma.getNodeById("ROOT_ID_HERE");
 // ⚠️ v3.151: productContext MUST be declared at the TOP — checks 7.44/7.45 (lines ~2452)

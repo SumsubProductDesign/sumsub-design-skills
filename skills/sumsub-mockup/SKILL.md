@@ -1634,6 +1634,12 @@ btn.setProperties({
 
 ## Table Starter — populate, hide, label (don't hack internals)
 
+> 🚫 **NEVER set/zero the padding of a table-organism instance (`*Table Starter*`, `Txn table`, `Case table`, etc.) — added v3.156.** These organisms carry a baked internal content inset (canonical `Txn table` top frame = `padL=32 padR=32 padT=24 padB=24`, so the Top Toolbar + Body sit at x=32, content width = tableW−64). The inset is what gives rows their left/right gutters. Setting `table.paddingLeft = 0` (or any padding on the instance) STRIPS that inset and slams the toolbar/rows flush to the table edge.
+>
+> **Reason this rule exists:** TM Transactions-table sim 2026-06-01 — the build dropped the `Txn table` (key `cce53984...`, State=Filled — correct component + variant) but then zeroed its paddings to `0/0/0/0`. Canonical is `32/32/24/24`. A fresh `createInstance()` INHERITS the component's `32/32/24/24` — so 0/0/0/0 only happens if the build EXPLICITLY set them. User: "полностью проигнорировал правильные отступы у таблицы."
+>
+> **Rule:** drop the table organism, resize its WIDTH to fit the content area if needed, set documented row/State/cell properties — but never touch `paddingLeft/Right/Top/Bottom` (or `itemSpacing`) on the table instance or its internal Top Toolbar / Body frames. They are component-managed. Audit check 7.55 catches a table-organism instance with zeroed padding.
+
 A `*Table Starter*` instance ships with **10 default rows + header row with "Table header" labels**. Three things you must handle:
 
 ### 1. Hide unused rows via `row.visible = false`
