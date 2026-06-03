@@ -1,6 +1,6 @@
 // ===== AUDIT SEGMENT 2/3 (7.31 → before 7.48) =====
-// Run via use_figma: set ROOT_ID_HERE + productContext (top), run, collect {issues, info}.
-// After all 3 segments: concatenate issues + info; PASS iff total issues==0.
+// Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
+// After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
 // Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
 const root = figma.getNodeById("ROOT_ID_HERE");

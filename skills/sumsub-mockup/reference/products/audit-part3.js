@@ -1,6 +1,6 @@
 // ===== AUDIT SEGMENT 3/3 (7.48 → end) =====
-// Run via use_figma: set ROOT_ID_HERE + productContext (top), run, collect {issues, info}.
-// After all 3 segments: concatenate issues + info; PASS iff total issues==0.
+// Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
+// After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
 // Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
 const root = figma.getNodeById("ROOT_ID_HERE");
@@ -661,6 +661,38 @@ if (productContext === "tm") {
     if (pL === 0 && pT === 0) {
       issues.push(`7.55 table-padding-stripped: "${t.name}" (${Math.round(t.width)}w) has padding 0/0/0/0 — its internal content inset was zeroed. Canonical Txn table = 32/32/24/24, insetting the Top Toolbar + Body so rows get gutters. A fresh createInstance inherits that; 0/0/0/0 = the build explicitly zeroed it. NEVER set padding on the Txn table instance; drop it and configure rows/State only. Fix: do NOT touch paddingLeft/Right/Top/Bottom.`);
     }
+  }
+}
+
+// 7.56. Redesign library-staleness detector (v3.156, INFO not FAIL).
+// The 2026-06 redesign lives in the Base components SOURCE file. Each consuming
+// file caches its own copy of imported library variables; a file only gets the
+// new Tailwind values after it re-syncs (Update) the Base library. A NON-synced
+// file resolves variables to PRE-redesign hex — every component (local or remote)
+// then renders old colors REGARDLESS of skill output. This is a Figma library
+// state, not a build defect → reported as INFO. (Observed: TM file
+// 4zG4nJT1s0mcVQDXuJjoJJ resolved Base/Neutral/60=#a6afbe (old) vs new #6a7282;
+// status bg #d0f1e8/#f6f7f9 old.)
+{
+  // Distinctive PRE-redesign hexes that do NOT exist in the new Tailwind palette.
+  const OLD_PALETTE = new Set([
+    "#373d4d","#586073","#7d8799","#a6afbe","#c4cad4","#f6f7f9","#edeff2","#e1e5ea",
+    "#1764ff","#4180ff","#1455d9","#0a2d73","#25b793","#d0f1e8","#f5222d","#ffa500","#212736"
+  ]);
+  function hx(c){if(!c)return null;const h=x=>Math.round(x*255).toString(16).padStart(2,"0");return "#"+h(c.r)+h(c.g)+h(c.b);}
+  const foundOld = new Set();
+  for (const n of all) {
+    let fills; try { fills = n.fills; } catch (e) { continue; }
+    if (!Array.isArray(fills)) continue;
+    for (const f of fills) {
+      if (f.type === "SOLID" && f.visible !== false) {
+        const hex = hx(f.color);
+        if (hex && OLD_PALETTE.has(hex)) foundOld.add(hex);
+      }
+    }
+  }
+  if (foundOld.size >= 4) {
+    infos.push(`[info] ⚠️ REDESIGN LIBRARY STALE: this file resolves ${foundOld.size} distinct PRE-redesign hexes (${[...foundOld].slice(0,8).join(", ")}). The Base components library in this file is NOT synced to the 2026-06 Tailwind+black redesign — components render OLD colors regardless of skill output. This is a Figma library-sync state, not a build defect. Tell the user: ask design to open this file and Update the Base components library (Assets → library updates → Update), then colors will re-resolve to the new palette.`);
   }
 }
 
