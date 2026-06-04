@@ -2171,6 +2171,10 @@ Audit 7.42 flags any visible `.Tab Basic / Item` with default label `/^Tab(_\d+)
 
 ## Sidebar — set the active nav item for the current page
 
+> 🚫 **NEVER resize or re-layout nodes nested inside the `*Sidebar*` (or `*Header*`) instance — added v3.158.** Configure chrome ONLY via exposed component properties: pick the variant (Type/Collapsed), toggle the active nav-item's `Selected`, set exposed text props (org name / key name). The KeyHeader info button, nav items, search field, etc. are component-managed. Do NOT reach into `.Sidebar / KeyHeader` (or any nested frame) to `resize()` a child or set `layoutSizingHorizontal/Vertical = "FILL"` on it.
+>
+> **Reason this rule exists:** CM "All cases" sim 2026-06-01 — the build reached into the Sidebar's `.Sidebar / KeyHeader` and resized the info `*Button*` (Content=Icon Only, native **24×24**) to **88×72** (a FILL/resize on a chrome-internal button). It rendered as a giant empty outlined box with a tiny (i) next to "Sumsub". User flagged it: "непонятно, зачем он поменял размер инфо кнопки в сайдбаре." Audit check 7.57 now catches an Icon-Only button distorted off its native size.
+
 Setting `Type=Transactions monitoring` selects which section the sidebar shows but does NOT highlight the current page within that section. The skill repeatedly forgets the second step: navigating to the sub-item inside the section and toggling its `Selected` variant.
 
 ```js

@@ -1954,6 +1954,31 @@ if (productContext === "tm") {
   }
 }
 
+// 7.57. Icon-Only *Button* distorted off its native size (v3.158).
+// Icon-only buttons are fixed squares (DS native 24/32/40). A rendered size that
+// deviates >8px from the mainComponent's native size means the build resized it
+// (or set layoutSizingHorizontal/Vertical=FILL on it) — usually by reaching into a
+// chrome component (Sidebar KeyHeader, Header) and re-laying-out a nested button.
+// Observed: CM "All cases" sim 2026-06-01 — Sidebar KeyHeader info button native
+// 24x24 blown up to 88x72. NEVER resize/re-layout nodes inside chrome instances.
+{
+  const iconBtns = all.filter(n =>
+    n.type === "INSTANCE" &&
+    /^\*?Button\*?$/.test(n.name) &&
+    n.mainComponent &&
+    /Content=Icon Only/i.test(n.mainComponent.name || "")
+  );
+  for (const b of iconBtns) {
+    const mc = b.mainComponent;
+    let nw, nh;
+    try { nw = mc.width; nh = mc.height; } catch (e) { continue; }
+    if (!nw || !nh) continue;
+    if (Math.abs(b.width - nw) > 8 || Math.abs(b.height - nh) > 8) {
+      issues.push(`7.57 icon-button-distorted: "${b.name}" rendered ${Math.round(b.width)}x${Math.round(b.height)} but its component is native ${Math.round(nw)}x${Math.round(nh)} (Icon-Only buttons are fixed squares). The build resized it or set layoutSizing=FILL — usually by reaching INTO a chrome instance (Sidebar/Header). Remove the resize/FILL; configure chrome via exposed properties only, never re-layout its nested children.`);
+    }
+  }
+}
+
 return issues.length === 0
   ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
   : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);
