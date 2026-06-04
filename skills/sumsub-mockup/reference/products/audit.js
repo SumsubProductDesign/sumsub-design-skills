@@ -1979,6 +1979,26 @@ if (productContext === "tm") {
   }
 }
 
+// 7.58. TM Rule editor (Pattern 3) MUST have a 52px collapsed Sidebar (v3.159).
+// Canonical Create rule (2694:902178) has *Sidebar* 52x902 @(0,0) Type=Dashboard
+// Collapsed=True; Header FRAME 1388x64 @x=52 white; Body 1388 @x=52. The agent has a
+// strong "editor pages have no sidebar" prior and omitted it (sim 2026-06-01),
+// building Header full-1440 @x=0. Signature: a page-title TEXT "Create rule"/"Edit
+// rule". If present AND no *Sidebar* instance in the build → FAIL.
+{
+  const ruleTitle = all.find(n =>
+    n.type === "TEXT" && /^(Create|Edit) rule$/i.test((n.characters || "").trim())
+  );
+  if (ruleTitle) {
+    const hasSidebar = all.some(n =>
+      n.type === "INSTANCE" && /\*Sidebar\*/.test(n.mainComponent?.parent?.name || n.name || "")
+    );
+    if (!hasSidebar) {
+      issues.push(`7.58 rule-editor-missing-sidebar: this is a Rule editor (title "${ruleTitle.characters.trim()}") but has NO *Sidebar* instance. Canonical Create rule has a 52px collapsed *Sidebar* (Type=Dashboard, Collapsed=True) at (0,0), with Header at x=52 (w=1388) and Body at x=52. NEVER build the rule editor full-1440 with no sidebar — that's a stale "editor = no sidebar" prior. Import the Sidebar (key 60be5cbb…), Collapsed=True, place at x=0, offset Header/Body to x=52. See tm-layout-patterns.md Pattern 3.`);
+    }
+  }
+}
+
 return issues.length === 0
   ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
   : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);

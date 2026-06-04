@@ -66,17 +66,25 @@ Root (1440 × 1154+ scrollable)
 
 > Used for: **Rule page 2.0** (Create/Edit rule flow), file `bbp6LvphVT5J6QytzGJY6z`.
 
-⚠️ **Corrected v3.130** — pre-v3.130 docs claimed "no sidebar". **Canonical actually has 52px collapsed `*Sidebar*` at x=0** with `Type=<contextual>` + `Collapsed=True`. Same lesson as v3.118 AP fix: when pattern doc and canonical disagree, canonical wins, doc gets updated.
+## 🛑 Rule editor MUST have a 52px collapsed Sidebar — REQUIRED (v3.159)
+
+**Do NOT build the Rule editor at full-1440 with no sidebar.** Canonical `Create rule` (`2694:902178`) HAS a `*Sidebar*` INSTANCE **52×902 at (0,0)**, variant `Type=Dashboard, Collapsed=True`. Everything else is offset right by 52: Header at x=52 (w=1388), Body at x=52 (w=1388).
+
+This has been the canonical since v3.130. Yet the TM Rule-editor sim 2026-06-01 still **omitted the Sidebar entirely** and built Header at x=0 w=1440 — the agent claimed "Pattern 3 is no-sidebar per layout-doc," which is FALSE (this doc says the opposite). Same failure mode as the AP banned-Sidebar saga: a strong training prior ("editor pages have no sidebar") overrides a soft doc note. So this is now a HARD RULE enforced by audit **7.58**: a `Create rule`/`Edit rule` frame with NO `*Sidebar*` instance = FAIL.
+
+Banned outputs:
+- Rule-editor root frame with no `*Sidebar*` child
+- Header at x=0 width=1440 (must be x=52 width=1388)
+- Body / Page Content at x=0 (must be x=52)
 
 ```
-Root (1440 × 902+, scrollable)
-├── *Sidebar*                     (52 × 902, x=0, y=0, Collapsed=True)
-└── Header + body wrapper         (1388 × 902, x=52, y=0)
-    ├── *Header*                  (1388 × 56, custom Rule editor header chrome)
-    └── Body (1388 × h, y=56)
-        └── Page Content (HORIZONTAL)
-            ├── Main content  (≈964px, paddingL=88, paddingR=88, inner ≈788px)
-            └── Settings panel (≈440px — right panel, sticky)
+Root (1440 × 902+, scrollable, NONE layout)
+├── *Sidebar*                     (52 × 902, x=0, y=0, Type=Dashboard Collapsed=True)  ← REQUIRED
+├── Header                        (FRAME 1388 × 64, x=52, y=0, fill #ffffff white)     ← custom Rule editor header chrome (a FRAME, not *Header*); white bg
+└── Body                          (1388 × h, x=52, y=64)
+    └── Page Content (HORIZONTAL)
+        ├── Main content  (paddingL=88, paddingR=88)
+        └── Settings panel (≈440px — right panel, sticky)
 ```
 
 **Layout math:** 52 + 1388 = 1440 ✓
@@ -86,8 +94,8 @@ Root (1440 × 902+, scrollable)
 - Frame name: `Create rule`, root 1440×902
 - Sidebar: 52×902 at (0, 0), Collapsed=True
 - Header + body: 1388×902 at (52, 0), wraps header chrome + body
-- Header chrome: 1388×56 at top (custom Rule editor header, NOT standard *Header* 64-high)
-- Body: 1388 × scroll-height starts at y=56
+- Header chrome: 1388×**64** at (52,0), fill **#ffffff** (white) — custom Rule editor header FRAME (not a `*Header*` instance)
+- Body: 1388 × scroll-height starts at (52, **64**)
 - Page Content inside Body: HORIZONTAL split between Main content + Settings panel
 - Screen height varies with content: 902 / 1087 / 1294 / 1449 / 2246px
 
@@ -195,7 +203,7 @@ What kind of TM screen?
 │   → Pattern 2 (Sidebar 257 + Header 56 + Body 1164, screen 1440×1154+ scrollable)
 │
 ├── Creating or editing a rule
-│   → Pattern 3 (Header Full Screen Page 1440×64 + Main 1000px + Settings panel 440px)
+│   → Pattern 3 (52px collapsed *Sidebar* @x=0 + Header FRAME 1388×64 white @x=52 + Body 1388 @x=52 with Main + Settings 440 — NEVER omit the sidebar, audit 7.58)
 │
 ├── Single transaction detail (Finance / Crypto / Travel Rule / Gambling)
 │   → Pattern 4 (Header 1920×64 + Header/Finance 1920×144 + Body: Main 1412 + Right 380)
