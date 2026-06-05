@@ -1999,6 +1999,32 @@ if (productContext === "tm") {
   }
 }
 
+// 7.59. Status value rendered as bare TEXT in a table cell (v3.160).
+// A column of status values must use the Status cell type (Type=Status + nested
+// *Status* pill), NEVER a Text Regular cell with a bare status word. Observed:
+// Settings Members sim 2026-06-01 — "Active"/"Invited" rendered as plain TEXT.
+// Roles (Admin/Member/Owner/Moderator) are NOT statuses — excluded.
+{
+  const STATUS_WORDS = /^(Active|Inactive|Pending|Invited|Invite sent|Approved|Rejected|Suspended|Blocked|Disabled|Expired|Processing|Awaiting|Resolved|Closed|Failed|Passed|Verified|Online|Offline)$/i;
+  function mcParentName(n){ if(n.type!=="INSTANCE") return ""; try { return n.mainComponent?.parent?.name || n.mainComponent?.name || ""; } catch(e){ return ""; } }
+  const hits = [];
+  const texts = all.filter(n => n.type === "TEXT" && isVisible(n) && STATUS_WORDS.test((n.characters||"").trim()));
+  for (const t of texts) {
+    // is it inside a Table Row/cell, and NOT inside a *Status* instance?
+    let p = t.parent, inCell = false, inStatus = false;
+    while (p && p !== root) {
+      if (/\*Status\*/.test(mcParentName(p))) { inStatus = true; break; }
+      if (/Table Row|Cell Content|Cell/i.test(p.name||"")) inCell = true;
+      p = p.parent;
+    }
+    if (inCell && !inStatus) hits.push(t.characters.trim());
+  }
+  if (hits.length) {
+    const uniq = [...new Set(hits)];
+    issues.push(`7.59 status-as-bare-text: ${hits.length} table cell(s) render a status value as plain TEXT (${uniq.slice(0,6).join(", ")}) instead of a *Status* pill. Set the cell Type to "Status" and configure the nested *Status* instance (label + color variant). Roles (Admin/Member/Owner) are exempt — only status words are flagged.`);
+  }
+}
+
 return issues.length === 0
   ? JSON.stringify({ status: "✅ Audit PASSED", info: infos }, null, 2)
   : JSON.stringify({ failed: issues.length, issues, info: infos }, null, 2);

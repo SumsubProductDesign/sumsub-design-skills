@@ -1756,6 +1756,13 @@ flagInst.setProperties({ "Country": "United States (US)" });
 Special: UK = `"United Kingdom of Great Britain (GB)"`.
 
 ### Status Cell — Full Setup
+
+> 🚫 **A column of status values MUST use the Status cell type — NEVER a Text Regular cell with a bare status word (added v3.160).** If a column holds status-like values — `Active`, `Inactive`, `Pending`, `Invited`, `Invite sent`, `Approved`, `Rejected`, `Suspended`, `Blocked`, `Disabled`, `Expired`, `Processing`, `Awaiting`, `Resolved`, `Open`, `Closed`, `Failed`, `Passed`, `Verified`, `Online`, `Offline` — set that cell's `Type` to `Status` and configure the nested `*Status*` instance (label + color variant). A status rendered as plain text is a defect (no pill, no color). Audit check 7.59 catches a bare status word in a table cell.
+>
+> **Reason this rule exists:** Settings Members sim 2026-06-01 — the build left the Status column (`Active` / `Invited`) and rendered them as bare TEXT in `Table Row / Cell Content` cells; zero visible `*Status*` instances. User: "статусы сделал не в виде компонента status, а простого текста почему-то."
+>
+> **Roles ≠ statuses.** Role values (`Admin`, `Member`, `Owner`, `Moderator`) are NOT statuses — they stay as text or a `*Tag Colorful*` per the canonical, NOT `*Status*`. Only the status column gets the Status cell type.
+
 ```js
 cellStatus.setProperties({ "Type": "Status" });
 const statusInst = findAll(cellStatus, n => n.type === "INSTANCE" && n.name === "*Status*")[0];
