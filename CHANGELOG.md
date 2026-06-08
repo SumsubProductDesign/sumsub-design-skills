@@ -4,6 +4,58 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.161.0 — 2026-06-05 (audit checks-count is a floor, not a stale literal)
+Settings Members retest validated 7.59 (10 *Status* pills, 0 bare status text), but the signature read `checks54` — stale after 7.55–7.59 added (~59). Agent copied "54" from a stale SKILL.md line. Fix: `checks<N>` is now guidance — must be present and **≥50** (under ~30 = cherry-picked subset = fabrication signal); count what you ran, never copy a stale literal. Removes per-check doc maintenance.
+
+## v3.160.0 — 2026-06-05 (status values MUST use *Status* cell + audit 7.59)
+Settings Members sim: the Status column ("Active"/"Invited") rendered as bare TEXT in table cells, 0 visible *Status* pills. New rule: a column of status values (Active/Inactive/Pending/Invited/Approved/Rejected/Suspended/…) must set cell Type=Status + configure the nested *Status* pill. **Roles (Admin/Member/Owner/Moderator) are EXEMPT** — they stay text/Tag. Audit 7.59 flags a bare status word in a table cell (roles excluded → low false-positive). User: "статусы сделал не в виде компонента status, а простого текста".
+
+## v3.159.0 — 2026-06-04 (TM Rule editor MUST have 52px Sidebar + audit 7.58)
+TM Rule-editor sim omitted the Sidebar, claiming "Pattern 3 is no-sidebar per doc" — FALSE (doc says 52px collapsed Sidebar since v3.130). Canonical Create rule has *Sidebar* 52×902 @(0,0) Type=Dashboard Collapsed=True, Header FRAME 1388×64 @(52,0) white, Body 1388 @(52,64). Upgraded Pattern 3 doc to a 🛑 HARD RULE; corrected header 56→64 + #ffffff fill. Audit 7.58: a "Create rule"/"Edit rule" frame with no *Sidebar* = FAIL. (3rd "agent ignores corrected doc, follows training prior" case after AP sidebar v3.122.)
+
+## v3.158.0 — 2026-06-01 (ban resizing chrome-instance internals + audit 7.57)
+CM All-cases sim: the build reached into the *Sidebar*'s `.Sidebar / KeyHeader` and resized the info *Button* (native 24×24) to 88×72. Rule: NEVER resize/re-layout nodes inside *Sidebar*/*Header* instances — configure via exposed properties only. Audit 7.57: an Icon-Only *Button* whose rendered size deviates >8px from its component-native size = FAIL. User: "непонятно, зачем он поменял размер инфо кнопки в сайдбаре".
+
+## v3.157.0 — 2026-06-01 (redesign-library-staleness detector, audit 7.56)
+A consuming file caches its own copy of imported Base-library variable values; it shows the 2026-06 redesign colors only after re-syncing the Base library. Audit 7.56 (INFO): if ≥4 distinct pre-redesign hexes resolve, warns the file is stale and tells the user to run Assets → Update — so old colors are correctly attributed to library-sync state, not a build defect.
+
+## v3.156.0 — 2026-06-01 (ban zeroing table-organism padding + audit 7.55)
+TM Transactions-table sim: build dropped the Txn table (correct component+variant) but zeroed its padding to 0/0/0/0; canonical is 32/32/24/24, which insets the toolbar/rows. A fresh instance inherits 32/32/24/24 — so 0/0/0/0 = an explicit zeroing. Rule: never set/zero padding on a table-organism instance. Audit 7.55: a `Txn table` instance with padding 0/0/0/0 = FAIL. Narrowed to `Txn table` only (verified inset); generic *Table Starter* NOT included (native inset unverified — avoids false positives). User: "полностью проигнорировал правильные отступы у таблицы".
+
+## v3.155.0 — 2026-06-01 (document baked-override staleness in AP organisms)
+AP sim: most of the Body organism re-synced to Tailwind, but one Primary *Button* kept a baked raw fill #e3a93d (gold) instead of black semantic/background/primary/normal — a non-variable override the redesign can't reach. Documented in applicant-page-pattern.md: imported organisms may carry baked overrides + 2023-era kitchen-sink content ("Documents block old"); flag to design team, don't fix in the build. (Also: the v3.154 3-part audit ran clean here — agent ran all checks segmented, no skip.)
+
+## v3.154.0 — 2026-06-01 (pre-split audit into 3 runnable segment files)
+TM sim shipped `audit-NOT_RUN-50KB_code_param_cap` — rationalized "105KB > 50KB, can't fs-load, split isn't verbatim" and SKIPPED the audit. Fix: the audit ships as 3 pre-built segment files (audit-part1/2/3.js, each <50KB, comments intact, no stripping). Run protocol rewritten: 3 parts = the supported path; `audit-NOT_RUN` for size reasons is BANNED (valid only if use_figma itself errors). Closes both the cherry-pick class (v3.152) and the size-skip class.
+
+## v3.153.0 — 2026-06-01 (fix CM Pattern B Container paddingRight 24→32)
+CM sim flagged audit 7.44d as stale — and was right. Canonical Container is symmetric 32/32/24/24 (L/R both spacing/3xl); the doc/audit had paddingRight=24. The "24" was the VISUAL right gutter (Overview 908 overflows the 900 content box by 8), not the padding property. Fixed audit 7.44d + the CM doc. (False-positive class: my audit penalized builds that correctly matched canonical.)
+
+## v3.152.0 — 2026-06-01 (extract audit to reference/products/audit.js)
+The ~1850-line audit was inlined in SKILL.md mixed with prose, inviting cherry-picking. Extracted to a single `audit.js` source of truth; SKILL.md points to it (dropped 4204→2353 lines). Run protocol documented (comment-strip / segment-split for the 50KB transport limit).
+
+## v3.151.0 — 2026-06-01 (fix 2 verbatim-audit-script bugs)
+Billing redesign sim hit two bugs that forced hand-editing the "verbatim" script: `productContext` was declared late (TDZ ReferenceError at the 7.45 check) and `page` was undefined in checks 7.46/7.47/7.48. Both now declared at the top so the script runs with only ROOT_ID + productContext edited. (Sim also VALIDATED the redesign live: primary CTA #030712 black, status badges Tailwind hex, all via stable variable keys, zero skill-code changes.)
+
+## v3.150.0 — 2026-06-01 (Dashboard redesign retrain — part 2: base palette + Dark mode)
+Base palette tables rewritten to Tailwind hex (base keys verified stable); banners over colored palettes with Tailwind /50 anchors + NEW palettes (emerald/sky/teal/violet/rose/fuchsia). NEW "Dark Mode" section (Light/Dark per-mode table + setExplicitVariableModeForCollection). color-usage.md + workflow-builder connector colors updated. Global ~/.claude/figma/ docs synced.
+
+## v3.149.0 — 2026-06-01 (Dashboard redesign retrain — part 1: Variable Pattern maps + blue→black)
+The Dashboard DS redesigned ALL color variables to a Tailwind v4 palette and shifted brand primary blue→black. **importVariableByKeyAsync keys are STABLE** — only the hex behind them changed, so skill code keeps working. Rewrote the functional binding maps (Text/BG/Border/Icon) to new Tailwind hex + added the new `primary`/`secondary` groups (primary CTA fill is now #030712 black via semantic/background/primary/normal, not blue). Border-radius renamed + doubled: sm 2→4, md 4→8, lg 8→12, xl 12→16. Quick-reference rewritten from base-key recommendations to semantic tokens.
+
+## v3.148.0 — 2026-05-26 (fix embedded audit 7.44 pre-drift values)
+v3.146 added a Pattern B layout check (correct post-drift values) as a PROSE checklist item only — the runnable verbatim script's 7.44a-e still had pre-drift values (header (0,0,1440,88), wrapper (0,96,992,804), right col (992,96)). Agents ran the stale 7.44 and got false positives. Rewrote 7.44a-e to current canonical (52/1388/964/1016/812) and folded the wrapper-height + Tab-Basic-x assertions into the runnable script.
+
+## v3.147.0 — 2026-05-26 (AP header height read-from-canonical)
+AP sim: header rendered 144px (Version=New) while the in-file canonical is 152px (Version=Old). 144 is the correct modern height; the doc hardcoded 152 in three places and the read-from-canonical rule only covered widths. Extended the rule to also read header.height and position Summary.y/Body.y from it. Synced the global AP doc (still had the pre-v3.118 52px Sidebar).
+
+## v3.146.0 — 2026-05-22 (CM Pattern B canonical drift + audit check #9)
+Canonical Case page drifted: it now has a 52px collapsed Sidebar at (0,0), shifting header/wrapper/right-col right by 52 (header 1388@x=52, wrapper 964×812@(52,88), right col 424×812@(1016,88)). Rewrote Pattern B doc + recipe. New audit check (later folded into 7.44): wrapper height must be FIXED 812 (not auto-grown to 2552) and Tab Basic must be FILL (left-aligned x=32, not centered).
+
+## v3.145.0 — 2026-05-22 (Billing sim — 4 audit blind spots)
+Billing Invoices sim exposed four gaps: (A) the product-reference table had broken paths (`reference/` not `reference/products/`) AND was missing Billing + 15 products — all refs 404'd silently; (B) new audit layout-sanity check (Sidebar.x + width === Main.x) catches sidebar/content overlap; (C) URL verification via get_metadata before emitting a link (a sim returned a node id that didn't exist); (D) new "Add-to-existing-page mode" — inspect the existing canonical page first and preserve its chrome instead of building a generic table.
+
+
 ## v3.144.0 — 2026-05-20 (Three Sonnet-class fixes: audit_signature strict regex + "out of scope" banned + mandatory font loading)
 **Comparison observation 2026-05-20: parallel Billing Invoices sims by Opus and Sonnet on v3.143** revealed material quality gap. Opus respected all v3.140+ rules (DS Checkbox, audit format, no permission-seek). Sonnet ignored three:
 
