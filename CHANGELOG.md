@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.162.0 — 2026-06-08 (Marketplace integration cards use the `Cards` component, not custom frames)
+Marketplace sim fabricated 6 custom `Card / X` frames because `search_design_system` for "integration card" found nothing — the DS component is named **`Cards`** (SET key `b9191d098f0d3684006a176a4414857c47acf596`, one variant per integration `Name=…`, props for status/buttons/tags). Documented the component + key in marketplace-pattern.md with the rule: never hand-build integration cards; if a card/list component isn't keyword-discoverable, read the canonical's repeated INSTANCE → its `mainComponent.parent` SET. (Drawer 600 + *Status* pills were otherwise correct.)
+
 ## v3.161.0 — 2026-06-05 (audit checks-count is a floor, not a stale literal)
 Settings Members retest validated 7.59 (10 *Status* pills, 0 bare status text), but the signature read `checks54` — stale after 7.55–7.59 added (~59). Agent copied "54" from a stale SKILL.md line. Fix: `checks<N>` is now guidance — must be present and **≥50** (under ~30 = cherry-picked subset = fabrication signal); count what you ran, never copy a stale literal. Removes per-check doc maintenance.
 

@@ -32,6 +32,25 @@ Root (1440 × 900, fill #ffffff)
 
 **Drawer 600 wide** (not standard 400) because integration detail card needs more horizontal space for description + setup steps + screenshots.
 
+### 🚫 Integration cards use the `Cards` component — NEVER fabricate custom card frames (v3.162)
+
+The integration grid is built from a real DS component SET, **confusingly named `Cards`** (NOT "Integration card" / "Marketplace card" — that's why a keyword `search_design_system` misses it). Use it; do not hand-build `Card / X` frames with custom logo + status + title + button.
+
+| Property | Value |
+|---|---|
+| Component SET key | `b9191d098f0d3684006a176a4414857c47acf596` (`Cards`) |
+| Variant example | `Type=New page, Name=Monnai` (key `ffe1ccdbf29a01ffe7045d668c3f4a14fdb6a938`) — one variant per integration name |
+| Native size | ~362 × 312 |
+| Structure | `Logo` (FRAME) + `Body` (FRAME) |
+| Key properties | `Solution Tag #1685:19`, `Active/Connected Status#29:…`, `Set up required Status#1684:0`, `Disabled Status#1652:0`, `Request Buttton#29:30`, `Settings Button#29:50`, `Learn More Button#29:20`, `New Tag #29:60` (toggle the status/button/tag that matches each integration's state) |
+
+```js
+const cardsSet = await figma.importComponentSetByKeyAsync("b9191d098f0d3684006a176a4414857c47acf596");
+const card = cardsSet.defaultVariant.createInstance(); // then setProperties for name, status, buttons, tags
+```
+
+**Reason this rule exists:** Marketplace sim 2026-06-08 fabricated 6 custom `Card / X` frames (logo + *Status* + title + desc + *Button*) because `search_design_system` for "integration card" returned nothing — the component is named `Cards`. Status pills + 600 drawer were otherwise correct; only the card unit was hand-built. If you can't find a product's card/list component by keyword, inspect the canonical frame's repeated INSTANCE and read its `mainComponent.parent` (the SET) — that's the component to import.
+
 ---
 
 ## Pattern B — Marketplace Products (1440 + Content 2.0 organism)
