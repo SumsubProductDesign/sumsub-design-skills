@@ -1384,7 +1384,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    - Example valid: `audit-v3.143.0-issues0-checks54`, `audit-v3.144.0-issues3-checks54-roots2`
    - Example INVALID (will be treated as fabricated): `sumsub-mockup-v3.143 / kHQyyYdPZjEyrSahRmBLUr / 2026-05-20` (observed Sonnet sim v3.143 retest 2026-05-20 — date-format signature, not audit-run structure)
    - MUST include `issues<N>` matching the actual issue count
-   - MUST include `checks<N>` matching the number of audit checks (54 in v3.144 script — increases as audits added; current count = 54 with audit 7.54)
+   - MUST include `checks<N>` where N is the number of audit checks you ran. The exact value is NOT verified (it grows as checks are added — currently ~59 with checks through 7.59) — but it MUST be present and **≥ 50**. A value under ~30 signals a cherry-picked subset (fabrication). Do NOT copy a stale literal like "54" from older examples — count what you actually ran, or just use the current floor.
    - If JSON log has `audit_verdict: PASS` but `audit_signature` doesn't match the strict regex → reviewer treats audit as FABRICATED, not run
 
    **Self-fabricated patterns to avoid:**
