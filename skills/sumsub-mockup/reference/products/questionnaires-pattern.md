@@ -29,13 +29,15 @@ Root (1920 × 1080, NONE layout, fill #ffffff)
 └── Content   (1644 × 988, x=276, y=92)
 ```
 
-**Confirmed dimensions** from `Screen 565`:
-- Sidebar: 276 wide (276 + 1004 = 1280 ✓)
-- Header: 1004 × 116 at x=276 — taller than typical 64 because it includes title + subtitle + CTA
-- Table Starter: 940 wide at x=308 — 32px left padding inside content area
-- Page height: 1061 (or scrolling to fit table content)
+**Confirmed dimensions** from canonical `Screen 754` (re-verified 2026-06-08):
+- Root: **1920 × 1080** (NOT 1440, NOT 1280 — the list is 1920)
+- Sidebar: **276** wide @ x=0 (NOT 257)
+- Header: 1644 × 92 @ x=276
+- Content: 1644 @ x=276, with the table + its Top Toolbar inside
 
-> **Common mistake:** assuming Questionnaires uses 1440 canvas with 257 sidebar. Both wrong — 1280 + 276.
+**CTA / action placement — `+ Create questionnaire` and `Import questionnaire` go in the Top Toolbar's `Search + actions` region (right of the search field), NOT in the page Header.** Verified in canonical Screen 754: both CTAs live in `.Top Toolbar / Search + actions`; the Header carries only chrome (title, global search, profile). The Subheader has a separate `+ Add`. Do NOT lift table-scoped actions up into the *Header*.
+
+> 🛑 **HARD RULE — canvas 1920, sidebar 276.** The recurring mistake is defaulting to **1440 canvas + 257 sidebar** (observed again in the 2026-06-08 sim — the agent built 1440+257 despite this doc). Questionnaires list is **1920 + 276**. If your build comes out 1440-wide with a 257 Sidebar on a Questionnaires page, it's wrong — rebuild at 1920 with the 276 Sidebar. (4th "agent ignored the corrected layout doc" case after AP sidebar / TM rule-editor sidebar.)
 
 ---
 

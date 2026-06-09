@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.163.0 — 2026-06-08 (table-scoped actions go in the Top Toolbar, not the Header; Questionnaires 1920/276)
+Questionnaires sim built the page at 1440 canvas + 257 sidebar (the doc says 1920 + 276 — 4th "agent ignored the corrected layout doc" case) and put "Create questionnaire"/"Import questionnaire" in the *Header*. Canonical (Screen 754) puts both CTAs in the Top Toolbar's `Search + actions` region (right of the search), Header is chrome only. Fixes: questionnaires-pattern.md cleaned of its 1920-vs-1280 internal inconsistency + 🛑 hard rule (1920/276) + CTA-placement note; SKILL.md Header section — table-scoped actions (Create/Import/Export/Add/bulk) belong in the Top Toolbar next to search, not the Header. User: "кнопки, которые относятся к таблице, оказались в хедере, вместо того чтобы быть справа от поиска таблицы".
+
 ## v3.162.0 — 2026-06-08 (Marketplace integration cards use the `Cards` component, not custom frames)
 Marketplace sim fabricated 6 custom `Card / X` frames because `search_design_system` for "integration card" found nothing — the DS component is named **`Cards`** (SET key `b9191d098f0d3684006a176a4414857c47acf596`, one variant per integration `Name=…`, props for status/buttons/tags). Documented the component + key in marketplace-pattern.md with the rule: never hand-build integration cards; if a card/list component isn't keyword-discoverable, read the canonical's repeated INSTANCE → its `mainComponent.parent` SET. (Drawer 600 + *Status* pills were otherwise correct.)
 
