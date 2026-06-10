@@ -1474,7 +1474,11 @@ When the prompt asks to ADD a feature to an existing page (e.g. "add Pay invoice
 
 Before building anything, **open the matching reference file(s) with the `Read` tool first** and actually consume their content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
 
-**Reference path note (v3.145):** all product reference files live in `${CLAUDE_PLUGIN_ROOT}/reference/products/`. Earlier versions of this table pointed to `${CLAUDE_PLUGIN_ROOT}/reference/` (no `products/` segment) — those paths 404. If `Read` returns a "no such file" error on a path here, the file genuinely doesn't exist; do not guess alternates.
+**Reference path note (v3.145):** all product reference files live in `${CLAUDE_PLUGIN_ROOT}/reference/products/`. Earlier versions of this table pointed to `${CLAUDE_PLUGIN_ROOT}/reference/` (no `products/` segment) — those paths 404.
+
+**🚫 Check reference files with the local `Read` tool ONLY (v3.166).** Never "verify" a reference file via a GitHub raw URL / WebFetch — the repo is PRIVATE, raw URLs return 404 for every file that exists, and you'll wrongly report "pattern doc doesn't exist in the plugin." (Observed twice: Global Settings + AML sims reported these docs as 404 while they were present on disk in the installed plugin — verified on the test machine.) If `Read` errors:
+1. Re-check the exact path: `${CLAUDE_PLUGIN_ROOT}` is an absolute path — don't prepend `~`, don't rebuild it by hand; on Windows it contains backslashes — pass it through as-is.
+2. Only after a correct-path `Read` fails may you report the file missing — and say "Read at <full path> returned not-found", not "404".
 
 **Read when building a specific product:**
 

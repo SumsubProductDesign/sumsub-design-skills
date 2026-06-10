@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.166.0 — 2026-06-10 (reference files are checked with local Read only — never GitHub raw URLs)
+Two sims (Global Settings, AML) reported pattern docs as "404 / don't exist in the plugin" while the files were present on disk in the installed plugin (verified on the test machine: all files in cache for 3.164, fresh timestamps). Root cause: the repo is private, so any GitHub-raw/WebFetch "verification" returns 404 for files that exist. New rule: reference files are checked/read ONLY via the local Read tool at `${CLAUDE_PLUGIN_ROOT}/reference/products/...` (absolute path, no `~`, Windows backslashes passed as-is); a file may be reported missing only after a correct-path local Read fails.
+
 ## v3.165.0 — 2026-06-10 (audit FP-debt cleanup: 4 recurring false-positive classes fixed)
 Data Comparison sim was CLEAN (1440+276 correct — settings-family didn't blindly flip to 1920; file-local CCR/Table; "Create preset" in Top Toolbar citing rule v3.163) but spent its triage on the same 4 false positives every sim hits. Fixed all four in audit.js + parts:
 - **7.42** now skips Tab Basic strips with a hidden ancestor (items in the Header's disabled Subheader never render — was flagged in 3 sims running).
