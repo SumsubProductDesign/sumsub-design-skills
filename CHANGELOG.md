@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.164.0 — 2026-06-10 (AML Vendors canonical drift: Header 1644×120, old Body sub-tabs are hidden)
+AML Screening sim built Vendors configuration matching the live canonical 1:1 (1920 + Sidebar 276 + *Header* 1644×120 with Subheader tabs + Page Content 1084 centered, Comply advantage 640 + Tip 380 file-local organisms) — canonical-first worked even though the agent reported the pattern doc as unavailable. Verified the canonical (3130:238046): the doc's old "Pattern A has no Header, sub-tabs live in Body via *Tab Button*" layout is dead — those nodes are hidden in canonical. aml-screening-pattern.md rewritten to the current layout (matches Global Settings Pattern B). Build itself was clean: 0 real defects, self-caught throw-rollback bug, honest FP triage.
+
 ## v3.163.0 — 2026-06-08 (table-scoped actions go in the Top Toolbar, not the Header; Questionnaires 1920/276)
 Questionnaires sim built the page at 1440 canvas + 257 sidebar (the doc says 1920 + 276 — 4th "agent ignored the corrected layout doc" case) and put "Create questionnaire"/"Import questionnaire" in the *Header*. Canonical (Screen 754) puts both CTAs in the Top Toolbar's `Search + actions` region (right of the search), Header is chrome only. Fixes: questionnaires-pattern.md cleaned of its 1920-vs-1280 internal inconsistency + 🛑 hard rule (1920/276) + CTA-placement note; SKILL.md Header section — table-scoped actions (Create/Import/Export/Add/bulk) belong in the Top Toolbar next to search, not the Header. User: "кнопки, которые относятся к таблице, оказались в хедере, вместо того чтобы быть справа от поиска таблицы".
 

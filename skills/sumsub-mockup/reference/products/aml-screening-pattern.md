@@ -16,27 +16,31 @@ Sidebar is **276** in Pattern A, **52** (collapsed) in Pattern B.
 
 ---
 
-## Pattern A — Vendors / Ongoing monitoring (1920+276 Settings)
+## Pattern A — Vendors / Ongoing monitoring (1920 + 276 + Header 120)
 
 > Pages `2:9` "Vendors settings" (Comply advantage etc.), `3130:213974` "Ongoing monitoring"
+>
+> 🔄 **Updated v3.164 (2026-06-10): canonical drift confirmed** via metadata scan of `3130:238046` (5.2. Comply advantage). The old "no Header, sub-tabs in Body via *Tab Button*" layout is DEAD — those Tab Button / Tab Basic nodes are still in the canonical but **hidden**. Current canonical uses the Global-Settings-style **`*Header*` 1644×120 with Subheader tabs** (4 visible tab items, Selected on the current vendor group).
 
 ```
-Root (1920 × 900+, fill #ffffff)
-├── *Sidebar*  (276 × 911, x=0, y=0)
-└── Body      (1644 × 900, x=276, y=0)
-    ├── *Tab Button*       (370 × 40, sub-tabs)
-    ├── Tab Basic / Item
-    └── (vendor settings / ongoing monitoring config)
+Root (1920 × 1163, fill #ffffff)
+├── *Sidebar*  (276 × 1163, x=0, y=0)
+└── Body      (1644 × 1163, x=276, y=0)
+    ├── *Header*  (1644 × 120, Production=True Version=Old Type=Generic)   ← Subheader tabs live HERE
+    └── Frame 270989628  (1644 × 1043, y=120)
+        └── Page Content  (1084 × 932 @ x=280 — centered, 280/280 side margins)
+            ├── Vendor organism (e.g. `Comply advantage` 640×932, file-local key bcd11d71e58b9b3eb1c525143ca1a19da370155e)
+            └── Tip organism (`Tip / Comply advantage` 380×348 @ x=704, file-local key 3e60467a96647aae64b64744226051b71a7abff2)
 ```
 
-**Confirmed dimensions** from `5.2. Comply advantage`:
-- Sidebar: 276 × 911
-- Body: 1644 × 1163 at x=276 (page scrolls to 1163)
-- Tab Button: 370 × 40 at (303, 148)
-- Tab Basic / Item: at (301, 192)
-- Layout sum: 276 + 1644 = 1920 ✓
+**Confirmed dimensions** from `3130:238046` (re-scanned 2026-06-10):
+- Sidebar: 276 × 1163 @ (0,0)
+- Body: 1644 × 1163 @ x=276 — layout sum 276 + 1644 = 1920 ✓
+- Header: 1644 × **120** (NOT absent, NOT 64)
+- Page Content: 1084 @ x=280 inside Frame 270989628 (280 + 1084 + 280 = 1644 ✓)
+- Old `*Tab Button*` (370×40 @ 303,148) and `Tab Basic / Item` — present but **hidden=true** in canonical; do NOT build them.
 
-Same as Global Settings Pattern A — no separate Header, sub-tabs live inside Body.
+Matches Global Settings Pattern B (1920 + 276 + Header 120). The pre-drift "Pattern A without Header" no longer exists in canonical.
 
 ---
 
@@ -67,7 +71,7 @@ This pattern matches Blueprint editor (CM Pattern C) and KYB Levels Pattern B va
 ```
 What kind of AML Screening screen?
 ├── Vendors settings (Comply advantage, GBG, etc.) / Ongoing monitoring config
-│   → Pattern A (1920 + Sidebar 276 + Body 1644 with sub-tabs)
+│   → Pattern A (1920 + Sidebar 276 + Header 1644×120 with Subheader tabs + Page Content 1084 centered)
 │
 ├── Resolution rule chain editor (rule list + visual chain)
 │   → Pattern B (1440 + collapsed Sidebar 52 + Body 1388, no Header)
@@ -94,5 +98,5 @@ What kind of AML Screening screen?
 
 - **Two canvas widths in one file** — Vendors/Ongoing are 1920, Resolution chain is 1440. Match the page being reproduced.
 - **Two Sidebar widths** — 276 for Pattern A, 52 (collapsed) for Pattern B. Don't substitute one for the other.
-- **No `*Header*` on either pattern** — both use Body-internal chrome. Sub-tabs in Pattern A; rule editor in Pattern B.
+- **Header:** Pattern A (Vendors) HAS `*Header*` 1644×120 with Subheader tabs since the canonical drift (v3.164; the old Body-internal sub-tabs are hidden in canonical). Pattern B (Resolution chain) still has NO `*Header*` — Body-internal chrome.
 - **Ongoing monitoring page sometimes has duplicate sidebars** — observed `Menu` instance (281×900) AND `*Sidebar*` (276×911) at x=0. Likely a left-over migration artifact in the canonical. When reproducing, use only `*Sidebar*` (276) and skip the legacy `Menu`.
