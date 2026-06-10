@@ -12,15 +12,21 @@
 
 ---
 
-## Pattern — Full-screen builder (1280 + Header Full Screen Page 120)
+## Pattern — Full-screen builder (1280 + Header 120 + centered Page Content 1084)
 
 > Page `614:519053` "Detailed UI / UX"
+>
+> 🔄 **Updated v3.167 (2026-06-10): canonical drift confirmed** (parent frame of `2276:1279935`). Content is NOT full-width 1280 — it's the same **centered Page Content 1084** pattern as AML Vendors / Global Settings: main organism 640 + side column 380.
 
 ```
-Root (1280 × 720 viewport, NONE layout, fill #ffffff)
-├── *Header Full Screen Page*  (1280 × 120, INSTANCE)    ← y=0, custom 120 (NOT standard 64!)
-└── Frame (Content)            (1280 × 2217, scroll)     ← y=120, full-width content
-    └── (PoA preset config blocks)
+Root (1280 × scroll, NONE layout, fill #ffffff)
+├── *Header* (Organisms set 387e2cf6…, variant Type=Fullscreen)  (1280 × 120)   ← y=0, custom 120 (NOT standard 64!)
+└── Frame                      (1280 × 2217, scroll)     ← y=120
+    └── Page Content           (1084 × scroll @ x=98 — centered, 98/98 side margins)
+        ├── Content (PoA lib organism d15de57b48…, 640 wide)     ← preset config blocks
+        └── .Side content      (380 wide @ x=704)
+            ├── Tip (28f7adf163…, 380×296)
+            └── Levels (c2abf237de…, Preset is used=False, 380×176 @ y=308)
 ```
 
 **With modal overlay:**
@@ -48,8 +54,9 @@ Root (1280 × 720 viewport, NONE layout, fill #ffffff)
 
 ```
 PoA Settings screen?
-   → ALWAYS this pattern: 1280 canvas, Header Full Screen Page 1280×120, Content 1280×scroll
-     No Sidebar. Modal overlays use Tint + Modal Basic Small (540 wide).
+   → ALWAYS this pattern: 1280 canvas, Header (Fullscreen variant) 1280×120,
+     Page Content 1084 centered (main 640 + side 380). No Sidebar.
+     Modal overlays use Tint + Modal Basic Small (540 wide).
 ```
 
 ---

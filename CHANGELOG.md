@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.167.0 — 2026-06-10 (PoA Settings canonical drift: centered Page Content 1084, not full-width)
+PoA sim was clean (1280 canvas, no sidebar, Header Fullscreen 120 — third canvas size in a row handled correctly; v3.165 FP-cleanup confirmed: issues dropped to 1 from the usual 8-10). The build matched the live canonical: content is a **centered Page Content 1084** (98/98 margins, main organism 640 + side column 380 with Tip/Levels) — the same pattern as AML Vendors / Global Settings. The doc said "full-width 1280 content" — 6th canonical drift; rewritten with organism keys. Remaining known FP sub-class: 7.19 flags pre-existing designer COMPONENTs on host Drafts pages (cheap one-line triage; no reliable Plugin-API way to tell "existed before this build" — left as-is for now).
+
 ## v3.166.0 — 2026-06-10 (reference files are checked with local Read only — never GitHub raw URLs)
 Two sims (Global Settings, AML) reported pattern docs as "404 / don't exist in the plugin" while the files were present on disk in the installed plugin (verified on the test machine: all files in cache for 3.164, fresh timestamps). Root cause: the repo is private, so any GitHub-raw/WebFetch "verification" returns 404 for files that exist. New rule: reference files are checked/read ONLY via the local Read tool at `${CLAUDE_PLUGIN_ROOT}/reference/products/...` (absolute path, no `~`, Windows backslashes passed as-is); a file may be reported missing only after a correct-path local Read fails.
 
