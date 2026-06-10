@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.165.0 — 2026-06-10 (audit FP-debt cleanup: 4 recurring false-positive classes fixed)
+Data Comparison sim was CLEAN (1440+276 correct — settings-family didn't blindly flip to 1920; file-local CCR/Table; "Create preset" in Top Toolbar citing rule v3.163) but spent its triage on the same 4 false positives every sim hits. Fixed all four in audit.js + parts:
+- **7.42** now skips Tab Basic strips with a hidden ancestor (items in the Header's disabled Subheader never render — was flagged in 3 sims running).
+- **7.17** honors the same canonical-raw exemptions as 7.16 (40/48/64/88) — canonical pages legitimately use raw 64.
+- **7.19** page-skip matches "🧩 Local components"-style emoji-prefixed pages (host-file components are not the build's orphans).
+- **7.40** recognizes the State=Active VARIANT as a valid active-nav mechanism (componentProperties.State or mainComponent "State=Active") — was a triaged FP in nearly every sim; the message previously claimed the variant "only selects the section", which is wrong for the redesigned Sidebar sets.
+
 ## v3.164.0 — 2026-06-10 (AML Vendors canonical drift: Header 1644×120, old Body sub-tabs are hidden)
 AML Screening sim built Vendors configuration matching the live canonical 1:1 (1920 + Sidebar 276 + *Header* 1644×120 with Subheader tabs + Page Content 1084 centered, Comply advantage 640 + Tip 380 file-local organisms) — canonical-first worked even though the agent reported the pattern doc as unavailable. Verified the canonical (3130:238046): the doc's old "Pattern A has no Header, sub-tabs live in Body via *Tab Button*" layout is dead — those nodes are hidden in canonical. aml-screening-pattern.md rewritten to the current layout (matches Global Settings Pattern B). Build itself was clean: 0 real defects, self-caught throw-rollback bug, honest FP triage.
 

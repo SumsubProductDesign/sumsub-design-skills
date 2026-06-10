@@ -306,7 +306,19 @@ const DEFAULT_TEXTS = new Set([
       const v = n.componentProperties?.["Selected"]?.value;
       return v === "true" || v === "True" || v === "Yes" || v === true;
     });
-    if (visSelected.length === 0 && selectedItems.length === 0) {
+    // v3.165: many Sidebar variants mark the active page via a State=Active
+    // VARIANT (componentProperties["State"]="Active" / mainComponent name
+    // contains "State=Active"), not a Selected boolean. Recognize it —
+    // this was a recurring FP triaged in nearly every sim.
+    const stateActiveItems = sb.findAll(n => {
+      if (n.type !== "INSTANCE") return false;
+      try {
+        const sv = n.componentProperties?.["State"]?.value;
+        if (typeof sv === "string" && /active/i.test(sv)) return true;
+        return /State=Active/i.test(n.mainComponent?.name || "");
+      } catch (e) { return false; }
+    }).filter(n => { let c = n; while (c && c !== root) { if (c.visible === false) return false; c = c.parent; } return true; });
+    if (visSelected.length === 0 && selectedItems.length === 0 && stateActiveItems.length === 0) {
       // Soft warning: not all Sidebar variants expose a Selected property
       // (e.g. Type=Billing variant has no per-page active state via Plugin
       // API). Flag as warning, not hard fail — the skill should still try

@@ -512,17 +512,19 @@ for (const cf of contentFramesToAudit) {
   const lr = [cf.paddingLeft, cf.paddingRight];
   const tb = [cf.paddingTop, cf.paddingBottom];
   const gap = cf.itemSpacing;
+  // v3.165: honor the same canonical-raw exemptions as 7.16 (40/48/64/88) —
+  // recurring FP: canonical pages legitimately use raw 64 (padB, section gap).
   for (const [side, val] of [["paddingLeft", lr[0]], ["paddingRight", lr[1]]]) {
-    if (typeof val === "number" && val > 0 && (val < 24 || val > 32)) {
+    if (typeof val === "number" && val > 0 && (val < 24 || val > 32) && !CANONICAL_RAW_SPACING_VALUES.includes(val)) {
       issues.push(`Content-type frame "${cf.name}" ${side} = ${val}px, out of expected range [24, 32] (Rule 7.8 formula). Rebind to spacing/xl or spacing/3xl, or verify file's token values.`);
     }
   }
   for (const [side, val] of [["paddingTop", tb[0]], ["paddingBottom", tb[1]]]) {
-    if (typeof val === "number" && val > 0 && (val < 16 || val > 24)) {
+    if (typeof val === "number" && val > 0 && (val < 16 || val > 24) && !CANONICAL_RAW_SPACING_VALUES.includes(val)) {
       issues.push(`Content-type frame "${cf.name}" ${side} = ${val}px, out of expected range [16, 24]. Rebind to spacing/lg or spacing/xl.`);
     }
   }
-  if (typeof gap === "number" && gap > 0 && (gap < 8 || gap > 24)) {
+  if (typeof gap === "number" && gap > 0 && (gap < 8 || gap > 24) && !CANONICAL_RAW_SPACING_VALUES.includes(gap)) {
     issues.push(`Content-type frame "${cf.name}" itemSpacing = ${gap}px, out of expected range [8, 24]. Rebind to spacing/s..spacing/xl.`);
   }
 }
@@ -534,8 +536,11 @@ for (const cf of contentFramesToAudit) {
 {
   const orphans = [];
   for (const page of figma.root.children) {
-    // Skip the official home page
-    if (/^local\s*components?$/i.test(page.name)) continue;
+    // Skip the official home page. v3.165: host files prefix it with emoji/
+    // markers ("🧩 Local components", "🧰 Local components") — match anywhere,
+    // not anchored. Pre-existing host-file components on their own components
+    // page are NOT this build's orphans (recurring FP).
+    if (/local\s*components?/i.test(page.name) || /component/i.test(page.name)) continue;
     for (const n of page.children) {
       if (n.type !== "COMPONENT") continue;
       // Direct child of a non-"Local components" page = orphan
@@ -975,7 +980,19 @@ const DEFAULT_TEXTS = new Set([
       const v = n.componentProperties?.["Selected"]?.value;
       return v === "true" || v === "True" || v === "Yes" || v === true;
     });
-    if (visSelected.length === 0 && selectedItems.length === 0) {
+    // v3.165: many Sidebar variants mark the active page via a State=Active
+    // VARIANT (componentProperties["State"]="Active" / mainComponent name
+    // contains "State=Active"), not a Selected boolean. Recognize it —
+    // this was a recurring FP triaged in nearly every sim.
+    const stateActiveItems = sb.findAll(n => {
+      if (n.type !== "INSTANCE") return false;
+      try {
+        const sv = n.componentProperties?.["State"]?.value;
+        if (typeof sv === "string" && /active/i.test(sv)) return true;
+        return /State=Active/i.test(n.mainComponent?.name || "");
+      } catch (e) { return false; }
+    }).filter(n => { let c = n; while (c && c !== root) { if (c.visible === false) return false; c = c.parent; } return true; });
+    if (visSelected.length === 0 && selectedItems.length === 0 && stateActiveItems.length === 0) {
       // Soft warning: not all Sidebar variants expose a Selected property
       // (e.g. Type=Billing variant has no per-page active state via Plugin
       // API). Flag as warning, not hard fail — the skill should still try
@@ -1452,6 +1469,10 @@ for (const node of all) {
 {
   const tabContainers = root.findAll(n => n.type === "INSTANCE" && /^\*?Tab Basic/.test(n.name));
   for (const tc of tabContainers) {
+    // v3.165: skip Tab Basic strips whose ancestor chain is hidden (e.g. the
+    // *Header*'s disabled Subheader) — recurring FP: items have visible=true
+    // but never render because the Subheader itself is hidden.
+    if (!isVisible(tc)) continue;
     const items = (tc.children || []).filter(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));
     for (const item of items) {
       if (!item.visible) continue;

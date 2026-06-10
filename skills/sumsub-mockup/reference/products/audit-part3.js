@@ -194,6 +194,10 @@ const sidebar = root.findOne(n =>
 {
   const tabContainers = root.findAll(n => n.type === "INSTANCE" && /^\*?Tab Basic/.test(n.name));
   for (const tc of tabContainers) {
+    // v3.165: skip Tab Basic strips whose ancestor chain is hidden (e.g. the
+    // *Header*'s disabled Subheader) — recurring FP: items have visible=true
+    // but never render because the Subheader itself is hidden.
+    if (!isVisible(tc)) continue;
     const items = (tc.children || []).filter(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));
     for (const item of items) {
       if (!item.visible) continue;
