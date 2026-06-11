@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.168.0 — 2026-06-11 (Flow Builder: v3.139 validated; check-8 FP fixes; Condition-master font workaround)
+Workflow Builder retest finally validated v3.139: all 4 nodes shipped `configured=true / empty=false` (verified via Plugin API), 1440×900 shell, Canvas organism with bars, 3 bezier connectors with canonical colors. Fixed the flow-builder section of audit check 8 (4 recurring FPs): the header requirement now accepts the GENERIC *Header* (canonical per workflow-builder-pattern.md — the old matcher only accepted /Flowbuilder/ names); Start-Badge / Status=Danger / Info-Block-placeholder counters now count VISIBLE attachments only (every Node/Canvas master ships hidden Badge/Status layers that flagged every build). Documented a DS bug + workaround in workflow-builder-pattern.md: the Type=Condition master contains a hidden TEXT with an empty font family → createInstance throws "unloaded font"; instantiate State=Hover, configure, then switch State=Default (flag the master to the design team).
+
 ## v3.167.0 — 2026-06-10 (PoA Settings canonical drift: centered Page Content 1084, not full-width)
 PoA sim was clean (1280 canvas, no sidebar, Header Fullscreen 120 — third canvas size in a row handled correctly; v3.165 FP-cleanup confirmed: issues dropped to 1 from the usual 8-10). The build matched the live canonical: content is a **centered Page Content 1084** (98/98 margins, main organism 640 + side column 380 with Tip/Levels) — the same pattern as AML Vendors / Global Settings. The doc said "full-width 1280 content" — 6th canonical drift; rewritten with organism keys. Remaining known FP sub-class: 7.19 flags pre-existing designer COMPONENTs on host Drafts pages (cheap one-line triage; no reliable Plugin-API way to tell "existed before this build" — left as-is for now).
 

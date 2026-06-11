@@ -1693,9 +1693,13 @@ if (productContext === "flow-builder") {
   if (!sidebar) {
     issues.push(`Flow Builder page is missing the *Sidebar* instance. Required — import key 60be5cbb4d070ccc4853589a555d949c3f23f62e and use the variant matching the dashboard context.`);
   }
+  // v3.168: canonical Flow Builder uses the GENERIC *Header* (set 2689f78…/387e2cf6…),
+  // NOT a Flowbuilder-specific header — see workflow-builder-pattern.md "What NOT to do" #5.
+  // The old matcher only accepted /Flowbuilder/ names and flagged correct generic-Header
+  // builds as "missing header" (recurring FP).
   requireInstance(
-    "Flowbuilder Header",
-    n => n.mainComponent?.parent?.name === "Flowbuilder / *Header*" || /Flowbuilder/.test(n.mainComponent?.parent?.name || ""),
+    "Builder page Header (generic *Header*)",
+    n => n.mainComponent?.parent?.name === "*Header*" || /Flowbuilder/.test(n.mainComponent?.parent?.name || ""),
     // "Header" alone is too broad — every DS component has an internal "Header" frame.
     // Only flag top-level custom frames with explicit Flow Builder–mimicking names.
     ["Flow Builder Header", "FB Header", "Workflow Header", "Flowbuilder Header"]
@@ -1724,19 +1728,27 @@ if (productContext === "flow-builder") {
       issues.push(`Canvas is present but bars are missing (top: ${hasTopBar}, right: ${hasRightBar}, bottom: ${hasBottomBar}). Make sure you used the Canvas INSTANCE, not a custom FRAME.`);
     }
   }
-  // Node attachments should be used sparingly — not on every node
+  // Node attachments should be used sparingly — not on every node.
+  // v3.168: only count VISIBLE attachments. Every Node/Canvas master ships hidden
+  // Badge/Status layers inside — counting them flagged every build ("all nodes show
+  // Start Badge / Status=Danger", recurring FP). Walk the chain inside the node.
+  function visibleWithin(node, container) {
+    let c = node;
+    while (c && c !== container) { if (c.visible === false) return false; c = c.parent; }
+    return node.visible !== false;
+  }
   const nodeInstances = all.filter(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "Node / Canvas");
   const nodesWithBadge = nodeInstances.filter(n =>
-    n.findAll(c => c.type === "INSTANCE" && c.mainComponent?.name === "Node / Badge / Start").length > 0
+    n.findAll(c => c.type === "INSTANCE" && c.mainComponent?.name === "Node / Badge / Start" && visibleWithin(c, n)).length > 0
   ).length;
   if (nodeInstances.length > 1 && nodesWithBadge === nodeInstances.length) {
-    issues.push(`All ${nodeInstances.length} canvas nodes show 'Start Badge' — only the first node should have it`);
+    issues.push(`All ${nodeInstances.length} canvas nodes show a VISIBLE 'Start Badge' — only the first node should have it`);
   }
   const nodesWithDanger = nodeInstances.filter(n =>
-    n.findAll(c => c.type === "INSTANCE" && /Status=Danger/.test(c.mainComponent?.name || "")).length > 0
+    n.findAll(c => c.type === "INSTANCE" && /Status=Danger/.test(c.mainComponent?.name || "") && visibleWithin(c, n)).length > 0
   ).length;
   if (nodeInstances.length > 1 && nodesWithDanger === nodeInstances.length) {
-    issues.push(`All ${nodeInstances.length} canvas nodes show 'Status=Danger' — realistic flows have mixed or empty statuses`);
+    issues.push(`All ${nodeInstances.length} canvas nodes show a VISIBLE 'Status=Danger' — realistic flows have mixed or empty statuses`);
   }
   // Invented "Legend" frame
   const legends = all.filter(n => n.type === "FRAME" && /^Legend$/i.test(n.name));
@@ -1760,11 +1772,12 @@ if (productContext === "flow-builder") {
   if (renamedNodes.length) {
     issues.push(`${renamedNodes.length} Node / Canvas instance(s) renamed with "Node — *" pattern — keep default instance names`);
   }
-  // Info Block placeholder — the component ships with "Start time: 24 Jul, 23 13:43" / "Time in node: 8y:12m:14d" defaults
+  // Info Block placeholder — the component ships with "Start time: 24 Jul, 23 13:43" / "Time in node: 8y:12m:14d" defaults.
+  // v3.168: VISIBLE ones only — the defaults also live on hidden component-internal layers in every node (recurring FP).
   const placeholderTexts = ["Start time: 24 Jul", "Time in node: 8y", "Time in node: 8y:12m:14d"];
-  const placeholderHits = all.filter(n => n.type === "TEXT" && placeholderTexts.some(p => n.characters?.includes(p)));
+  const placeholderHits = all.filter(n => n.type === "TEXT" && isVisible(n) && placeholderTexts.some(p => n.characters?.includes(p)));
   if (placeholderHits.length) {
-    issues.push(`Info Block placeholder text still present in ${placeholderHits.length} text node(s) — replace with realistic times or hide Info Block`);
+    issues.push(`Info Block placeholder text VISIBLE in ${placeholderHits.length} text node(s) — replace with realistic times or hide Info Block`);
   }
 }
 
@@ -1795,7 +1808,7 @@ if (productContext === "tm") {
   // TM screens have multiple layout patterns — check sidebar width matches pattern.
   // Pattern 1 (Transactions table): Sidebar 257px, screen 1440×900
   // Pattern 2 (Settings/Rules): Sidebar 276px, screen 1440×956
-  // Pattern 3 (Rule editor): No sidebar, Header Full Screen Page 1440px
+  // Pattern 3 (Rule editor): 52px collapsed Sidebar + Header 1388 @x=52 (v3.159, audit 7.58)
   // Pattern 4 (Transaction detail): No sidebar, 1920px wide canvas
   // Pattern 5 (Txn Networks): No sidebar, 1681px wide canvas
   if (sidebar) {

@@ -78,6 +78,12 @@ Live sim 2026-05-18 v3.138: agent built clean Workflow Builder canvas with corre
 
 **Exception:** ONLY when user explicitly says "show empty / unconfigured nodes" / "drop-node placeholder state" / similar.
 
+### ⚠️ DS bug: Condition master throws "unloaded font" on createInstance (v3.168 — workaround)
+
+The master `Node / Canvas / Type=Condition, State=Default, Status=Default` (Workflow Builder · Core) contains a hidden TEXT with an EMPTY font family (`""` / Regular). `createInstance()` + `appendChild` throws **"unloaded font"** and the font cannot be loaded (empty family name). **Workaround (validated in the 2026-06-11 sim):** instantiate the clean `State=Hover` variant of the same Type=Condition, configure it fully (props, texts), then switch `State` back to `"Default"` via `setProperties`. Renders identically to a Default-born instance.
+
+This is a **design-source defect** — flag to the design team to fix the master's hidden TEXT font (assign a real family or delete the node) and re-publish. Do NOT try to load the empty font or edit the master from a build.
+
 ### Node sub-components (attached above/beside nodes)
 
 Attached at negative Y (above node) or at x=230 (right edge):
