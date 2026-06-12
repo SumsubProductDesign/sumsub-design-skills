@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.169.0 — 2026-06-12 (Databases: clean run closes the dashboard queue; Browser-chrome key is a macket key)
+Databases (Active Products) sim matched the canonical 1:1 including every quirk: browser chrome 1920×80, .Sidebar category 276 @y=80, Header 1639 @x=281 (the 5px gap), Legend/Rows @313, 4 Status_databases cards 2×2 with country flags. One catalog bug documented: `Browser & URL Controls`' catalogued key is a macket key (import fails) — get it via the canonical instance's getMainComponentAsync().createInstance(); same getNodeByIdAsync approach for the other file-local pieces (ids now in the doc). **This completes the dashboard-family simulation queue** (all 24+ products tested at least once; recent runs are consistently 0-1 residuals).
+
 ## v3.168.0 — 2026-06-11 (Flow Builder: v3.139 validated; check-8 FP fixes; Condition-master font workaround)
 Workflow Builder retest finally validated v3.139: all 4 nodes shipped `configured=true / empty=false` (verified via Plugin API), 1440×900 shell, Canvas organism with bars, 3 bezier connectors with canonical colors. Fixed the flow-builder section of audit check 8 (4 recurring FPs): the header requirement now accepts the GENERIC *Header* (canonical per workflow-builder-pattern.md — the old matcher only accepted /Flowbuilder/ names); Start-Badge / Status=Danger / Info-Block-placeholder counters now count VISIBLE attachments only (every Node/Canvas master ships hidden Badge/Status layers that flagged every build). Documented a DS bug + workaround in workflow-builder-pattern.md: the Type=Condition master contains a hidden TEXT with an empty font family → createInstance throws "unloaded font"; instantiate State=Hover, configure, then switch State=Default (flag the master to the design team).
 

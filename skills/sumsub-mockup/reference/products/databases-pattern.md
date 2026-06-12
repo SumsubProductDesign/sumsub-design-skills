@@ -86,3 +86,4 @@ What kind of Databases screen?
 - **Sidebar 276, NOT 257** — settings family canvas.
 - **Active Products has a slight 5px gap** between Sidebar (ends at x=276) and Header (starts at x=281). Available Products has no gap (Header starts at x=276).
 - **Both pages use white background** (#ffffff).
+- **`Browser & URL Controls` is NOT importable by key (v3.169)** — its catalogued key is a macket key, `importComponentByKeyAsync` fails. Get it from the canonical instance instead: find the instance in the canonical frame → `await instance.getMainComponentAsync()` → `.createInstance()`. Same applies to the other file-local pieces here (`.Sidebar category` 1980:13757, `Legend` 62:9088, `Status_databases / Basic` set 22:6218) — use `getNodeByIdAsync` on those ids.
