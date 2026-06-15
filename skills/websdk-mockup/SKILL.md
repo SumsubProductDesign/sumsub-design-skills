@@ -111,17 +111,17 @@ Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
 **Trigger phrases that indicate KYB:** "KYB", "company verification", "business verification", "associated parties", "beneficial owner / UBO", "company documents", "company search", "PoA for KYB", "associated party". When ANY of these appear, switch into KYB mode:
 
 1. **Source file:** `9ii3Ueqr01mbLS3SE6bsrJ` (KYB | Light + Dark)
-2. **Canonical examples:** sections on `🟡 Detailed UI/UX (Light)` page (id `1:43`) — General flow / Company search / Company documents / Adding associated parties / We're checking your data / PoA
-3. **Shell:** **`Window / *` LOCAL components** (NOT the WebSDK `Widget` set)
-4. **Frame size:** 1440×1046 background with centered 512×800 Window inside
-5. **Top Bar variant:** `Type=Steps, Stroke=False` (different axis than KYC's `Size=Medium/Small/Large`)
-6. **Bottom Bar:** assembled directly as `Toolbar / Bottom Bar / Desktop` instance — variant `Buttons=Two, Stroke=False` (or `Buttons=One`)
-7. **Library subscription required:** consumer file must subscribe to KYB library via Assets panel before keys will import. If `importComponentSetByKeyAsync(b0df76296cf872acbf76475d1497b3092003c4e9)` fails, ask user to subscribe.
-8. **🛑 UN-HIDE THE BARS (v3.170):** every `Window / *` variant ships its `Toolbar / Top Bar` (header/nav) AND `Toolbar / Bottom Bar / Desktop` (footer/buttons) children as **`visible=false`**. After `createInstance()` you MUST set both `visible = true` — otherwise you ship a bare content-only window with no navigation and no action buttons (a defect). The bars are already inside the instance; toggle `visible`, don't insert. A KYB screen WITHOUT a visible header and footer = wrong. See kyb-organisms.md "🛑 HARD RULE".
+2. **Canonical examples:** sections on `🟡 Detailed UI/UX (Light)` page (id `1:43`) — General flow / Company search (originals ref `6980:643402`) / Company documents / Adding associated parties / We're checking your data / PoA
+3. **Shell:** ✅ **the SAME `Widget` shell as KYC** — set `232e8d4d5beed4ad18da48386dab7a640ac0ca45`, `Type=Content` (remote, importable by key). The KYB-specific delta: the thing placed in the Widget's content slot is a **`Window / *` KYB-local shell** (Title + step form), not a bare organism.
+4. **Frame size:** Widget native 1440×900 inside a 1440×960 section frame (canonical). Widget column is centered (Left bar panel hidden).
+5. **Header/footer come FREE from the Widget:** a fresh `Widget` `Type=Content` instance already ships its 718-wide `Toolbar / Top Bar` (`Size=Medium`) visible AND its `Bottom Bar` (key `5d6dd1a8374252d06a2ed8e359c904968a103128`) visible with a **black `#20252c` Primary button**. Do NOT rebuild bars.
+6. **Content slot is named `"Slot"`** (718-wide), NOT KYC's `"Content "`. Insert the `Window / *` via `slot.insertChild(0, …)` — pick the slot by reading SLOT nodes (largest non-Image, non-Left-bar), never by hardcoded name.
+7. **KYB `Window / *` sets are LOCAL-UNPUBLISHED** — `importComponentSetByKeyAsync(b0df76296…)` throws "not found" even inside the KYB file. Fetch via a canonical instance's `getMainComponentAsync().parent`. The Widget shell (`232e8d4d`) IS importable by key. See kyb-organisms.md recipe.
+8. **🔴 REVERTED v3.170 (fixed v3.171):** do **NOT** build a bare `Window` and un-hide its internal `Toolbar / Top Bar` / `Toolbar / Bottom Bar / Desktop`. Those internal bars are a *different* footer that renders the OLD blue `#143cff` button and a wrong border ("старая кнопка / обводка не такая"). Always wrap the Window in the `Widget` shell and keep the Window's OWN internal bars HIDDEN — the Widget's `Bottom Bar` (5d6dd1a8) is the correct black-button footer. See kyb-organisms.md "What v3.170 got wrong".
 
-**Full KYB reference:** `${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md` — contains all 17+ KYB component keys, variant lists, canonical screen anatomy, assembly recipe, section node-IDs.
+**Full KYB reference:** `${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md` — contains the Widget-shell recipe, all KYB component keys, variant lists, canonical screen anatomy, section node-IDs.
 
-**Do NOT mix KYB Window shells with KYC Widget shells in the same flow.** Use one OR the other based on the product context.
+**The Widget shell is shared between KYB and KYC; only the slot content differs.** Don't mix KYB `Window / *` content with KYC organisms in the same slot.
 
 ---
 
@@ -687,4 +687,4 @@ Before declaring "done":
 - [ ] Set Widget padding to `0/12/12/12` on mobile
 - [ ] Inserted organism via `slot.insertChild(0, instance)` + organism `layoutSizingHorizontal = "FILL"`
 - [ ] Ran `auditWidget` from `examples-library.md` — 0 issues
-- [ ] **KYB only:** Window's `Toolbar / Top Bar` AND `Toolbar / Bottom Bar` set to `visible = true` (variants ship them hidden) — screen has a header with nav AND a footer with buttons. Compare against a FULL-screen canonical (with bars), not a bare-Window example frame.
+- [ ] **KYB only (v3.171):** built on the `Widget` shell (`232e8d4d`, `Type=Content`), NOT a bare Window. Widget's own Top Bar (718) + `Bottom Bar` (5d6dd1a8, black #20252c button) visible. KYB `Window / *` inserted into the `"Slot"` (718) via `insertChild`; Window's OWN internal bars left HIDDEN; Left bar + Image slots hidden. Did NOT un-hide the Window's internal `Toolbar / Bottom Bar / Desktop` (that's the blue-button defect reverted in v3.171).

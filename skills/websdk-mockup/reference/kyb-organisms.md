@@ -3,95 +3,133 @@
 > Source file: **`9ii3Ueqr01mbLS3SE6bsrJ`** (KYB | Light + Dark)
 > Page with canonical screens: `🟡 Detailed UI/UX (Light)` (id `1:43`)
 > Components page: `🧩 Components` (id `2:49`)
-> Last scan: 2026-04-30
+> Canonical "originals" reference section (Company search): `6980:643402`
+> Last verified: 2026-06-15 (live inspection of canonical + test build)
 
 ---
 
-## ⚠️ KYB does NOT use the standard WebSDK `Widget` shell
+## ✅ KYB **DOES** use the standard WebSDK `Widget` shell (corrected v3.171)
 
-This is the most important fact about KYB. **KYB is architecturally different from KYC WebSDK.**
+> 🔴 **This reverses the pre-v3.171 claim that "KYB does NOT use the Widget shell."** That claim was wrong and produced broken footers/buttons (see "What v3.170 got wrong" below). Live inspection of the canonical `6980:643402` proved every KYB desktop frame is built on the **same `Widget` shell as KYC**.
 
 | | KYC WebSDK | **KYB WebSDK** |
 |---|---|---|
-| Shell | `Widget` set (`232e8d4d5beed4ad18da48386dab7a640ac0ca45`) — `Type=Content` / `Type=Camera` | **`Window / *` LOCAL components** in KYB file |
-| Canvas frame | 1440×960 (desktop) / 375×812 (mobile) | **1440×1046** background frame, centered Window 512×800 inside |
-| Library | `WebSDK UI Kit [Organisms]` (`8VpSRNe9ur7SBctw0JrtOE`) | KYB file (`9ii3Ueqr01mbLS3SE6bsrJ`) — must subscribe to its published library |
-| Top Bar variant | `Size=Medium / Small / Large` (Widget master variants) | `Type=Steps, Stroke=False` (different variant axis) |
-| Bottom Bar | Built into Widget chrome (visible/hidden via overrides) | **Separate `Toolbar / Bottom Bar / Desktop` instance** assembled directly |
-| Content slot | `Content ` SLOT inside Widget (Type=Content) | Body FRAME inside Window with manually-assembled Title + organism + sub-slots |
+| Outer shell | `Widget` set `232e8d4d5beed4ad18da48386dab7a640ac0ca45`, `Type=Content` | **SAME** — `Widget` `Type=Content` (variant key `1ee5c92aaeccd3fd0637757e11ff70b2ac615a78`, `remote=true`, importable by key) |
+| Visible header | Widget's own `Toolbar / Top Bar` (718, `Size=Medium`) | **SAME** — Widget's own 718-wide Top Bar |
+| Visible footer | Widget's own `Bottom Bar` (key `5d6dd1a8374252d06a2ed8e359c904968a103128`) | **SAME** — Widget's own `Bottom Bar` `5d6dd1a8…` |
+| Content slot | `Content ` SLOT → an organism (PoI/Welcome/…) | **`Slot` SLOT (718-wide) → a `Window / *` shell** (KYB-local) |
+| What goes in the slot | organism | **`Window / Select company` etc.** — provides Title + form; its OWN internal bars stay HIDDEN |
+| Slot name (drift!) | `"Content "` (trailing space) | **`"Slot"`** — different name; read the actual SLOT node, don't hardcode |
 
-**Practical consequence:** the `Rule #∞` "look at WebSDK Examples" workflow does NOT apply to KYB. KYB has its own canonical examples on the `🟡 Detailed UI/UX (Light)` page of the KYB file itself, organized by SECTION (Company search, Company documents, Adding associated parties, Proof of address, We're checking your data).
+**The KYB-specific delta vs KYC is ONLY this:** the thing placed in the Widget's content slot is a **`Window / *` shell** (a KYB-local component that bundles Title + the step's form), instead of a bare organism. Everything else — the Widget shell, its 718 Top Bar, its `Bottom Bar` footer, the black `#20252c` Primary button — is identical to KYC and comes for free from `createInstance()`.
 
 ---
 
-## 🛑 HARD RULE — a KYB screen MUST show the Top Bar (header/nav) AND Bottom Bar (footer/buttons), v3.170
+## 🔴 What v3.170 got wrong (do NOT repeat)
 
-**The biggest KYB mistake: shipping a bare content-only Window with no header and no footer.** Every `Window / *` shell variant ships its `Toolbar / Top Bar` and `Toolbar / Bottom Bar / Desktop` children as **`visible=false`** (the published variants hide them — e.g. `Window / Select company` State=Company information has BOTH hidden). If you just `createInstance()` the variant and stop, you get a window with only the form — no step navigation, no action buttons. That is a defect (user 2026-06-12: "у sdk обязательно должен быть хедер с навигацией и футер с кнопками, как в примере").
+v3.170 built a **bare `Window / Select company` (512-wide)** and un-hid the Window's OWN internal `Toolbar / Top Bar` (512×56) + `Toolbar / Bottom Bar / Desktop` (512). That is the wrong composition:
 
-**After creating the Window instance, you MUST un-hide both bars:**
+| | v3.170 bare-Window (WRONG) | Canonical Widget shell (RIGHT) |
+|---|---|---|
+| Footer component | `Toolbar / Bottom Bar / Desktop` (Window-internal) | **`Bottom Bar` `5d6dd1a8…`** (Widget-level) |
+| Primary button render | **#143cff (blue, "старая кнопка")** | **#20252c (black)** |
+| Footer top treatment | different ("обводка не такая") | canonical |
+| Header | Window-internal 512 Top Bar | Widget-level 718 Top Bar |
+
+User feedback that exposed this (2026-06-15): *"хедер с футером появились (хоть и используется старая кнопка и обводка не такая, как в оригинале)"*. Verified via test build: a fresh `Widget` `Type=Content` instance ships the `Bottom Bar` `5d6dd1a8` with a black `#20252c` Primary button — so the fix is purely structural (use the Widget shell), NOT a token/library re-sync.
+
+**Rule:** NEVER un-hide a `Window / *` shell's internal Top Bar / Bottom Bar. Those exist for the rare bare-embed case and render the OLD blue button. Always wrap the Window in the `Widget` shell; keep the Window's internal bars hidden.
+
+---
+
+## 🛑 HARD RULE — a KYB screen MUST be the `Widget` shell with visible header + footer
+
+Every KYB desktop screen = `Widget` (`Type=Content`) with:
+- the Widget's own `Toolbar / Top Bar` (718, `Size=Medium`) visible — back + Progress line + close
+- the Widget's own `Bottom Bar` (`5d6dd1a8…`, 718) visible — black Primary button (+ optional Secondary)
+- a KYB `Window / *` shell inserted into the Widget's `Slot` (718-wide content slot), with the Window's OWN internal bars left hidden
+- the `Left bar` slot hidden (canonical hides the optional left promo panel; widget column is centered on the 1440 canvas)
+
+A bare content-only Window (no Widget), or a Window with its internal bars un-hidden, is a defect.
+
+---
+
+## Canonical KYB screen anatomy (Widget shell)
+
+```
+Section frame (1440×960, fill #404040 when "made by Claude")
+└── Widget INSTANCE (1440×900, Type=Content, set 232e8d4d, variant 1ee5c92a)
+    ├── Left bar  (SLOT 400×900)                     ← HIDE (canonical hides the left promo panel)
+    ├── Toolbar / Top Bar  (718×60, Size=Medium)     ← VISIBLE — header: back + Progress / Line + close
+    │     (two more Top Bar size variants exist, hidden — leave them hidden)
+    ├── widget column (718)
+    │   ├── Image slot  (710×240)                     ← HIDDEN (no Steps illustration on company-search)
+    │   ├── Slot  (718×722)  ← MAIN CONTENT SLOT      ← insertChild(0, kybWindow)
+    │   │     └── Window / Select company (512×~698)  ← KYB-local shell; its internal Top/Bottom bars HIDDEN
+    │   │           └── Content: Title + Select + Company search form
+    │   └── Bottom Bar  (718×~72/102, key 5d6dd1a8)   ← VISIBLE — footer
+    │         ├── Slot (506×144)  ← button area
+    │         │     └── *Button* / Basic  Primary/Default  → #20252c BLACK (key b9917066…)
+    │         └── (Consent / Carousel / pagination — toggled via props, usually off)
+    └── Whitelabel Wrapper
+```
+
+**Slot naming drift:** the Widget's main content slot is named **`"Slot"`** (718-wide) in the KYB/redesigned Widget, not KYC's `"Content "`. Always pick it by reading SLOT nodes (largest non-`Image` slot), never by hardcoded name.
+
+**`Window / Status page` is an exception** — a long scrollable summary (no Top/Bottom bars). It can sit directly without the Widget footer. Verify against the canonical `We're checking your data` section.
+
+---
+
+## ⚠️ KYB `Window / *` shells are LOCAL-UNPUBLISHED — NOT importable by key
+
+`importComponentSetByKeyAsync("b0df76296cf872acbf76475d1497b3092003c4e9")` throws **"Component set not found"** even when building INSIDE the KYB file — these `Window / *` sets are local and unpublished. Fetch them from an existing canonical instance instead:
+
 ```js
-const topBar = window.findOne(n => n.type === "INSTANCE" && /Top Bar/i.test(n.name));
-const bottomBar = window.findOne(n => n.type === "INSTANCE" && /Bottom Bar/i.test(n.name));
-if (topBar) topBar.visible = true;       // header: back + Progress line + close
-if (bottomBar) bottomBar.visible = true; // footer: Primary (+ optional Secondary) buttons
-```
-(This is also why the natural height is 800 with bars vs 706 without — the agent that shipped 800 but left bars hidden had the right height and the wrong visibility.) The bars are child INSTANCES already present in the variant — you toggle `visible`, you don't insert them. Then override the Bottom Bar's button labels and the Top Bar's progress state as needed.
-
-The alternative canonical composition (see `7032:56070`) wraps the Window in a `Widget` with Top Bar + Bottom Bar as **siblings** (718-wide) and the Window's own bars hidden. Either is valid — but the screen must end up WITH a visible header and footer. Never deliver the bare Window.
-
-## Canonical KYB screen anatomy
-
-```
-Frame (1440×1046, no fill, centered Window inside)
-└── Window (512×800, VERTICAL auto-layout, no padding)
-    ├── Toolbar / Top Bar / Desktop INSTANCE        (512×56)   ← MUST be visible=true (variant default hides it)
-    │     variant: Type=Steps, Stroke=False
-    │     contains: back button + Progress / Line / Group + close button
-    │
-    ├── Body FRAME                                   (512×566 typical)
-    │     VERTICAL auto-layout
-    │     paddingT=24, paddingR=24, paddingB=0, paddingL=24, gap=32
-    │     ├── Title INSTANCE (set a4f74154e6c950755b1472a64e5344063da0365c, Alignment=Left)
-    │     │     Title TEXT + Subtitile TEXT
-    │     └── Content FRAME
-    │           ├── Slot (SLOT, optional — for inline messaging)
-    │           └── Step organism instance (e.g. Select company / Company search)
-    │
-    └── Toolbar / Bottom Bar / Desktop INSTANCE     (512×178)   ← MUST be visible=true (variant default hides it)
-          variant: Buttons=Two, Stroke=False (or Buttons=One)
-          paddingT=16, paddingB=24
-          ├── Content (gap=16, paddingL=16, paddingR=16)
-          │     ├── Consents FRAME (optional, often hidden)
-          │     ├── *Checkbox* / Item (optional, often hidden)
-          │     └── Buttons (Primary disabled by default + optional Secondary)
-          ├── Whitelabel Wrapper
-          └── Rectangle 15226 (1px stroke, hidden by default)
+// Get the local Window set via a canonical instance's main component → parent set
+const anyWindowInstance = await figma.getNodeByIdAsync("0:887"); // a Window/Select company in "Default" frame
+// NOTE: instance-internal ids (0:NNN) only resolve by traversing live parents, not getNodeByIdAsync.
+// Robust path: find a canonical frame, locate the Window instance, read its main component's parent set:
+const canonFrame = await figma.getNodeByIdAsync("6970:48507"); // "Default" frame in Company search
+const winInst = canonFrame.findOne(n => n.type === "INSTANCE" && /^Window \/ Select company/.test(n.name));
+const winMain = await winInst.getMainComponentAsync();
+const winSet = winMain.parent; // COMPONENT_SET, local
+const winVariant = winSet.children.find(c => /State=Company information/.test(c.name));
+const kybWindow = winVariant.createInstance();
 ```
 
-**Note:** Window / Status page is an exception — it's a long scrollable summary view (512×1712) without Top/Bottom bars, just a Content FRAME.
+The Widget shell (`232e8d4d`) IS remote/published, so `importComponentSetByKeyAsync` works for it.
 
 ---
 
 ## KYB organism inventory (LOCAL to file `9ii3Ueqr01mbLS3SE6bsrJ`)
 
-### Window-level shells (full-screen widgets)
+### Widget shell (shared with KYC — remote, importable by key)
 
-| Component | Type | Key | Variants |
+| Component | Type | Key | Notes |
+|---|---|---|---|
+| `Widget` | SET | `232e8d4d5beed4ad18da48386dab7a640ac0ca45` | variant `Type=Content` = `1ee5c92aaeccd3fd0637757e11ff70b2ac615a78` |
+| `Bottom Bar` (Widget footer) | COMP | `5d6dd1a8374252d06a2ed8e359c904968a103128` | inside Widget; black Primary button. Props: `Primary`, `Secondary`, `Link`, `Consent`, `Carousel`, `Total`/`Current` (pagination), `Warning`, `Slot` |
+| `Toolbar / Top Bar ` | SET | `87aeeca5403429c521a1e89a154d23ac113ee551` | Widget header; visible variant `Size=Medium` = `4286563e15dbb5fe02d95cc87c76816dfc06e8fe` |
+| `*Button* / Basic` | SET | `5e6bd44e70142ccf9cc266ccffe56292ecbc7029` | Primary/Default = `b9917066812164b1a763596ec1b1a06b7916521f` → **#20252c black** |
+
+### Window-level shells (KYB-local — go INSIDE the Widget's `Slot`; NOT importable by key)
+
+| Component | Type | Key (for reference; fetch via in-file lookup) | Variants |
 |---|---|---|---|
 | `Window / Select company` | SET | `b0df76296cf872acbf76475d1497b3092003c4e9` | 5: `State=Find your company / Empty / Basic / Company information / Too many` |
 | `Window / Associated parties` | SET | `2cf035dfd2cf3138def72198e479b82dd2d6c6c7` | 5: `Type=Page / Add Individual / Edit Individual / Add Company / Edit Company` |
 | `Window / Proof of address` | SET | `583837ca5462a97da36ed0f4956b2753cd7c9709` | 3: `Type=Add / Page / Edit` |
 | `Window / Company documents` | COMP | `d1a4a6f1d3fd69cb328dc8710fe513a987eff205` | — |
-| `Window / Status page` | COMP | `4e340431366075ea783bc5dab1c15c22e8a1c3f6` | — |
+| `Window / Status page` | COMP | `4e340431366075ea783bc5dab1c15c22e8a1c3f6` | — (no bars; scrollable summary) |
 
-### Body-level organisms (sit inside Window's Body)
+### Body-level organisms (sit inside a `Window / *`'s own Content)
 
 | Component | Type | Key | Variants |
 |---|---|---|---|
 | `Associated parties` | SET | `ca8434186c31b0dfdf0b6d562bca90867f777d48` | 2: `State=Empty state / Filled` |
 | `Proof of address` | SET | `4ad4516985aa3327d967b970f4156c469058b772` | 2: `State=Empty state / Filled` |
 | `Select company / Company search` | SET | `bc8428cc30c98aae19b708e3dbba14c21e92bb15` | 1: `Property 1=Mode Default` |
-| `Card Associated Party / Associated Parties screen` | SET | `98989981be8f04e4994376ed740a0e3f0ddfddf2` | 6: State × Type (Default/Empty/Error × Individual/Company) |
+| `Card Associated Party / Associated Parties screen` | SET | `98989981be8f04e4994376ed740a0e3f0ddfddf2` | 6: State × Type |
 | `Card Associated Party / Status screen` | SET | `0b5174743e12cb234de457b173817db8aff60941` | 2: `Type=Individual / Company` |
 | `Company document / Group` | SET | `7a756bb4314a2e5807f9a4fcb5aab94be2ea6ca3` | 3: `State=UnComplete / Complete / Warning` |
 | `Group / Attached File` | SET | `7eba7fa09b44512b3211668907b0c5aa8c59d233` | 3: `State=Added / Loading / Error` |
@@ -102,32 +140,76 @@ Frame (1440×1046, no fill, centered Window inside)
 
 | Component | Type | Key | Variants |
 |---|---|---|---|
-| `Status` | SET | `538c3c2cc17f14901afd1f92de4371d5e123b3d2` | 6: `Type=Resubmission requested / Verification required / Verification is not required / Pending review / Under review / Verified` |
-| `Status group` | SET | `70cdd6444ab5e526974fbf1676db15d02b6af460` | 12: 6× Property 1 × Open=Open/Close (collapsible status group) |
-| `Status Page / Status` | SET | `7569ae2494ecbfb7f883c07682f74b656c9f9e9d` | 5: `Status=Resubmit requested / Verification requested / Pending review / Processing / Verified` |
-| `Status Page / Step` | SET | `5e2cf1f4b1c54da7ea71178d95034bc101c90799` | 4: `Step=Processing / Verified / Resubmit requested / Verification required` |
+| `Status` | SET | `538c3c2cc17f14901afd1f92de4371d5e123b3d2` | 6 |
+| `Status group` | SET | `70cdd6444ab5e526974fbf1676db15d02b6af460` | 12 |
+| `Status Page / Status` | SET | `7569ae2494ecbfb7f883c07682f74b656c9f9e9d` | 5 |
+| `Status Page / Step` | SET | `5e2cf1f4b1c54da7ea71178d95034bc101c90799` | 4 |
+
+---
+
+## Canonical assembly recipe (Widget shell)
+
+```js
+// 0. Pick a free canvas spot; build inside a Section (fill #404040, name ends "(made by Claude)").
+
+// 1. Widget shell — remote, importable by key
+const wSet = await figma.importComponentSetByKeyAsync("232e8d4d5beed4ad18da48386dab7a640ac0ca45");
+const wVar = wSet.children.find(c => /Type=Content/.test(c.name));
+const widget = wVar.createInstance();           // 1440×900 native
+section.appendChild(widget);
+// Fresh instance already ships: Top Bar 718 (Size=Medium) visible, Bottom Bar 5d6dd1a8 visible, BLACK button.
+
+// 2. Hide the Left bar (canonical hides the left promo panel → centered 718 column)
+const leftBar = widget.findOne(n => n.type === "SLOT" && /Left bar|left side/i.test(n.name));
+if (leftBar) leftBar.visible = false;
+
+// 3. Hide the Image slot (no Steps illustration on company-search style screens)
+const imageSlot = widget.findOne(n => n.type === "SLOT" && /Image/i.test(n.name));
+if (imageSlot) imageSlot.visible = false;
+
+// 4. Get the KYB Window from a canonical instance (LOCAL set — NOT importable by key)
+const canonFrame = await figma.getNodeByIdAsync("6970:48507"); // Company search "Default"
+const winInst = canonFrame.findOne(n => n.type === "INSTANCE" && /^Window \/ Select company/.test(n.name));
+const winSet = (await winInst.getMainComponentAsync()).parent;  // local COMPONENT_SET
+const winVar = winSet.children.find(c => /State=Company information/.test(c.name)) || winSet.children[0];
+const kybWindow = winVar.createInstance();
+
+// 5. Insert the Window into the Widget's MAIN content slot (named "Slot", 718-wide — NOT "Content ")
+const slots = widget.findAll(n => n.type === "SLOT");
+const contentSlot = slots
+  .filter(s => !/image|left bar/i.test(s.name) && Math.round(s.width) >= 600)
+  .sort((a,b) => (b.width*b.height) - (a.width*a.height))[0];
+contentSlot.insertChild(0, kybWindow);          // insertChild — NOT appendChild
+try { kybWindow.layoutSizingHorizontal = "FILL"; } catch(e){}
+
+// 6. Keep the Window's OWN internal Top/Bottom bars HIDDEN (default). Do NOT un-hide them.
+
+// 7. Configure: Top Bar progress/step, Bottom Bar button label (set on the Widget's Bottom Bar, not the Window's)
+const topBar = widget.findOne(n => n.type === "INSTANCE" && /Top Bar/i.test(n.name) && n.visible);
+const bottomBar = widget.findOne(n => n.type === "INSTANCE" && n.name === "Bottom Bar" && n.visible);
+// e.g. bottomBar.setProperties({ "Primary#…": true, "Secondary#…": false });
+// override the button label TEXT inside bottomBar as needed.
+```
+
+---
+
+## Library subscription requirement
+
+The **Widget shell** is remote (WebSDK Organisms library) — subscribe `WebSDK UI Kit [Organisms]` (`8VpSRNe9ur7SBctw0JrtOE`) per main SKILL Rule #1.
+
+The **`Window / *` KYB shells are local-unpublished** in `9ii3Ueqr01mbLS3SE6bsrJ` — you can only use them when building IN that file (fetch via in-file node lookup, step 4 above). To use them in another file, the KYB file owner must first **publish** them as a library and the consumer must **subscribe**. If you're not building in the KYB file and the Window sets aren't published, STOP and tell the user.
 
 ---
 
 ## KYB flow — canonical screen sequence (from General flow section `3719:142312`)
 
-The General flow section has 88 frames showing the complete user journey. The key step types (in order):
-
 1. **Start screen** — intro disclaimer
-2. **Company search** (5 states):
-   - Find your company (search field, no results yet)
-   - Empty (no matches)
-   - Basic (company list)
-   - Company information (selected company details preview)
-   - Too many (overflow state)
-3. **Status page (overview)** — full summary of pending steps with Status group cards (Associated parties / Company documents / Proof of address)
+2. **Company search** (5 states): Find your company / Empty / Basic / Company information / Too many
+3. **Status page (overview)** — pending steps with Status group cards
 4. **Company documents** — document upload
-5. **Adding associated parties** (multiple sub-flows):
-   - Adding Individual / Editing Individual
-   - Adding Company / Editing Company
-   - "If there are associated parties" / "If there are no associated parties" branches
-6. **Proof of address** — Add / Edit / Page (overview)
-7. **We're checking your data** — submission status (Processing / Pending review / Verification required / Resubmit requested / Verified)
+5. **Adding associated parties** — Add/Edit Individual, Add/Edit Company branches
+6. **Proof of address** — Add / Edit / Page
+7. **We're checking your data** — Processing / Pending review / Verification required / Resubmit requested / Verified
 
 ### Section node IDs in KYB file (Detailed UI/UX Light page `1:43`)
 
@@ -135,6 +217,7 @@ The General flow section has 88 frames showing the complete user journey. The ke
 |---|---|
 | `General flow` | `3719:142312` |
 | `Company search` | `5147:28502` |
+| `Company search (originals reference)` | `6980:643402` |
 | `Company documents` | `3105:80346` |
 | `Adding associated parties` | `3105:95064` |
 | `We're checking your data` | `3417:55129` |
@@ -142,89 +225,16 @@ The General flow section has 88 frames showing the complete user journey. The ke
 | `Substitute beneficial owner` | `6886:50893` |
 | `Only for designers` | `5599:87861` |
 
-For each section, the canonical examples are pre-built FRAMEs (1440×1046 with centered 512×800 Window inside).
-
----
-
-## Canonical assembly recipe
-
-```js
-// 1. Subscribe target file to KYB library (manual, in Figma) — required first
-//    File: 9ii3Ueqr01mbLS3SE6bsrJ → Assets → Libraries → publish/subscribe
-
-// 2. Import the KYB Window-shell variant
-const selCompSet = await figma.importComponentSetByKeyAsync("b0df76296cf872acbf76475d1497b3092003c4e9");
-const findVariant = selCompSet.children.find(c => c.name === "State=Find your company");
-const window = findVariant.createInstance();
-
-// 3. Create background frame (1440×1046) and center the Window inside
-const bg = figma.createFrame();
-bg.resize(1440, 1046);
-bg.fills = []; // or KYB-specific page bg
-bg.appendChild(window);
-window.x = 464; window.y = 32;
-
-// 4. ⚠️ REQUIRED — un-hide the Top Bar (header/nav) and Bottom Bar (footer/buttons).
-//    Window variants ship BOTH hidden; a bare content-only window is a defect.
-const topBar = window.findOne(n => n.type === "INSTANCE" && /Top Bar/i.test(n.name));
-const bottomBar = window.findOne(n => n.type === "INSTANCE" && /Bottom Bar/i.test(n.name));
-if (topBar) topBar.visible = true;
-if (bottomBar) bottomBar.visible = true;
-
-// 5. Customize text/state via setProperties on the Window variant
-//    (Window variants are pre-assembled — no inner slot inserts needed for the basic case)
-window.setProperties({ "State": "Find your company" });
-
-// 5. For text overrides:
-const titleNode = window.findOne(n => n.type === "TEXT" && n.name === "Title");
-if (titleNode) {
-  await figma.loadFontAsync(titleNode.fontName);
-  titleNode.characters = "Find your company";
-}
-
-// 6. For specific organism overrides inside Window body (when canonical Example shows non-default):
-//    Use setProperties on the SET-level variant first; if the inner organism still needs
-//    customization (e.g. to replace Select company / Company search with a different inner state),
-//    walk the Window's children and apply overrides as needed.
-```
-
----
-
-## Library subscription requirement
-
-KYB components are local to `9ii3Ueqr01mbLS3SE6bsrJ`. To use them in another file:
-
-1. The KYB file must **publish** them as a library (file owner action in Figma)
-2. The consumer file must **subscribe** to that library via Assets panel → Libraries
-
-If `importComponentSetByKeyAsync(KEY)` fails with "Component set not found" — the consumer file is not subscribed. STOP and ask the user to subscribe before proceeding.
-
-**Pre-build check (analogous to Rule #1 for WebSDK):**
-
-```js
-const candidates = ["b0df76296cf872acbf76475d1497b3092003c4e9", "ca8434186c31b0dfdf0b6d562bca90867f777d48", "538c3c2cc17f14901afd1f92de4371d5e123b3d2"];
-for (const k of candidates) {
-  try { await figma.importComponentSetByKeyAsync(k); }
-  catch(e) { /* surface to user, ask to subscribe to KYB library */ }
-}
-```
-
----
-
-## KYB-specific Top/Bottom bar variants
-
-Even though Top Bar uses set key `87aeeca5403429c521a1e89a154d23ac113ee551` (same as WebSDK Top Bar), KYB instances expose a different variant name `Type=Steps, Stroke=False`. This is because the local KYB-file Top Bar is a **redefined/wrapped** version of the WebSDK Top Bar with different variant axes specifically for KYB step navigation (Progress line + back/close buttons).
-
-The Bottom Bar set `d6aff684505b1b3e74f92341a81cb700d9324a14` is **NOT importable** from external files (returns "Component set not found"). It's local to KYB file. Consumers must subscribe via library or use the Window shell which has it baked in.
+Each section has pre-built canonical FRAMEs (1440×960 with the centered Widget inside). **Always inspect the matching canonical FRAME before building** and mirror it node-by-node (Rule #4.4).
 
 ---
 
 ## When the user asks for a KYB screen
 
-1. Confirm KYB context (user mentions: "KYB", "company verification", "associated parties", "beneficial owner", "company documents", "Proof of address for KYB", "business verification")
-2. Open the KYB file `9ii3Ueqr01mbLS3SE6bsrJ` and find the matching SECTION on the Detailed UI/UX (Light) page
-3. Inspect the canonical FRAME for the target step (1440×1046 with centered Window 512×800)
-4. Replicate using the matching `Window / *` shell + variant
-5. Audit the build's Window variant + state matches canonical
+1. Confirm KYB context (KYB / company verification / associated parties / beneficial owner / company documents / PoA for KYB).
+2. Open `9ii3Ueqr01mbLS3SE6bsrJ` and find the matching SECTION on the Detailed UI/UX (Light) page.
+3. Inspect the canonical FRAME for the target step (Widget shell, 1440×960) node-by-node.
+4. Build the **Widget shell** (recipe above) with the matching `Window / *` in its `Slot`; keep the Window's internal bars hidden.
+5. Audit: Widget present; Top Bar 718 visible; `Bottom Bar` (5d6dd1a8) visible with black `#20252c` button; `Window / *` inside the `Slot`; Window's internal bars hidden; Left bar + Image slot hidden. No bare-Window, no un-hidden Window-internal bars.
 
-**Do NOT mix KYB Window shells with KYC Widget shells in the same flow.** They're different design systems sharing the same WebSDK token foundation.
+**Do NOT mix KYB `Window / *` content with KYC organisms in the same slot.** The shell (Widget) is shared; the slot content differs by product.
