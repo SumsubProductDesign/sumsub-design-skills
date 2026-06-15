@@ -36,9 +36,26 @@ v3.170 built a **bare `Window / Select company` (512-wide)** and un-hid the Wind
 | Footer top treatment | different ("обводка не такая") | canonical |
 | Header | Window-internal 512 Top Bar | Widget-level 718 Top Bar |
 
-User feedback that exposed this (2026-06-15): *"хедер с футером появились (хоть и используется старая кнопка и обводка не такая, как в оригинале)"*. Verified via test build: a fresh `Widget` `Type=Content` instance ships the `Bottom Bar` `5d6dd1a8` with a black `#20252c` Primary button — so the fix is purely structural (use the Widget shell), NOT a token/library re-sync.
+User feedback that exposed this (2026-06-15): *"хедер с футером появились (хоть и используется старая кнопка и обводка не такая, как в оригинале)"*.
 
-**Rule:** NEVER un-hide a `Window / *` shell's internal Top Bar / Bottom Bar. Those exist for the rare bare-embed case and render the OLD blue button. Always wrap the Window in the `Widget` shell; keep the Window's internal bars hidden.
+**Rule:** NEVER un-hide a `Window / *` shell's internal Top Bar / Bottom Bar. Those exist for the rare bare-embed case. Always wrap the Window in the `Widget` shell; keep the Window's internal bars hidden. Use the Widget's NATIVE `Bottom Bar` button — relabel its TEXT in place; do not replace it.
+
+---
+
+## 🔵→⚫ Footer button color is LIBRARY-SYNC dependent (v3.172) — blue #143cff = stale library
+
+The v3.171 retest (2026-06-15) shipped the correct Widget structure but the footer Primary button still rendered **#143cff (blue)** — the user's "старая кнопка". Deep variable trace found the real cause: **the file contains two `Color` variable collections** with the same variable key `ce42e223` but different collection instances:
+
+| Collection instance | `…button/primary/default/background-normal` aliases to | Result |
+|---|---|---|
+| **Current / redesigned** `6c3bcce7…/10760:1373` | `semantic/background/neutral/normal` → `base/neutral/neutral-100` | **#20252c (dark)** ✅ |
+| **Stale / pre-redesign** `6c3bcce7…/9943:5950` | `semantic/background/blue/normal` → `base/blue/blue-100` | **#143cff (blue)** ❌ |
+
+This is the WebSDK **blue→black** redesign (same shift as Dashboard): primary was re-pointed from blue to neutral/dark. A **freshly-created** `Widget` `Type=Content` (built against the current library) yields the dark button for free; a build made when the editor's library cache is **stale** binds the old collection (`9943:5950`) and renders blue. Same component key (`b9917066`), same variant, same token NAME — only the collection instance differs.
+
+**This is library staleness (audit 7.56 class), NOT a skill-logic bug.** The skill cannot choose the collection instance — it's set by the file/editor's library-sync state. Fix: in Figma, **Assets → Libraries → Update** the WebSDK/Base library, then rebuild → dark button.
+
+**Audit rule (do NOT report from the nominal token):** read the primary button's ACTUAL rendered fill (`button.fills[0].color`). If it's **#143cff** (or `…/blue/normal` resolves in the bound collection), the build is on a **stale library** → report `STALE-LIBRARY: primary button #143cff, expected #20252c — update library + rebuild`, do NOT report `PASS / #20252c`. The v3.171 retest audit falsely claimed `primaryButton.bg=#20252c` by resolving the token NAME against the current collection while the node rendered blue — that masked the staleness.
 
 ---
 
@@ -235,6 +252,10 @@ Each section has pre-built canonical FRAMEs (1440×960 with the centered Widget 
 2. Open `9ii3Ueqr01mbLS3SE6bsrJ` and find the matching SECTION on the Detailed UI/UX (Light) page.
 3. Inspect the canonical FRAME for the target step (Widget shell, 1440×960) node-by-node.
 4. Build the **Widget shell** (recipe above) with the matching `Window / *` in its `Slot`; keep the Window's internal bars hidden.
-5. Audit: Widget present; Top Bar 718 visible; `Bottom Bar` (5d6dd1a8) visible with black `#20252c` button; `Window / *` inside the `Slot`; Window's internal bars hidden; Left bar + Image slot hidden. No bare-Window, no un-hidden Window-internal bars.
+5. Audit (read ACTUAL rendered values, never nominal token names):
+   - Widget present (`Type=Content`); Top Bar 718 visible; `Bottom Bar` (5d6dd1a8) visible; `Window / *` inside the `Slot`; Window's internal bars hidden.
+   - **`Left bar` SLOT hidden** (`leftBarSlot.visible === false`) and `Image slot` hidden — read the SLOT's `.visible`, not a frame named "left side". (v3.172: a build left the Left bar visible while the audit falsely reported it hidden.)
+   - **Primary button: read `button.fills[0].color`.** Expect `#20252c` (dark). If `#143cff` (blue) → `STALE-LIBRARY` (the bound `Color` collection is the old `9943:5950` copy) → report "update library + rebuild", do NOT report PASS. Do NOT resolve the token NAME (it maps to dark in the current collection and masks the staleness).
+   - No bare-Window, no un-hidden Window-internal bars, native footer button (not a replaced/injected `*Button*`).
 
 **Do NOT mix KYB `Window / *` content with KYC organisms in the same slot.** The shell (Widget) is shared; the slot content differs by product.
