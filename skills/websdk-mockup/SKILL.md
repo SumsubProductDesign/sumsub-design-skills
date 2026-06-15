@@ -117,6 +117,7 @@ Every WebSDK build that skipped this step has shipped wrong. Cataloged failures:
 5. **Top Bar variant:** `Type=Steps, Stroke=False` (different axis than KYC's `Size=Medium/Small/Large`)
 6. **Bottom Bar:** assembled directly as `Toolbar / Bottom Bar / Desktop` instance — variant `Buttons=Two, Stroke=False` (or `Buttons=One`)
 7. **Library subscription required:** consumer file must subscribe to KYB library via Assets panel before keys will import. If `importComponentSetByKeyAsync(b0df76296cf872acbf76475d1497b3092003c4e9)` fails, ask user to subscribe.
+8. **🛑 UN-HIDE THE BARS (v3.170):** every `Window / *` variant ships its `Toolbar / Top Bar` (header/nav) AND `Toolbar / Bottom Bar / Desktop` (footer/buttons) children as **`visible=false`**. After `createInstance()` you MUST set both `visible = true` — otherwise you ship a bare content-only window with no navigation and no action buttons (a defect). The bars are already inside the instance; toggle `visible`, don't insert. A KYB screen WITHOUT a visible header and footer = wrong. See kyb-organisms.md "🛑 HARD RULE".
 
 **Full KYB reference:** `${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md` — contains all 17+ KYB component keys, variant lists, canonical screen anatomy, assembly recipe, section node-IDs.
 
@@ -686,3 +687,4 @@ Before declaring "done":
 - [ ] Set Widget padding to `0/12/12/12` on mobile
 - [ ] Inserted organism via `slot.insertChild(0, instance)` + organism `layoutSizingHorizontal = "FILL"`
 - [ ] Ran `auditWidget` from `examples-library.md` — 0 issues
+- [ ] **KYB only:** Window's `Toolbar / Top Bar` AND `Toolbar / Bottom Bar` set to `visible = true` (variants ship them hidden) — screen has a header with nav AND a footer with buttons. Compare against a FULL-screen canonical (with bars), not a bare-Window example frame.

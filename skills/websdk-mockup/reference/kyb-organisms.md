@@ -24,12 +24,27 @@ This is the most important fact about KYB. **KYB is architecturally different fr
 
 ---
 
+## 🛑 HARD RULE — a KYB screen MUST show the Top Bar (header/nav) AND Bottom Bar (footer/buttons), v3.170
+
+**The biggest KYB mistake: shipping a bare content-only Window with no header and no footer.** Every `Window / *` shell variant ships its `Toolbar / Top Bar` and `Toolbar / Bottom Bar / Desktop` children as **`visible=false`** (the published variants hide them — e.g. `Window / Select company` State=Company information has BOTH hidden). If you just `createInstance()` the variant and stop, you get a window with only the form — no step navigation, no action buttons. That is a defect (user 2026-06-12: "у sdk обязательно должен быть хедер с навигацией и футер с кнопками, как в примере").
+
+**After creating the Window instance, you MUST un-hide both bars:**
+```js
+const topBar = window.findOne(n => n.type === "INSTANCE" && /Top Bar/i.test(n.name));
+const bottomBar = window.findOne(n => n.type === "INSTANCE" && /Bottom Bar/i.test(n.name));
+if (topBar) topBar.visible = true;       // header: back + Progress line + close
+if (bottomBar) bottomBar.visible = true; // footer: Primary (+ optional Secondary) buttons
+```
+(This is also why the natural height is 800 with bars vs 706 without — the agent that shipped 800 but left bars hidden had the right height and the wrong visibility.) The bars are child INSTANCES already present in the variant — you toggle `visible`, you don't insert them. Then override the Bottom Bar's button labels and the Top Bar's progress state as needed.
+
+The alternative canonical composition (see `7032:56070`) wraps the Window in a `Widget` with Top Bar + Bottom Bar as **siblings** (718-wide) and the Window's own bars hidden. Either is valid — but the screen must end up WITH a visible header and footer. Never deliver the bare Window.
+
 ## Canonical KYB screen anatomy
 
 ```
 Frame (1440×1046, no fill, centered Window inside)
 └── Window (512×800, VERTICAL auto-layout, no padding)
-    ├── Toolbar / Top Bar / Desktop INSTANCE        (512×56)
+    ├── Toolbar / Top Bar / Desktop INSTANCE        (512×56)   ← MUST be visible=true (variant default hides it)
     │     variant: Type=Steps, Stroke=False
     │     contains: back button + Progress / Line / Group + close button
     │
@@ -42,7 +57,7 @@ Frame (1440×1046, no fill, centered Window inside)
     │           ├── Slot (SLOT, optional — for inline messaging)
     │           └── Step organism instance (e.g. Select company / Company search)
     │
-    └── Toolbar / Bottom Bar / Desktop INSTANCE     (512×178)
+    └── Toolbar / Bottom Bar / Desktop INSTANCE     (512×178)   ← MUST be visible=true (variant default hides it)
           variant: Buttons=Two, Stroke=False (or Buttons=One)
           paddingT=16, paddingB=24
           ├── Content (gap=16, paddingL=16, paddingR=16)
@@ -149,7 +164,14 @@ bg.fills = []; // or KYB-specific page bg
 bg.appendChild(window);
 window.x = 464; window.y = 32;
 
-// 4. Customize text/state via setProperties on the Window variant
+// 4. ⚠️ REQUIRED — un-hide the Top Bar (header/nav) and Bottom Bar (footer/buttons).
+//    Window variants ship BOTH hidden; a bare content-only window is a defect.
+const topBar = window.findOne(n => n.type === "INSTANCE" && /Top Bar/i.test(n.name));
+const bottomBar = window.findOne(n => n.type === "INSTANCE" && /Bottom Bar/i.test(n.name));
+if (topBar) topBar.visible = true;
+if (bottomBar) bottomBar.visible = true;
+
+// 5. Customize text/state via setProperties on the Window variant
 //    (Window variants are pre-assembled — no inner slot inserts needed for the basic case)
 window.setProperties({ "State": "Find your company" });
 

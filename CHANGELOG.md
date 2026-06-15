@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.170.0 — 2026-06-12 (KYB WebSDK: un-hide the Window's Top Bar + Bottom Bar — header & footer are mandatory)
+First websdk-mockup queue test (KYB Company information). The build shipped a bare `Window / Select company` (512×800) with no header and no footer. Root cause: every `Window / *` variant ships its `Toolbar / Top Bar` (nav) AND `Toolbar / Bottom Bar / Desktop` (buttons) children as `visible=false`; the agent created the instance and stopped. New HARD RULE (kyb-organisms.md + SKILL.md KYB section + build checklist): after createInstance, set both bars `visible = true` — a KYB screen MUST have a visible header-with-navigation and footer-with-buttons (compare against a full-screen canonical, not a bare-Window example frame). The bars are already in the instance — toggle visibility, don't insert. User: "у sdk обязательно должен быть хедер с навигацией и футер с кнопками, как в примере".
+
 ## v3.169.0 — 2026-06-12 (Databases: clean run closes the dashboard queue; Browser-chrome key is a macket key)
 Databases (Active Products) sim matched the canonical 1:1 including every quirk: browser chrome 1920×80, .Sidebar category 276 @y=80, Header 1639 @x=281 (the 5px gap), Legend/Rows @313, 4 Status_databases cards 2×2 with country flags. One catalog bug documented: `Browser & URL Controls`' catalogued key is a macket key (import fails) — get it via the canonical instance's getMainComponentAsync().createInstance(); same getNodeByIdAsync approach for the other file-local pieces (ids now in the doc). **This completes the dashboard-family simulation queue** (all 24+ products tested at least once; recent runs are consistently 0-1 residuals).
 
