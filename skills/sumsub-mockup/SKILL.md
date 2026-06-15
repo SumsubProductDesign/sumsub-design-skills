@@ -73,6 +73,15 @@ If a canonical version of the screen you're being asked to build exists somewher
 
 If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
 
+### Island layout (post-redesign Dashboard shell) + layout migration
+
+**The post-2026-06 Dashboard layout is the "Island": a grey page (`semantic/background/neutral/subtlest` #f3f4f6) with the `*Sidebar*` flush-left and all content inside a rounded white card (`border-radius/xl`=16, 1px `neutral/subtlest` border) that floats with 8px insets top/right/bottom and 0 left (flush to the sidebar). The `*Header*` lives INSIDE the card, not full-width.** When the user mentions "island", "new layout", "redesign layout", "after redesign", or asks to convert/migrate existing mockups to the new layout — **Read `${CLAUDE_PLUGIN_ROOT}/reference/products/island-layout-pattern.md` first** (full structure, component/token keys, the migration procedure, and the property-level audit). Headline rules:
+
+- **Two header types by nesting level** (same `*Header*` set, different `Type`): **1st-level** section landing (opened from a sidebar item) → `Generic` (56h) + sidebar 257. **2nd-level** drill-down (detail/editor/sub-config) → `Fullscreen` breadcrumbs header (key `1dd02328…`) + sidebar 52. A **✕ (Close) in an old header is the signal it's 2nd-level** → use breadcrumbs. For config/editor pages the Fullscreen header MUST be configured clean (`Subheader#4002:0=false`, `Key#5362:0=false`) or it bleeds applicant chrome (tabs/client/tags).
+- **Sandbox = a STATE detected by a VISIBLE indicator, never by node presence.** Walk the ancestor `.visible` chain — old headers contain a hidden "sandbox mode" text in every instance; do not flag sandbox from its mere presence. Sandbox = yellow card border (`border/yellow/subtle` #fad24a) + a 24h `Sandbox alert` plashka as the card's first child.
+- **Migration preserves the frame's ORIGINAL outer dimensions.** Set the frame to FIXED original height + cascade `layoutSizingVertical="FILL"` down (island→card→content), card `clipsContent`; never let it HUG content (heights drift). **Recenter content only AFTER container widths settle** (else the centering math overshoots). **Overlays (Toast/Dropdown) → `layoutPositioning="ABSOLUTE"` set AFTER the frame is auto-layout** (no-op otherwise → squishes the island). Hand-built frames: set BOTH `layoutSizing` axes (`createFrame` defaults to 100×100). Output goes on the SOURCE's page, not `figma.currentPage`.
+- **Audit by VALUES, not presence** (structural-skeleton checks pass present-but-wrong builds): assert frame-height==original, plashka height==24, content centering |L−R|≤20 & minX≥0, header rendered-texts == breadcrumb+title only, overlay==ABSOLUTE, sidebar border cleared. When fixing a class across N items, enumerate ALL N. See the doc's §7 checklist.
+
 ### Canonical Body inspection: read the WHOLE content tree, not just the chrome
 
 Most builds break because the skill inspects the chrome (Sidebar / Header / Body wrapper dimensions) but **does not walk into the canonical Body** to find out what's actually inside. Result: the skill outputs "generic" Body content (Tab Button + 3 Cards + Table) regardless of product, even when canonical Body has color pickers, illustrations, gradient settings, language selectors, blueprints, etc.
@@ -1504,6 +1513,7 @@ Before building anything, **open the matching reference file(s) with the `Read` 
 | Flow Builder / Workflow canvas | `${CLAUDE_PLUGIN_ROOT}/reference/products/workflow-builder-pattern.md` |
 | Legacy dashboard pages (Statistics, Dev space, Home) | `${CLAUDE_PLUGIN_ROOT}/reference/products/legacy-dashboard-patterns.md` |
 | Page layouts (cross-product) | `${CLAUDE_PLUGIN_ROOT}/reference/products/layout-patterns.md` |
+| **Island layout (post-redesign) / layout migration** | `${CLAUDE_PLUGIN_ROOT}/reference/products/island-layout-pattern.md` |
 | Design system components / variables / colors | `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md`, `…/color-usage.md` |
 | Blocks system (helpers + templates) | `${CLAUDE_PLUGIN_ROOT}/reference/products/BLOCKS.md` |
 | Dashboard project files (cross-product index) | `${CLAUDE_PLUGIN_ROOT}/reference/products/dashboard-project-files.md` |
