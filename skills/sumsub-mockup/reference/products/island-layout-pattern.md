@@ -57,7 +57,24 @@ Layout math:
 | `semantic/background/yellow/subtlest/normal` (interim plashka fill) | `f65302a79ce509d4d324e533c1e36fc1c3e9fc9e` | #fffbeb |
 | `semantic/text/yellow/normal` (interim plashka text) | `8e208782e664c4f5e9a5af91465b43a86ad731b9` | #d27a0a |
 
-> The `Page` set is unpublished, so you cannot `importComponentSetByKeyAsync` it in a consumer file. Build the island wrapper as plain frames (tokens above) + import `*Sidebar*` / `*Header*` / `Page / Body` by key. Flag to design: **publish `Page` set + `Sandbox alert`** so future builds use them canonically.
+### Build approach — INSTANTIATE the `Page` component + fill its slot. NEVER detach, NEVER hand-build (except fallback).
+
+🛑 **The layout must be a live `Page` component INSTANCE with content placed into its slot — do NOT detach the instance, and do NOT assemble the island from raw frames.** (Костя 2026-06-15: *"нужно, чтобы скил использовал инстанс компонента лейаута, а не детачил его и заменял слот на нужный контент"*.)
+
+**Preferred (canonical) path:**
+```js
+const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
+const page = pageSet.children.find(c => /Full screen page/.test(c.name) /* or Basic */).createInstance();
+// fill the content slot (do NOT detach):
+const slot = page.findAll(n => n.type==="SLOT").filter(s => !/image|left bar/i.test(s.name))
+  .sort((a,b)=>(b.width*b.height)-(a.width*a.height))[0];   // "Main content" / "Slot"
+slot.insertChild(0, contentInstance);     // slot.insertChild — never appendChild, never detach
+// configure the Page's own *Header* (already Version=New) + sandbox variant via the Page's variant props.
+```
+
+**Fallback path (ONLY when the `Page` component is unavailable):** if `importComponentSetByKeyAsync("ccd4779c…")` throws "not found" (the set is currently **unpublished** from Base), hand-build the island wrapper as plain frames (tokens above) + import `*Sidebar*` / `*Header*` / `Page / Body` by key. This is a degraded fallback — the result is a frame tree, not a component instance, so it won't track future redesign updates. Log that you used the fallback and WHY.
+
+> 🚩 **BLOCKER for the canonical path — flag to design / ask the user:** the `Page` set (`ccd4779c…`) and `Sandbox alert` (`07975654…`) are **not published** from Base, so a consumer file cannot instantiate them. Until they're published + the consumer file subscribes, the skill is forced into the hand-build fallback. **Publishing them is the fix** that lets the skill use the instance + slot as required.
 
 ---
 
@@ -175,6 +192,7 @@ Keep EVERY original element: the header (re-skin via the Version flip, §3 — k
 > Hard lesson from this session: a structural/skeleton check ("does the island/card/header exist?") passes builds that are present-but-wrong. The review must assert actual property VALUES. Each check below caught a real defect.
 
 For every migrated frame:
+- [ ] **Layout shell is a `Page` component INSTANCE** with content placed in its slot (not a detached instance, not a hand-built raw-frame tree). The hand-built frame tree is acceptable ONLY as the logged fallback when the `Page` component is unpublished — and the log must say so.
 - [ ] **Frame height == original** (migration preserves outer dimensions).
 - [ ] Frame width 1440; island width == sidebar-complement (1388 collapsed / 1183 expanded).
 - [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
