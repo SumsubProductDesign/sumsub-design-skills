@@ -94,7 +94,21 @@ items.slice(origTabLabels.length).forEach(it=>it.visible=false);  // hide extras
 ```
 Validated: result is a live `Page` INSTANCE (`type==="INSTANCE"`), content slotted, default placeholders removed, header tabs relabeled to the original (`Steps / Configurations / Checks Execution Flow`).
 
-**Hand-build is now ONLY a fallback** if `importComponentSetByKeyAsync` ever throws "not found" (file not subscribed to the Base library) — log it. `Sandbox alert` (`07975654…`) is **no longer needed**: sandbox is a `Page` variant (§4).
+### 🛑🛑 HARD RULE — import-first, instance-MANDATORY (hand-build is BANNED unless the import actually throws)
+
+The recurring failure: the skill keeps **hand-building the island from raw frames even though `Page` imports fine** — defaulting to the familiar path and calling it "the fallback". This is BANNED. Enforce mechanically:
+
+1. **MANDATORY first step of any island build/migration:** `const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf")`.
+2. **If that resolves (it does — Page is published) → you MUST instantiate `Page` and fill its slot. Hand-building raw frames is FORBIDDEN.**
+3. Hand-build is permitted **ONLY** if step 1 *throws*, and your build log MUST paste the actual thrown error string. No error string in the log ⇒ hand-build was illegitimate ⇒ the build FAILS.
+
+**Banned rationalizations (each = an automatic FAIL):**
+- "I'll hand-build the island" / "assemble the frames" — when Page imports.
+- "hand-build is the safe/familiar/fallback path" — fallback requires a thrown import error, logged.
+- "the §7 audit passed" — §7's instance check is only satisfied by an actual `Page` INSTANCE OR a logged import-throw; a hand-built tree with no logged throw FAILS it.
+- "the result looks the same" — a detached/hand-built frame tree is NOT a component instance; it won't track redesign updates and is a different node type. Looking similar is irrelevant.
+
+`Sandbox alert` (`07975654…`) is **no longer needed**: sandbox is a `Page` variant (§4).
 
 ---
 
@@ -203,7 +217,7 @@ Keep EVERY original element: the header (re-skin via the Version flip, §3 — k
 > Hard lesson from this session: a structural/skeleton check ("does the island/card/header exist?") passes builds that are present-but-wrong. The review must assert actual property VALUES. Each check below caught a real defect.
 
 For every migrated frame:
-- [ ] **Layout shell is a `Page` component INSTANCE** with content placed in its slot (not a detached instance, not a hand-built raw-frame tree). The hand-built frame tree is acceptable ONLY as the logged fallback when the `Page` component is unpublished — and the log must say so.
+- [ ] **Layout shell is a live `Page` component INSTANCE** — ENFORCE mechanically: the audit itself runs `try{ await figma.importComponentSetByKeyAsync("ccd4779c…"); pageImportable=true }catch{ pageImportable=false }`. Then for each migrated frame, check whether its shell is a `Page` instance (a descendant INSTANCE whose `mainComponent.parent` is the `Page` set) vs a hand-built `Island` FRAME. **If `pageImportable` AND the shell is a hand-built frame tree → FAIL** ("hand-built while Page was importable"). Hand-build passes ONLY when `pageImportable===false` AND the build log pasted the thrown import error.
 - [ ] **Frame height == original** (migration preserves outer dimensions).
 - [ ] Frame width 1440; island width == sidebar-complement (1388 collapsed / 1183 expanded).
 - [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
