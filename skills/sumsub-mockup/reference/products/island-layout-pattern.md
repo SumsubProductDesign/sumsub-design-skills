@@ -38,11 +38,11 @@ Layout math:
 ### Components
 | Component | Key | Notes |
 |---|---|---|
-| `Page` SET | `ccd4779c69fbf17342db36c7fe57d1160306efdf` | **NOT importable outside Base** (unpublished). Build the island from parts below. |
+| `Page` SET | `ccd4779c69fbf17342db36c7fe57d1160306efdf` | **PUBLISHED (2026-06-15) — importable. INSTANTIATE it** (see Build approach). Variant props: `Type` (Basic/Full screen page), `Sandbox` (No/Yes), `Statusbar`, `Summy AI`. Slots: `Main content` 1340 / `Side content` 380 / `Items` nav. |
 | `Page / Body` SET | `8aab14fc18dca0e4c85886e38dc337a1ad56f50b` | importable; variant `Type=Default White` `382d07f935f0972fd0353684e511bd9783b6027e`; slots `"Main content"` (1340) / `"Side content"` (380) / `"Items"` nav |
 | `*Sidebar*` SET | `60be5cbb4d070ccc4853589a555d949c3f23f62e` | use `Collapsed=True` variant for 2nd-level (52w) |
 | `*Header*` SET | `387e2cf61b1bf4f2045d3ccefecc5c7820a86889` | see §3 for the two variants |
-| `Sandbox alert` COMP | `07975654154febad577eac9662d90acf79dfa29c` | **NOT importable outside Base** (unpublished) → hand-build interim (§4) |
+| `Sandbox alert` COMP | `07975654154febad577eac9662d90acf79dfa29c` | OBSOLETE for builds — sandbox is now a `Page` `Sandbox=Yes` variant (§4). (Still unpublished, but no longer needed.) |
 | `Statusbar` SET (trial/sandbox-only billing bar) | `cbab86a47d47d8399a03be80dbded51317d61610` | `type=Sandbox only` is a BILLING msg — NOT the in-app sandbox indicator |
 
 ### Variables (importVariableByKeyAsync)
@@ -72,9 +72,29 @@ slot.insertChild(0, contentInstance);     // slot.insertChild — never appendCh
 // configure the Page's own *Header* (already Version=New) + sandbox variant via the Page's variant props.
 ```
 
-**Fallback path (ONLY when the `Page` component is unavailable):** if `importComponentSetByKeyAsync("ccd4779c…")` throws "not found" (the set is currently **unpublished** from Base), hand-build the island wrapper as plain frames (tokens above) + import `*Sidebar*` / `*Header*` / `Page / Body` by key. This is a degraded fallback — the result is a frame tree, not a component instance, so it won't track future redesign updates. Log that you used the fallback and WHY.
+**✅ `Page` is PUBLISHED (2026-06-15) — the instance approach is validated and REQUIRED. Use it.** Validated end-to-end recipe:
+```js
+const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
+// variant by level + sandbox: Type=Basic|Full screen page, Sandbox=No|Yes (Sandbox is a VARIANT prop — §4)
+const page = pageSet.children.find(c => /Type=Full screen page/.test(c.name) && /Sandbox=No/.test(c.name)).createInstance();
+// content slots: "Main content" (1340) + "Side content" (380) + "Items" (nav). Insert, then REMOVE the default placeholder:
+const main = page.findAll(n=>n.type==="SLOT").find(s=>/Main content/i.test(s.name));
+main.insertChild(0, mainContent);
+[...main.children].filter(c=>/\.Content Slot|placeholder/i.test(c.name)).forEach(c=>c.remove());  // drop the default
+const side = page.findAll(n=>n.type==="SLOT").find(s=>/Side content/i.test(s.name));
+if (sideContent){ side.insertChild(0, sideContent); side.visible=true; [...side.children].filter(c=>/^\.Side content/i.test(c.name)).forEach(c=>c.remove()); }
+// header: the Page's built-in header is Version=New Fullscreen — configure it (title/crumb + relabel its Subheader tabs from the original):
+const hdr = page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
+hdr.setProperties({ "Title text#3817:0": title });
+hdr.findOne(n=>/Breadcrumb/i.test(n.name))?.setProperties({ "Name#6638:5": crumb });
+const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
+const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
+origTabLabels.forEach((lbl,i)=>{ items[i].setProperties({ "Label text#4517:0": lbl }); items[i].visible=true; });  // relabel from original
+items.slice(origTabLabels.length).forEach(it=>it.visible=false);  // hide extras
+```
+Validated: result is a live `Page` INSTANCE (`type==="INSTANCE"`), content slotted, default placeholders removed, header tabs relabeled to the original (`Steps / Configurations / Checks Execution Flow`).
 
-> 🚩 **BLOCKER for the canonical path — flag to design / ask the user:** the `Page` set (`ccd4779c…`) and `Sandbox alert` (`07975654…`) are **not published** from Base, so a consumer file cannot instantiate them. Until they're published + the consumer file subscribes, the skill is forced into the hand-build fallback. **Publishing them is the fix** that lets the skill use the instance + slot as required.
+**Hand-build is now ONLY a fallback** if `importComponentSetByKeyAsync` ever throws "not found" (file not subscribed to the Base library) — log it. `Sandbox alert` (`07975654…`) is **no longer needed**: sandbox is a `Page` variant (§4).
 
 ---
 
@@ -126,18 +146,10 @@ let visible = !!t; let p=t; while(p && p!==oldHeader){ if(p.visible===false){vis
 const sandbox = visible && t.visible;   // only true if actually rendered
 ```
 
-### Sandbox alert plashka (interim — real component unpublished)
-```js
-const plashka = figma.createFrame();
-plashka.name="Sandbox alert"; plashka.layoutMode="HORIZONTAL";
-plashka.primaryAxisAlignItems="CENTER"; plashka.counterAxisAlignItems="CENTER";
-plashka.itemSpacing=8; plashka.paddingLeft=16; plashka.paddingRight=16;
-// fill → semantic/background/yellow/subtlest (interim; canonical Sandbox alert is #fef3c7)
-card.insertChild(0, plashka);
-plashka.layoutSizingHorizontal="FILL";
-plashka.layoutSizingVertical="FIXED"; plashka.resize(plashka.width, 24);  // ⚠️ MUST set 24 — createFrame defaults to 100×100
-// + Geist Medium 12/16 text "You're in Sandbox mode. Real verification checks are disabled."
-```
+### Applying sandbox — use the `Page` `Sandbox=Yes` VARIANT (not hand-built)
+Sandbox is a **variant property of the `Page` component**: instantiate `…Sandbox=Yes` (or set the `Sandbox` variant prop). The yellow island border + the `Sandbox alert` plashka come built-in — no hand-building, and the standalone `Sandbox alert` component is NOT needed. The detection rule above only decides WHICH variant (Yes/No) to use.
+
+> Hand-built plashka (only for the legacy hand-build fallback when the `Page` component is unavailable): a 24h HORIZONTAL frame, fill `semantic/background/yellow/subtlest`, `layoutSizingVertical="FIXED"; resize(w,24)` (createFrame defaults 100×100 → must set 24), Geist Medium 12/16 text. Prefer the `Page Sandbox=Yes` variant instead.
 
 ---
 
@@ -150,27 +162,26 @@ Two modes: **in-place** (transform the existing frame; simulates "apply new layo
 ### 🛑 Preservation principle — a migration RESKINS + REFRAMES, it NEVER rebuilds from scratch
 Keep EVERY original element: the header (re-skin via the Version flip, §3 — keeps its tabs/buttons/title/breadcrumb), the content, and ALL overlays (toasts, dropdowns, notes). Losing the subheader tabs, the header action buttons, or the toast messages = FAIL. Do not delete-and-recreate any of them; restructure what's already there.
 
-### Per-frame transform (in place or on a clone)
+### Per-frame transform (INSTANCE-based — required now that `Page` is published)
 ```
-0. Capture origH = frame.height (you restore it — §6).
-1. Read the OLD frame:
-   - the header instance — find the *Header* (it may be nested inside a wrapper like Header-levels).
-   - content = the page content frame.
-   - overlays = ALL Toast / Dropdown / etc. instances (capture references — you will keep them).
-   - sandbox = VISIBLE sandbox indicator (§4), NOT mere presence.
-2. RE-SKIN the header in place: flip its *Header* `Version` Old→New (§3). Keep tabs/buttons/title;
-   optionally update the breadcrumb crumb. Do NOT remove or replace the header.
-3. Frame → page shell: layoutMode=HORIZONTAL, paddings 0, fill page-bg grey.
-4. *Sidebar* Collapsed=True (52); layoutAlign="STRETCH"; clear its #e1e5ea border strokes (§6).
-5. Island (VERTICAL, pad T8/R8/B8/L0 spacing/s, gap8) → Main body (HORIZONTAL gap8) → Body card
-   (white, radius16, border neutral OR yellow-if-sandbox §4, clipsContent=true).
-6. MOVE the EXISTING (re-skinned) header into the card (top, FILL width), then move the content under it.
-   (Move the Header-levels wrapper if the *Header* is nested in one — its inner re-skinned header comes with it.)
-7. If actually sandbox (§4): insert Sandbox alert plashka (24h) as card child 0.
-8. PRESERVE overlays: keep each toast/dropdown as a frame child; set layoutPositioning="ABSOLUTE"
-   AFTER the frame is auto-layout (§6); reposition (e.g. toast x=1440-w-32, y=80). NEVER drop them.
-9. Sizing — see §6 (preserve original height; recenter content AFTER widths settle).
+0. Capture origH = frame.height.
+1. Read the OLD frame (capture, don't discard):
+   - original header → its TITLE, Subheader tab LABELS, action-button labels.
+   - content → main column + side column (e.g. Body 640 + Overview 380).
+   - overlays → ALL Toast / Dropdown instances.
+   - sandbox → VISIBLE indicator (§4), not mere presence.
+2. Instantiate Page: Type=Full screen page (2nd level) / Basic (1st level); Sandbox=Yes ONLY if detected.
+3. Move/insert content into the Page slots — "Main content" (main col) + "Side content" (side col;
+   set visible) — and REMOVE each slot's default placeholder (.Content Slot / .Side content).
+4. Configure the Page's built-in header (Version=New) from the original — PRESERVE its content:
+   Title (`Title text#3817:0`), breadcrumb crumb (`Name#6638:5`), relabel the Subheader tabs from the
+   original (`Label text#4517:0`) + hide extras, carry the original action buttons (enable + label).
+   Do NOT leave the junk default tabs (Tab_1…5); do NOT strip the real tabs/buttons.
+5. Overlays → ABSOLUTE children over the Page instance (set layoutPositioning AFTER it's placed), reposition.
+6. Place the Page instance at the old frame's position; remove the old frame. Result IN PLACE = a live
+   `Page` INSTANCE in the same spot. Preserve origH (resize the instance to 1440×origH — §6).
 ```
+> ⚠️ Confirm in the next full run: action-BUTTON carry-over onto the Page header, and height preservation when resizing the Page instance to origH (the component is natively 1080). Tabs + slot-fill + placeholder-removal + sandbox-variant are validated.
 
 ---
 
@@ -206,7 +217,7 @@ For every migrated frame:
 
 ---
 
-## 8. Known design-source gaps (flag to design team)
-- `Page` component set (`ccd4779c…`) — not published from Base → can't be instantiated in consumer files; island is hand-assembled meanwhile.
-- `Sandbox alert` component (`07975654…`) — not published → hand-built interim plashka (fill #fffbeb vs canonical #fef3c7).
-- The hidden "You are in sandbox mode" TEXT baked into `Header-levels` is a detection trap (see §4).
+## 8. Notes
+- ✅ `Page` component set (`ccd4779c…`) — **published 2026-06-15**; instantiate it (Build approach). Resolved the earlier blocker.
+- `Sandbox alert` (`07975654…`) — unpublished, but OBSOLETE: sandbox is a `Page` `Sandbox=Yes` variant.
+- The hidden "You are in sandbox mode" TEXT baked into the old `Header-levels` is a detection trap (see §4) — detect sandbox by VISIBLE indicator only.
