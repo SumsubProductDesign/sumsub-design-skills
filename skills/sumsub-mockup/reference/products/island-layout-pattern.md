@@ -77,20 +77,21 @@ Both are the SAME `*Header*` set (`387e2cf6…`, `Version=New`); the `Type` vari
 
 **Migration signal:** a **✕ (Close) in the OLD header = 2nd level** → replace with the breadcrumbs (Fullscreen) header. The breadcrumb trail replaces the ✕ (path back).
 
-### 🛑 Header chrome gotcha (config/editor pages)
-The Fullscreen `*Header*` is **shared with the applicant detail page**. A fresh instance defaults bring applicant chrome — tabs (`Tab_1…5`), `ClientNickname`, ID/ExternalID, "Suspicious" tags, and a hidden "You are in sandbox mode" — via **`Subheader#4002:0`=true** and **`Key#5362:0`=true**. For a config/editor/level page you MUST:
+### 🛑 MIGRATION: re-skin the existing header (flip Version), NEVER rebuild it — LOSSLESS
+
+The old dashboard/KYC header is the **same `*Header*` set** as the redesign, just `Version=Old` (often wrapped in a local header component like `Header-levels`, set `8b724626…`, whose only child is the `*Header*`). It already holds the page's REAL content — a `*Tab Basic*` subheader with real tabs, action buttons, title, breadcrumb. **A migration MUST preserve all of that. Do it by flipping the existing header's `Version` Old→New — do NOT build a fresh header:**
 ```js
-header.setProperties({
-  "Subheader#4002:0": false,   // removes the tabs + applicant context row
-  "Key#5362:0": false,         // removes the API-key badge
-  "Breadcrumbs#6913:0": true,
-  "Title text#3817:0": pageTitle,
-});
-// breadcrumb parent crumb is on the sub-instance, not the header:
-const bc = header.findOne(n => n.type==="INSTANCE" && /Breadcrumb/i.test(n.name));
-bc.setProperties({ "Name#6638:5": "Levels" });   // per-page crumb
+// find the *Header* instance (may be nested inside Header-levels / a local wrapper)
+const hdr = frame.findOne(n => n.type==="INSTANCE" && /^\*Header\*/.test(n.name));
+hdr.setProperties({ "Version": "New" });   // re-skins Old→New; KEEPS tabs/buttons/title/Subheader/breadcrumb
+const bc = hdr.findOne(n => n.type==="INSTANCE" && /Breadcrumb/i.test(n.name));
+if (bc) bc.setProperties({ "Name#6638:5": "Levels" });   // optional: per-page crumb
 ```
-Result: clean ~56px header showing only `Crumb / Title`. (`Sandbox#6943:5` is unrelated — already false; the sandbox text lives in the Subheader.)
+Verified 2026-06-15: flipping `Version=New` preserved tabs (`Steps / Configurations / Checks Execution Flow`), buttons (`Linked levels` / `Create level` / AI / ID / `Add tag`), title (`New level`), breadcrumb — only the skin + height changed (120→112).
+
+🔴 **NEVER `Subheader#4002:0=false` / `Key#5362:0=false` on a MIGRATED header** — those rows hold REAL content (the level-editor tabs + the header action buttons). Stripping them was a shipped bug: the migration "completely replaced the header and didn't bring back the buttons + lost the subheader tabs". Likewise NEVER discard the old header and create a clean new one — that loses everything.
+
+> The `Subheader=false / Key=false` "clean config" applies ONLY to a **fresh, from-scratch** build where a NEW `*Header*` instance shows junk placeholder tabs (`Tab_1…5`) + client chrome. In a MIGRATION the header already has real content — preserve it via the Version flip.
 
 ---
 
@@ -129,25 +130,29 @@ Two modes: **in-place** (transform the existing frame; simulates "apply new layo
 
 **Placement:** migrated output goes on the SOURCE's page, NOT `figma.currentPage` (which is a reflex from dashboard/websdk builders → lands on the wrong page). For a copy: `clone()` then append to the source's page, positioned clear of the source. For in-place: don't move.
 
-### Per-frame transform
+### 🛑 Preservation principle — a migration RESKINS + REFRAMES, it NEVER rebuilds from scratch
+Keep EVERY original element: the header (re-skin via the Version flip, §3 — keeps its tabs/buttons/title/breadcrumb), the content, and ALL overlays (toasts, dropdowns, notes). Losing the subheader tabs, the header action buttons, or the toast messages = FAIL. Do not delete-and-recreate any of them; restructure what's already there.
+
+### Per-frame transform (in place or on a clone)
 ```
-0. Capture origH = frame.height BEFORE anything (you will restore it — §6).
-1. Read signals from the OLD frame:
-   - oldHeader (e.g. Header-levels). ✕/Close present → 2nd-level breadcrumbs header.
-   - sandbox = VISIBLE sandbox indicator (§4) — NOT mere presence.
-   - title  = old header Title text.
-   - content = the page content frame; toast/dropdown = overlay instances.
-2. Turn the frame into the page shell: layoutMode=HORIZONTAL, paddings 0, fill page-bg grey.
-3. *Sidebar* Collapsed=True (52); layoutAlign="STRETCH"; hide its #e1e5ea border strokes (§6).
-4. Island (VERTICAL, pad T8/R8/B8/L0 spacing/s, gap8) → Main body (HORIZONTAL gap8) → Body card
-   (white, radius16, border neutral OR yellow-if-sandbox, clipsContent=true).
-5. Header: Fullscreen variant; Subheader=false, Key=false, Breadcrumbs=true, Title, breadcrumb crumb (§3).
-6. Re-host the old content into the card under the header.
-7. If sandbox: insert Sandbox alert plashka (24h) as card child 0 (§4).
-8. Remove the old header.
+0. Capture origH = frame.height (you restore it — §6).
+1. Read the OLD frame:
+   - the header instance — find the *Header* (it may be nested inside a wrapper like Header-levels).
+   - content = the page content frame.
+   - overlays = ALL Toast / Dropdown / etc. instances (capture references — you will keep them).
+   - sandbox = VISIBLE sandbox indicator (§4), NOT mere presence.
+2. RE-SKIN the header in place: flip its *Header* `Version` Old→New (§3). Keep tabs/buttons/title;
+   optionally update the breadcrumb crumb. Do NOT remove or replace the header.
+3. Frame → page shell: layoutMode=HORIZONTAL, paddings 0, fill page-bg grey.
+4. *Sidebar* Collapsed=True (52); layoutAlign="STRETCH"; clear its #e1e5ea border strokes (§6).
+5. Island (VERTICAL, pad T8/R8/B8/L0 spacing/s, gap8) → Main body (HORIZONTAL gap8) → Body card
+   (white, radius16, border neutral OR yellow-if-sandbox §4, clipsContent=true).
+6. MOVE the EXISTING (re-skinned) header into the card (top, FILL width), then move the content under it.
+   (Move the Header-levels wrapper if the *Header* is nested in one — its inner re-skinned header comes with it.)
+7. If actually sandbox (§4): insert Sandbox alert plashka (24h) as card child 0.
+8. PRESERVE overlays: keep each toast/dropdown as a frame child; set layoutPositioning="ABSOLUTE"
+   AFTER the frame is auto-layout (§6); reposition (e.g. toast x=1440-w-32, y=80). NEVER drop them.
 9. Sizing — see §6 (preserve original height; recenter content AFTER widths settle).
-10. Overlays (Toast/Dropdown): layoutPositioning="ABSOLUTE" AFTER the frame is auto-layout (§6),
-    then position (e.g. x=1440-w-32, y=80).
 ```
 
 ---
@@ -175,9 +180,9 @@ For every migrated frame:
 - [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
 - [ ] Card: border == expected (#e5e7eb normal / #fad24a sandbox — driven by §4 detection, NOT presence); radius == 16.
 - [ ] **Sandbox correctness:** if not actually sandbox → neutral border AND no Sandbox alert plashka. If sandbox → yellow border AND plashka **height == 24**.
-- [ ] Header: clean — rendered texts (ancestor-visible, within header bounds) == breadcrumb + title only (Subheader/Key off; no tabs/client/tags).
+- [ ] **Header re-skinned, NOT rebuilt:** the original `*Header*` is still present with `Version=New`; its **subheader tabs and action buttons are PRESERVED** (tab count + button count match the old header; title + breadcrumb intact). A header showing only breadcrumb+title (tabs/buttons gone) = FAIL (content was stripped).
+- [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists in the frame (count matches the old frame) AND `layoutPositioning == "ABSOLUTE"`. A missing toast = FAIL.
 - [ ] Content: centered (|L−R| ≤ 20) AND no overflow (minX ≥ 0, maxX ≤ cardW).
-- [ ] Every overlay (Toast/Dropdown/etc.) `layoutPositioning == "ABSOLUTE"`.
 - [ ] When fixing a CLASS across N items, enumerate ALL N — don't hardcode a subset (missed 1 of 4 toast frames once).
 - [ ] **Page-load:** nodes on a non-current page return null from `getNodeByIdAsync` until `page.loadAsync()`. A nested section is found via `page.findOne` (recursive), not `page.children.find`.
 
