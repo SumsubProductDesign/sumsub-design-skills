@@ -6,6 +6,17 @@
 
 ---
 
+## 0. THE ESSENCE (read this first — it is the whole job)
+
+**Building/migrating an island screen = exactly three steps, nothing more:**
+1. **Instantiate the WHOLE-layout component `Page`** (set `ccd4779c…`) — it already contains the sidebar + island + rounded card + header. You never assemble any of that yourself.
+2. **Apply the right VARIANT:** `Type` = `Basic` (1st level) / `Full screen page` (2nd level), `Sandbox` = `No`/`Yes`. The variant drives the whole chrome (sidebar width, header style, sandbox border + plashka).
+3. **Put the content INSIDE its slot** (`"Main content"` / `"Side content"`), removing the default placeholder.
+
+That's it. Do **NOT** hand-build the island from frames. Do **NOT** detach the instance. Do **NOT** recreate the sidebar/card/header as your own nodes. If you find yourself calling `figma.createFrame()` for an "Island"/"Body"/"Card" — STOP: you're doing it wrong; instantiate `Page` instead. (The only exception is a logged import-throw — see §2 HARD RULE.) The header's title/breadcrumb/tabs/buttons are configured ON the Page instance's built-in header; the page-specific body goes in the slot.
+
+---
+
 ## 1. Structure & dimensions
 
 ```
