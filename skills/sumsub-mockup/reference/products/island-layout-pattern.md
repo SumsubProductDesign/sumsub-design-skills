@@ -206,7 +206,54 @@ Keep EVERY original element: the header (re-skin via the Version flip, §3 — k
 6. Place the Page instance at the old frame's position; remove the old frame. Result IN PLACE = a live
    `Page` INSTANCE in the same spot. Preserve origH (resize the instance to 1440×origH — §6).
 ```
-> ⚠️ Confirm in the next full run: action-BUTTON carry-over onto the Page header, and height preservation when resizing the Page instance to origH (the component is natively 1080). Tabs + slot-fill + placeholder-removal + sandbox-variant are validated.
+### ✅ EXACT validated migration function — COPY AND RUN THIS verbatim (do NOT write your own)
+
+The skill keeps writing its own build code and defaulting to hand-build. **Do not.** This function is validated end-to-end (live `Page` INSTANCE, height preserved 800, content in slots, header tabs preserved). Use it per frame:
+
+```js
+async function migrateFrameToIsland(srcFrame){
+  const origH = Math.round(srcFrame.height);
+  // 1. READ the original (capture, don't discard)
+  const oldHeader = srcFrame.findOne(n=>n.type==="INSTANCE" && /Header-levels|^\*Header\*/.test(n.name));
+  const innerHdr  = oldHeader ? (oldHeader.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)) || oldHeader) : null;
+  const tabLabels = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/Tab Basic \/ Item/i.test(n.name)&&n.visible)
+      .map(t=>{const tx=t.findOne(x=>x.type==="TEXT"&&x.visible);return tx?tx.characters:null;}).filter(Boolean) : [];
+  let title="Title"; const tn=innerHdr&&innerHdr.findOne(n=>n.type==="TEXT"&&n.name==="Title"); if(tn)title=tn.characters;
+  // sandbox = VISIBLE indicator only (ancestor-aware), never mere presence
+  let sandbox=false; if(innerHdr){const s=innerHdr.findOne(n=>n.type==="TEXT"&&/sandbox mode/i.test(n.characters)); if(s){let p=s,v=s.visible;while(p&&p!==innerHdr){if(p.visible===false){v=false;break;}p=p.parent;} sandbox=v;}}
+  const content  = srcFrame.children.find(c=>c.type==="FRAME"&&c.name==="Content");
+  const mainCol  = content && content.children.find(c=>c.name==="Body");
+  const sideCol  = content && content.children.find(c=>/Overview/i.test(c.name));
+  const overlays = srcFrame.children.filter(c=>c.type==="INSTANCE"&&/Toast|Dropdown/i.test(c.name));
+  // 2. INSTANTIATE the whole-layout Page (MANDATORY — if this throws, log the error; only then fallback)
+  const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
+  const variant = pageSet.children.find(c=>/Type=Full screen page/.test(c.name) && new RegExp("Sandbox="+(sandbox?"Yes":"No")).test(c.name));
+  const page = variant.createInstance();
+  const parent=srcFrame.parent, x=srcFrame.x, y=srcFrame.y, nm=srcFrame.name;
+  parent.appendChild(page); page.x=x; page.y=y; page.name=nm;
+  // 3. FILL slots — capture placeholder refs BEFORE insert, remove by ref (avoids stale-node throw)
+  const fill=(re,node)=>{ if(!node)return; const slot=page.findAll(n=>n.type==="SLOT").find(s=>re.test(s.name)); if(!slot)return;
+    const ph=[...slot.children]; try{slot.visible=true;}catch(e){} slot.insertChild(0,node); for(const p of ph){try{p.remove();}catch(e){}} };
+  fill(/Main content/i, mainCol);
+  fill(/Side content/i, sideCol);
+  // 4. CONFIGURE the Page's built-in Version=New header from the original
+  const hdr=page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
+  if(hdr){ try{hdr.setProperties({"Title text#3817:0":title});}catch(e){}
+    const bc=hdr.findOne(n=>/Breadcrumb/i.test(n.name)); if(bc){try{bc.setProperties({"Name#6638:5":"Levels"});}catch(e){}}
+    const tb=hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
+    if(tb&&tabLabels.length){const items=tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
+      items.forEach((it,i)=>{try{ if(i<tabLabels.length){it.setProperties({"Label text#4517:0":tabLabels[i]});it.visible=true;} else it.visible=false; }catch(e){}});}
+  }
+  // 5. OVERLAYS → ABSOLUTE over the instance
+  for(const ov of overlays){ try{page.appendChild(ov); ov.layoutPositioning="ABSOLUTE"; ov.x=1440-Math.round(ov.width)-32; ov.y=80;}catch(e){} }
+  // 6. PRESERVE original height
+  try{page.resize(1440, origH);}catch(e){}
+  // 7. remove the now-empty old frame (in-place). For COPY mode: clone srcFrame first and pass the clone.
+  try{srcFrame.remove();}catch(e){}
+  return page;
+}
+```
+Validated result per frame: `page.type==="INSTANCE"`, `page.height===origH`, Main slot = the form, Side slot = Overview, header = breadcrumb + title + the original tabs. **Still TODO (refine):** carrying the original action BUTTONS onto the Page header (tabs are done; buttons need the header's button-slot config).
 
 ---
 
