@@ -139,21 +139,23 @@ Both are the SAME `*Header*` set (`387e2cf6…`, `Version=New`); the `Type` vari
 
 **Migration signal:** a **✕ (Close) in the OLD header = 2nd level** → replace with the breadcrumbs (Fullscreen) header. The breadcrumb trail replaces the ✕ (path back).
 
-### 🛑 MIGRATION: re-skin the existing header (flip Version), NEVER rebuild it — LOSSLESS
+### 🛑 Header: use the `Page` instance's OWN header — configure it from the original, then DISCARD the old header
 
-The old dashboard/KYC header is the **same `*Header*` set** as the redesign, just `Version=Old` (often wrapped in a local header component like `Header-levels`, set `8b724626…`, whose only child is the `*Header*`). It already holds the page's REAL content — a `*Tab Basic*` subheader with real tabs, action buttons, title, breadcrumb. **A migration MUST preserve all of that. Do it by flipping the existing header's `Version` Old→New — do NOT build a fresh header:**
+When you instantiate `Page` (the required path, §0/§2), it ALREADY contains a clean `Version=New` Fullscreen header. **Use THAT header. Do NOT keep or "flip" the old header** — READ the old header's labels (title, Subheader tab labels, action-button labels) and apply them to the Page's header; the old header is removed with the old frame.
+
 ```js
-// find the *Header* instance (may be nested inside Header-levels / a local wrapper)
-const hdr = frame.findOne(n => n.type==="INSTANCE" && /^\*Header\*/.test(n.name));
-hdr.setProperties({ "Version": "New" });   // re-skins Old→New; KEEPS tabs/buttons/title/Subheader/breadcrumb
-const bc = hdr.findOne(n => n.type==="INSTANCE" && /Breadcrumb/i.test(n.name));
-if (bc) bc.setProperties({ "Name#6638:5": "Levels" });   // optional: per-page crumb
+const hdr = page.findOne(n => n.type==="INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);  // the Page's OWN header
+hdr.setProperties({ "Title text#3817:0": title, "Key#5362:0": false });   // Key=false drops the 'Key name' badge → clean
+hdr.findOne(n=>/Breadcrumb/i.test(n.name))?.setProperties({ "Name#6638:5": "Levels" });
+const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
+const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
+origTabLabels.forEach((l,i)=>{ items[i].setProperties({ "Label text#4517:0": l }); items[i].visible=true; });
+items.slice(origTabLabels.length).forEach(it=>it.visible=false);
+// action buttons: enable + label the header's First/Second Button slots from the original (TODO: finalize)
 ```
-Verified 2026-06-15: flipping `Version=New` preserved tabs (`Steps / Configurations / Checks Execution Flow`), buttons (`Linked levels` / `Create level` / AI / ID / `Add tag`), title (`New level`), breadcrumb — only the skin + height changed (120→112).
+✅ **Verified**: the Page's own header configured this way is CLEAN — `Levels / New level` + the original tabs (`Steps / Configurations / Checks Execution Flow`), with `Key=false` removing the only stray badge. No applicant junk.
 
-🔴 **NEVER `Subheader#4002:0=false` / `Key#5362:0=false` on a MIGRATED header** — those rows hold REAL content (the level-editor tabs + the header action buttons). Stripping them was a shipped bug: the migration "completely replaced the header and didn't bring back the buttons + lost the subheader tabs". Likewise NEVER discard the old header and create a clean new one — that loses everything.
-
-> The `Subheader=false / Key=false` "clean config" applies ONLY to a **fresh, from-scratch** build where a NEW `*Header*` instance shows junk placeholder tabs (`Tab_1…5`) + client chrome. In a MIGRATION the header already has real content — preserve it via the Version flip.
+🔴 **Do NOT flip the OLD header's `Version` Old→New** (this was the pre-publish hand-build trick). Flipping the OLD applicant-context header surfaces junk (ClientNickname / ID / Suspicious / a default 'Button') — which is exactly what made past runs bail to hand-build. That junk does NOT exist on the Page instance's OWN header. The `Version`-flip / keep-old-header approach is **only** valid in the hand-build fallback (when `Page` is unimportable); on the instance path, always use the Page's own header.
 
 ---
 
@@ -238,7 +240,7 @@ async function migrateFrameToIsland(srcFrame){
   fill(/Side content/i, sideCol);
   // 4. CONFIGURE the Page's built-in Version=New header from the original
   const hdr=page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
-  if(hdr){ try{hdr.setProperties({"Title text#3817:0":title});}catch(e){}
+  if(hdr){ try{hdr.setProperties({"Title text#3817:0":title, "Key#5362:0":false});}catch(e){}  // Key=false → clean (no 'Key name' badge)
     const bc=hdr.findOne(n=>/Breadcrumb/i.test(n.name)); if(bc){try{bc.setProperties({"Name#6638:5":"Levels"});}catch(e){}}
     const tb=hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
     if(tb&&tabLabels.length){const items=tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
