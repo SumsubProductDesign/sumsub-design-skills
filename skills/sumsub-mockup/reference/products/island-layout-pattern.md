@@ -152,9 +152,11 @@ const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
 const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
 origTabLabels.forEach((l,i)=>{ items[i].setProperties({ "Label text#4517:0": l }); items[i].visible=true; });
 items.slice(origTabLabels.length).forEach(it=>it.visible=false);
-// action buttons: carry the original's text-action buttons (Create level / Run level / Save) — enable
-// hdr Show actions slot#6943:20=true, clone each into the "Actions slot", then SET clone.visible=true
-// (clones arrive hidden). Validated: 'Create level' renders in the cluster alongside the icon actions.
+// action buttons: carry ONLY the original's ANCESTOR-VISIBLE text-action buttons (Create level / Run level / Save).
+// A button's own .visible can be true while its parent (Key/applicant area: ID / External ID / Add tag) is hidden —
+// walk parents and skip non-rendered ones + the placeholder labelled literally 'Button'. Then enable
+// Show actions slot#6943:20=true, clone each real action into the "Actions slot", and SET clone.visible=true
+// (clones arrive hidden). Validated: 'Create level' renders; the Key-area junk is excluded.
 ```
 ✅ **Verified**: the Page's own header configured this way is CLEAN — `Levels / New level` + the original tabs (`Steps / Configurations / Checks Execution Flow`), with `Key=false` removing the only stray badge. No applicant junk.
 
@@ -263,8 +265,12 @@ async function migrateFrameToIsland(srcFrame){
     // header's "Actions slot". Clone them in, then SET VISIBLE (clones arrive visible=false). srcFrame
     // still exists here (removed in step 7), so innerHdr's buttons are clonable.
     try{
-      const origBtns = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/^\*Button\*/.test(n.name)&&n.visible)
-        .filter(b=>{const t=b.findOne(x=>x.type==="TEXT"&&x.visible); return t && t.characters.trim().length>1;}) : [];
+      // ⚠️ ANCESTOR-visible only — a button's own .visible can be true while its parent (the Key/applicant area:
+      // ID / External ID / Add tag) is hidden. Filtering by b.visible alone clones that junk. Walk parents.
+      const rendered=(n)=>{let p=n;while(p&&p!==innerHdr){if(p.visible===false)return false;p=p.parent;}return n.visible;};
+      const origBtns = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/^\*Button\*/.test(n.name))
+        .filter(b=>{ if(!rendered(b)) return false; const t=b.findOne(x=>x.type==="TEXT"&&x.visible);
+          const lbl=t?t.characters.trim():""; return lbl.length>1 && !/^Button$/i.test(lbl); }) : [];  // skip icon-only + placeholder 'Button'
       if(origBtns.length){
         hdr.setProperties({"Show actions slot#6943:20":true});
         const aSlot = hdr.findAll(n=>n.type==="SLOT").find(s=>/Actions slot/i.test(s.name));
@@ -312,7 +318,7 @@ For every migrated frame:
 - [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
 - [ ] Card: border == expected (#e5e7eb normal / #fad24a sandbox — driven by §4 detection, NOT presence); radius == 16.
 - [ ] **Sandbox correctness:** if not actually sandbox → neutral border AND no Sandbox alert plashka. If sandbox → yellow border AND plashka **height == 24**.
-- [ ] **Header content reproduced (instance path):** the Page's own Version=New header shows title + breadcrumb + the **original Subheader tabs** (relabeled) + the **original text-action buttons carried into the Actions slot** (e.g. `Create level` — and it must be `visible=true`, clones arrive hidden). A header with only breadcrumb+title (tabs/buttons missing) = FAIL.
+- [ ] **Header content reproduced (instance path):** the Page's own Version=New header shows title + breadcrumb + the **original Subheader tabs** (relabeled) + ONLY the **original ANCESTOR-VISIBLE text-action buttons** carried into the Actions slot (e.g. `Create level`, `visible=true` — clones arrive hidden). A header with only breadcrumb+title (real actions missing) = FAIL. Carrying the old header's hidden Key-area buttons (ID / External ID / Add tag) or a placeholder `Button` = FAIL (over-carry — filter by ancestor-visibility, not own `.visible`).
 - [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists (count matches the old frame) as a SIBLING of the Page instance, positioned over it. (Instance path: they CANNOT be children of the Page instance — instance children are locked. Hand-build fallback: ABSOLUTE child.) A missing toast = FAIL.
 - [ ] **Content NOT split / not broken inside:** the editor content went into the "Main content" slot as one block with "Side content" left HIDDEN; the form is NOT left-flushed in a shrunk 896 column. Content centered-ish (|L−R| ≤ 40) AND no overflow.
 - [ ] When fixing a CLASS across N items, enumerate ALL N — don't hardcode a subset (missed 1 of 4 toast frames once).
