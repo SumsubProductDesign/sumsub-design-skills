@@ -152,11 +152,13 @@ const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
 const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
 origTabLabels.forEach((l,i)=>{ items[i].setProperties({ "Label text#4517:0": l }); items[i].visible=true; });
 items.slice(origTabLabels.length).forEach(it=>it.visible=false);
-// action buttons: carry ONLY the original's ANCESTOR-VISIBLE text-action buttons (Create level / Run level / Save).
-// A button's own .visible can be true while its parent (Key/applicant area: ID / External ID / Add tag) is hidden —
-// walk parents and skip non-rendered ones + the placeholder labelled literally 'Button'. Then enable
-// Show actions slot#6943:20=true, clone each real action into the "Actions slot", and SET clone.visible=true
-// (clones arrive hidden). Validated: 'Create level' renders; the Key-area junk is excluded.
+// action buttons: carry the original's ANCESTOR-VISIBLE buttons from its ACTION group ("Buttons"/"Buttons Bar"):
+// the text actions (Create level / Run level / Save) AND the icon-only ⋮ 'More'/kebab (Content=Icon Only, Type=Secondary).
+// SKIP the AI (icon Primary) + help (icon Tertiary) — the Page header already provides those. A button's own .visible
+// can be true while its parent (Key/applicant area: ID / External ID / Add tag) is hidden — walk parents, skip
+// non-rendered. Then Show actions slot#6943:20=true, clone each into the "Actions slot", SET clone.visible=true
+// (clones arrive hidden), and DROP the slot's default secondary 'Button' placeholder (it re-seeds — remove any leftover
+// labelled exactly 'Button'). Validated: Create level + kebab render; Key-area junk and the default secondary excluded.
 ```
 ✅ **Verified**: the Page's own header configured this way is CLEAN — `Levels / New level` + the original tabs (`Steps / Configurations / Checks Execution Flow`), with `Key=false` removing the only stray badge. No applicant junk.
 
@@ -261,22 +263,33 @@ async function migrateFrameToIsland(srcFrame){
     const tb=hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
     if(tb&&tabLabels.length){const items=tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
       items.forEach((it,i)=>{try{ if(i<tabLabels.length){it.setProperties({"Label text#4517:0":tabLabels[i]});it.visible=true;} else it.visible=false; }catch(e){}});}
-    // CARRY the original action buttons (Create level / Run level / Save — text-labeled ones) into the
-    // header's "Actions slot". Clone them in, then SET VISIBLE (clones arrive visible=false). srcFrame
-    // still exists here (removed in step 7), so innerHdr's buttons are clonable.
+    // CARRY the original action buttons into the header's "Actions slot": the text actions (Create level / Run
+    // level / Save) AND the icon-only ⋮ 'More'/kebab. Clone them in, SET VISIBLE (clones arrive visible=false),
+    // then DROP the slot's default secondary 'Button' placeholder. srcFrame still exists here (removed in step 7).
     try{
       // ⚠️ ANCESTOR-visible only — a button's own .visible can be true while its parent (the Key/applicant area:
       // ID / External ID / Add tag) is hidden. Filtering by b.visible alone clones that junk. Walk parents.
       const rendered=(n)=>{let p=n;while(p&&p!==innerHdr){if(p.visible===false)return false;p=p.parent;}return n.visible;};
-      const origBtns = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/^\*Button\*/.test(n.name))
-        .filter(b=>{ if(!rendered(b)) return false; const t=b.findOne(x=>x.type==="TEXT"&&x.visible);
-          const lbl=t?t.characters.trim():""; return lbl.length>1 && !/^Button$/i.test(lbl); }) : [];  // skip icon-only + placeholder 'Button'
+      // candidates = ancestor-visible *Button* in the original's ACTION group (parent name contains "Buttons" —
+      // i.e. "Buttons" / "Buttons Bar"), NOT the Key/Close/Info areas.
+      const cands = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/^\*Button\*/.test(n.name)).filter(b=>{
+        if(!rendered(b)) return false; let pn=""; try{pn=b.parent.name;}catch(e){} return /Buttons/i.test(pn); }) : [];
+      const origBtns=[];
+      for(const b of cands){ let vn=""; try{const mc=await b.getMainComponentAsync(); vn=mc?mc.name:"";}catch(e){}
+        const t=b.findOne(x=>x.type==="TEXT"&&x.visible); const lbl=t?t.characters.trim():"";
+        const isTextAction = lbl.length>1 && !/^Button$/i.test(lbl);              // Create level / Run level / Save
+        const isMoreKebab  = /Icon Only/i.test(vn) && /Type=Secondary/i.test(vn); // the ⋮ 'More' button (icon Secondary)
+        if(isTextAction || isMoreKebab) origBtns.push(b);   // carry text actions + kebab; SKIP AI (icon Primary) & help (icon Tertiary) — Page header already shows those
+      }
       if(origBtns.length){
         hdr.setProperties({"Show actions slot#6943:20":true});
         const aSlot = hdr.findAll(n=>n.type==="SLOT").find(s=>/Actions slot/i.test(s.name));
-        if(aSlot){ const ph=[...aSlot.children];
+        if(aSlot){ const ph=[...aSlot.children];   // slot's default placeholder(s) — incl. a Secondary 'Button'
           for(const ob of [...origBtns].reverse()){ const c=ob.clone(); aSlot.insertChild(0,c); try{c.visible=true;}catch(e){} }  // ⚠️ clone arrives hidden → set visible
-          for(const p of ph){try{p.remove();}catch(e){}} }
+          for(const p of ph){try{p.remove();}catch(e){}}
+          // belt-and-suspenders: the slot can re-seed a default secondary 'Button' — drop any leftover labelled exactly 'Button'
+          for(const c of [...aSlot.children]){ try{const tt=c.findOne(x=>x.type==="TEXT"&&x.visible); if(tt&&/^Button$/i.test(tt.characters.trim())) c.remove();}catch(e){} }
+        }
       }
     }catch(e){}
   }
@@ -318,7 +331,7 @@ For every migrated frame:
 - [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
 - [ ] Card: border == expected (#e5e7eb normal / #fad24a sandbox — driven by §4 detection, NOT presence); radius == 16.
 - [ ] **Sandbox correctness:** if not actually sandbox → neutral border AND no Sandbox alert plashka. If sandbox → yellow border AND plashka **height == 24**.
-- [ ] **Header content reproduced (instance path):** the Page's own Version=New header shows title + breadcrumb + the **original Subheader tabs** (relabeled) + ONLY the **original ANCESTOR-VISIBLE text-action buttons** carried into the Actions slot (e.g. `Create level`, `visible=true` — clones arrive hidden). A header with only breadcrumb+title (real actions missing) = FAIL. Carrying the old header's hidden Key-area buttons (ID / External ID / Add tag) or a placeholder `Button` = FAIL (over-carry — filter by ancestor-visibility, not own `.visible`).
+- [ ] **Header content reproduced (instance path):** the Page's own Version=New header shows title + breadcrumb + the **original Subheader tabs** (relabeled) + the **original ANCESTOR-VISIBLE action buttons from the "Buttons"/"Buttons Bar" group** carried into the Actions slot — both the **text actions** (`Create level` / Run level / Save) **and the icon-only ⋮ 'More'/kebab** (`Content=Icon Only, Type=Secondary`), each `visible=true` (clones arrive hidden). A header with only breadcrumb+title (real actions missing) = FAIL. FAIL conditions (over- or under-carry): carrying the old header's hidden Key-area buttons (ID / External ID / Add tag); leaving the slot's default secondary `Button` placeholder in the Actions slot; **dropping the kebab/'More' and leaving the default secondary `Button` in its place** (filter by ancestor-visibility + carry the icon Secondary, don't rely on own `.visible` or text-only).
 - [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists (count matches the old frame) as a SIBLING of the Page instance, positioned over it. (Instance path: they CANNOT be children of the Page instance — instance children are locked. Hand-build fallback: ABSOLUTE child.) A missing toast = FAIL.
 - [ ] **Content NOT split / not broken inside:** the editor content went into the "Main content" slot as one block with "Side content" left HIDDEN; the form is NOT left-flushed in a shrunk 896 column. Content centered-ish (|L−R| ≤ 40) AND no overflow.
 - [ ] When fixing a CLASS across N items, enumerate ALL N — don't hardcode a subset (missed 1 of 4 toast frames once).

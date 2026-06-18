@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.184.0 — 2026-06-15 (header: carry the ⋮ 'More'/kebab too; drop the slot's default secondary 'Button')
+v3.183 carried only TEXT actions, so the original's icon-only ⋮ 'More'/kebab was skipped and the Actions slot's default secondary `Button` placeholder stayed in its place (user: "Вместо кебаб кнопки 'More' просто оставил дефолтную secondary кнопку"). Inspection: the original action group ("Buttons"/"Buttons Bar") = Create level (Primary text) + kebab (`Content=Icon Only, Type=Secondary`, key 479ef206) + AI (icon Primary) + help (icon Tertiary); the Actions slot shipped a default `Button` (Secondary, key d54b0031) my placeholder-removal missed. Fix in `migrateFrameToIsland`: harvest from the action group both the text actions AND the icon-Secondary kebab (skip AI/help — Page header provides them), then drop any leftover slot child labelled exactly `Button`. §3 + §7 updated.
+
 ## v3.183.0 — 2026-06-15 (button carry-over: harvest ANCESTOR-VISIBLE actions only — don't clone the old header's hidden Key-area junk)
 v3.182 carried buttons but over-carried (user: "скил напихал все, что нашел в компоненте хедера, вместо реальных кнопок из оригинала"): the harvest filtered by each button's OWN `.visible`, so it also cloned the old header's hidden **Key/applicant-area** buttons (ID / External ID / Add tag) and a placeholder labelled `Button`. Inspection of the original header showed the REAL actions live in the `Buttons / Buttons Bar` group and only `Create level` is ANCESTOR-visible; the junk has `.visible=true` but a hidden parent. Fix (ancestor-visibility class — recurred all session, cf. sandbox detection): `migrateFrameToIsland` now walks each candidate button's parent chain and carries ONLY ancestor-visible text actions, also excluding the literal `Button` placeholder. §3 + §7 updated. Island migration complete + the button carry-over is now precise.
 
