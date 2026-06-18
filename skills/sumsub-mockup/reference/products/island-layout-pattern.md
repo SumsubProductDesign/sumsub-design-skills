@@ -88,12 +88,13 @@ slot.insertChild(0, contentInstance);     // slot.insertChild — never appendCh
 const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
 // variant by level + sandbox: Type=Basic|Full screen page, Sandbox=No|Yes (Sandbox is a VARIANT prop — §4)
 const page = pageSet.children.find(c => /Type=Full screen page/.test(c.name) && /Sandbox=No/.test(c.name)).createInstance();
-// content slots: "Main content" (1340) + "Side content" (380) + "Items" (nav). Insert, then REMOVE the default placeholder:
+// Put the WHOLE content block into "Main content" (1340) and leave "Side content" HIDDEN.
+// (Do NOT split into Main/Side columns — it breaks positioned content; see §5.) Capture placeholder
+// refs BEFORE insert and remove by ref (reading slot.children[].name AFTER insertChild throws on a stale node).
 const main = page.findAll(n=>n.type==="SLOT").find(s=>/Main content/i.test(s.name));
-main.insertChild(0, mainContent);
-[...main.children].filter(c=>/\.Content Slot|placeholder/i.test(c.name)).forEach(c=>c.remove());  // drop the default
-const side = page.findAll(n=>n.type==="SLOT").find(s=>/Side content/i.test(s.name));
-if (sideContent){ side.insertChild(0, sideContent); side.visible=true; [...side.children].filter(c=>/^\.Side content/i.test(c.name)).forEach(c=>c.remove()); }
+const ph = [...main.children];          // default placeholder(s), captured before insert
+main.insertChild(0, content);           // `content` = the whole content block
+for (const p of ph) { try { p.remove(); } catch(e){} }
 // header: the Page's built-in header is Version=New Fullscreen — configure it (title/crumb + relabel its Subheader tabs from the original):
 const hdr = page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
 hdr.setProperties({ "Title text#3817:0": title });
@@ -198,13 +199,17 @@ Keep EVERY original element: the header (re-skin via the Version flip, §3 — k
    - overlays → ALL Toast / Dropdown instances.
    - sandbox → VISIBLE indicator (§4), not mere presence.
 2. Instantiate Page: Type=Full screen page (2nd level) / Basic (1st level); Sandbox=Yes ONLY if detected.
-3. Move/insert content into the Page slots — "Main content" (main col) + "Side content" (side col;
-   set visible) — and REMOVE each slot's default placeholder (.Content Slot / .Side content).
+3. Move the WHOLE content into the "Main content" slot; leave "Side content" HIDDEN (Main is then 1340 and
+   fits the form+overview pair as the original positioned it). Do NOT split form→Main / overview→Side — that
+   left-flushes the form in a shrunk 896 column and breaks the layout. Remove the slot's default placeholder.
+   (insertChild into a SLOT invalidates the node ref — re-fetch from slot.children for any follow-up edit.)
 4. Configure the Page's built-in header (Version=New) from the original — PRESERVE its content:
    Title (`Title text#3817:0`), breadcrumb crumb (`Name#6638:5`), relabel the Subheader tabs from the
    original (`Label text#4517:0`) + hide extras, carry the original action buttons (enable + label).
    Do NOT leave the junk default tabs (Tab_1…5); do NOT strip the real tabs/buttons.
-5. Overlays → ABSOLUTE children over the Page instance (set layoutPositioning AFTER it's placed), reposition.
+5. Overlays (Toast/Dropdown) → place as SIBLINGS of the Page instance (in its parent), positioned over it.
+   A Page INSTANCE cannot accept appended children (instance children are LOCKED → `page.appendChild(ov)` is
+   illegal and drops the overlay — this deleted toasts in a real run). Re-position: `ov.x = page.x+1440-w-32`.
 6. Place the Page instance at the old frame's position; remove the old frame. Result IN PLACE = a live
    `Page` INSTANCE in the same spot. Preserve origH (resize the instance to 1440×origH — §6).
 ```
@@ -223,9 +228,7 @@ async function migrateFrameToIsland(srcFrame){
   let title="Title"; const tn=innerHdr&&innerHdr.findOne(n=>n.type==="TEXT"&&n.name==="Title"); if(tn)title=tn.characters;
   // sandbox = VISIBLE indicator only (ancestor-aware), never mere presence
   let sandbox=false; if(innerHdr){const s=innerHdr.findOne(n=>n.type==="TEXT"&&/sandbox mode/i.test(n.characters)); if(s){let p=s,v=s.visible;while(p&&p!==innerHdr){if(p.visible===false){v=false;break;}p=p.parent;} sandbox=v;}}
-  const content  = srcFrame.children.find(c=>c.type==="FRAME"&&c.name==="Content");
-  const mainCol  = content && content.children.find(c=>c.name==="Body");
-  const sideCol  = content && content.children.find(c=>/Overview/i.test(c.name));
+  const content  = srcFrame.children.find(c=>c.type==="FRAME"&&c.name==="Content"); // the WHOLE level-editor content (form + overview as the original positioned them)
   const overlays = srcFrame.children.filter(c=>c.type==="INSTANCE"&&/Toast|Dropdown/i.test(c.name));
   // 2. INSTANTIATE the whole-layout Page (MANDATORY — if this throws, log the error; only then fallback)
   const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
@@ -233,11 +236,20 @@ async function migrateFrameToIsland(srcFrame){
   const page = variant.createInstance();
   const parent=srcFrame.parent, x=srcFrame.x, y=srcFrame.y, nm=srcFrame.name;
   parent.appendChild(page); page.x=x; page.y=y; page.name=nm;
-  // 3. FILL slots — capture placeholder refs BEFORE insert, remove by ref (avoids stale-node throw)
-  const fill=(re,node)=>{ if(!node)return; const slot=page.findAll(n=>n.type==="SLOT").find(s=>re.test(s.name)); if(!slot)return;
-    const ph=[...slot.children]; try{slot.visible=true;}catch(e){} slot.insertChild(0,node); for(const p of ph){try{p.remove();}catch(e){}} };
-  fill(/Main content/i, mainCol);
-  fill(/Side content/i, sideCol);
+  // 3. FILL the Main content slot with the WHOLE content (do NOT split into Main/Side columns — that left-flushes the form
+  //    in a shrunk 896 column and breaks the layout). Leave Side content HIDDEN → Main content slot = 1340, fits the pair.
+  //    NOTE: insertChild into a SLOT INVALIDATES the inserted node's reference — re-fetch from slot.children afterwards.
+  if(content){
+    const slot=page.findAll(n=>n.type==="SLOT").find(s=>/Main content/i.test(s.name));
+    const ph=[...slot.children];                 // capture placeholders BEFORE insert (avoid stale-node throw)
+    slot.insertChild(0, content);
+    for(const p of ph){try{p.remove();}catch(e){}}
+    // optional recenter the form+overview pair within 1340 — RE-FETCH the node first (original ref is now stale):
+    try{ const placed=slot.children.find(c=>c.type==="FRAME"&&c.children&&c.children.length>1) || slot.children[0];
+      const kids=placed.children.filter(c=>c.visible!==false); const minX=Math.min(...kids.map(c=>c.x)), maxXR=Math.max(...kids.map(c=>c.x+c.width));
+      const shift=(slot.width-(maxXR-minX))/2-minX; if(Math.abs(shift)>1)kids.forEach(k=>{try{k.x=k.x+shift;}catch(e){}}); }catch(e){}
+  }
+  // (Side content slot stays hidden — the editor content is a single positioned block, not two columns.)
   // 4. CONFIGURE the Page's built-in Version=New header from the original
   const hdr=page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
   if(hdr){ try{hdr.setProperties({"Title text#3817:0":title, "Key#5362:0":false});}catch(e){}  // Key=false → clean (no 'Key name' badge)
@@ -246,8 +258,9 @@ async function migrateFrameToIsland(srcFrame){
     if(tb&&tabLabels.length){const items=tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
       items.forEach((it,i)=>{try{ if(i<tabLabels.length){it.setProperties({"Label text#4517:0":tabLabels[i]});it.visible=true;} else it.visible=false; }catch(e){}});}
   }
-  // 5. OVERLAYS → ABSOLUTE over the instance
-  for(const ov of overlays){ try{page.appendChild(ov); ov.layoutPositioning="ABSOLUTE"; ov.x=1440-Math.round(ov.width)-32; ov.y=80;}catch(e){} }
+  // 5. OVERLAYS — a Page INSTANCE cannot accept appended children (instance children are LOCKED → page.appendChild(ov)
+  //    is illegal and silently drops the toast). Place overlays as SIBLINGS of the Page instance, positioned over it.
+  for(const ov of overlays){ try{ parent.appendChild(ov); ov.x = page.x + 1440 - Math.round(ov.width) - 32; ov.y = page.y + 80; }catch(e){} }
   // 6. PRESERVE original height
   try{page.resize(1440, origH);}catch(e){}
   // 7. remove the now-empty old frame (in-place). For COPY mode: clone srcFrame first and pass the clone.
@@ -265,7 +278,7 @@ Validated result per frame: `page.type==="INSTANCE"`, `page.height===origH`, Mai
    - ❌ Letting the frame HUG content (`counterAxisSizingMode=AUTO`) makes heights drift (800→922…). Wrong for migration.
    - (Only a from-scratch standalone build may hug; an existing-mockup migration must preserve height.)
 2. **Recenter content AFTER container widths settle.** Re-hosted content that was LEFT-constrained does not auto-recenter when the card shrinks 1440→1380. Recenter LAST (after card/island/frame widths are final, content.width==1380): `shift=(content.width - span)/2 - minX; children.forEach(c=>c.x+=shift)`. CENTER-constrained content lands 148/148 on its own (shift≈0). ❌ Running the recenter while `content.width` is still a transient (~640, before card FILL) overshoots → content at x=-492.
-3. **Overlays must be ABSOLUTE, set AFTER the frame is auto-layout.** `layoutPositioning="ABSOLUTE"` is a no-op while the parent is still NONE-layout → the overlay stays in flow and squishes the island (1388→936). Set it after HORIZONTAL layout is applied; reposition relative to the frame.
+3. **Overlays (hand-build fallback only): ABSOLUTE, set AFTER the frame is auto-layout.** `layoutPositioning="ABSOLUTE"` is a no-op while the parent is still NONE-layout → the overlay stays in flow and squishes the island (1388→936). Set it after HORIZONTAL layout is applied; reposition relative to the frame. **On the INSTANCE path the Page instance CANNOT hold appended overlays (children locked) — place them as SIBLINGS of the instance instead (§5).**
 4. **Sidebar fills height via `layoutAlign="STRETCH"`**, not `layoutSizingVertical="FILL"` against a hugging parent.
 5. **Hide the sidebar border (TEMPORARY):** the inner `Sidebar` instance has a right-edge `#e1e5ea` stroke that draws a line at the sidebar/island boundary; clear it (`strokes=[]`) for a seamless flush sidebar. (Reversible; the new Sidebar component will likely handle this itself.)
 6. **Hand-built frames: always set BOTH `layoutSizing` axes** — `createFrame()` defaults to 100×100 (this is why the Sandbox alert shipped 100px tall when only width was set).
@@ -284,8 +297,8 @@ For every migrated frame:
 - [ ] Card: border == expected (#e5e7eb normal / #fad24a sandbox — driven by §4 detection, NOT presence); radius == 16.
 - [ ] **Sandbox correctness:** if not actually sandbox → neutral border AND no Sandbox alert plashka. If sandbox → yellow border AND plashka **height == 24**.
 - [ ] **Header re-skinned, NOT rebuilt:** the original `*Header*` is still present with `Version=New`; its **subheader tabs and action buttons are PRESERVED** (tab count + button count match the old header; title + breadcrumb intact). A header showing only breadcrumb+title (tabs/buttons gone) = FAIL (content was stripped).
-- [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists in the frame (count matches the old frame) AND `layoutPositioning == "ABSOLUTE"`. A missing toast = FAIL.
-- [ ] Content: centered (|L−R| ≤ 20) AND no overflow (minX ≥ 0, maxX ≤ cardW).
+- [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists (count matches the old frame) as a SIBLING of the Page instance, positioned over it. (Instance path: they CANNOT be children of the Page instance — instance children are locked. Hand-build fallback: ABSOLUTE child.) A missing toast = FAIL.
+- [ ] **Content NOT split / not broken inside:** the editor content went into the "Main content" slot as one block with "Side content" left HIDDEN; the form is NOT left-flushed in a shrunk 896 column. Content centered-ish (|L−R| ≤ 40) AND no overflow.
 - [ ] When fixing a CLASS across N items, enumerate ALL N — don't hardcode a subset (missed 1 of 4 toast frames once).
 - [ ] **Page-load:** nodes on a non-current page return null from `getNodeByIdAsync` until `page.loadAsync()`. A nested section is found via `page.findOne` (recursive), not `page.children.find`.
 
