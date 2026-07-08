@@ -77,8 +77,18 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 | Check | Rule |
 |---|---|
 | `base/*` tokens on custom nodes | ❌ Replace with `semantic/*` equivalent |
+| Raw hex (no variable) on custom nodes | ❌ Bind to `semantic/*` equivalent |
 | `semantic/*` tokens on custom nodes | ✅ Correct |
 | `components/*` tokens on instances | ✅ Don't modify — managed by component |
+| **Component tokens (`status/*`, `components/*`, `button/*`, `field/*` …) deliberately applied on custom nodes** | ✅ **LEAVE AS-IS — do NOT replace with semantic** |
+
+> 🚨 **Component tokens on custom nodes stay (v3.187).** If a designer bound a component-level token (e.g. `status/green/background-normal` on a custom badge pill) to a custom node, that's a deliberate choice — the component token IS the correct context-specific alias. Only `base/*` bindings and raw hex are violations to fix. Костя 2026-07-08: «если применены конкретные переменные компонентов, их не нужно заменять на семантические, менять только базовые или hex значения». (A batch-fix session rebound 6 `status/green/*` bindings to their semantic alias targets and had to revert them.)
+
+**Batch-fix gotchas (from New Layout CM cleanup, 2026-07-08):**
+- **Walk per-section, never the whole page in one `use_figma` call** — a full-page walk on a large page drops the MCP transport mid-call.
+- **Data-viz fills stay on `base/*`** — chart bars, area vectors, progress segments bound to `base/green/50`, `base/blue/10|20|40`, `base/neutral/40|50` have no same-hex semantic equivalent; rebinding would change the color. Base palette is correct for charts.
+- **Bind spacing/radius only where a token with the exact same value exists** (spacing 4/6/8/12/16/24/28/32; radius 4/8/12/16). Values like 1/2/10/20/40/64 px spacing or 2/40/100 px radius have no tokens — leave raw (pills at 40/100 and blueprint-body 64 are canonical hardcodes).
+- **Watch for capitalized duplicate collections** (`Base/White/100`, `Base/Neutral/90`) — same hexes as `base/*`, different collection; match names case-insensitively.
 
 **Automatic replacement map:**
 - `base/neutral/90` for text → `semantic/text/neutral/default`
