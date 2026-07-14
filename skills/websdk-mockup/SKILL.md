@@ -206,6 +206,18 @@ await page.loadAsync();
 await figma.setCurrentPageAsync(page);
 ```
 
+**🛑 Placing output into a SECTION (yours or an existing one) — `section.appendChild(frame)` FIRST, then set coords (they become RELATIVE to the section):**
+
+```js
+section.appendChild(frame);          // 1. parent FIRST — a Section does NOT adopt frames by overlap
+const occupied = section.children.filter(c => c !== frame && c.width > 200);
+frame.x = occupied.length ? Math.max(...occupied.map(c => c.x + c.width)) + 80 : 40;  // 2. free spot: right of rightmost + gap
+frame.y = 160;
+if (frame.x + frame.width > section.width) section.resizeWithoutConstraints(frame.x + frame.width + 40, section.height);  // 3. grow section if needed
+```
+
+Failure mode (Welcome-Mobile sim 2026-06-15): the skill computed section-relative coords (x=1560 — even placed a label there) but appended the frame to the **PAGE**, where 1560 is an ABSOLUTE canvas coordinate → the mobile frame landed on top of an unrelated old mockup ("Table Page"), while the target section showed only the orphan label. Same class as the sumsub-mockup island §5 rule. **After placing: verify the frame's `parent` IS the section, it does not overlap any sibling, and the section bounds enclose it.** Never leave build output as a page child when a wrapper/target section exists.
+
 ---
 
 ### Rule #1 — Check libraries BEFORE starting (HARD RULE)

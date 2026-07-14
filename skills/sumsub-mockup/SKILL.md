@@ -1107,6 +1107,8 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    If you're creating multiple sections on a page, all of them get `#404040` and all of them get the `(made by Claude)` suffix. The page canvas itself should be `#1e1e1e` (darker) — that's a figma.currentPage setting, not the section.
 
+   **🛑 Screens go INSIDE the section — `section.appendChild(frame)` FIRST, then coords (they become RELATIVE to the section).** A Section does NOT adopt frames by geometric overlap, and section-relative x/y applied to a PAGE child are absolute canvas coords that land on unrelated mockups. Both failure modes shipped (island Configurations build: section empty, screens beside it; WebSDK Welcome-Mobile: frame on the page at "relative" x=1560 → on top of an old mockup). Free spot inside an existing section: `x = max(children right edges) + 80`; grow the section (`resizeWithoutConstraints`) if the frame would exceed its bounds. After placing, verify: `frame.parent === section`, no sibling overlap, section bounds enclose the frame.
+
 7.8. **Bind every non-zero spacing, gap, radius value to a design token — no raw numbers. This is a BUILD-TIME requirement, not a post-audit cleanup.**
 
    When you write `frame.paddingLeft = 24` or `frame.cornerRadius = 8`, you're shipping a hardcoded value. It looks fine visually but doesn't respond to DS updates, and any reviewer comparing tokens sees the number as a "break". Sumsub's convention: custom frames always bind these values to variables.
