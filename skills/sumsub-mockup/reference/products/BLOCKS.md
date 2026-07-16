@@ -53,13 +53,15 @@ FRAME_NAME  — имя фрейма в Figma
 ├── Sidebar (Organisms DS, *Sidebar*)
 └── Main
     ├── Header (Organisms DS, *Header*)
+    │   └── Subheader (Subheader#4002:0=true) → *Tab Basic*   ← ТАБЫ ЗДЕСЬ, не в Content
     └── Content
         ├── Title Row
         │   ├── Page Title (semibold/h4-xl + semantic/text/neutral/strong)
         │   └── CTA Button (*Button*, Primary, Medium)
-        ├── Tabs (*Tab Basic* Redesign)
         └── Table (*Table Starter* Redesign) / Drawer / Modal
 ```
+
+> 🛑 **Табы страницы = сабхедер Header'а** (`Subheader#4002:0=true` на инстансе `*Header*`), НЕ отдельный `*Tab Basic*` в Content. Item'ы табов живут в SLOT `Items wrapper` — конфигурить через `findAll(/Tab Basic \/ Item/)`, `.children.filter` их не видит (остаются `Tab_1…Tab_5`).
 
 ## Переменные и стили
 

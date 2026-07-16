@@ -98,12 +98,30 @@ if (CTA_LABEL) {
   await setInstanceText(ctaBtn, "Button", CTA_LABEL);
 }
 
-// 7. Tabs — importComponentByKeyAsync (single component, not a set)
+// 7. Tabs — INSIDE the Header's Subheader (Subheader#4002:0=true), NEVER a standalone Tab Basic in content.
+// Page-level tab navigation is part of the *Header* component. A bare *Tab Basic* row under the title is a
+// known defect (designer sim 2026-07-16: "Табы не в виде сабхедера (как должно быть)").
 if (TAB_LABELS && TAB_LABELS.length) {
-  const tabComp = await figma.importComponentByKeyAsync(COMPONENTS.tabBasic);
-  const tabBar = tabComp.createInstance();
-  content.appendChild(tabBar);
-  tabBar.layoutSizingHorizontal = "FILL";
+  header.setProperties({ "Subheader#4002:0": true });
+  const subTb = header.findOne(n => n.name === "*Tab Basic*");
+  // ⚠️ items sit inside the "Items wrapper" SLOT — use findAll; .children.filter on the Tab Basic
+  // misses them entirely and leaves default "Tab_1…Tab_5" labels (same designer sim).
+  const items = subTb ? subTb.findAll(n => n.type === "INSTANCE" && /Tab Basic \/ Item/i.test(n.name)) : [];
+  for (let i = 0; i < items.length; i++) {
+    try {
+      if (i < TAB_LABELS.length) {
+        items[i].visible = true;
+        items[i].setProperties({
+          "Label text#4517:0": TAB_LABELS[i],
+          "Counter#5190:0": false,
+          "Badge#2885:0": false,
+          "Selected": i === 0 ? "true" : "false",
+        });
+      } else {
+        items[i].visible = false;
+      }
+    } catch (e) {}
+  }
 }
 
 // 8. Table — append first, then set sizing

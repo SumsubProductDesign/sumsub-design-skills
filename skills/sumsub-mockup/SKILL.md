@@ -2164,16 +2164,19 @@ Audit 7.36 scans every TEXT inside every modal/drawer's custom body wrap and fla
 
 `*Tab Basic*` is a single COMPONENT (not a component_set) containing 10–12 `.Tab Basic / Item` children. Each item has its own properties: `Label text#4517:0`, `Counter#5190:0`, `Badge#2885:0`, `Tag#1082:0`, `Selected` variant, etc. Default state on every item: `Label text="Tab"` (or `Tab_4`, `Tab_5`...), `Counter=true` (showing "5"), `Badge=true` (showing "Beta").
 
-**Two failure modes the skill repeats:**
+**🛑 Placement: page-level tabs live in the Header's SUBHEADER, never as a standalone Tab Basic in content.** Enable `Subheader#4002:0=true` on the `*Header*` instance — its `Header / Subheader` contains the `*Tab Basic*` to configure. Appending a bare `*Tab Basic*` row under the title inside Content is a defect (designer sim 2026-07-16: "Табы не в виде сабхедера (как должно быть)"). Standalone Tab Basic is only for tabs INSIDE a card/panel body, not page navigation.
+
+**Three failure modes the skill repeats:**
 
 1. **All labels stuffed into the first item.** Skill regex-finds three TEXT properties on item 0 (Label/Counter/Badge) and writes the four desired tab names into the first three available text slots. Result: item 0 shows "All / Pre-scoring / Monitoring" mashed into Label/Counter/Badge slots; items 1–3 keep defaults; item 4 is "Archived" via name match.
 2. **Items 5+ left visible with defaults.** Skill renames items 0–3 then forgets to hide items 4–11. Result: 7 extra "Tab" / "Tab_4" / "Tab_5" labels rendering in the tab strip with stray "5"/"Beta".
+3. **Items fetched via `.children.filter` → ALL missed.** The items sit inside the `Items wrapper` **SLOT**, not as direct children of the Tab Basic — `tabs.children.filter(...)` returns nothing (or only non-item nodes), the config loop no-ops, and every tab renders its default `Tab_1…Tab_5` label (designer sim 2026-07-16: "изначально были с базовыми лейблами"). Always fetch with **`findAll`**.
 
-**Correct pattern — iterate, set, hide rest:**
+**Correct pattern — findAll, set, hide rest:**
 
 ```js
 const tabLabels = ["All", "Pre-scoring", "Monitoring", "Archived"];
-const items = tabs.children.filter(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));
+const items = tabs.findAll(c => c.type === "INSTANCE" && /Tab Basic \/ Item/i.test(c.name));  // findAll — items live in the "Items wrapper" SLOT; .children.filter misses them
 for (let i = 0; i < items.length; i++) {
   if (i < tabLabels.length) {
     items[i].visible = true;
@@ -2192,7 +2195,7 @@ for (let i = 0; i < items.length; i++) {
 }
 ```
 
-Audit 7.42 flags any visible `.Tab Basic / Item` with default label `/^Tab(_\d+)?$/` or with `Counter=true` / `Badge=true`.
+Audit 7.42 flags any visible `.Tab Basic / Item` with default label `/^Tab(_\d+)?$/` or with `Counter=true` / `Badge=true`. **Placement check:** a `*Tab Basic*` that is a direct child of the page Content frame (page-level tab navigation outside the Header) = FAIL — it must live in the Header's Subheader (`Subheader#4002:0=true`).
 
 ## Sidebar — set the active nav item for the current page
 
