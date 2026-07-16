@@ -71,6 +71,8 @@ The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECT
 > **Inspection check:** when canonical Examples for the target organism have `Image#10288:0 = true`, the build MUST mirror this — set both the boolean AND the INSTANCE_SWAP. If you only set Tips in Content slot but leave `Image#10288:0 = false`, you ship a Tips screen with no illustration.
 >
 > **Rule for override map decisions:** never apply visibility/property overrides "globally per Widget variant". Always read the canonical Example for THIS specific organism and copy what it has — the same `Type=Content` Widget can have Image=true (Tips/Guidelines) or Image=false (Welcome/Status) depending on which organism it hosts.
+>
+> **🛑 And mirror EVERY SLOT, not a named list (Override #8, examples-library.md):** enumerate ALL SLOT nodes of your Widget and set each `visible` to the canonical example's effective visibility. Non-Content variants ship different slots with different defaults — the `Type=Camera` master ships `Left side` (nav) + `slot` (logo) VISIBLE while the canonical hides both; a Content-named checklist missed them and the audit's signature omitted the unchecked slots → false PASS (Camera sim 2026-07-16). Audit must assert per-slot rendered-state equality with the canonical for every slot.
 
 ### Banned shortcuts (every one of these has appeared in past failed builds):
 

@@ -219,6 +219,20 @@ These are the exact instance-level changes that distinguish a working Widget com
 | 6 | Widget padding | auto-layout padding on Widget instance | `0/24/24/24` (default) | **`0/12/12/12`** (must override) |
 | 7 | Organism in slot | `Content ` SLOT children | use `slot.insertChild(0, organism)` + `organism.layoutSizingHorizontal = "FILL"` | same |
 
+### 🛑 Override #8 — MIRROR EVERY SLOT's rendered-state from the canonical (variant-agnostic; do NOT rely on the named list above)
+
+The list above names the frames the `Type=Content` variant ships (`instruction`, `Image`, `Left bar`…). **Other Widget variants ship DIFFERENT slots with different default visibility.** Real defect (Camera sim 2026-07-16): the `Type=Camera` master ships `Left side` (navigation) and `slot` (logo) **VISIBLE** by default; the canonical Camera example (`2344:108817`) hides both — but the skill only applied/checked the Content-named list, so the build rendered a left nav + logo the canonical doesn't have, and the audit signature simply omitted `leftSideVisible` → false PASS.
+
+Rule: after assembling ANY Widget variant, enumerate **ALL** its SLOT nodes and set each one's `visible` to match the canonical example's **effective (ancestor) visibility** — 1:1, whatever the slot is called:
+
+```js
+const canonSlots = {};   // read once from the canonical example widget
+for (const s of canonWidget.findAll(n => n.type === "SLOT")) canonSlots[s.name] = renderedTo(s, canonWidget);
+for (const s of myWidget.findAll(n => n.type === "SLOT")) if (s.name in canonSlots) s.visible = canonSlots[s.name];
+```
+
+The audit must assert per-slot rendered-state equality with the canonical for EVERY slot — a slot missing from the signature is an unchecked slot, not a passing one.
+
 ---
 
 ## Common failure modes (and what each looks like)
