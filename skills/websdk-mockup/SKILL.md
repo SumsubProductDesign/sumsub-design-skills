@@ -201,12 +201,18 @@ Memory ≠ answer. The only valid source of "where" is the user's current messag
 **Page-level placement — always `ensureDraftsPage()` first:**
 
 ```js
-// MUST be the first call in every use_figma script
-const page = figma.root.children.find(p => /drafts/i.test(p.name))
-  || figma.root.children[0];
+// MUST be the first call in every use_figma script.
+// CREATE the Drafts page when missing — do NOT fall back to children[0]:
+// the old `|| figma.root.children[0]` fallback silently dumped builds onto
+// whatever the file's first page was (e.g. "Onboarding"), violating the
+// Drafts-only rule while the skill believed it complied (fixed 2026-07-16).
+let page = figma.root.children.find(p => /drafts/i.test(p.name));
+if (!page) { page = figma.createPage(); page.name = "🛠 Drafts"; }
 await page.loadAsync();
 await figma.setCurrentPageAsync(page);
 ```
+
+Exceptions (the ONLY ones): the user's message names an explicit target page/section, or an in-place migration transforms frames on their source page. Everything else goes to Drafts. The audit must verify the output section's page matches `/drafts/i` (or a documented exception).
 
 **🛑 Placing output into a SECTION (yours or an existing one) — `section.appendChild(frame)` FIRST, then set coords (they become RELATIVE to the section):**
 

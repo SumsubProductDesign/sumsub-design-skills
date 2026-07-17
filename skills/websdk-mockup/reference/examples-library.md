@@ -326,6 +326,11 @@ function auditWidget(widget, label) {
   if (actual.paddingRight !== expected.paddingRight) issues.push(`padding R=${actual.paddingRight} should be ${expected.paddingRight}`);
   if (actual.slotKidsCount === 0) issues.push(`Content slot empty — insertChild organism`);
 
+  // Drafts-page check (fixed 2026-07-16): the old ensureDraftsPage fallback dumped builds onto page[0].
+  // Exceptions: user-named target page/section, or in-place migration on the source page.
+  let pg = widget; while (pg && pg.type !== "PAGE") pg = pg.parent;
+  if (pg && !/drafts/i.test(pg.name)) issues.push(`output on page "${pg.name}" — must be a Drafts page (or a documented exception)`);
+
   return { label, isMobile, expected, actual, issues };
 }
 ```
