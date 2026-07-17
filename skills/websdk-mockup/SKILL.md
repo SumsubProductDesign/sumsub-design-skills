@@ -70,7 +70,7 @@ The WebSDK Organisms file (`8VpSRNe9ur7SBctw0JrtOE`) contains an `Examples` SECT
 >
 > **Inspection check:** when canonical Examples for the target organism have `Image#10288:0 = true`, the build MUST mirror this — set both the boolean AND the INSTANCE_SWAP. If you only set Tips in Content slot but leave `Image#10288:0 = false`, you ship a Tips screen with no illustration.
 >
-> **Rule for override map decisions:** never apply visibility/property overrides "globally per Widget variant". Always read the canonical Example for THIS specific organism and copy what it has — the same `Type=Content` Widget can have Image=true (Tips/Guidelines) or Image=false (Welcome/Status) depending on which organism it hosts.
+> **Rule for override map decisions:** never apply visibility/property overrides "globally per Widget variant". Always read the canonical Example for THIS specific organism and copy what it has — the same `Type=Content` Widget can have Image=true (Tips/Guidelines) or Image=false (Welcome/Status) depending on which organism it hosts. **This includes the NUMBERS: Widget root w/h and the organism's BOTH sizing axes (szH+szV) come from THIS canonical, never carried from a previously built screen** — Liveness sim 2026-07-16 reused the Camera round's 1440×960 (canonical: 1440×900) and left the organism szV=FIXED (canonical: FILL) → 312px dead space; composition was right, the self-assembled numbers broke it (Override #7a, examples-library.md).
 >
 > **🛑 And mirror EVERY SLOT, not a named list (Override #8, examples-library.md):** enumerate ALL SLOT nodes of your Widget and set each `visible` to the canonical example's effective visibility. Non-Content variants ship different slots with different defaults — the `Type=Camera` master ships `Left side` (nav) + `slot` (logo) VISIBLE while the canonical hides both; a Content-named checklist missed them and the audit's signature omitted the unchecked slots → false PASS (Camera sim 2026-07-16). Audit must assert per-slot rendered-state equality with the canonical for every slot.
 
@@ -442,9 +442,11 @@ Audit: every Type=Content Widget MUST have `slot.children.length >= 1` after bui
 **Workflow for every WebSDK screen request:**
 
 1. **Open `reference/examples-library.md`** — find the Examples section for the target organism
-2. **Inspect that section in `8VpSRNe9ur7SBctw0JrtOE`** via Plugin API — read the canonical Widget overrides (visibility, padding, fill)
-3. **Replicate the assembly in target file** following the 7-step recipe (see `examples-library.md`)
+2. **Inspect that section in `8VpSRNe9ur7SBctw0JrtOE`** via Plugin API — read the canonical Widget overrides (visibility, padding, fill, root w/h, organism sizing axes)
+3. **Replicate the assembly in target file** following the 7-step recipe + Overrides #7a/#8 (see `examples-library.md`)
 4. **Audit your output** with the `auditWidget` function from `examples-library.md` — must show 0 issues
+
+**🛑 Every screen request = a DESKTOP + MOBILE pair (standing user requirement, 2026-07-16).** Unless the user explicitly asks for one platform only, build BOTH versions of the screen — Desktop (from the desktop Example) and Mobile (375×812, from the mobile Example) — side by side in the same wrapper section, each replicated from its OWN canonical example (do not derive the mobile from the desktop by resizing). One section, two labeled frames: `<Screen> — Desktop`, `<Screen> — Mobile`.
 
 **The 7 critical instance overrides (memorize these):**
 

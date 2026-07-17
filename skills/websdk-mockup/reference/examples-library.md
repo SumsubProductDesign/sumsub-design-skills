@@ -219,6 +219,15 @@ These are the exact instance-level changes that distinguish a working Widget com
 | 6 | Widget padding | auto-layout padding on Widget instance | `0/24/24/24` (default) | **`0/12/12/12`** (must override) |
 | 7 | Organism in slot | `Content ` SLOT children | use `slot.insertChild(0, organism)` + `organism.layoutSizingHorizontal = "FILL"` | same |
 
+### 🛑 Override #7a — mirror the organism's BOTH sizing axes + the Widget's ROOT DIMS from THIS canonical (no value bleed from other screens)
+
+Override #7 says `layoutSizingHorizontal = "FILL"` — that's necessary but NOT sufficient. Real defect (Liveness sim 2026-07-16, Костя: "Скил попытался собрать собственный лейаут и получилось неправильно"): the build left the organism's `layoutSizingVertical` at FIXED (542) while the canonical has **FILL** (794 — camera fills the slot), producing 312px of dead space under the camera; AND the Widget root was sized 1440×**960** — a height carried over from the *previous round's Camera example* — while THIS Liveness canonical is 1440×**900**. Composition (variant map, slot visibility) was identical to canonical; only the self-assembled numbers broke it.
+
+Rules:
+- **Mirror BOTH sizing axes** of the slotted organism from the canonical: `szH` AND `szV` (camera-type organisms are `szV=FILL`; content organisms typically HUG height). Read them off the canonical's organism, don't assume.
+- **Widget root w/h = THIS canonical example's w/h**, read fresh per screen. Never reuse dims from a previously built screen or another Example — even within the same Widget variant they differ (Camera capture 1440×960 vs Liveness 1440×900).
+- Audit must diff root w/h AND the organism's sizing axes against the canonical.
+
 ### 🛑 Override #8 — MIRROR EVERY SLOT's rendered-state from the canonical (variant-agnostic; do NOT rely on the named list above)
 
 The list above names the frames the `Type=Content` variant ships (`instruction`, `Image`, `Left bar`…). **Other Widget variants ship DIFFERENT slots with different default visibility.** Real defect (Camera sim 2026-07-16): the `Type=Camera` master ships `Left side` (navigation) and `slot` (logo) **VISIBLE** by default; the canonical Camera example (`2344:108817`) hides both — but the skill only applied/checked the Content-named list, so the build rendered a left nav + logo the canonical doesn't have, and the audit signature simply omitted `leftSideVisible` → false PASS.
