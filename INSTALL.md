@@ -158,7 +158,16 @@ The plugin bundles **8 skills**:
 - `sumsub-screen-annotations` — Add Scenarios annotations above mockup screens
 - `sumsub-design-review` — Audit a mockup for design system compliance
 
-Plus the Figma remote MCP server, registered automatically. On first use, Claude Code will prompt you to authenticate with Figma.
+Plus the **Figma remote MCP server** (`https://mcp.figma.com/mcp`), registered automatically via the plugin's `.mcp.json`. It still needs a one-time **authentication**:
+
+1. In Claude Code type `/mcp` → select `figma` → **Authenticate**.
+2. A browser opens on Figma — sign in via Sumsub SSO → **Approve**.
+
+Requirements on the Figma side (most common failure causes):
+- You need a **full seat** in the Sumsub Figma organization — a Viewer seat gets an OAuth denial.
+- On an SSO/Enterprise org the Claude integration may show **"admin approval required"** — ask the Figma org admin (Kostya) to approve the app; nothing on the Claude side fixes this.
+
+> The remote server does NOT require Figma Desktop to be running — it works entirely over OAuth.
 
 ---
 
@@ -438,9 +447,15 @@ When asked `Are you sure you want to continue connecting?`, type `yes` and press
 
 ### Figma tools aren't available in Claude
 
-1. Make sure Figma Desktop is open and you're logged in.
-2. Run `sumsub-update` (or the manual update commands), restart Claude Desktop.
-3. In a new Claude Code conversation: "what MCP tools do you have available?" — response should include tools prefixed with `figma_`.
+The plugin uses the **remote** Figma MCP server (`https://mcp.figma.com/mcp`) — Figma Desktop does NOT need to be running. Check in this order:
+
+1. **Is the server registered?** In a terminal: `claude mcp list` — `figma → https://mcp.figma.com/mcp` should be listed. If missing, register it manually:
+   ```bash
+   claude mcp add --transport http --scope user figma https://mcp.figma.com/mcp
+   ```
+2. **Are you authenticated?** In Claude Code: `/mcp` → `figma` → **Authenticate** → browser → Sumsub SSO → **Approve**. This is the most common cause — the server is registered but OAuth never ran.
+3. **Did Figma refuse the login?** "Access denied" / "admin approval required" on the Figma consent screen = your Figma **seat** or the org's app approval, not Claude. You need a full (non-Viewer) seat, and the Claude integration must be approved by the Figma org admin — ask Kostya.
+4. **Verify tools:** in a new Claude Code conversation ask "what MCP tools do you have available?" — the list should include tools prefixed with `mcp__figma__` (e.g. `mcp__figma__get_metadata`, `mcp__figma__use_figma`).
 
 ### A skill runs but fails with an error
 
