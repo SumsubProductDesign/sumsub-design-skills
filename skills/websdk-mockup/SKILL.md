@@ -292,11 +292,13 @@ Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/variables.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/base-components.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/organisms.md
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/examples-library.md  ← canonical Widget+Organism assembly (KYC)
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md     ← KYB-specific structure (Window/* shells)
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyb-organisms.md     ← KYB-specific structure (Widget shell + Window/* in slot)
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/websdk-mockup/reference/kyc-flow-map.md      ← canonical FLOW sequences (multi-screen requests)
 ```
 
 **For KYC tasks:** `examples-library.md` is the most important.
-**For KYB tasks:** `kyb-organisms.md` is the most important — KYB uses `Window / *` LOCAL components from a separate file (`9ii3Ueqr01mbLS3SE6bsrJ`), NOT the Widget shell from WebSDK Organisms. See "KYB does NOT use the standard WebSDK Widget shell" section.
+**For FLOW tasks (multi-screen sequence):** `kyc-flow-map.md` is mandatory — the sequence comes from the flow canonical (`Lvs3OA19oILUfjyairhb81`), not from the prompt's step list.
+**For KYB tasks:** `kyb-organisms.md` is the most important — KYB uses the SAME `Widget` shell as KYC with the KYB `Window / *` (local components from `9ii3Ueqr01mbLS3SE6bsrJ`) placed in the Widget's slot, the Window's own internal bars hidden (v3.171 — the old "KYB does not use the Widget shell" claim was WRONG).
 
 These files are NOT pre-loaded into context. They contain exact component keys, token import keys, and variant names — you cannot guess these correctly. Building without reading them is a rule violation.
 
@@ -453,6 +455,8 @@ Audit: every Type=Content Widget MUST have `slot.children.length >= 1` after bui
 4. **Audit your output** with the `auditWidget` function from `examples-library.md` — must show 0 issues
 
 **🛑 Every screen request = a DESKTOP + MOBILE pair (standing user requirement, 2026-07-16).** Unless the user explicitly asks for one platform only, build BOTH versions of the screen — Desktop (from the desktop Example) and Mobile (375×812, from the mobile Example) — side by side in the same wrapper section, each replicated from its OWN canonical example (do not derive the mobile from the desktop by resizing). One section, two labeled frames: `<Screen> — Desktop`, `<Screen> — Mobile`.
+
+**🛑 FLOW requests — the sequence comes from the flow canonical, NOT from the prompt's step list.** "Build the KYC flow: A → B → C" names ANCHOR steps; the canonical flow (`Lvs3OA19oILUfjyairhb81` "[✳️ PROD] General" → section "General flow": WEB `7130:32504` + mWEB `9227:299668`) contains the screens BETWEEN them — a Tips screen before EACH capture step (doc tips `Tips[ID | Live Capture]`+`Image Slot[ID]`; liveness tips `Tips[Type=Selfie]`+`Image Slot[Liveness]` "Let's take a selfie" — NOT `Tips | Liveness`), document back side, pending status. Read `reference/kyc-flow-map.md` BEFORE building any flow; replicate each screen from its canonical instance; mirror the canonical's `Scenarios` annotation row. Real defect (2026-07-20): flow built literally from the prompt list → doc-tips assembled by guess + NO tips before Liveness.
 
 **The 7 critical instance overrides (memorize these):**
 
