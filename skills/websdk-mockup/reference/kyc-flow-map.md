@@ -48,6 +48,10 @@ Procedure for ANY flow request:
 - 🛑 **The `Image Slot` VARIANT must match the step — set it explicitly, it does NOT follow the Tips organism.** Real defect (flow re-run 2026-07-20, Костя: "Снова не тот экран с типсами подставил перед загрузкой доков"): the doc-tips screen had every TEXT right (`Tips[ID | Live Capture]`, "Get ready to upload your ID", items Success/Success/Error) but the Image slot held **`Image Slot[Type=Liveness]`** — the liveness illustration on the document screen → visually the WRONG screen despite all texts matching. Mapping: doc-ID tips → `Image Slot[Type=ID]`, passport → `[Type=Passport]`, liveness → `[Type=Liveness]` (read from the canonical example: `3044:140189` / `3044:155375` / General `9217:69259`). **The audit must assert the slotted instance's VARIANT (`mainComponent.name`), not just that the slot is filled/visible** — this extends Override #8 from slot visibility to slotted-instance variant equality, for EVERY filled slot (Image slot, content Slot, Camera slot). (Post-`setProperties` note: a variant change invalidates the instance ref — re-fetch before verifying.)
 - Tips set key: `a4f45db0337fd053bbac9adf11434aaa53bcd664` (variants: Tips|Liveness, Tips|Document, ID|Live Capture, ID|Upload, Selfie with Document, Selfie, Short Video, Bank card, Bank statement, E-wallet). `Guidelines` set (`ee868b662794e83115465a04bd7c253d4c60e79f`: ID/Liveness/PoA) is a SEPARATE do/don't-examples organism — not the flow tips screen.
 
+## Sumsub ID promo block — ONLY on the Steps-overview screen
+
+The `SNS ID | Desktop` (Sumsub-ID promo: "Get verified faster with Sumsub ID" + email input) renders on exactly ONE canonical screen — the **Steps overview** (`9196:199933`, "Get verified for Astra", `Steps NEW[State=Default]`). It reaches other screens only as the **un-purged default content of the Widget's Slot** (the master ships `Steps NEW` as the Slot default — Override #8c). Any screen other than Steps-overview rendering `Steps NEW`/`SNS ID`/that promo text = FAIL.
+
 ## Flow presentation
 
 - Screens left→right in canonical order; desktop row + mobile row (mWEB) — the D+M pair rule applies to flows as two rows.
