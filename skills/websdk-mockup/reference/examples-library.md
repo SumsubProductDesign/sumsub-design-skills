@@ -242,6 +242,8 @@ for (const s of myWidget.findAll(n => n.type === "SLOT")) if (s.name in canonSlo
 
 The audit must assert per-slot rendered-state equality with the canonical for EVERY slot — a slot missing from the signature is an unchecked slot, not a passing one.
 
+**#8b — for every FILLED slot, also assert the slotted instance's VARIANT (`mainComponent.name`) equals the canonical's.** Slot visible + filled is not enough: the KYC flow re-run (2026-07-20) shipped the doc-tips screen with `Image Slot[Type=Liveness]` (liveness illustration) where the canonical (`3044:140189`) has `Image Slot[Type=ID]` — every text matched, the audit passed on visibility, and the screen still read as the WRONG one. Set slotted-instance variants explicitly per screen (they do NOT auto-follow the content organism); after `setProperties` on a variant the instance ref is invalidated — re-fetch before verifying.
+
 ---
 
 ## Common failure modes (and what each looks like)
