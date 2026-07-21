@@ -102,6 +102,8 @@ The source files for canonical references are:
 | Sumsub ID Connect | `Z87D5m8KArTvQWH13Nwmmo` | C — 947×812 embed (light + dark) |
 | Reusable KYC | `Fp0igOPOHzi00ZDqOsO5mk` | P1 — 1440 + Sidebar 257 + Content 1183 |
 
+**🛑 Account screens — canonical AUTHORITY ORDER (2026-07-20):** the Account file had a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page (screen catalog with node-ids in `reference/sumsub-id-pattern.md`). Order: Brand updates → `[❇️ PROD]` feature pages → `⭐️ Master Flow` (pre-brand, last resort, flag it) → 💀 Archive NEVER (the old "Sumsub ID account" page lives there). Real defect: the Account sim built the dashboard from Master Flow's `Main-Have docs` while the brand-updated `11061:178283` existed — "он явно не знает, как должны выглядеть разные экраны личного кабинета". Mobile canonicals = the `steps` 375-frames in the same Brand-updates section (D+M pair uses them, not a resized desktop).
+
 ### Step 4 — Rule #0: ASK where to create
 
 Same as `sumsub-mockup`. Don't default to a fileKey from memory or pattern docs.

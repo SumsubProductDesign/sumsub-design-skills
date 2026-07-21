@@ -62,22 +62,31 @@ Root (1440 × 900, fill #ECEDF2)              ← canonical bg is subtlest grey,
 
 The 384px sidebar is brand-driven — gives extra room for avatar circle + identity card preview + nav items with descriptive subtitles.
 
-### Source pages — Sumsub ID Account
+### Source pages — Sumsub ID Account (re-scanned 2026-07-20)
 
-| Page | ID | Status |
-|---|---|---|
-| Sumsub ID account | `3416:14299` | ❇️ PROD |
-| Disposable emails validation | `4878:39479` | ❇️ PROD |
-| Documents match | `4908:19224` | ❇️ PROD |
-| Emails | `4765:83095` | ❇️ PROD |
-| Add more data | `7899:56741` | dev |
-| View docs + Export data | `4030:59582` | dev |
-| History + Connections | `7935:28001` | dev |
-| Magic links | `9202:33289` | WIP |
-| Attestations | `8644:35607` | HOLD |
-| Change avatar | `4990:109645` | dev |
-| MFA | `4937:51667` | CR |
-| Trusted devices | `4906:13295` | WIP |
+> 🛑 **The 2026-04 canonical "Sumsub ID account" page (`3416:14299`) is now in 💀 Archive — NEVER build from it.** The Account file went through a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page. Real defect (Account sim 2026-07-20): the skill built the main dashboard from `⭐️ Master Flow` → `Main-Have docs` `10878:407071` (pre-brand-update) — Костя: "он явно не знает, как должны выглядеть разные экраны личного кабинета".
+
+**Canonical AUTHORITY ORDER for any Account screen:**
+1. **`[*️⃣ dev] Brand updates` page** — the newest brand look (user-confirmed authority). Screen catalog below.
+2. **`[❇️ PROD]` feature pages** — for screens not covered by Brand updates (Documents match, View docs + Export data, Change avatar, Emails).
+3. `⭐️ Master Flow` — assembled flow, PRE-brand-update; only when the screen exists nowhere else, and say so in the log.
+4. 💀 Archive — NEVER.
+
+**Brand updates page — screen catalog (canvas `11061:170527`):**
+
+| Section | Screen | Desktop (1440×900) | Mobile (375×812 "steps") |
+|---|---|---|---|
+| Welcome (`11061:174714`) | Welcome | `11061:170528` | `11061:173972`, `11061:176166` |
+| Code (`11061:174721`) | Code entry — 4 states | `11061:174054`, `11061:174062`, `11061:174070`, `11061:174078` | `11061:175287`, `11061:175004`, `11061:174863`, `11061:175009` |
+| Creating account (`11061:176595`) | Account creation — 4 states | `11061:176597`, `11061:176605`, `11061:176613`, `11061:176621` | `11061:177292`, `11061:177579`, `11061:177811`, `11061:177954`, `11061:178111`, `11061:177695` |
+| Account (`11061:176596`) | Dashboard **main-noDocs** | `11061:178274` | `11061:178733` |
+| Account (`11061:176596`) | Dashboard **Main-Have docs** | `11061:178283` | `11061:178841` |
+| Responsive layout (`11061:170831`) | breakpoint reference | — | — |
+
+Mobile canonicals are the `steps` 375-wide frames in the same section — the D+M pair rule uses THEM, not a resized desktop.
+
+**Current page inventory** (statuses live in page names — re-check before trusting):
+`⭐️ Master Flow` · `❖ Local components` · `[*️⃣ dev] Brand updates` · `[❇️ PROD] Documents match` · `[❇️ PROD] View docs + Export data` · `[❇️ PROD] Change avatar` · `[❇️ PROD] Emails` (↪ dev: unsubscribe, doc reuse; WIP: doc added) · dev: `Add more data` (↪ WIP Incorrect OCR data), `History + Connections`, `Intercom`, `Magic links`, `Blocked accounts`, `Help center` · WIP: `Settings: Trusted devices` · HOLD: `Attestations`, `MFA` · `💀 Archive` (contains the OLD "Sumsub ID account" page — do not use).
 
 ---
 
