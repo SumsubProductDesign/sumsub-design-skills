@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.197.0 — 2026-07-20 (sumsub-id: D+M pair rule encoded explicitly — was websdk-only, per-skill drift)
+Account re-run at v3.196: authority order landed (canonical `11061:178283` Brand updates, geometry 7.45 match, 0 leaks) — Костя: "уже лучше" — but the build shipped **desktop only**. The standing "every screen = Desktop+Mobile pair" rule was encoded in websdk-mockup SKILL.md; sumsub-id had only a passing note → the rule didn't fire. Fix: explicit D+M block in sumsub-id SKILL.md Step 3 (mobile canonicals = the `steps` 375-frames in the same Brand-updates section; never a resized desktop). Per-skill rule drift class again.
+
 ## v3.196.0 — 2026-07-20 (sumsub-id: Account canonical authority order — Brand updates page; old canonical is ARCHIVED)
 First sumsub-id-mockup sim (Account dashboard): geometry/components/data mostly fine, but the screen look was outdated — Костя: "Скил не справился до конца, он явно не знает, как должны выглядеть разные экраны личного кабинета". The Account file went through a **brand update**: the 2026-04 canonical page "Sumsub ID account" (`3416:14299`, still listed as PROD in the pattern doc) is now in **💀 Archive**, and the skill built from `⭐️ Master Flow`'s pre-brand `Main-Have docs` while the brand-updated version (`11061:178283`) existed. Fix: `sumsub-id-pattern.md` — fresh page inventory (2026-07-20) + **canonical AUTHORITY ORDER** (`[*️⃣ dev] Brand updates` → `[❇️ PROD]` feature pages → Master Flow last-resort-flagged → Archive NEVER) + **Brand updates screen catalog** with node-ids (Welcome / Code ×4 / Creating account ×4 / Account main-noDocs `11061:178274` + Main-Have docs `11061:178283`, each with mobile `steps` 375-frames as the M canonicals). SKILL.md Step 3 carries the order.
 
