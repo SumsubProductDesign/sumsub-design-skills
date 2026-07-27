@@ -73,6 +73,14 @@ If a canonical version of the screen you're being asked to build exists somewher
 
 If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
 
+**🛑 "No canonical exists" requires a real search, not one grep (v3.198).** Observed: an Applicants-LIST sim grepped only `dashboard-project-files.md` for "applicant", saw just "Applicant page. Device check", declared no canonical existed, and silently fell back to generic Pattern 1 (Sidebar 257 + Header 64). The real canonical (`YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`) uses **Sidebar 52 + Header 1388×120** — the build would have been wrong in every dimension. Костя: *"стоп, он точно должке быть в каноне, мы строили его 100 раз."* Before you may claim a canonical is absent:
+1. grep **both** reference roots — `${CLAUDE_PLUGIN_ROOT}/reference/products/*.md` **and** `${CLAUDE_PLUGIN_ROOT}/reference/*.md` (pattern docs and product docs live in different trees, and the paths differ per plugin version);
+2. search MemPalace for prior builds of the same screen (`python3 -m mempalace search "<screen> canonical"`);
+3. check the Figma project file list for a file named after the screen;
+4. still unclear → **ask the user for the canonical URL**. Never proceed on generic pattern defaults.
+
+When the user supplies a canonical the skill lacked, that's a permanent gap: write a pattern doc (fileKey + node-ids + measured dimensions + component keys + variants), add it to the obligatory-read table below, and commit it. A canonical you had to be told about twice is a skill bug.
+
 ### Island layout (post-redesign Dashboard shell) + layout migration
 
 **The post-2026-06 Dashboard layout is the "Island": a grey page (`semantic/background/neutral/subtlest` #f3f4f6) with the `*Sidebar*` flush-left and all content inside a rounded white card (`border-radius/xl`=16, 1px `neutral/subtlest` border) that floats with 8px insets top/right/bottom and 0 left (flush to the sidebar). The `*Header*` lives INSIDE the card, not full-width.** When the user mentions "island", "new layout", "redesign layout", "after redesign", or asks to convert/migrate existing mockups to the new layout — **Read `${CLAUDE_PLUGIN_ROOT}/reference/products/island-layout-pattern.md` first** (full structure, component/token keys, the migration procedure, and the property-level audit). Headline rules:
@@ -1497,7 +1505,8 @@ Before building anything, **open the matching reference file(s) with the `Read` 
 
 | Product | Reference file(s) |
 |---|---|
-| Applicant page / Applicant flow | `${CLAUDE_PLUGIN_ROOT}/reference/products/applicant-page-pattern.md`, `…/ap-component-catalog.md` |
+| Applicant page / Applicant flow (ONE applicant, detail) | `${CLAUDE_PLUGIN_ROOT}/reference/products/applicant-page-pattern.md`, `…/ap-component-catalog.md` |
+| **Applicants table / applicants LIST** (list of applicants, search, no-results, bulk actions, "no KYC/KYB applicants yet") | `${CLAUDE_PLUGIN_ROOT}/reference/products/applicants-table-pattern.md` — canonical `YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`. **Sidebar 52 + Header 1388×120**, NOT generic Pattern 1 (257/64). `Applicants table` is FILE-LOCAL. |
 | Transaction Monitoring — any TM screen | `${CLAUDE_PLUGIN_ROOT}/reference/products/tm-layout-patterns.md`, `…/tm-component-catalog.md` |
 | Case Management — any CM screen | `${CLAUDE_PLUGIN_ROOT}/reference/products/case-management-pattern.md`, `…/cm-component-catalog.md` |
 | Billing / Invoices / Plan details | `${CLAUDE_PLUGIN_ROOT}/reference/products/billing-pattern.md`, `…/billing-component-catalog.md` |

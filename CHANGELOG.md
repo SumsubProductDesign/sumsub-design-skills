@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.198.0 — 2026-07-27 (Applicants LIST canonical indexed; "no canonical" now requires a real search)
+Applicants-table sim: the skill had **no applicants-LIST canonical** indexed, grepped one index file (`dashboard-project-files.md`) for "applicant", found only "Applicant page. Device check", declared no canonical existed and fell back to generic Pattern 1 (Sidebar 257 + Header 64). Real canonical (`YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`) is **Sidebar 52 + Header 1388x120 + body padding 16/32** — every dimension would have been wrong. Kostya: "stop, it must be in canon, we built it 100 times."
+
+Fixes:
+- **New** `reference/products/applicants-table-pattern.md` — all 6 canonical states (Default / Bulk actions / No results / No KYC / No KYB / No networks + 1920 breakpoint) with node-ids and measured geometry; Header config incl. Subheader tabs `Individuals / Companies / Actions / Networks`; `Applicants table` flagged FILE-LOCAL (set `7a7487fb...`, `remote=false`) with the Base-components fallback; canonical toolbar/filter labels; applicant ID format = 24-char hex.
+- Registered in the obligatory-read table, with the applicant DETAIL vs applicants LIST distinction spelled out.
+- **New hard rule**: "no canonical exists" may only be claimed after grepping BOTH reference roots + MemPalace + the Figma project list, and otherwise asking the user for the URL. When the user supplies a missing canonical, writing the pattern doc is mandatory.
+- Documented two Plugin-API traps hit during the build: setting a `Selected` VARIANT **discards text overrides** (set variant first, then label), and `setProperties` invalidates sibling node references (re-query per iteration).
+
 ## v3.197.0 — 2026-07-20 (sumsub-id: D+M pair rule encoded explicitly — was websdk-only, per-skill drift)
 Account re-run at v3.196: authority order landed (canonical `11061:178283` Brand updates, geometry 7.45 match, 0 leaks) — Костя: "уже лучше" — but the build shipped **desktop only**. The standing "every screen = Desktop+Mobile pair" rule was encoded in websdk-mockup SKILL.md; sumsub-id had only a passing note → the rule didn't fire. Fix: explicit D+M block in sumsub-id SKILL.md Step 3 (mobile canonicals = the `steps` 375-frames in the same Brand-updates section; never a resized desktop). Per-skill rule drift class again.
 
