@@ -101,6 +101,11 @@ Hide the remaining `.Tab Basic / Item` slots.
 - Subtitle — `We couldn't find what you're looking for. Try a different search term`
 - `Buttons#6571:2` = false in canonical; enable it (+ `2nd button#6571:0`) when the state needs a recovery CTA.
 
+> ⚠️ **Two traps when writing the recovery copy (v3.199):**
+> 1. The 2nd button's default label is **`Empty search`** — plausible-looking, NOT in the audit's banned-strings list, so it ships silently. Override it and verify in the read-back.
+> 2. A secondary CTA here must be an **action**: `Clear search`. "Keep original query" is a no-op — the operator is already looking at the original query's zero result. "Search the original query instead" belongs only in the *auto-corrected* variant (where the visible results are for a different query than the one typed).
+> 3. `setProperties` TEXT writes can silently drop substrings (observed: ` U+0441` disappearing from correction copy). For copy with Unicode codepoints or mixed scripts, set `textNode.characters` directly, then re-apply range fills/fonts, then read the text back and assert it.
+
 ---
 
 ## Realistic data

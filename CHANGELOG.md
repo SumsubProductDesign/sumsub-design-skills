@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.199.0 — 2026-07-27 (setProperties TEXT writes can silently drop substrings; no-op secondary CTAs)
+Homoglyph applicants build, second pass. Two defects the audit could not see:
+- Writing correction copy through `*Empty State*` / `*Alert*` TEXT **properties silently removed** the ` U+0441` / ` U+0430` tokens (`Cyrillic "s" U+0441 instead of Latin "c" U+0063` shipped without the Cyrillic codepoints) — no error, Latin codepoints survived, build reported success. Fix: after any `setProperties` TEXT write, read the node back and assert the string; for copy with Unicode codepoints / mixed scripts write `textNode.characters` directly and re-apply range fills+fonts afterwards.
+- The `*Empty State*` 2nd button ships with default label **`Empty search`** — plausible enough that it is not in the banned-strings list, so it passed audit and shipped. Documented as a must-override.
+- Design rule: a secondary CTA in a zero-result state must be an action (`Clear search`). "Keep original query" is a no-op because the operator is already looking at the original query's result; "search the original instead" only makes sense in the auto-corrected variant. (Kostya caught this: "заменить secondary кнопку на empty search норм идея?")
+
 ## v3.198.0 — 2026-07-27 (Applicants LIST canonical indexed; "no canonical" now requires a real search)
 Applicants-table sim: the skill had **no applicants-LIST canonical** indexed, grepped one index file (`dashboard-project-files.md`) for "applicant", found only "Applicant page. Device check", declared no canonical existed and fell back to generic Pattern 1 (Sidebar 257 + Header 64). Real canonical (`YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`) is **Sidebar 52 + Header 1388x120 + body padding 16/32** — every dimension would have been wrong. Kostya: "stop, it must be in canon, we built it 100 times."
 
