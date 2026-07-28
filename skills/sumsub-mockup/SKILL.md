@@ -709,7 +709,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    Wait for the answer. For work tasks (anything building on Sumsub product surfaces — Flow Builder, Applicant page, Dashboard screens, etc.) the default is option 4 (Sumsub org). Personal Drafts = Starter-tier limits = you WILL hit an MCP file-creation cap mid-build. Offer option 4 by default and ask to confirm.
 
-   **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
+   **planKey awareness.** When creating files via `create_new_file` / MCP, always pass the org `planKey` from `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md` (section "Figma File Info") for work tasks. Hitting a plan-tier limit mid-build because you silently used Drafts is a bug, not a Figma bug.
 
    **Page-level placement inside the file — call `ensureDraftsPage()` as the FIRST LINE of every `use_figma` script.**
 
@@ -766,11 +766,11 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    | Product / Task | Required reads (ALL of them) |
    |---|---|
-   | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` |
-   | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
-   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tm-component-catalog.md`, **AND** `${CLAUDE_PLUGIN_ROOT}/reference/products/sumsub-docs-transaction-monitoring.txt` — ALL FOUR required via explicit `Read` calls. The first three are in CLAUDE.md context but must still be explicitly read. The fourth is never pre-loaded. |
-   | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/BLOCKS.md` |
-   | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/layout-patterns.md` |
+   | Flow Builder | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/flowbuilder.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md` |
+   | Applicant page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/applicant-page-pattern.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/ap-component-catalog.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/layout-patterns.md` |
+   | Transaction Monitoring (any TM screen) | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/tm-layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/tm-component-catalog.md`, **AND** `${CLAUDE_PLUGIN_ROOT}/reference/products/sumsub-docs-transaction-monitoring.txt` — ALL FOUR required via explicit `Read` calls. The first three are in CLAUDE.md context but must still be explicitly read. The fourth is never pre-loaded. |
+   | Table page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/layout-patterns.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/BLOCKS.md` |
+   | Any custom page | `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/color-usage.md`, `${CLAUDE_PLUGIN_ROOT}/reference/products/layout-patterns.md` |
 
    If you haven't read the required references for the task's product, you're not ready to build. Building from "general knowledge" is a bug — the reference has exact keys, paddings, connector stroke weights, color logic that you cannot guess correctly.
 
@@ -1496,6 +1496,8 @@ When the prompt asks to ADD a feature to an existing page (e.g. "add Pay invoice
 Before building anything, **open the matching reference file(s) with the `Read` tool first** and actually consume their content. The references contain exact component keys, measured paddings, color logic, and anti-patterns. Without reading them, you will guess and produce a generic-looking result that doesn't match Sumsub's actual UI.
 
 **Reference path note (v3.145):** all product reference files live in `${CLAUDE_PLUGIN_ROOT}/reference/products/`. Earlier versions of this table pointed to `${CLAUDE_PLUGIN_ROOT}/reference/` (no `products/` segment) — those paths 404.
+
+> ✅ **v3.200 — the paths in this file are now verified to resolve.** Until v3.199 the docs physically lived in `skills/sumsub-mockup/reference/products/` while every path here said `${CLAUDE_PLUGIN_ROOT}/reference/products/` — **31 of the referenced paths did not exist**, including all three `audit-part*.js`. That is what actually produced the recurring "pattern doc doesn't exist / 404" reports the v3.166 rule was written to suppress. The docs were moved to `reference/products/` and the 8 stale root shadows (`reference/applicant-page-pattern.md` etc., frozen at 2026-04 and still teaching the banned 52px AP Sidebar) were deleted. If a `Read` on a path from this file fails now, the path is a real regression — report it, don't work around it.
 
 **🚫 Check reference files with the local `Read` tool ONLY (v3.166).** Never "verify" a reference file via a GitHub raw URL / WebFetch — the repo is PRIVATE, raw URLs return 404 for every file that exists, and you'll wrongly report "pattern doc doesn't exist in the plugin." (Observed twice: Global Settings + AML sims reported these docs as 404 while they were present on disk in the installed plugin — verified on the test machine.) If `Read` errors:
 1. Re-check the exact path: `${CLAUDE_PLUGIN_ROOT}` is an absolute path — don't prepend `~`, don't rebuild it by hand; on Windows it contains backslashes — pass it through as-is.

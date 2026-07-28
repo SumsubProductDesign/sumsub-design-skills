@@ -142,7 +142,7 @@ sumsub-design-skills/
 │           ├── organisms.md                        # WebSDK organisms catalog
 │           ├── examples-library.md                 # canonical Widget+Organism Examples inventory
 │           └── sumsub-id-websdk.md                 # Sumsub ID WebSDK auth flow (centered Toolbar 718 + Container 1392)
-└── skills/sumsub-mockup/reference/products/   # 28 per-product pattern docs (split per-file)
+└── reference/products/                        # per-product pattern docs + audit script (split per-file)
     │
     │ # Foundations (shared)
     ├── design-system.md             # Components, variables, tokens

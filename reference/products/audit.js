@@ -37,7 +37,13 @@
 // ============================================================================
 
 // Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
-const root = figma.getNodeById("ROOT_ID_HERE");
+// Runs as the body of a use_figma call, so top-level await is available.
+// ⚠️ v3.200: MUST be getNodeByIdAsync. The sync getNodeById only resolves nodes on
+// figma.currentPage, and currentPage is whatever the desktop app has active (it RESETS
+// between use_figma calls). Building on the Drafts page then running this script threw
+// "cannot read property 'parent' of null" on the next line — forcing agents to hand-fix
+// the verbatim script or skip the audit entirely.
+const root = await figma.getNodeByIdAsync("ROOT_ID_HERE");
 // ⚠️ v3.151: productContext MUST be declared at the TOP — checks 7.44/7.45 (lines ~2452)
 // reference it BEFORE the later "Product-required components" section. Declaring it only
 // there caused a TDZ ReferenceError that forced agents to hand-fix the verbatim script.

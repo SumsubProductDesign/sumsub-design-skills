@@ -95,7 +95,7 @@ Never start creating without all four things settled:
 
 ### Rule #1 — use Sumsub DS tokens, not raw values
 
-- **Typography**: always `figma.importStyleByKeyAsync` + `setTextStyleIdAsync`. See text style keys in `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md`.
+- **Typography**: always `figma.importStyleByKeyAsync` + `setTextStyleIdAsync`. See text style keys in `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md`.
 - **Colors**: `figma.variables.importVariableByKeyAsync` + `setBoundVariableForPaint`. Use `semantic/*` keys (text, background, border, icon). See key tables in same reference.
 - **Spacing**: `bindSpacing` / `bindFrameSpacing` from `${CLAUDE_PLUGIN_ROOT}/skills/sumsub-mockup/blocks/helpers.js`. Never hardcode padding numbers.
 - **Border radius**: `bindRadius`. Never hardcode corner radius.
@@ -296,8 +296,8 @@ Match the `*`/`.`/slash convention exactly — Figma's Assets panel uses it to c
 2. **Ask user** if any of the 4 scope items (purpose / location / single vs set / naming) are unclear.
 3. **Read references** you need:
    - `${CLAUDE_PLUGIN_ROOT}/reference/figma-gotchas.md` — Plugin API pitfalls
-   - `${CLAUDE_PLUGIN_ROOT}/reference/design-system.md` — variable keys, text style keys, icon keys
-   - `${CLAUDE_PLUGIN_ROOT}/reference/color-usage.md` — which semantic token applies where
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/design-system.md` — variable keys, text style keys, icon keys
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/color-usage.md` — which semantic token applies where
 4. **Import** all variables / text styles / parent components you'll use (pre-cache sync-only — avoid "Parent not found").
 5. **Build** the component (or each variant separately, then `combineAsVariants`).
 6. **Place** in Local components home or user-specified location.
