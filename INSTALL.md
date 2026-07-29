@@ -147,13 +147,12 @@ Quit and reopen Claude Desktop so it picks up the new skills:
 
 > After this step, the marketplace also appears in **Claude Desktop → Settings → Customize → Plugins** alongside "Anthropic & Partners". You can enable/disable individual plugins from there. All install/update still goes through the CLI commands above.
 
-The plugin bundles **8 skills**:
+The plugin bundles **7 skills**:
 
 - `sumsub-mockup` — Dashboard mockups (table pages, detail pages, drawers, modals)
 - `websdk-mockup` — WebSDK flow screens (Welcome, Document Type, Camera, Liveness, etc.)
 - `sumsub-id-mockup` — Sumsub ID Account / Connect / Reusable KYC
 - `sumsub-component` — Build a Figma component from a contract
-- `sumsub-local-component` — Build a Figma component locally inside an existing mockup file
 - `sumsub-specs-docs` — Generate Specs documentation pages with anatomy + Do/Don't cards
 - `sumsub-screen-annotations` — Add Scenarios annotations above mockup screens
 - `sumsub-design-review` — Audit a mockup for design system compliance
@@ -193,7 +192,6 @@ Claude Code should pick up the skill, ask where to create the mockup, and start 
 | `/sumsub-design:websdk-mockup [description]` | Build WebSDK flow screens in Figma |
 | `/sumsub-design:sumsub-id-mockup [description]` | Build Sumsub ID Account / Connect / Reusable KYC mockups |
 | `/sumsub-design:sumsub-component [contract]` | Build a Figma component from a structured contract |
-| `/sumsub-design:sumsub-local-component [description]` | Build a Figma component locally in an existing file |
 | `/sumsub-design:sumsub-specs-docs [component]` | Generate a Specs page with component anatomy |
 | `/sumsub-design:sumsub-screen-annotations` | Add Scenarios annotations above every screen on the current page |
 | `/sumsub-design:sumsub-design-review` | Audit a mockup for design system compliance |

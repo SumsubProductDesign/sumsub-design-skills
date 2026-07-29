@@ -1,3 +1,5 @@
+# Source: public Sumsub documentation (docs.sumsub.com), text dump for product terminology. All tokens/JWTs inside are documentation examples, not secrets.
+
 # About Case Management
 URL: https://docs.sumsub.com/docs/case-management
 

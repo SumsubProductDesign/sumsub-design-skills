@@ -1348,7 +1348,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 
    The default `Type=Dashboard` on a non-dashboard page is a visual bug — the active nav item won't match where the user is, and a reviewer will flag it immediately. Audit check 4 detects wrong variants based on Header title and screen name.
 
-8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script (`${CLAUDE_PLUGIN_ROOT}/reference/products/audit.js` — see "Mandatory audit step" section for the run protocol) via `use_figma`, with `productContext` set to match the task. The rules are:
+8. **Self-verify before delivering — MANDATORY, not "should run".** Before sharing any link with the user, you MUST run the audit script (the three pre-split segments `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part1.js` / `audit-part2.js` / `audit-part3.js`, run in order — see "Mandatory audit step" section for the run protocol) via `use_figma`, with `productContext` set to match the task. The rules are:
 
    - Audit not run = **do not share the link**. Treat it as the build being incomplete.
    - `productContext === null` is only acceptable for generic custom pages. For Flow Builder / Applicant page / Table page tasks, `null` is a bug — set the context.
@@ -1440,7 +1440,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part1.js` (checks 1 → before 7.31, ~34KB)
    - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part2.js` (7.31 → before 7.48, ~37KB)
    - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part3.js` (7.48 → end, ~37KB)
-   (The full uncut script is `audit.js` — reference only; do NOT try to run it whole, it's 105KB > 50KB.)
+   (The three part files ARE the source of truth — edit them directly, keeping each under the 50KB use_figma limit. The former uncut `audit.js` was removed as a drift-prone duplicate.)
 
    **Run protocol (MANDATORY — this is the supported path, no excuses):**
    1. For EACH of the 3 part files: `Read` it, set `ROOT_ID_HERE` + `productContext` at the top (the ONLY two edits), run via `use_figma`. Each returns `{ issues, info }`.
