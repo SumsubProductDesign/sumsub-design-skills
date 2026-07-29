@@ -7,8 +7,8 @@
 ⚠️ **Why this doc exists (v3.198):** the skill previously had NO applicants-list canonical indexed. A sim
 grepped `dashboard-project-files.md` for "applicant", found only "Applicant page. Device check", concluded
 "no canonical exists" and fell back to generic `layout-patterns.md` Pattern 1 (Sidebar 257 + Header 64).
-**That is wrong for this product** — canonical uses a 52px Sidebar and a 120px Header. Костя: *"стоп, он точно
-должке быть в каноне, мы строили его 100 раз. Это applicant list, он должен быть."* Never conclude
+**That is wrong for this product** — canonical uses a 52px Sidebar and a 120px Header. User feedback: *"stop, it
+must be in the canon for sure — we've built it 100 times. It's the applicant list, it has to be there."* Never conclude
 "no canonical" from one grep — see the general rule at the bottom.
 
 ---

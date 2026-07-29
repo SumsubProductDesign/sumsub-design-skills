@@ -8,7 +8,7 @@
 
 ## Critical context
 
-**Databases файл — это не raw dashboard mockup**, а маркетинговые/демо рендеры с **Browser & URL Controls** wrapper'ом сверху, имитирующим вкладку браузера. При сборке копируй чистый dashboard внутри (Sidebar + Header + Content), а Browser chrome — опционально.
+**The Databases file is NOT a raw dashboard mockup** — it contains marketing/demo renders with a **Browser & URL Controls** wrapper on top that imitates a browser tab. When building, copy the clean dashboard inside (Sidebar + Header + Content); the Browser chrome is optional.
 
 ---
 

@@ -73,7 +73,7 @@ If a canonical version of the screen you're being asked to build exists somewher
 
 If the canonical reference is missing or ambiguous, **stop and ask the user**, do not invent values. "I built X but couldn't find canonical for screens 4, 10, 11, so I used 1300 for those" is not acceptable — surface the gap, get the user to point at the right canonical or accept the deviation explicitly.
 
-**🛑 "No canonical exists" requires a real search, not one grep (v3.198).** Observed: an Applicants-LIST sim grepped only `dashboard-project-files.md` for "applicant", saw just "Applicant page. Device check", declared no canonical existed, and silently fell back to generic Pattern 1 (Sidebar 257 + Header 64). The real canonical (`YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`) uses **Sidebar 52 + Header 1388×120** — the build would have been wrong in every dimension. Костя: *"стоп, он точно должке быть в каноне, мы строили его 100 раз."* Before you may claim a canonical is absent:
+**🛑 "No canonical exists" requires a real search, not one grep (v3.198).** Observed: an Applicants-LIST sim grepped only `dashboard-project-files.md` for "applicant", saw just "Applicant page. Device check", declared no canonical existed, and silently fell back to generic Pattern 1 (Sidebar 257 + Header 64). The real canonical (`YzK6VnBiqLTqfuaDvPZVc8` / `1156:60753`) uses **Sidebar 52 + Header 1388×120** — the build would have been wrong in every dimension. User feedback: *"stop, it definitely must be in the canon — we've built it 100 times."* Before you may claim a canonical is absent:
 1. grep **both** reference roots — `${CLAUDE_PLUGIN_ROOT}/reference/products/*.md` **and** `${CLAUDE_PLUGIN_ROOT}/reference/*.md` (pattern docs and product docs live in different trees, and the paths differ per plugin version);
 2. search MemPalace for prior builds of the same screen (`python3 -m mempalace search "<screen> canonical"`);
 3. check the Figma project file list for a file named after the screen;
@@ -283,7 +283,7 @@ Third escape route in the same class: skill expanded all cards (per (a)) and did
 
 **Banned behaviors v3.121:**
 - Expanded card delivered with empty Content slot / hidden Slot placeholder / hidden `Slot component` TEXT
-- Post-build question: "Я наполнил cards только заголовками + status. Если нужно содержимое — скажи, добавлю."
+- Post-build question: "Я наполнил cards только заголовками + status. Если нужно содержимое — скажи, добавлю." (EN: "I filled the cards with headers + status only. If you need content — say so and I'll add it.")
 - Treating "hide the Slot placeholder" as equivalent to "fill the slot" — it's not. Hidden placeholder + empty Content frame is structurally identical to "skipped" content.
 
 **Rule:** when you expand a card (`Collapsed=No`), you MUST populate its Content slot in the same `use_figma` chunk. The card is not "done" until its Content slot contains the organism instance from the section map. Splitting "expand cards" into one chunk and "add content" into a later chunk is a banned-class behavior — same content-skipping pattern.
@@ -316,10 +316,10 @@ If you don't know what content goes inside an expanded card → check canonical 
 **Audit Mode A** catches `Card content` as banned string in `defaultTexts[]` (added v3.135).
 
 **Banned question patterns:**
-- "Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю"
+- "Если нужно содержимое внутри cards (Personal info / Applicant data instance, Document instance, Risk labels block с реальными labels), скажи — добавлю" (EN: "If you need content inside the cards (Personal info / Applicant data instance, Document instance, Risk labels block with real labels), say so — I'll add it")
 - "I only filled headers + status. Should I add content inside the cards?"
 - "Want me to add the organism instances now, or is the expanded skeleton enough?"
-- "Я могу заполнить cards organism instances если нужно"
+- "Я могу заполнить cards organism instances если нужно" (EN: "I can fill the cards with organism instances if needed")
 - "Want me to also build the Documents block title (Body / Title) section above the verification cards, matching canonical pattern?" — same class. If canonical has Body / Title, build it by default, don't ask.
 - "Want me to build [any other canonical structure] matching canonical pattern?" — if it's in canonical, build it.
 - "OK that ID document / Selfie / Phone / Email cards show Status=Default in HeaderChecks instead of Approved?" — if your swap failed, fix it via `setProperties({Status: "Approved"})` and re-deliver, don't ship Status=Default and ask if it's OK.
@@ -327,9 +327,9 @@ If you don't know what content goes inside an expanded card → check canonical 
 - ANY phrasing of the form "X (intrinsic) vs Y (canonical) — which do you want?" — canonical wins by default per v3.118 rule.
 - "Want me to swap the static demo data (Germany / Mexico / sample dates / IP) for a coherent persona, or is the DS preset realistic enough?" (v3.126) — if the DS preset doesn't match the requested applicant (e.g. user said KYC and demo data is generic), swap by default. Don't ask permission to make data coherent.
 - "Want a fuller step list using `Verification steps (KYB)` set variants?" (v3.136) — if canonical Verification steps section has step cards (Company data / Phone verification / Email / Questionnaire / Non-Doc / Associated parties / Company documents / Proof of address / etc.), build ALL of them. Don't ship only dividers and ask permission.
-- "Кнопка X находится в строке заголовка страницы (title row внутри Content). Если по задумке она должна быть в шапке (Header компонент), скажи — перенесём." (v3.140) — page title + CTA always in Header per `layout-patterns.md` Pattern 1 v3.140 + `feedback_page_title_in_header.md`. Don't put CTA in custom Title Row, don't ask permission to move it later. Place in Header from the start.
+- "Кнопка X находится в строке заголовка страницы (title row внутри Content). Если по задумке она должна быть в шапке (Header компонент), скажи — перенесём." (EN: "Button X is in the page title row (inside Content). If it's meant to live in the Header component, say so — we'll move it.") (v3.140) — page title + CTA always in Header per `layout-patterns.md` Pattern 1 v3.140 + `feedback_page_title_in_header.md`. Don't put CTA in custom Title Row, don't ask permission to move it later. Place in Header from the start.
 - "Хочешь проверить, корректно ли отображаются данные?" / "Want to verify the data displays correctly?" (v3.140) — agent's job is to read back the build and verify itself, not ship and ask user to verify. Verification is part of "audit" step, not a permission-seek.
-- "Таблица заполнена данными по-best-effort. Хочешь проверить?" (v3.140) — same as above. If data fill is best-effort and unverified, that's an incomplete build. Inspect via read-back BEFORE delivery, fix any mismatches, then deliver.
+- "Таблица заполнена данными по-best-effort. Хочешь проверить?" (EN: "The table is filled with best-effort data. Want to check?") (v3.140) — same as above. If data fill is best-effort and unverified, that's an incomplete build. Inspect via read-back BEFORE delivery, fix any mismatches, then deliver.
 - "out of scope for this task" (v3.144) — observed Sonnet sim v3.143 retest: "filling 7 rows would require per-cell key inspection... out of scope for this task". User asked for an Invoices page with Pay flow; rows showing real invoice data are NOT out of scope, they're the page's primary content. "Out of scope" claim banned when the skipped work is the page's core content.
 - "would require a separate pass" (v3.144) — separate passes are fine in build mechanics (transport-drop retries, font loading, etc.), but using this phrase to defer canonical content fill is banned. Do the pass.
 - "per-cell key inspection... not in scope" (v3.144) — every Table Starter row Cell exposes properties via `componentProperties`. Walk cells, set them. Not out of scope.
@@ -677,7 +677,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    4. The default page inside the file is the existing Drafts page (matched via `/drafts/i`); if absent, create `🛠 Drafts`
    5. If the user wants a specific section/frame inside that file, they'll say so in the prompt; otherwise the new section goes onto the Drafts page
 
-   This exception covers "Build X. Файл: https://figma.com/design/abc/..." prompts which are common in testing and routine work. Hard-stop applies only when the prompt has NO URL and NO explicit location.
+   This exception covers "Build X. Файл: https://figma.com/design/abc/..." ("Файл" = "File") prompts which are common in testing and routine work. Hard-stop applies only when the prompt has NO URL and NO explicit location.
 
    **Forbidden bypass phrases** — same class of violation as pre-flight's banned auto mode. All of these are rule breaks, period:
    - "Auto mode: defaulting to Sumsub org"
@@ -783,7 +783,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    | A table / data list page | **"Top Toolbar — Rules"** and **"Table Cell Configuration"** |
    | Anything with filters | Check filter label customization — filter instances default to "Label" text |
    | A multi-screen task (≥4 screens) | Rule 7.6 (grid layout) |
-   | A task that mentions "all necessary screens" / "все экраны" / "flow" | Rule 7.6 + realistic-data Rule #7 applies to every screen, including modals |
+   | A task that mentions "all necessary screens" / "все экраны" ("all screens") / "flow" | Rule 7.6 + realistic-data Rule #7 applies to every screen, including modals |
 
    Trigger is the user's task text, not your plan. If the user says "domain management with add flow", the task involves modals — re-read the Modal section before `use_figma` even if your plan doesn't mention it yet.
 
@@ -1353,7 +1353,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    - Audit not run = **do not share the link**. Treat it as the build being incomplete.
    - `productContext === null` is only acceptable for generic custom pages. For Flow Builder / Applicant page / Table page tasks, `null` is a bug — set the context.
    - Audit failed = **do not share the link**. Fix every issue, re-run, keep iterating until it returns "✅ Audit PASSED".
-   - Do not say "done", "готово", "макет создан", or paste a Figma URL in the same message unless the previous tool call was a passing audit.
+   - Do not say "done", "готово" ("done"), "макет создан" ("mockup created"), or paste a Figma URL in the same message unless the previous tool call was a passing audit.
 
    **Paste the audit script VERBATIM.** Do not write a "simplified version", "custom audit", or "smarter check". Do not remove checks because they produced too many findings on the first run — findings are the point. The only allowed edits to the script body are (a) set `ROOT_ID_HERE` and (b) set `productContext`. If a specific check in the script has a bug (false positives), report it to the user and keep running — do NOT silently strip the check and declare PASSED. Auditing your own work by writing a softer audit is the skill-equivalent of grading your own exam: it always passes.
 
@@ -1468,12 +1468,12 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 Before starting, decide what the user actually wants:
 
 **Build just the block** (no page wrapper) when the user:
-- Says "recreate **this** block" / "build this component" / "пересоздай этот блок"
+- Says "recreate **this** block" / "build this component" / "пересоздай этот блок" ("recreate this block")
 - Shares a single Figma node URL pointing to a component or internal frame (not a full-page frame)
 - Describes a single UI element (card, drawer, modal, etc.) without mentioning a page
 
 **Build a full page** (sidebar + header + content) when the user:
-- Says "page" / "screen" / "mockup" / "страница" / "экран"
+- Says "page" / "screen" / "mockup" / "страница" ("page") / "экран" ("screen")
 - Shares a URL to a top-level 1440×900 frame
 - Asks for a flow or multiple screens
 
@@ -1481,7 +1481,7 @@ Before starting, decide what the user actually wants:
 
 ## Add-to-existing-page mode (added v3.145)
 
-When the prompt asks to ADD a feature to an existing page (e.g. "add Pay invoice button to the invoices page", "добавь форму X на страницу Y"):
+When the prompt asks to ADD a feature to an existing page (e.g. "add Pay invoice button to the invoices page", "добавь форму X на страницу Y" ("add form X to page Y")):
 
 1. **Inspect the existing canonical page in the target file FIRST.** Use `mcp__figma__get_metadata` on the existing top-level frame. Record every structural block in order: Header (height + properties), Cards Row, Period Row, Filters group, Table, etc.
 2. **Preserve all existing chrome.** The new build must contain the same block sequence as the canonical — the new feature is ADDED, not REPLACE-d. Replacing canonical's `*Filters group*` with ad-hoc `*Input Basic*` + `*Filter*` chips is a regression.
@@ -1666,7 +1666,7 @@ btn.setProperties({
 
 > 🚫 **NEVER set/zero the padding of a table-organism instance (`*Table Starter*`, `Txn table`, `Case table`, etc.) — added v3.156.** These organisms carry a baked internal content inset (canonical `Txn table` top frame = `padL=32 padR=32 padT=24 padB=24`, so the Top Toolbar + Body sit at x=32, content width = tableW−64). The inset is what gives rows their left/right gutters. Setting `table.paddingLeft = 0` (or any padding on the instance) STRIPS that inset and slams the toolbar/rows flush to the table edge.
 >
-> **Reason this rule exists:** TM Transactions-table sim 2026-06-01 — the build dropped the `Txn table` (key `cce53984...`, State=Filled — correct component + variant) but then zeroed its paddings to `0/0/0/0`. Canonical is `32/32/24/24`. A fresh `createInstance()` INHERITS the component's `32/32/24/24` — so 0/0/0/0 only happens if the build EXPLICITLY set them. User: "полностью проигнорировал правильные отступы у таблицы."
+> **Reason this rule exists:** TM Transactions-table sim 2026-06-01 — the build dropped the `Txn table` (key `cce53984...`, State=Filled — correct component + variant) but then zeroed its paddings to `0/0/0/0`. Canonical is `32/32/24/24`. A fresh `createInstance()` INHERITS the component's `32/32/24/24` — so 0/0/0/0 only happens if the build EXPLICITLY set them. User feedback: "completely ignored the table's correct paddings."
 >
 > **Rule:** drop the table organism, resize its WIDTH to fit the content area if needed, set documented row/State/cell properties — but never touch `paddingLeft/Right/Top/Bottom` (or `itemSpacing`) on the table instance or its internal Top Toolbar / Body frames. They are component-managed. Audit check 7.55 catches a table-organism instance with zeroed padding.
 
@@ -1788,7 +1788,7 @@ Special: UK = `"United Kingdom of Great Britain (GB)"`.
 
 > 🚫 **A column of status values MUST use the Status cell type — NEVER a Text Regular cell with a bare status word (added v3.160).** If a column holds status-like values — `Active`, `Inactive`, `Pending`, `Invited`, `Invite sent`, `Approved`, `Rejected`, `Suspended`, `Blocked`, `Disabled`, `Expired`, `Processing`, `Awaiting`, `Resolved`, `Open`, `Closed`, `Failed`, `Passed`, `Verified`, `Online`, `Offline` — set that cell's `Type` to `Status` and configure the nested `*Status*` instance (label + color variant). A status rendered as plain text is a defect (no pill, no color). Audit check 7.59 catches a bare status word in a table cell.
 >
-> **Reason this rule exists:** Settings Members sim 2026-06-01 — the build left the Status column (`Active` / `Invited`) and rendered them as bare TEXT in `Table Row / Cell Content` cells; zero visible `*Status*` instances. User: "статусы сделал не в виде компонента status, а простого текста почему-то."
+> **Reason this rule exists:** Settings Members sim 2026-06-01 — the build left the Status column (`Active` / `Invited`) and rendered them as bare TEXT in `Table Row / Cell Content` cells; zero visible `*Status*` instances. User feedback: "made the statuses as plain text instead of the Status component for some reason."
 >
 > **Roles ≠ statuses.** Role values (`Admin`, `Member`, `Owner`, `Moderator`) are NOT statuses — they stay as text or a `*Tag Colorful*` per the canonical, NOT `*Status*`. Only the status column gets the Status cell type.
 
@@ -2175,13 +2175,13 @@ Audit 7.36 scans every TEXT inside every modal/drawer's custom body wrap and fla
 
 `*Tab Basic*` is a single COMPONENT (not a component_set) containing 10–12 `.Tab Basic / Item` children. Each item has its own properties: `Label text#4517:0`, `Counter#5190:0`, `Badge#2885:0`, `Tag#1082:0`, `Selected` variant, etc. Default state on every item: `Label text="Tab"` (or `Tab_4`, `Tab_5`...), `Counter=true` (showing "5"), `Badge=true` (showing "Beta").
 
-**🛑 Placement: page-level tabs live in the Header's SUBHEADER, never as a standalone Tab Basic in content.** Enable `Subheader#4002:0=true` on the `*Header*` instance — its `Header / Subheader` contains the `*Tab Basic*` to configure. Appending a bare `*Tab Basic*` row under the title inside Content is a defect (designer sim 2026-07-16: "Табы не в виде сабхедера (как должно быть)"). Standalone Tab Basic is only for tabs INSIDE a card/panel body, not page navigation.
+**🛑 Placement: page-level tabs live in the Header's SUBHEADER, never as a standalone Tab Basic in content.** Enable `Subheader#4002:0=true` on the `*Header*` instance — its `Header / Subheader` contains the `*Tab Basic*` to configure. Appending a bare `*Tab Basic*` row under the title inside Content is a defect (designer sim 2026-07-16 feedback: "Tabs are not built as a subheader (the way they should be)"). Standalone Tab Basic is only for tabs INSIDE a card/panel body, not page navigation.
 
 **Three failure modes the skill repeats:**
 
 1. **All labels stuffed into the first item.** Skill regex-finds three TEXT properties on item 0 (Label/Counter/Badge) and writes the four desired tab names into the first three available text slots. Result: item 0 shows "All / Pre-scoring / Monitoring" mashed into Label/Counter/Badge slots; items 1–3 keep defaults; item 4 is "Archived" via name match.
 2. **Items 5+ left visible with defaults.** Skill renames items 0–3 then forgets to hide items 4–11. Result: 7 extra "Tab" / "Tab_4" / "Tab_5" labels rendering in the tab strip with stray "5"/"Beta".
-3. **Items fetched via `.children.filter` → ALL missed.** The items sit inside the `Items wrapper` **SLOT**, not as direct children of the Tab Basic — `tabs.children.filter(...)` returns nothing (or only non-item nodes), the config loop no-ops, and every tab renders its default `Tab_1…Tab_5` label (designer sim 2026-07-16: "изначально были с базовыми лейблами"). Always fetch with **`findAll`**.
+3. **Items fetched via `.children.filter` → ALL missed.** The items sit inside the `Items wrapper` **SLOT**, not as direct children of the Tab Basic — `tabs.children.filter(...)` returns nothing (or only non-item nodes), the config loop no-ops, and every tab renders its default `Tab_1…Tab_5` label (designer sim 2026-07-16 feedback: "they initially had the default labels"). Always fetch with **`findAll`**.
 
 **Correct pattern — findAll, set, hide rest:**
 
@@ -2212,7 +2212,7 @@ Audit 7.42 flags any visible `.Tab Basic / Item` with default label `/^Tab(_\d+)
 
 > 🚫 **NEVER resize or re-layout nodes nested inside the `*Sidebar*` (or `*Header*`) instance — added v3.158.** Configure chrome ONLY via exposed component properties: pick the variant (Type/Collapsed), toggle the active nav-item's `Selected`, set exposed text props (org name / key name). The KeyHeader info button, nav items, search field, etc. are component-managed. Do NOT reach into `.Sidebar / KeyHeader` (or any nested frame) to `resize()` a child or set `layoutSizingHorizontal/Vertical = "FILL"` on it.
 >
-> **Reason this rule exists:** CM "All cases" sim 2026-06-01 — the build reached into the Sidebar's `.Sidebar / KeyHeader` and resized the info `*Button*` (Content=Icon Only, native **24×24**) to **88×72** (a FILL/resize on a chrome-internal button). It rendered as a giant empty outlined box with a tiny (i) next to "Sumsub". User flagged it: "непонятно, зачем он поменял размер инфо кнопки в сайдбаре." Audit check 7.57 now catches an Icon-Only button distorted off its native size.
+> **Reason this rule exists:** CM "All cases" sim 2026-06-01 — the build reached into the Sidebar's `.Sidebar / KeyHeader` and resized the info `*Button*` (Content=Icon Only, native **24×24**) to **88×72** (a FILL/resize on a chrome-internal button). It rendered as a giant empty outlined box with a tiny (i) next to "Sumsub". User feedback: "unclear why it changed the size of the info button in the sidebar." Audit check 7.57 now catches an Icon-Only button distorted off its native size.
 
 Setting `Type=Transactions monitoring` selects which section the sidebar shows but does NOT highlight the current page within that section. The skill repeatedly forgets the second step: navigating to the sub-item inside the section and toggling its `Selected` variant.
 
@@ -2233,7 +2233,7 @@ Audit 7.40 flags any sidebar where no descendant has `Selected=true` and no `Sel
 
 ## Header — primary CTA placement
 
-> 🚫 **Table-scoped actions go in the Top Toolbar, NOT the page Header (added v3.163).** If the page has a Top Toolbar / *Table Starter* and the action operates on the table's entities — `Create X`, `Import X`, `Export`, `Add X`, bulk actions — place those buttons in the **Top Toolbar's right-side `Search + actions` area (next to the search field)**, not in the *Header*. The Header is chrome (title, global search, notifications, profile). Lifting `Create questionnaire` / `Import questionnaire` up into the Header is a defect — verified against canonical Questionnaires (both CTAs live in `.Top Toolbar / Search + actions`). When a Top Toolbar exists, do NOT leave it empty/search-only while putting the real actions in the Header. (Exception: a few pages put a single page-level CTA in the Header action slot — confirm against the canonical before choosing; default table actions to the Top Toolbar.) User (Questionnaires sim 2026-06-08): "кнопки, которые относятся к таблице, оказались в хедере, вместо того чтобы быть справа от поиска таблицы".
+> 🚫 **Table-scoped actions go in the Top Toolbar, NOT the page Header (added v3.163).** If the page has a Top Toolbar / *Table Starter* and the action operates on the table's entities — `Create X`, `Import X`, `Export`, `Add X`, bulk actions — place those buttons in the **Top Toolbar's right-side `Search + actions` area (next to the search field)**, not in the *Header*. The Header is chrome (title, global search, notifications, profile). Lifting `Create questionnaire` / `Import questionnaire` up into the Header is a defect — verified against canonical Questionnaires (both CTAs live in `.Top Toolbar / Search + actions`). When a Top Toolbar exists, do NOT leave it empty/search-only while putting the real actions in the Header. (Exception: a few pages put a single page-level CTA in the Header action slot — confirm against the canonical before choosing; default table actions to the Top Toolbar.) User feedback (Questionnaires sim 2026-06-08): "buttons that belong to the table ended up in the header instead of to the right of the table search".
 
 `*Header*` Type=Generic doesn't have a dedicated "primary CTA" property — it has right-side action button slots (`First Button`, `Second Button`, `Kebab`) all defaulting to icon-only chrome controls (Help, language, kebab). The CTA-related properties `Buttons#... = true` + `First Button = true` only enable those chrome slots, NOT a separate primary button.
 

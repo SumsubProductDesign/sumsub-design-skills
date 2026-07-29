@@ -72,7 +72,7 @@ node.setProperties({
 });
 ```
 
-Live sim 2026-05-18 v3.138: agent built clean Workflow Builder canvas with correct nodes + bezier connectors, but used default `configured=false, empty=true` variants — all nodes rendered in placeholder/onboarding state instead of "real flow" state. User flagged: "ноды флоубилдера всегда должны быть с configured=true и empty=false".
+Live sim 2026-05-18 v3.138: agent built clean Workflow Builder canvas with correct nodes + bezier connectors, but used default `configured=false, empty=true` variants — all nodes rendered in placeholder/onboarding state instead of "real flow" state. User feedback: "Flow Builder nodes must always have configured=true and empty=false".
 
 **Banned default state on Flow Builder nodes:** delivering a workflow mockup with `configured=false` / `empty=true` nodes = banned. User asked for a workflow, not a tutorial onboarding state.
 

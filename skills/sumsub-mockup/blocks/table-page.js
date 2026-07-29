@@ -100,7 +100,7 @@ if (CTA_LABEL) {
 
 // 7. Tabs — INSIDE the Header's Subheader (Subheader#4002:0=true), NEVER a standalone Tab Basic in content.
 // Page-level tab navigation is part of the *Header* component. A bare *Tab Basic* row under the title is a
-// known defect (designer sim 2026-07-16: "Табы не в виде сабхедера (как должно быть)").
+// known defect (designer sim 2026-07-16, user feedback: "Tabs are not rendered as a subheader (as they should be)").
 if (TAB_LABELS && TAB_LABELS.length) {
   header.setProperties({ "Subheader#4002:0": true });
   const subTb = header.findOne(n => n.name === "*Tab Basic*");

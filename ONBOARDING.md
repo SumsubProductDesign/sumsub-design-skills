@@ -1,112 +1,112 @@
 # Onboarding — Sumsub Design Skills + Claude
 
-Полная настройка с нуля для нового дизайнера: Claude CLI → плагин со скиллами → Figma MCP → проверка. Время: ~15 минут.
+Complete setup from scratch for a new designer: Claude CLI → the skills plugin → Figma MCP → verification. Time: ~15 minutes.
 
-> **Главное правило всей инструкции:** команды `claude …` выполняются в **Terminal.app**, а не в чате Claude и не во вкладке Code. Чат работает в песочнице без твоего PATH — оттуда установить/обновить ничего нельзя.
+> **The number one rule of this whole guide:** `claude …` commands are run in **Terminal.app**, not in the Claude chat and not in the Code tab. The chat runs in a sandbox without your PATH — you can't install or update anything from there.
 
 ---
 
-## Часть 1 — Claude Code CLI (один раз)
+## Part 1 — Claude Code CLI (one time)
 
-Открой **Terminal.app** (`Cmd+Space` → «Terminal»).
+Open **Terminal.app** (`Cmd+Space` → "Terminal").
 
-**1.1. Проверь, вдруг уже установлен:**
+**1.1. Check whether it's already installed:**
 ```bash
 claude --version
 ```
-Показал версию → сразу в Часть 2.
+If it prints a version → jump straight to Part 2.
 
-**1.2. Установи:**
+**1.2. Install:**
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 ```
-Закрой терминал полностью, открой заново, проверь `claude --version`.
+Close the terminal completely, open it again, and check `claude --version`.
 
-**1.3. Если `command not found`** — каталог не попал в PATH:
+**1.3. If you get `command not found`** — the install directory didn't make it into PATH:
 ```bash
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 claude --version
 ```
 
-**1.4. Если curl-инсталлер заблокирован** (корпоративный Mac) — альтернативы:
+**1.4. If the curl installer is blocked** (corporate Mac) — alternatives:
 ```bash
-brew install --cask claude-code            # есть Homebrew
-npm install -g @anthropic-ai/claude-code   # есть Node 18+
+brew install --cask claude-code            # if you have Homebrew
+npm install -g @anthropic-ai/claude-code   # if you have Node 18+
 ```
-или меню **Claude → Install "claude" command line tool** в Claude Desktop.
+or use the **Claude → Install "claude" command line tool** menu in Claude Desktop.
 
-Полный troubleshooting: [INSTALL.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/INSTALL.md).
+Full troubleshooting: [INSTALL.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/INSTALL.md).
 
 ---
 
-## Часть 2 — Плагин sumsub-design (один раз)
+## Part 2 — The sumsub-design plugin (one time)
 
 ```bash
 claude plugin marketplace add https://github.com/SumsubProductDesign/sumsub-design-skills
 claude plugin install sumsub-design@sumsub-design
 claude plugin list
 ```
-В списке должен появиться `sumsub-design` со свежей версией.
+`sumsub-design` should appear in the list with a recent version.
 
-Затем **полностью перезапусти Claude Desktop** (`Cmd+Q` → открыть заново).
+Then **fully restart Claude Desktop** (`Cmd+Q` → open it again).
 
 ---
 
-## Часть 3 — Обновление плагина (регулярно)
+## Part 3 — Updating the plugin (regularly)
 
-Версии выходят часто. Когда просят обновиться (или скилл ведёт себя странно):
+New versions ship often. When you're asked to update (or a skill starts acting weird):
 
 ```bash
 claude plugin marketplace update sumsub-design
 claude plugin update sumsub-design@sumsub-design
 claude plugin list
 ```
-и перезапусти Claude Desktop (`Cmd+Q`).
+then restart Claude Desktop (`Cmd+Q`).
 
-⚠️ **Кнопка «Check for updates» в Claude Desktop плагин НЕ обновляет** — она смотрит в локальный кэш и показывает устаревшую версию. Только команды выше.
+⚠️ **The "Check for updates" button in Claude Desktop does NOT update the plugin** — it looks at the local cache and shows a stale version. Only the commands above work.
 
 ---
 
-## Часть 4 — Figma MCP (один раз)
+## Part 4 — Figma MCP (one time)
 
-**4.1. Добавь сервер:**
+**4.1. Add the server:**
 ```bash
 claude mcp add --transport http --scope user figma https://mcp.figma.com/mcp
 ```
 
-**4.2. Авторизуйся:** открой Claude Code (вкладка Code или `claude` в терминале), набери `/mcp` → выбери `figma` → **Authenticate** → в браузере войди в Figma через Sumsub SSO → **Approve**.
+**4.2. Authenticate:** open Claude Code (the Code tab or `claude` in the terminal), type `/mcp` → select `figma` → **Authenticate** → sign in to Figma in the browser via Sumsub SSO → **Approve**.
 
-**4.3. Если авторизация отваливается** — это почти всегда не Claude, а доступ в Figma:
-- Нужен **полноценный seat** в организации Sumsub (на Viewer-месте OAuth вернёт отказ).
-- Если видишь «admin approval required» — интеграцию Claude должен одобрить **админ Figma-организации**. Напиши Косте.
-
----
-
-## Часть 5 — Проверка, что всё работает
-
-1. `claude plugin list` → `sumsub-design` свежей версии.
-2. В новой сессии Claude Code попроси: `Build a WebSDK Welcome screen in file <URL твоего тест-файла>`.
-3. Скилл должен: спросить/использовать правильный файл, собрать **пару Desktop + Mobile**, положить её в секцию `… (made by Claude)` на странице **🛠 Drafts** (создаст, если её нет), в конце отдать ссылку.
+**4.3. If authentication keeps failing** — it's almost always Figma access, not Claude:
+- You need a **full seat** in the Sumsub organization (OAuth will refuse on a Viewer seat).
+- If you see "admin approval required" — the Claude integration must be approved by a **Figma org admin**. Message Kostya.
 
 ---
 
-## Типовые грабли
+## Part 5 — Verify everything works
 
-| Симптом | Причина | Решение |
+1. `claude plugin list` → `sumsub-design` at a recent version.
+2. In a fresh Claude Code session, ask: `Build a WebSDK Welcome screen in file <URL of your test file>`.
+3. The skill should: ask for / use the right file, build a **Desktop + Mobile pair**, place it in the `… (made by Claude)` section on the **🛠 Drafts** page (creating it if it doesn't exist), and hand you a link at the end.
+
+---
+
+## Common pitfalls
+
+| Symptom | Cause | Fix |
 |---|---|---|
-| «в шелле нет claude CLI / npm / node» в ответе Claude | Команды запущены в чате (песочница) | Выполнять в Terminal.app — Часть 1/3 |
-| `command not found: claude` в терминале | CLI не установлен или не в PATH | Часть 1.2–1.4 |
-| «Check for updates» показывает старую версию | Смотрит в локальный кэш | Команды из Части 3 |
-| Figma MCP «отказывается авторизовать» | Seat/SSO в Figma, не Claude | Часть 4.3 |
-| Скилл ведёт себя не по правилам после обновления | Claude Desktop не перезапущен | `Cmd+Q` → открыть заново |
-| Правка файлов внутри `~/Library/Application Support/Claude/local-agent-mode-sessions/…` | Cowork-хак, перезатирается сервером | Никогда так не делать — только официальный путь выше |
+| "no claude CLI / npm / node in the shell" in Claude's reply | Commands were run in the chat (sandbox) | Run them in Terminal.app — Part 1/3 |
+| `command not found: claude` in the terminal | CLI not installed or not in PATH | Part 1.2–1.4 |
+| "Check for updates" shows an old version | It looks at the local cache | Commands from Part 3 |
+| Figma MCP "refuses to authenticate" | Figma seat/SSO issue, not Claude | Part 4.3 |
+| Skill ignores the rules after an update | Claude Desktop wasn't restarted | `Cmd+Q` → open it again |
+| Editing files inside `~/Library/Application Support/Claude/local-agent-mode-sessions/…` | Cowork hack, gets overwritten by the server | Never do this — only the official path above |
 
 ---
 
-## Ссылки
+## Links
 
-- Установка (полная, с Windows): [INSTALL.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/INSTALL.md)
-- Обновление: [UPDATE.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/UPDATE.md)
-- Что нового по версиям: [CHANGELOG.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md)
-- Вопросы: Костя (@kanstantsin.ruskikh)
+- Installation (full, incl. Windows): [INSTALL.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/INSTALL.md)
+- Updating: [UPDATE.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/UPDATE.md)
+- What's new per version: [CHANGELOG.md](https://github.com/SumsubProductDesign/sumsub-design-skills/blob/main/CHANGELOG.md)
+- Questions: Kostya (@kanstantsin.ruskikh)

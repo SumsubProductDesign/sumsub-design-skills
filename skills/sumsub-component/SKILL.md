@@ -61,7 +61,7 @@ argument-hint: "[component description]"
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
 - "Plugin version check passed as optional / not blocking"
-- "пропускаю как необязательный"
+- "пропускаю как необязательный" ("skipping as optional")
 - "Per 'work without stopping', I'll proceed with the local version and surface this at the end" (v3.124)
 - "I'll proceed with the local version and surface this at the end"
 - "newer version available — surfacing at the end"

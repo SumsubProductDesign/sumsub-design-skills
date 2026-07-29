@@ -77,7 +77,7 @@ If the request is "Sumsub ID welcome screen" / "Sumsub ID auth flow" / "Sumsub I
 - "doing the check later, after inspection"
 - "memory says plugin is current, skipping"
 - "Plugin version check passed as optional / not blocking"
-- "пропускаю как необязательный"
+- "пропускаю как необязательный" ("skipping as optional")
 - "Per 'work without stopping', I'll proceed with the local version and surface this at the end" (v3.124)
 - "I'll proceed with the local version and surface this at the end"
 - "newer version available — surfacing at the end"
@@ -104,7 +104,7 @@ The source files for canonical references are:
 
 **🛑 Every screen request = a DESKTOP + MOBILE pair (standing user requirement — same rule as websdk-mockup).** Unless the user explicitly asks for one platform, build BOTH: Desktop (1440×900) AND Mobile — each replicated from its OWN canonical (the Brand-updates sections ship mobile canonicals as `steps` 375-wide frames next to each desktop screen; do NOT derive mobile by resizing the desktop). One section, both frames. Real defect (Account re-run 2026-07-20): the build shipped desktop only — the pair rule was encoded in websdk-mockup and missed here (per-skill rule drift).
 
-**🛑 Account screens — canonical AUTHORITY ORDER (2026-07-20):** the Account file had a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page (screen catalog with node-ids in `reference/sumsub-id-pattern.md`). Order: Brand updates → `[❇️ PROD]` feature pages → `⭐️ Master Flow` (pre-brand, last resort, flag it) → 💀 Archive NEVER (the old "Sumsub ID account" page lives there). Real defect: the Account sim built the dashboard from Master Flow's `Main-Have docs` while the brand-updated `11061:178283` existed — "он явно не знает, как должны выглядеть разные экраны личного кабинета". Mobile canonicals = the `steps` 375-frames in the same Brand-updates section (D+M pair uses them, not a resized desktop).
+**🛑 Account screens — canonical AUTHORITY ORDER (2026-07-20):** the Account file had a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page (screen catalog with node-ids in `reference/sumsub-id-pattern.md`). Order: Brand updates → `[❇️ PROD]` feature pages → `⭐️ Master Flow` (pre-brand, last resort, flag it) → 💀 Archive NEVER (the old "Sumsub ID account" page lives there). Real defect: the Account sim built the dashboard from Master Flow's `Main-Have docs` while the brand-updated `11061:178283` existed — user feedback: "it clearly doesn't know what the different Account-area screens should look like". Mobile canonicals = the `steps` 375-frames in the same Brand-updates section (D+M pair uses them, not a resized desktop).
 
 ### Step 4 — Rule #0: ASK where to create
 

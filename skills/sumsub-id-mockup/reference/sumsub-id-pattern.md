@@ -64,7 +64,7 @@ The 384px sidebar is brand-driven — gives extra room for avatar circle + ident
 
 ### Source pages — Sumsub ID Account (re-scanned 2026-07-20)
 
-> 🛑 **The 2026-04 canonical "Sumsub ID account" page (`3416:14299`) is now in 💀 Archive — NEVER build from it.** The Account file went through a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page. Real defect (Account sim 2026-07-20): the skill built the main dashboard from `⭐️ Master Flow` → `Main-Have docs` `10878:407071` (pre-brand-update) — Костя: "он явно не знает, как должны выглядеть разные экраны личного кабинета".
+> 🛑 **The 2026-04 canonical "Sumsub ID account" page (`3416:14299`) is now in 💀 Archive — NEVER build from it.** The Account file went through a **brand update**; the current look lives on the **`[*️⃣ dev] Brand updates`** page. Real defect (Account sim 2026-07-20): the skill built the main dashboard from `⭐️ Master Flow` → `Main-Have docs` `10878:407071` (pre-brand-update) — user feedback: "it clearly doesn't know what the different Account-area screens should look like".
 
 **Canonical AUTHORITY ORDER for any Account screen:**
 1. **`[*️⃣ dev] Brand updates` page** — the newest brand look (user-confirmed authority). Screen catalog below.

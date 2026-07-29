@@ -32,11 +32,11 @@ v3.170 built a **bare `Window / Select company` (512-wide)** and un-hid the Wind
 | | v3.170 bare-Window (WRONG) | Canonical Widget shell (RIGHT) |
 |---|---|---|
 | Footer component | `Toolbar / Bottom Bar / Desktop` (Window-internal) | **`Bottom Bar` `5d6dd1a8…`** (Widget-level) |
-| Primary button render | **#143cff (blue, "старая кнопка")** | **#20252c (black)** |
-| Footer top treatment | different ("обводка не такая") | canonical |
+| Primary button render | **#143cff (blue, the "old button")** | **#20252c (black)** |
+| Footer top treatment | different ("the outline is not the same") | canonical |
 | Header | Window-internal 512 Top Bar | Widget-level 718 Top Bar |
 
-User feedback that exposed this (2026-06-15): *"хедер с футером появились (хоть и используется старая кнопка и обводка не такая, как в оригинале)"*.
+User feedback that exposed this (2026-06-15): *"the header and footer appeared (though it uses the old button, and the outline is not the same as in the original)"*.
 
 **Rule:** NEVER un-hide a `Window / *` shell's internal Top Bar / Bottom Bar. Those exist for the rare bare-embed case. Always wrap the Window in the `Widget` shell; keep the Window's internal bars hidden. Use the Widget's NATIVE `Bottom Bar` button — relabel its TEXT in place; do not replace it.
 
@@ -44,7 +44,7 @@ User feedback that exposed this (2026-06-15): *"хедер с футером п�
 
 ## 🔵→⚫ Footer button color is LIBRARY-SYNC dependent (v3.172) — blue #143cff = stale library
 
-The v3.171 retest (2026-06-15) shipped the correct Widget structure but the footer Primary button still rendered **#143cff (blue)** — the user's "старая кнопка". Deep variable trace found the real cause: **the file contains two `Color` variable collections** with the same variable key `ce42e223` but different collection instances:
+The v3.171 retest (2026-06-15) shipped the correct Widget structure but the footer Primary button still rendered **#143cff (blue)** — the user's "old button". Deep variable trace found the real cause: **the file contains two `Color` variable collections** with the same variable key `ce42e223` but different collection instances:
 
 | Collection instance | `…button/primary/default/background-normal` aliases to | Result |
 |---|---|---|

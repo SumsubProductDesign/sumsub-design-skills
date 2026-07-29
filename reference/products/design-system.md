@@ -6,15 +6,15 @@
 
 - **Primary file:** Base components [Dashboard UI Kit] (`tJMo5DkqQUN0H6N8apN0N7`)
 - **Libraries found:** 12
-- **Components found:** 100+ (full scan via Plugin API 2026-03-27, все страницы файла)
+- **Components found:** 100+ (full scan via Plugin API 2026-03-27, all pages of the file)
 - **Token scan:** ✅ Complete — 174 base + 396 semantic variables extracted via `getLocalVariablesAsync()`
 - **Last full scan:** 2026-03-27
 
-> 🔄 **2026-06-01 — DASHBOARD REDESIGN (Tailwind palette + blue→black brand).** Variable hex re-scanned. **importVariableByKeyAsync ключи СТАБИЛЬНЫ** — только цвета за ними изменились. Major changes:
-> - **Base palette → Tailwind v4** (blue/50 #1764ff→#3b82f6, neutral/90 #373d4d→#1e2939, etc.) + новые палитры emerald/sky/teal/violet/rose/lime/fuchsia + **Dark mode**. `base/neutral/110` deprecated.
-> - **Brand blue → black:** новые группы `semantic/background|border/primary` (#030712) и `secondary`. Primary CTA теперь **чёрный**, не синий. `button/primary/default/background-normal → primary/normal → #030712`.
-> - **border-radius переименован + удвоен:** `s`→`sm` (2→4), `m`→`md` (4→8), `lg` 8→12, `xl` 12→16. Spacing без изменений.
-> - **Обновлены секции:** ⚡ Быстрый справочник, Variable Patterns (Text/BG/Border/Icon maps), Border Radius. **PENDING (старые hex):** Base Palette tables (стр. ~817-977), Цветные текст/фон/бордер/иконка паттерны, Component Variables table (~1153), Краткая сводка. Полный delta + scan: `~/.claude/projects/-Users-konstantin/memory/ds-redesign-scan-2026-06/`.
+> 🔄 **2026-06-01 — DASHBOARD REDESIGN (Tailwind palette + blue→black brand).** Variable hex re-scanned. **importVariableByKeyAsync keys are STABLE** — only the colors behind them changed. Major changes:
+> - **Base palette → Tailwind v4** (blue/50 #1764ff→#3b82f6, neutral/90 #373d4d→#1e2939, etc.) + new palettes emerald/sky/teal/violet/rose/lime/fuchsia + **Dark mode**. `base/neutral/110` deprecated.
+> - **Brand blue → black:** new groups `semantic/background|border/primary` (#030712) and `secondary`. Primary CTA is now **black**, not blue. `button/primary/default/background-normal → primary/normal → #030712`.
+> - **border-radius renamed + doubled:** `s`→`sm` (2→4), `m`→`md` (4→8), `lg` 8→12, `xl` 12→16. Spacing unchanged.
+> - **Updated sections:** ⚡ Quick reference, Variable Patterns (Text/BG/Border/Icon maps), Border Radius. **PENDING (old hex):** Base Palette tables (approx. lines 817-977), colored text/background/border/icon patterns, Component Variables table (~1153), Summary by color. Full delta + scan: `~/.claude/projects/-Users-konstantin/memory/ds-redesign-scan-2026-06/`.
 
 ---
 
@@ -38,9 +38,9 @@
 
 ## Assets Library — Icons, Flags, Logo, Favicon
 
-> Файл: `yrG0gZDkCgEClKq8ZtGeyc`. Полный скан 2026-03-27.
-> **Импорт:** `await figma.importComponentByKeyAsync(key)` для каждой иконки/лого.
-> **Флаги/Лого/Фавикон:** `await figma.importComponentSetByKeyAsync(key)` + `setProperties({...})`.
+> File: `yrG0gZDkCgEClKq8ZtGeyc`. Full scan 2026-03-27.
+> **Import:** `await figma.importComponentByKeyAsync(key)` for each icon/logo.
+> **Flags/Logo/Favicon:** `await figma.importComponentSetByKeyAsync(key)` + `setProperties({...})`.
 
 ---
 
@@ -48,13 +48,13 @@
 
 | Component | Type | componentKey | Variants |
 |---|---|---|---|
-| `Flag` | component_set | `2720723497e64a089f0b60124c7da10222962e9c` | Country=AF, AD, AG... (258 стран) |
+| `Flag` | component_set | `2720723497e64a089f0b60124c7da10222962e9c` | Country=AF, AD, AG... (258 countries) |
 
-**Использование:**
+**Usage:**
 ```js
 const set = await figma.importComponentSetByKeyAsync("2720723497e64a089f0b60124c7da10222962e9c");
 const instance = set.defaultVariant.createInstance();
-instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скобках
+instance.setProperties({ "Country": "Russia (RU)" }); // ISO code in parentheses
 ```
 
 ---
@@ -66,11 +66,11 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `Logo` | component_set | `7fc04576095604e427dce6e94a3865fc69ca720d` | Type: Horizontal/Vertical/Icon × Color: Original/Black/White |
 | `Logo / NY` | component_set | `5bfbc5bac427390bbdf5191319f4840d45990c4a` | Text: True/False × Theme: Light/Dark |
 
-**Варианты Logo:**
-- `Type=Horizontal, Color=Original` — стандартный горизонтальный
-- `Type=Vertical, Color=Original` — вертикальный
-- `Type=Icon, Color=Original` — только знак (без текста)
-- `Type=Horizontal, Color=Black` / `Color=White` — монохром
+**Logo variants:**
+- `Type=Horizontal, Color=Original` — standard horizontal
+- `Type=Vertical, Color=Original` — vertical
+- `Type=Icon, Color=Original` — mark only (no text)
+- `Type=Horizontal, Color=Black` / `Color=White` — monochrome
 
 ---
 
@@ -85,27 +85,27 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ### Icons
 
-> **626 иконок** в 4 размерах. Все — отдельные компоненты (не component_set).
-> **Нейминг:** `{size}/{name}` → `normal/close`, `small/checkmark`, `large/settings-filled`
+> **626 icons** in 4 sizes. All are standalone components (not component_set).
+> **Naming:** `{size}/{name}` → `normal/close`, `small/checkmark`, `large/settings-filled`
 
-#### Размеры
-| Размер | Кол-во | Когда использовать |
+#### Sizes
+| Size | Count | When to use |
 |---|---|---|
-| `small/8px` | 4 | Минимальные шевроны внутри компонентов |
-| `small` | 166 | Внутри таблиц, тегов, кнопок, inline-элементов |
-| `normal` | 373 | Основные UI-иконки — кнопки, поля, навигация |
-| `large` | 85 | Sidebar-навигация (filled), empty state, иллюстрации |
+| `small/8px` | 4 | Minimal chevrons inside components |
+| `small` | 166 | Inside tables, tags, buttons, inline elements |
+| `normal` | 373 | Main UI icons — buttons, fields, navigation |
+| `large` | 85 | Sidebar navigation (filled), empty state, illustrations |
 
-#### small/8px — шевроны
-| Иконка | componentKey |
+#### small/8px — chevrons
+| Icon | componentKey |
 |---|---|
 | `small/8px/chevron-up` | `3d907709a915d78f1a5ed1149bd8e9a5025fbe08` |
 | `small/8px/chevron-down` | `f5e24d20033fc7adce065d29af28765786967362` |
 | `small/8px/chevron-left` | `340323f64b709d8490ca706bac2d626aed689e35` |
 | `small/8px/chevron-right` | `8fd89e82d3ec82147b2a0a80d77f7b0f0aac8f63` |
 
-#### small — наиболее используемые
-| Иконка | componentKey |
+#### small — most used
+| Icon | componentKey |
 |---|---|
 | `small/checkmark` | `f8404aef94a369cb5516c2804204344a06a2ffd2` |
 | `small/checkmark-outline` | `f8da888afc3980a7518fa8bbbfed0d5a81b1ffd8` |
@@ -145,8 +145,8 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `small/question-s` | `21f1127212a0812612e23b9c57a26601a36d03f0` |
 | `small/info-filled` | `ab0bb4c25f34446146b165011cd77396b7bc51af` |
 
-#### normal — наиболее используемые
-| Иконка | componentKey |
+#### normal — most used
+| Icon | componentKey |
 |---|---|
 | `normal/close` | `2c3c9185a3a56721455781d4cbce20a6f28c1abe` |
 | `normal/close-outline` | `306d69924c9b33b5273bd05835b5022711373669` |
@@ -240,8 +240,8 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `normal/border-radius` | `7c6cceff994ef536206941e79a93466ff9469520` |
 | `normal/height` | `afe2b30feda9da194e5dcd3726c3f07e199d199c` |
 
-#### large — Sidebar & специальные (все 85)
-| Иконка | componentKey |
+#### large — Sidebar & special (all 85)
+| Icon | componentKey |
 |---|---|
 | `large/dashboard-filled` | `cec6c0cfccb00d75bfa8bda77c5baadc75fa0688` |
 | `large/applicants-filled` | `69811dab976844f9b078c8e034bf2cbabd3b8bed` |
@@ -276,7 +276,7 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `large/mastercard` | `453bcbe239e18e34d1961e8845fb1c05ea676e51` |
 | `large/visa` | `ba9a7b3504b19f97949076b9dccf9474c002146e` |
 
-> Оставшиеся large/* иконки (53 шт.) — найди через `search_design_system` по имени при необходимости.
+> Remaining large/* icons (53 items) — find via `search_design_system` by name when needed.
 
 ---
 
@@ -637,7 +637,7 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ### Organisms [Dashboard UI Kit]
 
-> Файл: `1uOogG5Kyj80pwhtBqjb8g`. Полный скан 2026-03-27.
+> File: `1uOogG5Kyj80pwhtBqjb8g`. Full scan 2026-03-27.
 
 #### Navigation — Header (page: Header)
 | Component | Type | componentKey |
@@ -803,18 +803,18 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 > All from `Base components [Dashboard UI Kit]`. Extracted 2026-03-27 via `getLocalVariablesAsync()`.
 
-### ⚡ Быстрый справочник — наиболее используемые токены
+### ⚡ Quick reference — most used tokens
 
-> 🔄 **Обновлено 2026-06-01 (redesign).** Переписано на **semantic-токены** (ранее ошибочно указывались base-ключи — для кастомных нод всегда semantic). Hex — Tailwind, ключи semantic стабильны.
+> 🔄 **Updated 2026-06-01 (redesign).** Rewritten to **semantic tokens** (base keys were listed here previously by mistake — custom nodes must always use semantic). Hex values are Tailwind, semantic keys are stable.
 
 | Use case | Preferred variable | Hex | importVariableByKeyAsync key |
 |---|---|---|---|
-| Text primary / тёмный текст | `semantic/text/neutral/default` | `#1e2939` | `485b897d691c85b86a1ad8ebae7650f3dbcca365` |
-| Text strong / заголовок | `semantic/text/neutral/strong` | `#030712` | `1148e20b46c46ade58db9b4120fbf3ea872196fd` |
-| Text secondary / серый | `semantic/text/neutral/subtle` | `#364153` | `47f41dc6d16468e6189a8784f58b12d07ebe72c3` |
+| Text primary / dark text | `semantic/text/neutral/default` | `#1e2939` | `485b897d691c85b86a1ad8ebae7650f3dbcca365` |
+| Text strong / heading | `semantic/text/neutral/strong` | `#030712` | `1148e20b46c46ade58db9b4120fbf3ea872196fd` |
+| Text secondary / grey | `semantic/text/neutral/subtle` | `#364153` | `47f41dc6d16468e6189a8784f58b12d07ebe72c3` |
 | Text subtle / meta | `semantic/text/neutral/subtler` | `#4a5565` | `678d3fc239240d7247f43296117c4d35a84592d9` |
 | Link / interactive text | `semantic/text/blue/normal` | `#2563eb` | `8453b551ecd39d2c30d374d783b76d3c4e4c025d` |
-| **Primary action fill (чёрный, бывш. синий)** | `semantic/background/primary/normal` | `#030712` | `190dbb3600b96c9fad1f238790820c0b2605fb8f` |
+| **Primary action fill (black, formerly blue)** | `semantic/background/primary/normal` | `#030712` | `190dbb3600b96c9fad1f238790820c0b2605fb8f` |
 | Page background | `semantic/background/neutral/subtlest/normal` | `#f3f4f6` | `e7129860062f42ee2a929d1b4ccacd21133a03ee` |
 | Card / surface | `semantic/background/neutral/inverse/normal` | `#ffffff` | `567811a0cf497ac911288a2f4a75a1d89ebff75c` |
 | Hover background | `semantic/background/neutral/subtler/normal` | `#e5e7eb` | `1aed8505fcfaec5aacd4ac43b4eb62d8315caa0a` |
@@ -824,9 +824,9 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ---
 
-> 🔄 **Обновлено 2026-06-01 (Tailwind). Base-ключи СТАБИЛЬНЫ** (тот же ключ → новый hex). Но для кастомных нод используй **semantic**, не base.
+> 🔄 **Updated 2026-06-01 (Tailwind). Base keys are STABLE** (same key → new hex). But for custom nodes use **semantic**, not base.
 
-### Base Palette — Neutral (полная шкала, Tailwind gray)
+### Base Palette — Neutral (full scale, Tailwind gray)
 
 | Token | Hex | importVariableByKeyAsync key |
 |---|---|---|
@@ -861,14 +861,14 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `base/blue/90` | `#1e3a8a` | `5843b6100b70b2c4eae6ccd29584b9c023252810` |
 | `base/blue/100` | `#172554` | `e6889d1577aa4657e4995d93d45aa156146de26b` |
 
-> ⚠️ **Brand primary больше НЕ синий.** Primary action использует `base/neutral/100` (#030712, чёрный) через `semantic/background/primary/*`. Синий остаётся акцентом для ссылок/info.
+> ⚠️ **Brand primary is NO LONGER blue.** Primary action uses `base/neutral/100` (#030712, black) via `semantic/background/primary/*`. Blue remains an accent for links/info.
 
-> 🔄 **2026-06-01 — ВСЕ цветные палитры мигрированы на Tailwind. Per-step таблицы ниже = PRE-redesign hex (ключи стабильны, hex устарел).** Актуальные Tailwind /50-якори:
+> 🔄 **2026-06-01 — ALL colored palettes migrated to Tailwind. Per-step tables below = PRE-redesign hex (keys stable, hex outdated).** Current Tailwind /50 anchors:
 > green #22c55e · red #ef4444 · yellow #f4a614 · orange #f97316 · purple #a855f7 · pink #ec4899 · cyan #06b6d4 · geekblue #6366f1 · lime #84cc16 · volcano #fa541c
-> **Новые палитры (redesign):** emerald #10b981 · sky #0ea5e9 · teal #14b8a6 · violet #8b5cf6 · rose #f43f5e · fuchsia #d946ef
-> Полные шкалы (5→100, все ключи) — в `~/.claude/projects/-Users-konstantin/memory/ds-redesign-scan-2026-06/base.txt`. Шкала Tailwind: /5 lightest → /50 base → /100 darkest. Каждый base-ключ стабилен; биндить через semantic, не base.
+> **New palettes (redesign):** emerald #10b981 · sky #0ea5e9 · teal #14b8a6 · violet #8b5cf6 · rose #f43f5e · fuchsia #d946ef
+> Full scales (5→100, all keys) — in `~/.claude/projects/-Users-konstantin/memory/ds-redesign-scan-2026-06/base.txt`. Tailwind scale: /5 lightest → /50 base → /100 darkest. Every base key is stable; bind via semantic, not base.
 
-### Base Palette — Green (Success) — ⚠️ pre-redesign hex, см. якори выше (green/50 = #22c55e)
+### Base Palette — Green (Success) — ⚠️ pre-redesign hex, see anchors above (green/50 = #22c55e)
 
 | Token | Hex | key |
 |---|---|---|
@@ -910,7 +910,7 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `base/yellow/80` | `#7d4c00` | `3b03721657af796a8c8c1676f7a7f09cf3a746ee` |
 | `base/yellow/90` | `#5e3700` | `5257718de80815bbfd01f32b01ef578cda3b2d42` |
 
-### Base Palette — Orange / Purple / Pink / Cyan / Lime / Volcano / Geekblue (полные шкалы)
+### Base Palette — Orange / Purple / Pink / Cyan / Lime / Volcano / Geekblue (full scales)
 
 | Token | Hex | key |
 |---|---|---|
@@ -978,9 +978,9 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `base/geekblue/80` | `#10239e` | `8736867f45a1e989a498e8fba45532b566ae836e` |
 | `base/geekblue/90` | `#061178` | `c4163d4118d564e96f932d4b061154263ca9cfef` |
 
-### Base Palette — Краткая сводка по цветам (hex)
+### Base Palette — Summary by color (hex)
 
-| Цвет | /10 | /50 normal | /60 active | /90 strong | Role |
+| Color | /10 | /50 normal | /60 active | /90 strong | Role |
 |---|---|---|---|---|---|
 | Green | `#eefbf7` | `#25b793` | `#1f9c7d` | `#115242` | Success |
 | Red | `#fff1f0` | `#f5222d` | `#cf1322` | `#5c0011` | Danger / Error |
@@ -997,9 +997,9 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ### Semantic Variables — Text (semantic/text/*)
 
-> **Всегда используй для кастомных TEXT нод.** Никогда не хардкоди hex для текста.
+> **Always use for custom TEXT nodes.** Never hardcode hex for text.
 
-#### Neutral (основные — используются чаще всего)
+#### Neutral (main — used most often)
 | Token | Hex | Base alias |
 |---|---|---|
 | `semantic/text/neutral/default` | `#373d4d` | `base/neutral/90` |
@@ -1022,8 +1022,8 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `semantic/text/blue/stronger/normal` | `#0a2d73` | `base/blue/90` |
 | `semantic/text/blue/visited` | `#0d3991` | `base/blue/80` |
 
-#### Цветные текстовые токены (паттерн одинаковый для всех цветов)
-| Цвет | /normal | /hover | /stronger/normal |
+#### Colored text tokens (same pattern for all colors)
+| Color | /normal | /hover | /stronger/normal |
 |---|---|---|---|
 | `green` | `#25b793` | `#4cc4a6` | `#115242` |
 | `red` | `#f5222d` | `#ff4d4f` | `#5c0011` |
@@ -1040,22 +1040,22 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ### Semantic Variables — Background (semantic/background/*)
 
-> Используй для фонов кастомных фреймов, карточек, badge-подобных элементов.
+> Use for backgrounds of custom frames, cards, badge-like elements.
 
 #### Neutral backgrounds
-| Token | Hex | Base alias | Использование |
+| Token | Hex | Base alias | Usage |
 |---|---|---|---|
-| `semantic/background/neutral/subtlest/normal` | `#f6f7f9` | `base/neutral/10` | Фон страницы |
-| `semantic/background/neutral/subtler/normal` | `#edeff2` | `base/neutral/20` | Hover фон |
-| `semantic/background/neutral/subtle/normal` | `#e1e5ea` | `base/neutral/30` | Active фон, disabled |
+| `semantic/background/neutral/subtlest/normal` | `#f6f7f9` | `base/neutral/10` | Page background |
+| `semantic/background/neutral/subtler/normal` | `#edeff2` | `base/neutral/20` | Hover background |
+| `semantic/background/neutral/subtle/normal` | `#e1e5ea` | `base/neutral/30` | Active background, disabled |
 | `semantic/background/neutral/normal` | `#c4cad4` | `base/neutral/50` | Neutral badge |
-| `semantic/background/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Тёмный фон |
-| `semantic/background/neutral/stronger/normal` | `#212736` | `base/neutral/100` | Очень тёмный |
-| `semantic/background/neutral/inverse/normal` | `#ffffff` | `base/neutral/0` | Белая карточка |
-| `semantic/background/neutral/ghost/normal` | `#fdfdfd` | `base/neutral/5` | Тонкий ghost |
+| `semantic/background/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Dark background |
+| `semantic/background/neutral/stronger/normal` | `#212736` | `base/neutral/100` | Very dark |
+| `semantic/background/neutral/inverse/normal` | `#ffffff` | `base/neutral/0` | White card |
+| `semantic/background/neutral/ghost/normal` | `#fdfdfd` | `base/neutral/5` | Subtle ghost |
 
-#### Цветные фоны (паттерн)
-| Цвет | /normal (solid) | /subtler/normal (tint) | /subtlest/normal (lightest) |
+#### Colored backgrounds (pattern)
+| Color | /normal (solid) | /subtler/normal (tint) | /subtlest/normal (lightest) |
 |---|---|---|---|
 | `blue` | `#1764ff` | `#d3e2ff` | `#f4f8ff` |
 | `green` | `#25b793` | `#d0f1e8` | `#eefbf7` |
@@ -1074,16 +1074,16 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 ### Semantic Variables — Border (semantic/border/*)
 
 #### Neutral borders
-| Token | Hex | Base alias | Использование |
+| Token | Hex | Base alias | Usage |
 |---|---|---|---|
-| `semantic/border/neutral/subtlest/normal` | `#edeff2` | `base/neutral/20` | Тончайший разделитель |
-| `semantic/border/neutral/subtler/normal` | `#e1e5ea` | `base/neutral/30` | Subtle бордер |
-| `semantic/border/neutral/subtle/normal` | `#d3d7df` | `base/neutral/40` | Стандартный бордер |
-| `semantic/border/neutral/normal` | `#c4cad4` | `base/neutral/50` | Бордер input/card |
-| `semantic/border/neutral/hover` | `#7d8799` | `base/neutral/70` | Hover бордер |
-| `semantic/border/neutral/disabled` | `#e1e5ea` | `base/neutral/30` | Disabled бордер |
-| `semantic/border/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Сильный бордер |
-| `semantic/border/neutral/strongest/normal` | `#212736` | `base/neutral/100` | Максимальный |
+| `semantic/border/neutral/subtlest/normal` | `#edeff2` | `base/neutral/20` | Thinnest divider |
+| `semantic/border/neutral/subtler/normal` | `#e1e5ea` | `base/neutral/30` | Subtle border |
+| `semantic/border/neutral/subtle/normal` | `#d3d7df` | `base/neutral/40` | Standard border |
+| `semantic/border/neutral/normal` | `#c4cad4` | `base/neutral/50` | Input/card border |
+| `semantic/border/neutral/hover` | `#7d8799` | `base/neutral/70` | Hover border |
+| `semantic/border/neutral/disabled` | `#e1e5ea` | `base/neutral/30` | Disabled border |
+| `semantic/border/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Strong border |
+| `semantic/border/neutral/strongest/normal` | `#212736` | `base/neutral/100` | Strongest |
 
 #### Blue borders (focus, selection)
 | Token | Hex | Base alias |
@@ -1093,8 +1093,8 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 | `semantic/border/blue/disabled` | `#6d9dff` | `base/blue/30` |
 | `semantic/border/blue/subtler/normal` | `#d3e2ff` | `base/blue/20` |
 
-#### Цветные бордеры — паттерн (normal / subtler / subtlest)
-| Цвет | /normal | /subtler/normal | /subtlest/normal |
+#### Colored borders — pattern (normal / subtler / subtlest)
+| Color | /normal | /subtler/normal | /subtlest/normal |
 |---|---|---|---|
 | `green` | `#25b793` | `#d0f1e8` | `#eefbf7` |
 | `red` | `#f5222d` | `#ffd2ce` | `#fff1f0` |
@@ -1107,20 +1107,20 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 ### Semantic Variables — Icon (semantic/icon/*)
 
 #### Neutral icons
-| Token | Hex | Base alias | Использование |
+| Token | Hex | Base alias | Usage |
 |---|---|---|---|
-| `semantic/icon/neutral/normal` | `#586073` | `base/neutral/80` | Обычная иконка |
-| `semantic/icon/neutral/hover` | `#7d8799` | `base/neutral/70` | Hover иконка |
-| `semantic/icon/neutral/active` | `#373d4d` | `base/neutral/90` | Active иконка |
-| `semantic/icon/neutral/disabled` | `#a6afbe` | `base/neutral/60` | Disabled иконка |
-| `semantic/icon/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Сильная иконка |
-| `semantic/icon/neutral/subtle/normal` | `#7d8799` | `base/neutral/70` | Subtle иконка |
-| `semantic/icon/neutral/subtler/normal` | `#a6afbe` | `base/neutral/60` | Subtler иконка |
-| `semantic/icon/neutral/subtlest/normal` | `#c4cad4` | `base/neutral/50` | Subtlest иконка |
-| `semantic/icon/neutral/inverse/normal` | `#ffffff` | `base/neutral/0` | Иконка на тёмном фоне |
+| `semantic/icon/neutral/normal` | `#586073` | `base/neutral/80` | Regular icon |
+| `semantic/icon/neutral/hover` | `#7d8799` | `base/neutral/70` | Hover icon |
+| `semantic/icon/neutral/active` | `#373d4d` | `base/neutral/90` | Active icon |
+| `semantic/icon/neutral/disabled` | `#a6afbe` | `base/neutral/60` | Disabled icon |
+| `semantic/icon/neutral/strong/normal` | `#373d4d` | `base/neutral/90` | Strong icon |
+| `semantic/icon/neutral/subtle/normal` | `#7d8799` | `base/neutral/70` | Subtle icon |
+| `semantic/icon/neutral/subtler/normal` | `#a6afbe` | `base/neutral/60` | Subtler icon |
+| `semantic/icon/neutral/subtlest/normal` | `#c4cad4` | `base/neutral/50` | Subtlest icon |
+| `semantic/icon/neutral/inverse/normal` | `#ffffff` | `base/neutral/0` | Icon on dark background |
 
-#### Цветные иконки — паттерн
-| Цвет | /normal | /strong/normal | /stronger/normal |
+#### Colored icons — pattern
+| Color | /normal | /strong/normal | /stronger/normal |
 |---|---|---|---|
 | `blue` | `#1764ff` | `#1455d9` | `#0a2d73` |
 | `green` | `#25b793` | `#1f9c7d` | `#115242` |
@@ -1133,48 +1133,48 @@ instance.setProperties({ "Country": "Russia (RU)" }); // ISO код в скоб�
 
 ### Semantic Variables — Effects
 
-| Token | Hex | importVariableByKeyAsync key | Использование |
+| Token | Hex | importVariableByKeyAsync key | Usage |
 |---|---|---|---|
 | `semantic/effects/ring-focused` | `#6d9dff` | `eca594fae684dcd290070b104bb938dff895fd9f` | Focus ring / outline |
 
 ---
 
-**Usage для переменных (любой категории):**
+**Usage for variables (any category):**
 ```js
-// ✅ ПРАВИЛЬНО: использовать semantic ключ
-// Пример: фон страницы → semantic/background/neutral/subtlest/normal
+// ✅ CORRECT: use a semantic key
+// Example: page background → semantic/background/neutral/subtlest/normal
 const bgVar = await figma.variables.importVariableByKeyAsync("e7129860062f42ee2a929d1b4ccacd21133a03ee");
 frame.fills = [figma.variables.setBoundVariableForPaint(
   { type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", bgVar
 )];
 
-// Пример: текст заголовка → semantic/text/neutral/strong
+// Example: heading text → semantic/text/neutral/strong
 const textVar = await figma.variables.importVariableByKeyAsync("1148e20b46c46ade58db9b4120fbf3ea872196fd");
 textNode.fills = [figma.variables.setBoundVariableForPaint(
   { type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", textVar
 )];
 
-// Пример: бордер карточки → semantic/border/neutral/normal
+// Example: card border → semantic/border/neutral/normal
 const borderVar = await figma.variables.importVariableByKeyAsync("6618868be488e538a0d5a0002206439e45c3cfbe");
 frame.strokes = [figma.variables.setBoundVariableForPaint(
   { type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", borderVar
 )];
 
-// ❌ НЕПРАВИЛЬНО: использовать base ключ
-// const v = await figma.variables.importVariableByKeyAsync("fd45645c41a7370823a60c94992fa8eee7efd24d"); // base/neutral/90 — НЕТ
+// ❌ WRONG: using a base key
+// const v = await figma.variables.importVariableByKeyAsync("fd45645c41a7370823a60c94992fa8eee7efd24d"); // base/neutral/90 — NO
 ```
 
-> ✅ **Semantic переменные** (`semantic/text/*`, `semantic/background/*`, `semantic/border/*`, `semantic/icon/*`) имеют собственные ключи и **импортируются напрямую** через `figma.variables.importVariableByKeyAsync(key)`. Всегда используй semantic ключи из таблиц Variable Patterns — не base ключи.
+> ✅ **Semantic variables** (`semantic/text/*`, `semantic/background/*`, `semantic/border/*`, `semantic/icon/*`) have their own keys and **are imported directly** via `figma.variables.importVariableByKeyAsync(key)`. Always use semantic keys from the Variable Patterns tables — not base keys.
 
 ---
 
 ---
 
-## Component Variables — Complete (1361 переменных, все alias → semantic)
+## Component Variables — Complete (1361 variables, all alias → semantic)
 
-> Компонентные переменные — это алиасы поверх semantic слоя. Они встроены в инстансы компонентов автоматически — **не переопределяй их вручную**. Используй этот раздел чтобы знать, какие semantic-токены используются внутри каждого компонента, и воспроизводить его стиль в кастомных нодах.
+> Component variables are aliases on top of the semantic layer. They are built into component instances automatically — **do not override them manually**. Use this section to know which semantic tokens are used inside each component and to reproduce its style in custom nodes.
 >
-> 🔄 **2026-06-01 redesign — hex в таблицах ниже УСТАРЕЛ (pre-redesign).** Но это alias→semantic, и **semantic-слой управляет цветом**: т.к. компонентные переменные алиасят semantic-токены, а semantic-ключи стабильны, инстансы компонентов автоматически получают новые Tailwind-цвета. **Главное изменение для компонентов:** `button/primary/default/background` теперь алиасит `semantic/background/primary/normal` → **#030712 (чёрный)** вместо синего. Аналогично везде, где primary CTA был синим — теперь чёрный. Чтобы узнать актуальный hex алиаса — смотри обновлённые semantic-карты выше (Variable Patterns) или резолви ключ в рантайме. Per-cell hex здесь не перепроверялся (низкий приоритет — авто-применяется компонентом).
+> 🔄 **2026-06-01 redesign — hex in the tables below is OUTDATED (pre-redesign).** But these are alias→semantic, and **the semantic layer controls the color**: since component variables alias semantic tokens and semantic keys are stable, component instances automatically get the new Tailwind colors. **Main change for components:** `button/primary/default/background` now aliases `semantic/background/primary/normal` → **#030712 (black)** instead of blue. Likewise everywhere primary CTA was blue — it is now black. To find the current hex of an alias — see the updated semantic maps above (Variable Patterns) or resolve the key at runtime. Per-cell hex here was not re-verified (low priority — auto-applied by the component).
 
 ### Alert
 | Variable | Hex | Semantic alias |
@@ -1462,8 +1462,8 @@ frame.strokes = [figma.variables.setBoundVariableForPaint(
 | `select inline/icon-normal` | `#373d4d` | `semantic/icon/neutral/strong/normal` |
 | `select inline/icon-hover` | `#4180ff` | `semantic/icon/blue/hover` |
 
-### Status / Tag Colorful (паттерн одинаковый)
-> Обе группы используют одинаковую цветовую схему: subtler background + stronger text/icon
+### Status / Tag Colorful (same pattern)
+> Both groups use the same color scheme: subtler background + stronger text/icon
 
 | Color | background | text/icon | Semantic alias (bg) | Semantic alias (text) |
 |---|---|---|---|---|
@@ -1550,13 +1550,13 @@ frame.strokes = [figma.variables.setBoundVariableForPaint(
 | `Spacing/0` | `0px` |
 
 ### Border Radius
-> 🔄 **Обновлено 2026-06-01 (redesign): переименовано `s`→`sm`, `m`→`md` И значения удвоены.** Ключи стабильны.
+> 🔄 **Updated 2026-06-01 (redesign): renamed `s`→`sm`, `m`→`md` AND values doubled.** Keys are stable.
 | Token | Value | importVariableByKeyAsync key |
 |---|---|---|
-| `border-radius/sm` (был `/s`) | `4px` (был 2) | `885152d55a536fb853461592cc3eff926e94858d` |
-| `border-radius/md` (был `/m`) | `8px` (был 4) | `311dc09093e9474a8b582c8fb7ccc7a628065a20` |
-| `border-radius/lg` | `12px` (был 8) | `95839af397884cd7f8fadb34a62d4763f88d68dd` |
-| `border-radius/xl` | `16px` (был 12) | `03884e014085a48cf26670632be200a02b5a160c` |
+| `border-radius/sm` (was `/s`) | `4px` (was 2) | `885152d55a536fb853461592cc3eff926e94858d` |
+| `border-radius/md` (was `/m`) | `8px` (was 4) | `311dc09093e9474a8b582c8fb7ccc7a628065a20` |
+| `border-radius/lg` | `12px` (was 8) | `95839af397884cd7f8fadb34a62d4763f88d68dd` |
+| `border-radius/xl` | `16px` (was 12) | `03884e014085a48cf26670632be200a02b5a160c` |
 
 ### Colors — Brand
 | Token | Value |
@@ -1643,143 +1643,143 @@ instance.fills = [figma.variables.setBoundVariableForPaint(
 
 ## Variable Patterns — Learned from Production Files
 
-> Источник: Rule page 2.0 (`bbp6LvphVT5J6QytzGJY6z`), Case page (`ieTGS0ab6tqr3zwXRYPHIu`), Workflow Builder (`DnjKrpmudNkdNio4P8yFQB`)
-> Дата: 2026-03-27
+> Source: Rule page 2.0 (`bbp6LvphVT5J6QytzGJY6z`), Case page (`ieTGS0ab6tqr3zwXRYPHIu`), Workflow Builder (`DnjKrpmudNkdNio4P8yFQB`)
+> Date: 2026-03-27
 
-### КРИТИЧЕСКОЕ ПРАВИЛО
-- **Никогда не переписывай переменные внутри инстансов компонентов** — они уже содержат правильные переменные, управляемые самим компонентом
-- **Применяй переменные только к кастомным нодам** (TEXT, FRAME, RECTANGLE, которые ты создал сам, не являются инстансами)
-- **Иерархия:** Base → Semantic → Component. **Всегда используй semantic токены** для кастомных нод — они имеют собственные ключи и импортируются напрямую через `figma.variables.importVariableByKeyAsync`
-- **Никогда не используй base переменные для кастомных нод** — только semantic
+### CRITICAL RULE
+- **Never rewrite variables inside component instances** — they already contain the correct variables, managed by the component itself
+- **Apply variables only to custom nodes** (TEXT, FRAME, RECTANGLE that you created yourself and that are not instances)
+- **Hierarchy:** Base → Semantic → Component. **Always use semantic tokens** for custom nodes — they have their own keys and are imported directly via `figma.variables.importVariableByKeyAsync`
+- **Never use base variables for custom nodes** — semantic only
 
 ---
 
-### Text Variable Map (TEXT ноды)
+### Text Variable Map (TEXT nodes)
 
-> **ВСЕГДА используй semantic/text токены для кастомных TEXT нод.** Все они импортируются напрямую через `figma.variables.importVariableByKeyAsync(key)`.
+> **ALWAYS use semantic/text tokens for custom TEXT nodes.** All of them are imported directly via `figma.variables.importVariableByKeyAsync(key)`.
 
-> 🔄 **Обновлено 2026-06-01 (Dashboard redesign → Tailwind palette).** Hex-значения изменились, но **importVariableByKeyAsync ключи СТАБИЛЬНЫ** — старый skill-код продолжает работать, поменялись только цвета за ключами.
+> 🔄 **Updated 2026-06-01 (Dashboard redesign → Tailwind palette).** Hex values changed, but **importVariableByKeyAsync keys are STABLE** — old skill code keeps working, only the colors behind the keys changed.
 
-| Контекст | Переменная | Hex | importVariableByKeyAsync key |
+| Context | Variable | Hex | importVariableByKeyAsync key |
 |---|---|---|---|
-| Основной тёмный текст / заголовок | `semantic/text/neutral/default` | `#1e2939` | `485b897d691c85b86a1ad8ebae7650f3dbcca365` |
-| Сильный заголовок / page title | `semantic/text/neutral/strong` | `#030712` | `1148e20b46c46ade58db9b4120fbf3ea872196fd` |
-| ~~Максимально жирный / hero~~ DEPRECATED | `semantic/text/neutral/strongest` | `#0e1423` (deprecated) | `f52ec608375346d916ea1473f468d66a32296228` |
-| Тонкий серый / meta, hint | `semantic/text/neutral/subtle` | `#364153` | `47f41dc6d16468e6189a8784f58b12d07ebe72c3` |
-| Вторичный серый / subtitles | `semantic/text/neutral/subtler` | `#4a5565` | `678d3fc239240d7247f43296117c4d35a84592d9` |
-| Совсем бледный / placeholder | `semantic/text/neutral/subtlest` | `#6a7282` | `2c094d8e57056b11ecbb2166364d4648c92d4360` |
-| Белый (на тёмном фоне) — legacy inverse | `semantic/text/neutral/inverse` | `#ffffff` | `cc87e4556ec61118c805685f92c80b214050bcd9` |
-| Белый (на тёмном фоне) — NEW | `semantic/text/neutral/white` | `#ffffff` | `2246e22b28c016fc13cefcbc08784a98d8bdab4e` |
-| Ссылка / action / plain button | `semantic/text/blue/normal` | `#2563eb` | `8453b551ecd39d2c30d374d783b76d3c4e4c025d` |
-| Ссылка hover | `semantic/text/blue/hover` | `#1d4ed8` | `552ec77b56d6d5cdeb49ca7660c0a64c8d9293a3` |
-| Ссылка active | `semantic/text/blue/active` | `#1e40af` | `1b7669eb955667d990342f75aa08c98c9f818897` |
-| Ссылка disabled | `semantic/text/blue/disabled` | `#93c5fd` | `041be2fa0732be8a34a8ceeaa4018836e53c51df` |
-| Ссылка visited | `semantic/text/blue/visited` | `#1e40af` | `5a9366f6c449c5a0d572b3284fc1f85e6f723528` |
-| Success текст | `semantic/text/green/normal` | `#16a34a` | `999e8e5bd35425d064e652c4ff658b0df6d33626` |
-| Error / danger текст | `semantic/text/red/normal` | `#dc2626` | `8dee12529b7153f3decafbb6126e6a3260a093a1` |
-| Warning текст | `semantic/text/yellow/normal` | `#d27a0a` | `8e208782e664c4f5e9a5af91465b43a86ad731b9` |
-| AI / feature текст | `semantic/text/purple/normal` | `#9333ea` | `6a163bcac7bf8696203dbd4b89c2f2b7e8d9ca2d` |
+| Main dark text / heading | `semantic/text/neutral/default` | `#1e2939` | `485b897d691c85b86a1ad8ebae7650f3dbcca365` |
+| Strong heading / page title | `semantic/text/neutral/strong` | `#030712` | `1148e20b46c46ade58db9b4120fbf3ea872196fd` |
+| ~~Boldest / hero~~ DEPRECATED | `semantic/text/neutral/strongest` | `#0e1423` (deprecated) | `f52ec608375346d916ea1473f468d66a32296228` |
+| Light grey / meta, hint | `semantic/text/neutral/subtle` | `#364153` | `47f41dc6d16468e6189a8784f58b12d07ebe72c3` |
+| Secondary grey / subtitles | `semantic/text/neutral/subtler` | `#4a5565` | `678d3fc239240d7247f43296117c4d35a84592d9` |
+| Palest / placeholder | `semantic/text/neutral/subtlest` | `#6a7282` | `2c094d8e57056b11ecbb2166364d4648c92d4360` |
+| White (on dark background) — legacy inverse | `semantic/text/neutral/inverse` | `#ffffff` | `cc87e4556ec61118c805685f92c80b214050bcd9` |
+| White (on dark background) — NEW | `semantic/text/neutral/white` | `#ffffff` | `2246e22b28c016fc13cefcbc08784a98d8bdab4e` |
+| Link / action / plain button | `semantic/text/blue/normal` | `#2563eb` | `8453b551ecd39d2c30d374d783b76d3c4e4c025d` |
+| Link hover | `semantic/text/blue/hover` | `#1d4ed8` | `552ec77b56d6d5cdeb49ca7660c0a64c8d9293a3` |
+| Link active | `semantic/text/blue/active` | `#1e40af` | `1b7669eb955667d990342f75aa08c98c9f818897` |
+| Link disabled | `semantic/text/blue/disabled` | `#93c5fd` | `041be2fa0732be8a34a8ceeaa4018836e53c51df` |
+| Link visited | `semantic/text/blue/visited` | `#1e40af` | `5a9366f6c449c5a0d572b3284fc1f85e6f723528` |
+| Success text | `semantic/text/green/normal` | `#16a34a` | `999e8e5bd35425d064e652c4ff658b0df6d33626` |
+| Error / danger text | `semantic/text/red/normal` | `#dc2626` | `8dee12529b7153f3decafbb6126e6a3260a093a1` |
+| Warning text | `semantic/text/yellow/normal` | `#d27a0a` | `8e208782e664c4f5e9a5af91465b43a86ad731b9` |
+| AI / feature text | `semantic/text/purple/normal` | `#9333ea` | `6a163bcac7bf8696203dbd4b89c2f2b7e8d9ca2d` |
 
-> ⚠️ Переменные компонентных инстансов (`checkbox/text-normal`, `button/primary/text-normal` и т.д.) — **не трогать**, они управляются самим компонентом.
-> 🔑 **Brand shift (redesign):** primary actions теперь **чёрные**, не синие. Для кастомного primary-текста на светлом фоне используй `semantic/text/neutral/strong` (#030712). Синий (`text/blue/*`) остаётся для ссылок, не для primary CTA.
+> ⚠️ Component-instance variables (`checkbox/text-normal`, `button/primary/text-normal`, etc.) — **do not touch**, they are managed by the component itself.
+> 🔑 **Brand shift (redesign):** primary actions are now **black**, not blue. For custom primary text on a light background use `semantic/text/neutral/strong` (#030712). Blue (`text/blue/*`) remains for links, not for primary CTA.
 
 ---
 
 ### Background/Surface Variable Map
 
-> **ВСЕГДА используй semantic/background токены для кастомных FRAME/RECTANGLE нод.**
+> **ALWAYS use semantic/background tokens for custom FRAME/RECTANGLE nodes.**
 
-> 🔄 **Обновлено 2026-06-01.** Hex изменились (Tailwind), ключи стабильны. **НОВОЕ: `primary`/`secondary` группы** — primary action теперь чёрный (#030712), не синий.
+> 🔄 **Updated 2026-06-01.** Hex values changed (Tailwind), keys are stable. **NEW: `primary`/`secondary` groups** — primary action is now black (#030712), not blue.
 
-| Контекст | Переменная | Hex | importVariableByKeyAsync key |
+| Context | Variable | Hex | importVariableByKeyAsync key |
 |---|---|---|---|
-| **Primary action фон (чёрный, бывш. синий)** | `semantic/background/primary/normal` | `#030712` | `190dbb3600b96c9fad1f238790820c0b2605fb8f` |
+| **Primary action background (black, formerly blue)** | `semantic/background/primary/normal` | `#030712` | `190dbb3600b96c9fad1f238790820c0b2605fb8f` |
 | Primary hover | `semantic/background/primary/hover` | `#1e2939` | `c7bd25414a8ec67d8c07b20e3bfb00a22c6fb2b6` |
 | Primary active | `semantic/background/primary/active` | `#364153` | `cbf5911fdd650fb6a1a4928e9257b0c4bb559bac` |
-| Secondary action фон (белый) | `semantic/background/secondary/normal` | `#ffffff` | `da81bccfef06f3de221bafbb9b5ee6a161eb9000` |
+| Secondary action background (white) | `semantic/background/secondary/normal` | `#ffffff` | `da81bccfef06f3de221bafbb9b5ee6a161eb9000` |
 | Secondary hover | `semantic/background/secondary/hover` | `#f9fafb` | `e9418957d9a570a9133552a41d435bcfcd6630a4` |
-| Фон страницы | `semantic/background/neutral/subtlest/normal` | `#f3f4f6` | `e7129860062f42ee2a929d1b4ccacd21133a03ee` |
-| Hover фон строки/элемента | `semantic/background/neutral/subtler/normal` | `#e5e7eb` | `1aed8505fcfaec5aacd4ac43b4eb62d8315caa0a` |
-| Active / selected фон | `semantic/background/neutral/subtler/active` | `#b4bac4` | `1a1a6de3d3bb6304c68869a7db1bfd5658695774` |
-| Белая карточка / поверхность | `semantic/background/neutral/inverse/normal` | `#ffffff` | `567811a0cf497ac911288a2f4a75a1d89ebff75c` |
-| Ghost / почти белый | `semantic/background/neutral/ghost/normal` | `#f9fafb` | `e50636958c4d5a6917b4fb1e32a7de92ded72f85` |
-| Нейтральный badge / chip | `semantic/background/neutral/normal` | `#99a1af` | `01bbed7125f0fa610a421711fb670d72a21014e5` |
-| Тёмный фон (тултип, тёмная панель) | `semantic/background/neutral/strong/normal` | `#364153` | `564caa1c22a439e48f95d0889b5727223c3d262b` |
-| Очень тёмный (header dark) | `semantic/background/neutral/stronger/normal` | `#1e2939` | `74422cce02374b81e78b25d3ada0c712df2000bc` |
-| Самый тёмный (NEW) | `semantic/background/neutral/strongest/normal` | `#030712` | `c333f09404a045345a75f250a83bb997a59bf827` |
-| Брендовый синий фон | `semantic/background/blue/normal` | `#2563eb` | `b8461123ae0a13a548648c57112a63bf29f325fb` |
-| Синий tint (info badge bg) | `semantic/background/blue/subtler/normal` | `#dbeafe` | `67b521915a469a59c4fed6983b066c78dccdd017` |
-| Синий subtlest (info banner bg) | `semantic/background/blue/subtlest/normal` | `#eff6ff` | `1b7a0a9eaf438cccb537035c63dfb60c77ee7223` |
-| Success / green фон | `semantic/background/green/normal` | `#16a34a` | `5e61aee5fda078acea6c3d78afee4109382d00a7` |
+| Page background | `semantic/background/neutral/subtlest/normal` | `#f3f4f6` | `e7129860062f42ee2a929d1b4ccacd21133a03ee` |
+| Row/element hover background | `semantic/background/neutral/subtler/normal` | `#e5e7eb` | `1aed8505fcfaec5aacd4ac43b4eb62d8315caa0a` |
+| Active / selected background | `semantic/background/neutral/subtler/active` | `#b4bac4` | `1a1a6de3d3bb6304c68869a7db1bfd5658695774` |
+| White card / surface | `semantic/background/neutral/inverse/normal` | `#ffffff` | `567811a0cf497ac911288a2f4a75a1d89ebff75c` |
+| Ghost / near-white | `semantic/background/neutral/ghost/normal` | `#f9fafb` | `e50636958c4d5a6917b4fb1e32a7de92ded72f85` |
+| Neutral badge / chip | `semantic/background/neutral/normal` | `#99a1af` | `01bbed7125f0fa610a421711fb670d72a21014e5` |
+| Dark background (tooltip, dark panel) | `semantic/background/neutral/strong/normal` | `#364153` | `564caa1c22a439e48f95d0889b5727223c3d262b` |
+| Very dark (header dark) | `semantic/background/neutral/stronger/normal` | `#1e2939` | `74422cce02374b81e78b25d3ada0c712df2000bc` |
+| Darkest (NEW) | `semantic/background/neutral/strongest/normal` | `#030712` | `c333f09404a045345a75f250a83bb997a59bf827` |
+| Brand blue background | `semantic/background/blue/normal` | `#2563eb` | `b8461123ae0a13a548648c57112a63bf29f325fb` |
+| Blue tint (info badge bg) | `semantic/background/blue/subtler/normal` | `#dbeafe` | `67b521915a469a59c4fed6983b066c78dccdd017` |
+| Blue subtlest (info banner bg) | `semantic/background/blue/subtlest/normal` | `#eff6ff` | `1b7a0a9eaf438cccb537035c63dfb60c77ee7223` |
+| Success / green background | `semantic/background/green/normal` | `#16a34a` | `5e61aee5fda078acea6c3d78afee4109382d00a7` |
 | Success tint | `semantic/background/green/subtlest/normal` | `#f0fdf4` | `19544f30618b8916849f4654b1ca0acbb80f95c1` |
-| Danger / red фон | `semantic/background/red/normal` | `#dc2626` | `077e0b2e9bd8ee1412c3bb31b31b9264670c983a` |
+| Danger / red background | `semantic/background/red/normal` | `#dc2626` | `077e0b2e9bd8ee1412c3bb31b31b9264670c983a` |
 | Danger tint | `semantic/background/red/subtlest/normal` | `#fef2f2` | `5d84b7ea04f1a13c5ea348160d051bdc0adcf5a6` |
-| Warning / yellow фон | `semantic/background/yellow/normal` | `#d27a0a` | `d8abaea542d9cd3b953c3410626eac9f499e05b1` |
+| Warning / yellow background | `semantic/background/yellow/normal` | `#d27a0a` | `d8abaea542d9cd3b953c3410626eac9f499e05b1` |
 | Warning tint | `semantic/background/yellow/subtlest/normal` | `#fffbeb` | `f65302a79ce509d4d324e533c1e36fc1c3e9fc9e` |
-| AI / purple фон | `semantic/background/purple/normal` | `#9333ea` | `316588613a4d6d731eed49aedc54a069c1c7c461` |
+| AI / purple background | `semantic/background/purple/normal` | `#9333ea` | `316588613a4d6d731eed49aedc54a069c1c7c461` |
 | AI tint | `semantic/background/purple/subtlest/normal` | `#faf5ff` | `563db9da4b0d8225c41f27dfbc3e547505c51296` |
 
 ---
 
 ### Stroke/Border Variable Map
 
-> **ВСЕГДА используй semantic/border токены для кастомных бордеров.**
+> **ALWAYS use semantic/border tokens for custom borders.**
 
-> 🔄 **Обновлено 2026-06-01.** Hex изменились (Tailwind), ключи стабильны. НОВОЕ: `primary`/`secondary`/`strongest` границы. Red/yellow ключи теперь подтверждены сканом.
+> 🔄 **Updated 2026-06-01.** Hex values changed (Tailwind), keys are stable. NEW: `primary`/`secondary`/`strongest` borders. Red/yellow keys are now confirmed by scan.
 
-| Контекст | Переменная | Hex | importVariableByKeyAsync key |
+| Context | Variable | Hex | importVariableByKeyAsync key |
 |---|---|---|---|
-| Стандартный бордер (input, card) | `semantic/border/neutral/normal` | `#99a1af` | `6618868be488e538a0d5a0002206439e45c3cfbe` |
-| Чуть тоньше (subtle card) | `semantic/border/neutral/subtle/normal` | `#b4bac4` | `3ac6f9a55d66cd4435e64ad0fa7287b40da52980` |
-| Тонкий разделитель | `semantic/border/neutral/subtler/normal` | `#d1d5dc` | `806f4dce0b78f55df4ab1d126160091d6dd67fd2` |
-| Тончайший (ghost) | `semantic/border/neutral/subtlest/normal` | `#e5e7eb` | `40baade65c87f4b56fd67b027ec695d0984fae39` |
-| Hover бордер | `semantic/border/neutral/hover` | `#6a7282` | `7885773a706d511d5dca718333005107d4816534` |
-| Disabled бордер | `semantic/border/neutral/disabled` | `#d1d5dc` | `da7e67323128d731bb84df6e22a87487cec5fe7c` |
-| Сильный бордер | `semantic/border/neutral/strong/normal` | `#1e2939` | `f829e1000307bd7bfeabdcdaa80144a8f56a5ec1` |
-| Максимальный бордер (NEW) | `semantic/border/neutral/strongest/normal` | `#030712` | `1e990cc28bd2e093417cf5a6b791f87a85180512` |
-| **Primary бордер (чёрный)** | `semantic/border/primary/normal` | `#030712` | `a3bf1de7f916eeffb9160baf0a53af18108e1c0d` |
-| Secondary бордер | `semantic/border/secondary/normal` | `#d1d5dc` | `f5d6b5056fceb4fd437815865ba3049256522b07` |
-| Focus / selected бордер | `semantic/border/blue/focused` | `#2563eb` | `e6f6ed10a5a1432e92b67c3ed500db24a366c7c0` |
+| Standard border (input, card) | `semantic/border/neutral/normal` | `#99a1af` | `6618868be488e538a0d5a0002206439e45c3cfbe` |
+| Slightly lighter (subtle card) | `semantic/border/neutral/subtle/normal` | `#b4bac4` | `3ac6f9a55d66cd4435e64ad0fa7287b40da52980` |
+| Thin divider | `semantic/border/neutral/subtler/normal` | `#d1d5dc` | `806f4dce0b78f55df4ab1d126160091d6dd67fd2` |
+| Thinnest (ghost) | `semantic/border/neutral/subtlest/normal` | `#e5e7eb` | `40baade65c87f4b56fd67b027ec695d0984fae39` |
+| Hover border | `semantic/border/neutral/hover` | `#6a7282` | `7885773a706d511d5dca718333005107d4816534` |
+| Disabled border | `semantic/border/neutral/disabled` | `#d1d5dc` | `da7e67323128d731bb84df6e22a87487cec5fe7c` |
+| Strong border | `semantic/border/neutral/strong/normal` | `#1e2939` | `f829e1000307bd7bfeabdcdaa80144a8f56a5ec1` |
+| Strongest border (NEW) | `semantic/border/neutral/strongest/normal` | `#030712` | `1e990cc28bd2e093417cf5a6b791f87a85180512` |
+| **Primary border (black)** | `semantic/border/primary/normal` | `#030712` | `a3bf1de7f916eeffb9160baf0a53af18108e1c0d` |
+| Secondary border | `semantic/border/secondary/normal` | `#d1d5dc` | `f5d6b5056fceb4fd437815865ba3049256522b07` |
+| Focus / selected border | `semantic/border/blue/focused` | `#2563eb` | `e6f6ed10a5a1432e92b67c3ed500db24a366c7c0` |
 | Subtle blue (info border) | `semantic/border/blue/subtler/normal` | `#bfdbfe` | `37b18508b991694255a605e1093fbbc37eeb0094` |
-| Success бордер | `semantic/border/green/normal` | `#16a34a` | `ba3ad2401fab180a6735e38b83e2349d160d2898` |
-| Error бордер | `semantic/border/red/normal` | `#dc2626` | `73c46201db402b9aaaa756e9c25e0be4521b3a1b` |
-| Warning бордер | `semantic/border/yellow/normal` | `#d27a0a` | `7f35ef388d2fef4fbbeabad45c05f88a69b013e4` |
+| Success border | `semantic/border/green/normal` | `#16a34a` | `ba3ad2401fab180a6735e38b83e2349d160d2898` |
+| Error border | `semantic/border/red/normal` | `#dc2626` | `73c46201db402b9aaaa756e9c25e0be4521b3a1b` |
+| Warning border | `semantic/border/yellow/normal` | `#d27a0a` | `7f35ef388d2fef4fbbeabad45c05f88a69b013e4` |
 
 ---
 
 ### Icon Variable Map
 
-> **ВСЕГДА используй semantic/icon токены для кастомных иконок.**
+> **ALWAYS use semantic/icon tokens for custom icons.**
 
-> 🔄 **Обновлено 2026-06-01.** Hex изменились (Tailwind), ключи стабильны. НОВОЕ: `icon/neutral/stronger`, `icon/neutral/white`.
+> 🔄 **Updated 2026-06-01.** Hex values changed (Tailwind), keys are stable. NEW: `icon/neutral/stronger`, `icon/neutral/white`.
 
-| Контекст | Переменная | Hex | importVariableByKeyAsync key |
+| Context | Variable | Hex | importVariableByKeyAsync key |
 |---|---|---|---|
-| Обычная иконка | `semantic/icon/neutral/normal` | `#364153` | `e35494985a3c9f6ef974c23c58c338bf0fb11443` |
-| Hover иконка | `semantic/icon/neutral/hover` | `#6a7282`* | `604c812ce021ceeeccd873b0204bee7ff58b8d4b` |
+| Regular icon | `semantic/icon/neutral/normal` | `#364153` | `e35494985a3c9f6ef974c23c58c338bf0fb11443` |
+| Hover icon | `semantic/icon/neutral/hover` | `#6a7282`* | `604c812ce021ceeeccd873b0204bee7ff58b8d4b` |
 | Active / emphasized | `semantic/icon/neutral/strong/normal` | `#1e2939` | `706cebf845beae79e5726b61bc8411703bd04175` |
-| Максимально тёмная (NEW) | `semantic/icon/neutral/stronger/normal` | `#030712` | `0f09f7c82e1c3afb3659c4652fa5c11d0db3dd92` |
-| Disabled иконка | `semantic/icon/neutral/disabled` | `#99a1af`* | `d0714207b6710ecffa2b5958668c70ace5e5f1fb` |
-| Subtle иконка | `semantic/icon/neutral/subtle/normal` | `#4a5565` | `cb52f38ef58a27fa2ce30ded713d0470492c84f2` |
-| Subtler иконка | `semantic/icon/neutral/subtler/normal` | `#6a7282` | `58308f222b5599930525c12c7d3c9e356e0a618d` |
-| Subtlest иконка | `semantic/icon/neutral/subtlest/normal` | `#99a1af` | `d39afef460e8358bc600f538d70ac509385a50ba` |
-| Иконка на тёмном фоне | `semantic/icon/neutral/inverse/normal` | `#ffffff` | `3245c7c914e9ab1063a4e6424f30d94dcec5b4dc` |
-| Белая иконка (NEW) | `semantic/icon/neutral/white` | `#ffffff` | `d18ac8034d3b262a449e070d79f85d09b9b760f8` |
-| Brand / action иконка | `semantic/icon/blue/normal` | `#2563eb` | `7c2e75c6ed6dcf3596a4828a6638528a953ded1e` |
-| Success иконка | `semantic/icon/green/normal` | `#16a34a` | `746f67cb4b38ea9258722e796342ddfe1a301b30` |
-| Error иконка | `semantic/icon/red/normal` | `#dc2626` | `dc734f4b51dc0bd42987b4b5121970b91c3ca150` |
-| Warning иконка | `semantic/icon/yellow/normal` | `#d27a0a` | `8d50d16155085852ffbee57f04a1f0a8b6de6e31` |
-| AI / feature иконка | `semantic/icon/purple/normal` | `#9333ea` | `724270636299c0a73bcb56fe72ea338de23eb1eb` |
+| Darkest (NEW) | `semantic/icon/neutral/stronger/normal` | `#030712` | `0f09f7c82e1c3afb3659c4652fa5c11d0db3dd92` |
+| Disabled icon | `semantic/icon/neutral/disabled` | `#99a1af`* | `d0714207b6710ecffa2b5958668c70ace5e5f1fb` |
+| Subtle icon | `semantic/icon/neutral/subtle/normal` | `#4a5565` | `cb52f38ef58a27fa2ce30ded713d0470492c84f2` |
+| Subtler icon | `semantic/icon/neutral/subtler/normal` | `#6a7282` | `58308f222b5599930525c12c7d3c9e356e0a618d` |
+| Subtlest icon | `semantic/icon/neutral/subtlest/normal` | `#99a1af` | `d39afef460e8358bc600f538d70ac509385a50ba` |
+| Icon on dark background | `semantic/icon/neutral/inverse/normal` | `#ffffff` | `3245c7c914e9ab1063a4e6424f30d94dcec5b4dc` |
+| White icon (NEW) | `semantic/icon/neutral/white` | `#ffffff` | `d18ac8034d3b262a449e070d79f85d09b9b760f8` |
+| Brand / action icon | `semantic/icon/blue/normal` | `#2563eb` | `7c2e75c6ed6dcf3596a4828a6638528a953ded1e` |
+| Success icon | `semantic/icon/green/normal` | `#16a34a` | `746f67cb4b38ea9258722e796342ddfe1a301b30` |
+| Error icon | `semantic/icon/red/normal` | `#dc2626` | `dc734f4b51dc0bd42987b4b5121970b91c3ca150` |
+| Warning icon | `semantic/icon/yellow/normal` | `#d27a0a` | `8d50d16155085852ffbee57f04a1f0a8b6de6e31` |
+| AI / feature icon | `semantic/icon/purple/normal` | `#9333ea` | `724270636299c0a73bcb56fe72ea338de23eb1eb` |
 
-> `*` hover/disabled hex — приближение по шкале (точное значение резолвится по ключу в рантайме; ключ стабилен).
+> `*` hover/disabled hex — approximation on the scale (exact value resolves by key at runtime; the key is stable).
 
 ---
 
-### Dark Mode (NEW в redesign 2026-06-01)
+### Dark Mode (NEW in the 2026-06-01 redesign)
 
-Коллекция `color` теперь имеет два режима: **Light** и **Dark**. **Тот же semantic-ключ резолвится в разный hex по режиму** — ты биндишь переменную по ключу как обычно, а цвет адаптируется автоматически в зависимости от mode фрейма/страницы.
+The `color` collection now has two modes: **Light** and **Dark**. **The same semantic key resolves to a different hex per mode** — you bind the variable by key as usual, and the color adapts automatically depending on the frame/page mode.
 
-| Токен | Light | Dark |
+| Token | Light | Dark |
 |---|---|---|
 | `semantic/text/neutral/default` | `#1e2939` | `#c8cbcd` |
 | `semantic/text/neutral/strong` | `#030712` | `#f7f7f7` |
@@ -1787,26 +1787,26 @@ instance.fills = [figma.variables.setBoundVariableForPaint(
 | `semantic/background/neutral/subtlest/normal` (page bg) | `#f3f4f6` | `#26282a` |
 | `semantic/background/neutral/inverse/normal` (card) | `#ffffff` | `#1a1b1c` |
 | `semantic/background/secondary/normal` | `#ffffff` | `#202123` |
-| `semantic/background/primary/normal` (CTA) | `#030712` | `#f7f7f7` (инвертится!) |
+| `semantic/background/primary/normal` (CTA) | `#030712` | `#f7f7f7` (inverts!) |
 | `semantic/border/neutral/normal` | `#99a1af` | `#3d4045` |
 | `semantic/text/blue/normal` | `#2563eb` | `#4c7ef0` |
 
-**Как строить Dark-макет:** биндишь те же semantic-ключи (Light hex в таблицах выше — справочные), затем переключаешь режим коллекции на фрейме:
+**How to build a Dark mockup:** bind the same semantic keys (Light hex in the tables above is for reference), then switch the collection mode on the frame:
 ```js
 const col = (await figma.variables.getLocalVariableCollectionsAsync()).find(c=>c.name==="color");
 const darkMode = col.modes.find(m=>m.name==="Dark").modeId;
-frame.setExplicitVariableModeForCollection(col, darkMode); // весь фрейм рендерится в Dark
+frame.setExplicitVariableModeForCollection(col, darkMode); // entire frame renders in Dark
 ```
-По умолчанию строй Light, если пользователь явно не просит Dark. Не хардкодь Dark hex — биндь ключ + переключай режим.
+Build Light by default unless the user explicitly asks for Dark. Do not hardcode Dark hex — bind the key + switch the mode.
 
 ---
 
-### Подтверждённые Variable IDs
+### Confirmed Variable IDs
 
-> ⚠️ **ВАЖНО: IDs нестабильны между файлами.** Numeric часть ID (`21365:*`, `17587:*`) меняется от файла к файлу.
-> **Правильный способ найти рабочий ID** — пройти alias-цепочку от доступного компонентного токена до конечного base значения.
+> ⚠️ **IMPORTANT: IDs are unstable between files.** The numeric part of the ID (`21365:*`, `17587:*`) changes from file to file.
+> **The correct way to find a working ID** — walk the alias chain from an accessible component token down to the final base value.
 
-#### Алгоритм поиска рабочего ID в consuming файле:
+#### Algorithm for finding a working ID in a consuming file:
 ```js
 function toHex(val) {
   if (!val || typeof val !== 'object' || !('r' in val)) return null;
@@ -1828,22 +1828,22 @@ function resolveChain(varId, depth = 0) {
   }
   return null;
 }
-// Стартуй от известного компонентного токена (например button/secondary/default/text-normal)
-// и иди по цепочке — финальный ID будет рабочим для данного файла.
-// Пример: найти working ID для base/neutral/90:
+// Start from a known component token (e.g. button/secondary/default/text-normal)
+// and follow the chain — the final ID will be the working one for this file.
+// Example: find the working ID for base/neutral/90:
 // resolveChain("VariableID:17611:2791") // button/secondary/default/text-normal → ... → base/neutral/90
 ```
 
-#### Confirmed IDs для auth файла (`y1hyKhSvpv1wjP8k5rcdP1`)
-| Переменная | Hex | ID в auth файле |
+#### Confirmed IDs for the auth file (`y1hyKhSvpv1wjP8k5rcdP1`)
+| Variable | Hex | ID in the auth file |
 |---|---|---|
 | `base/neutral/90` | `#373d4d` | `VariableID:fd45645c41a7370823a60c94992fa8eee7efd24d/17587:7737` |
 | `base/neutral/70` | `#7d8799` | `VariableID:48fc5d3905940c8ad53ed40fa6ae9f55905ed751/17587:7555` |
 | `base/neutral/30` | `#e1e5ea` | `VariableID:66a9ccb4e1d745b142af46730c734eb2d738e454/21365:136` |
 | `base/blue/50` | `#1764ff` | `VariableID:bb75e253560dc7b3f54de0123ed73dd7bc7fb309/17601:471` |
 
-#### НЕ РАБОТАЕТ: Source file IDs напрямую
-> Никогда не применяй `VariableID:17587:107968` (source IDs в формате `VariableID:{numericId}:{numericId}`) — Figma принимает их без ошибки, но текст становится **невидимым**.
+#### DOES NOT WORK: Source file IDs directly
+> Never apply `VariableID:17587:107968` (source IDs in the `VariableID:{numericId}:{numericId}` format) — Figma accepts them without an error, but the text becomes **invisible**.
 
 ---
 
@@ -1870,15 +1870,15 @@ function resolveChain(varId, depth = 0) {
 
 ## Usage Notes for Claude Code
 
-1. **Cover sections — игнорировать при ревью и аудите.** Фреймы с именем `Cover`, `Overview`, `.Cover`, `_Cover` или находящиеся на странице `Overview` — декоративные, к ним не применяются правила переменных и text styles
-2. **"Task context" — игнорировать при ревью и аудите.** Инстансы с именем `Task context` пропускать полностью — не проверять переменные, заливки, text styles внутри них
+1. **Cover sections — ignore during review and audit.** Frames named `Cover`, `Overview`, `.Cover`, `_Cover` or located on the `Overview` page are decorative; variable and text-style rules do not apply to them
+2. **"Task context" — ignore during review and audit.** Skip instances named `Task context` entirely — do not check variables, fills, or text styles inside them
 2. **Before creating any design:** Run `search_design_system` to check for newer component versions
 2. **Component keys change** after major redesigns — re-run `/figma-ds-init` after design system updates
 3. **Prefer `Base components [Dashboard UI Kit]`** for Dashboard/web screens; use `WebSDK UI Kit` for SDK flows
 4. **Do NOT use `Redesign components`** (fileKey: `MDOnxIRFpmo1PApWWULLiH`) — use Base components equivalents
-5. **Для TEXT нод** — используй `semantic/text/*` ключи из таблицы "Text Variable Map". Никогда не используй base ключи (`base/neutral/90` и т.д.) напрямую
-6. **Для фонов и бордеров** — используй `semantic/background/*` и `semantic/border/*` ключи из таблиц "Background/Surface Variable Map" и "Stroke/Border Variable Map"
-7. **Semantic переменные импортируются напрямую** через `figma.variables.importVariableByKeyAsync(semanticKey)` — у них есть собственные ключи. Base ключи использовать не нужно
+5. **For TEXT nodes** — use `semantic/text/*` keys from the "Text Variable Map" table. Never use base keys (`base/neutral/90`, etc.) directly
+6. **For backgrounds and borders** — use `semantic/background/*` and `semantic/border/*` keys from the "Background/Surface Variable Map" and "Stroke/Border Variable Map" tables
+7. **Semantic variables are imported directly** via `figma.variables.importVariableByKeyAsync(semanticKey)` — they have their own keys. Base keys are not needed
 
 ---
 

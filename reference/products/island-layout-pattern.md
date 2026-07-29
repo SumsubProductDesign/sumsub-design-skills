@@ -72,7 +72,7 @@ Layout math:
 
 ### Build approach — INSTANTIATE the `Page` component + fill its slot. NEVER detach, NEVER hand-build (except fallback).
 
-🛑 **The layout must be a live `Page` component INSTANCE with content placed into its slot — do NOT detach the instance, and do NOT assemble the island from raw frames.** (Костя 2026-06-15: *"нужно, чтобы скил использовал инстанс компонента лейаута, а не детачил его и заменял слот на нужный контент"*.)
+🛑 **The layout must be a live `Page` component INSTANCE with content placed into its slot — do NOT detach the instance, and do NOT assemble the island from raw frames.** (user feedback 2026-06-15: *"the skill must use an instance of the layout component, not detach it and replace the slot with the needed content"*.)
 
 **Preferred (canonical) path:**
 ```js
@@ -130,7 +130,7 @@ The recurring failure: the skill keeps **hand-building the island from raw frame
 
 Both are the SAME `*Header*` set (`387e2cf6…`, `Version=New`); the `Type` variant differs:
 
-| | 1st level (обычный) | 2nd level (хлебные крошки) |
+| | 1st level (regular) | 2nd level (breadcrumbs) |
 |---|---|---|
 | Header `Type` variant | **`Generic`** | **`Fullscreen (Future main version)`** |
 | Variant key | `64ebf8f14b269eb122b7ce2edeef2ea65149f553` | `1dd023284d167fbcd71bd862294ff4028a7b5be0` |
@@ -197,7 +197,7 @@ Two modes: **in-place** (transform the existing frame; simulates "apply new layo
 
 **Placement:** migrated output goes on the SOURCE's page, NOT `figma.currentPage` (which is a reflex from dashboard/websdk builders → lands on the wrong page). For a copy: `clone()` then append to the source's page, positioned clear of the source. For in-place: don't move.
 
-> 🛑 **If you create a wrapper SECTION for copy/build output, the screens MUST be its CHILDREN — `section.appendChild(inst)`.** Failure mode (KYC "Configurations" build 2026-06-15): the skill created a `(made by Claude)` section but left the 5 `Page` instances as **page-level siblings BESIDE it** — so the section looked empty and the user asked *"скил считает, что сделал что-то?"* (did the skill do anything?). A Section does NOT adopt frames by geometric overlap; you must explicitly `appendChild`. Procedure: create the section → for each screen `section.appendChild(inst)` → lay them out in a row (fixed gap, e.g. `inst.x = col*(1440+GAP)`, coords are RELATIVE to the section once parented) → then confirm the section's bounds actually enclose every screen. Do NOT create a section and add the instances to the page.
+> 🛑 **If you create a wrapper SECTION for copy/build output, the screens MUST be its CHILDREN — `section.appendChild(inst)`.** Failure mode (KYC "Configurations" build 2026-06-15): the skill created a `(made by Claude)` section but left the 5 `Page` instances as **page-level siblings BESIDE it** — so the section looked empty and the user asked (user feedback): *"does the skill think it actually did something?"*. A Section does NOT adopt frames by geometric overlap; you must explicitly `appendChild`. Procedure: create the section → for each screen `section.appendChild(inst)` → lay them out in a row (fixed gap, e.g. `inst.x = col*(1440+GAP)`, coords are RELATIVE to the section once parented) → then confirm the section's bounds actually enclose every screen. Do NOT create a section and add the instances to the page.
 
 ### 🛑 Preservation principle — a migration RESKINS + REFRAMES, it NEVER rebuilds from scratch
 Keep EVERY original element: the header (re-skin via the Version flip, §3 — keeps its tabs/buttons/title/breadcrumb), the content, and ALL overlays (toasts, dropdowns, notes). Losing the subheader tabs, the header action buttons, or the toast messages = FAIL. Do not delete-and-recreate any of them; restructure what's already there.
