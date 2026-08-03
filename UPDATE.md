@@ -55,3 +55,14 @@ Reply `yes` and the skill runs the commands for you. The next tool call picks up
 - **"command not found: claude"** — the CLI isn't on your PATH. See `INSTALL.md` section "Part 1" for PATH setup.
 - **"Failed to update marketplace"** — check your network, try again. Or run the commands in a regular terminal as a fallback.
 - **Version didn't change** — try a fresh chat to force plugin reload, or as a last resort fully quit and relaunch Claude Desktop.
+
+## Dual-publish to the corporate GitLab marketplace
+
+The plugin is mirrored to `git.sumsub.net/internal-tools/claude-marketplace` (installable as `sumsub-design@sumsub-internal-marketplace`). GitHub is the upstream source of truth. After every release pushed to GitHub main, run:
+
+```bash
+./scripts/sync-to-gitlab.sh "One-line summary of the release"
+```
+
+It copies the plugin content into the local GitLab clone (`~/claude-marketplace-gitlab`), adds the marketplace CHANGELOG entry, validates, and pushes a branch that auto-opens an MR.
+
