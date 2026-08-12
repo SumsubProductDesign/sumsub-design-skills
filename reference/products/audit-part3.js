@@ -1,4 +1,4 @@
-// ===== AUDIT SEGMENT 3/3 (7.48 → end) =====
+// ===== AUDIT SEGMENT 3/3 (7.48 → end, minus 7.44 — moved to part 2 for size) =====
 // Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
 // After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
@@ -75,119 +75,6 @@ const sidebar = root.findOne(n =>
     const expectedBodyW = 1440 - summaryW;
     if (Math.abs(bodyInstance.width - expectedBodyW) > 2) {
       issues.push(`7.48 ap-body-width: frame "${root.name}" Body instance width=${Math.round(bodyInstance.width)} ≠ canonical ${expectedBodyW} (1440 − Summary.width ${summaryW}). Agent likely kept the organism's intrinsic width. Resize: bodyInstance.resize(${expectedBodyW}, bodyInstance.height). Banned class: "kept at intrinsic to avoid distorting nested cards".`);
-    }
-  }
-}
-
-// 7.44. Case page (Pattern B) — Frame 270990504 wrapper + Container + Tab Basic alignment.
-// ⚠️ v3.148: measurements updated to CURRENT canonical (drift confirmed via
-// get_metadata on 4045:2323380, 2026-05-22). The pre-v3.146 layout (header
-// at (0,0,1440,88), wrapper at (0,96,992,804), right col at (992,96)) is DEAD.
-// Current canonical has a 52px collapsed Sidebar at (0,0), shifting everything:
-//   root.children = [
-//     *Sidebar* (52×900 @ 0,0, Type=Case management Collapsed=True),
-//     Case page header (1388×88 @ 52,0),
-//     Frame 270990504 (964×812 @ 52,88, FRAME, VERTICAL, no padding, clipsContent, FIXED height) {
-//       Subheader (964×56, padding 32/32/0/1, CENTER/MAX align) { *Tab Basic* @ x=32 (FILL) },
-//       Container (964×scroll, padding 32/24/24/24, itemSpacing 24) { Overview content @ 908 }
-//     },
-//     Case page right column (424×812 @ 1016,88)
-//   ]
-// Layout sum: 52 + 964 + 424 = 1440. This block folds in the former prose
-// checklist #9 (wrapper.height FIXED + Tab Basic.x==32) so the runnable
-// verbatim script actually asserts them. See case-management-pattern.md.
-//
-// Trigger: any frame whose first-level INSTANCE child is `Case page header`.
-{
-  const casePageHeaders = root.findAll(n =>
-    n.type === "INSTANCE" &&
-    n.mainComponent?.parent?.name === "Case page header"
-  );
-  for (const cph of casePageHeaders) {
-    const screen = cph.parent;
-    if (!screen) continue;
-
-    // 7.44a — header position (post-drift: x=52, 1388×88)
-    if (Math.abs(cph.x - 52) > 0.5 || Math.abs(cph.y) > 0.5) {
-      issues.push(`Pattern B "${screen.name}": Case page header at (${Math.round(cph.x)},${Math.round(cph.y)}) — must be at (52, 0) (after the 52px Sidebar).`);
-    }
-    if (Math.abs(cph.width - 1388) > 0.5 || Math.abs(cph.height - 88) > 0.5) {
-      issues.push(`Pattern B "${screen.name}": Case page header is ${Math.round(cph.width)}×${Math.round(cph.height)} — must be 1388×88.`);
-    }
-
-    // 7.44b — left wrapper presence + position + FIXED height
-    const leftWrapper = screen.children.find(c =>
-      c.type === "FRAME" && (c.name === "Frame 270990504" || /Frame\s*\d+/.test(c.name))
-    );
-    if (!leftWrapper) {
-      issues.push(`Pattern B "${screen.name}": missing left wrapper FRAME (expected name "Frame 270990504"). Don't drop "Case page Overview tab content" directly into root — it must be wrapped in Frame 270990504 → Container with proper paddings. See case-management-pattern.md.`);
-    } else {
-      if (Math.abs(leftWrapper.x - 52) > 0.5 || Math.abs(leftWrapper.y - 88) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": left wrapper at (${Math.round(leftWrapper.x)},${Math.round(leftWrapper.y)}) — must be (52, 88) (after Sidebar, flush below 88px header, NO gap).`);
-      }
-      if (Math.abs(leftWrapper.width - 964) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": left wrapper width=${Math.round(leftWrapper.width)} — must be 964 (1440 − 52 Sidebar − 424 right col).`);
-      }
-      // folded from prose #9: wrapper MUST be FIXED at 812, not auto-grown to wrap 2400+px Container
-      if (leftWrapper.height > 900) {
-        issues.push(`Pattern B "${screen.name}": left wrapper height=${Math.round(leftWrapper.height)} — must be 812. Wrapper grew because layoutSizingVertical was not set to FIXED after appendChild; it hugged the Container's 2400+px content. Set clipsContent=true + FIXED height 812.`);
-      } else if (Math.abs(leftWrapper.height - 812) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": left wrapper height=${Math.round(leftWrapper.height)} — must be 812.`);
-      }
-
-      // 7.44c — Subheader inside left wrapper + Tab Basic left-alignment (folded from #9)
-      const subheader = leftWrapper.children.find(c => c.type === "FRAME" && /Subheader/i.test(c.name));
-      if (!subheader) {
-        issues.push(`Pattern B "${screen.name}": left wrapper has no Subheader FRAME. Required: HORIZONTAL frame named ".Header Full Screen Page / Subheader", padding 32/32/0/1, CENTER/MAX alignment, containing *Tab Basic* with 6 tabs.`);
-      } else {
-        const padOK = subheader.paddingLeft === 32 && subheader.paddingRight === 32;
-        if (!padOK) {
-          issues.push(`Pattern B "${screen.name}": Subheader paddings are L=${subheader.paddingLeft}/R=${subheader.paddingRight} — must be L=32, R=32.`);
-        }
-        if (subheader.primaryAxisAlignItems !== "CENTER" || subheader.counterAxisAlignItems !== "MAX") {
-          issues.push(`Pattern B "${screen.name}": Subheader alignment is ${subheader.primaryAxisAlignItems}/${subheader.counterAxisAlignItems} — must be CENTER/MAX (anchors Tab Basic to bottom at y=23).`);
-        }
-        // folded from prose #9: Tab Basic MUST be FILL → left-aligned at x=32, not centered at ~224
-        const tabBasic = subheader.findOne(n => n.type === "INSTANCE" && /\*?Tab Basic\*?/.test(n.name));
-        if (tabBasic && tabBasic.x > 50) {
-          issues.push(`Pattern B "${screen.name}": *Tab Basic* at x=${Math.round(tabBasic.x)} — must be x=32 (left-aligned). Tab Basic was not set to layoutSizingHorizontal="FILL", so Subheader's CENTER alignment centered the HUG-sized strip (~224.5 in a 964 wrapper).`);
-        }
-      }
-
-      // 7.44d — Container inside left wrapper
-      const container = leftWrapper.children.find(c => c.type === "FRAME" && c.name === "Container");
-      if (!container) {
-        issues.push(`Pattern B "${screen.name}": left wrapper has no Container FRAME. Required: VERTICAL frame named "Container", paddings 32/32/24/24 (L/R/T/B), itemSpacing 24, holding "Case page Overview tab content" at width 908 (FIXED; overflows the 900 content box by 8 → 24px visual right gutter).`);
-      } else {
-        // v3.153: pR=32 (was wrongly 24). Verified canonical Container 4045:2323405: L=R=32 (spacing/3xl), T=B=24 (spacing/2xl).
-        const expectedPads = { paddingLeft: 32, paddingRight: 32, paddingTop: 24, paddingBottom: 24 };
-        for (const [side, expected] of Object.entries(expectedPads)) {
-          if (container[side] !== expected) {
-            issues.push(`Pattern B "${screen.name}": Container ${side} = ${container[side]} — must be ${expected}. (Canonical Case page Container paddings: L=32, R=32, T=24, B=24, itemSpacing=24.)`);
-          }
-        }
-        if (container.itemSpacing !== 24) {
-          issues.push(`Pattern B "${screen.name}": Container itemSpacing = ${container.itemSpacing} — must be 24.`);
-        }
-      }
-    }
-
-    // 7.44e — right column position (post-drift: x=1016, 424×812)
-    const rightCol = screen.children.find(c =>
-      c.type === "INSTANCE" && c.mainComponent?.name === "Case page right column"
-    );
-    if (rightCol) {
-      if (Math.abs(rightCol.x - 1016) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": Case page right column at x=${Math.round(rightCol.x)} — must be x=1016 (52 Sidebar + 964 wrapper). Right edge 1016+424=1440, flush with canvas edge, NO right margin in current canonical.`);
-      }
-      if (Math.abs(rightCol.y - 88) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": Case page right column at y=${Math.round(rightCol.y)} — must be y=88 (vertically aligned with left wrapper).`);
-      }
-      if (Math.abs(rightCol.width - 424) > 0.5 || Math.abs(rightCol.height - 812) > 0.5) {
-        issues.push(`Pattern B "${screen.name}": Case page right column is ${Math.round(rightCol.width)}×${Math.round(rightCol.height)} — must be 424×812.`);
-      }
-    } else {
-      issues.push(`Pattern B "${screen.name}": no Case page right column instance found. Pattern B requires it at (1016, 88) with 424×812.`);
     }
   }
 }
@@ -787,6 +674,46 @@ if (productContext === "tm") {
   if (hits.length) {
     const uniq = [...new Set(hits)];
     issues.push(`7.59 status-as-bare-text: ${hits.length} table cell(s) render a status value as plain TEXT (${uniq.slice(0,6).join(", ")}) instead of a *Status* pill. Set the cell Type to "Status" and configure the nested *Status* instance (label + color variant). Roles (Admin/Member/Owner) are exempt — only status words are flagged.`);
+  }
+}
+
+// 7.60. Table Starter — header columns must line up with row columns (v3.203).
+// `*Table Starter*` is SLOT-based and exposes NO column-count property, so the only
+// way to drop the checkbox (40px) / trailing (136px) columns is `.visible = false`.
+// Hiding REMOVES the child from the slot, so the survivors redistribute — do it on
+// one side only and every header label ends up over the wrong column.
+// Observed: Applicants-breakdown build 2026-08-12 — header 5×227px vs rows 5×200px,
+// invisible to every other check (no TEXT leak, no overflow, no hidden content).
+{
+  function scA(n) { try { return n.children || []; } catch (e) { return []; } }
+  const slotOfA = n => scA(n).find(c => c.type === "SLOT");
+  const geoOf = ns => ns.filter(c => c.visible)
+    .map(c => Math.round(c.x) + "w" + Math.round(c.width)).join(" ");
+
+  const tables = all.filter(n => {
+    if (n.type !== "INSTANCE") return false;
+    try { return n.mainComponent?.parent?.name === "*Table Starter*"; } catch (e) { return false; }
+  });
+  for (const tbl of tables) {
+    const hdr = scA(tbl).find(c => /Table Header/i.test(c.name));
+    const rowsSlot = slotOfA(tbl);
+    if (!hdr || !rowsSlot || hdr.visible === false) continue;
+    const hSlot = slotOfA(hdr);
+    if (!hSlot) continue;
+    const hGeo = geoOf(scA(hSlot));
+    if (!hGeo) continue;
+    const bad = [];
+    for (const row of scA(rowsSlot)) {
+      if (!row.visible) continue;
+      const rSlot = slotOfA(row);
+      if (!rSlot) continue;
+      const rGeo = geoOf(scA(rSlot));
+      if (rGeo && rGeo !== hGeo) bad.push(rGeo);
+    }
+    if (bad.length) {
+      const uniqGeo = [...new Set(bad)];
+      issues.push(`7.60 table-column-misalignment: "${tbl.name}" — ${bad.length} visible row(s) whose cell geometry differs from the header. Header: [${hGeo}]. Row(s): [${uniqGeo.slice(0, 2).join("] [")}]. Cause: cells were hidden on ONE side only (checkbox 40px and/or trailing 136px cell). Whatever you hide in the header must be hidden in EVERY data row and vice versa — hiding removes the child from the SLOT, so the survivors redistribute differently on each side. Target the trailing cell by measured width, not by a fixed index. See SKILL.md "Column count — hiding is the ONLY path, and it must be SYMMETRIC".`);
+    }
   }
 }
 

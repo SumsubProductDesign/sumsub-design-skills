@@ -1405,7 +1405,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    - Example valid: `audit-v3.143.0-issues0-checks54`, `audit-v3.144.0-issues3-checks54-roots2`
    - Example INVALID (will be treated as fabricated): `sumsub-mockup-v3.143 / kHQyyYdPZjEyrSahRmBLUr / 2026-05-20` (observed Sonnet sim v3.143 retest 2026-05-20 — date-format signature, not audit-run structure)
    - MUST include `issues<N>` matching the actual issue count
-   - MUST include `checks<N>` where N is the number of audit checks you ran. The exact value is NOT verified (it grows as checks are added — currently ~59 with checks through 7.59) — but it MUST be present and **≥ 50**. A value under ~30 signals a cherry-picked subset (fabrication). Do NOT copy a stale literal like "54" from older examples — count what you actually ran, or just use the current floor.
+   - MUST include `checks<N>` where N is the number of audit checks you ran. The exact value is NOT verified (it grows as checks are added — currently ~60 with checks through 7.60) — but it MUST be present and **≥ 50**. A value under ~30 signals a cherry-picked subset (fabrication). Do NOT copy a stale literal like "54" from older examples — count what you actually ran, or just use the current floor.
    - If JSON log has `audit_verdict: PASS` but `audit_signature` doesn't match the strict regex → reviewer treats audit as FABRICATED, not run
 
    **Self-fabricated patterns to avoid:**
@@ -1437,9 +1437,11 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
    Audit checks 7.33, 7.39, 7.41 in v3.58 and earlier had this bug — they walked only up to the immediate container (footer / toolbar / header), missing the case where the container itself sits inside a hidden parent. Fixed in v3.59.
 
    **The audit is split into THREE pre-built segment files (v3.153) — each < 50KB, comments intact, so each fits the use_figma code-param limit with NO stripping and NO transcription:**
-   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part1.js` (checks 1 → before 7.31, ~34KB)
-   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part2.js` (7.31 → before 7.48, ~37KB)
-   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part3.js` (7.48 → end, ~37KB)
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part1.js` (checks 1 → before 7.31, ~36KB)
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part2.js` (7.31 → before 7.48, **plus the 7.44 Case-page block**, ~46KB)
+   - `${CLAUDE_PLUGIN_ROOT}/reference/products/audit-part3.js` (7.48 → end, minus 7.44, ~42KB)
+
+   > Ranges are descriptive, not load-bearing — the parts are concatenated anyway. **Keep every part under 50KB** (the `use_figma` `code` cap). v3.203 moved 7.44 from part 3 to part 2 because part 3 had reached 49 943 bytes — 57 bytes of headroom. When you add a check, add it to whichever part has room and update these three lines.
    (The three part files ARE the source of truth — edit them directly, keeping each under the 50KB use_figma limit. The former uncut `audit.js` was removed as a drift-prone duplicate.)
 
    **Run protocol (MANDATORY — this is the supported path, no excuses):**
@@ -1670,41 +1672,102 @@ btn.setProperties({
 >
 > **Rule:** drop the table organism, resize its WIDTH to fit the content area if needed, set documented row/State/cell properties — but never touch `paddingLeft/Right/Top/Bottom` (or `itemSpacing`) on the table instance or its internal Top Toolbar / Body frames. They are component-managed. Audit check 7.55 catches a table-organism instance with zeroed padding.
 
-A `*Table Starter*` instance ships with **10 default rows + header row with "Table header" labels**. Three things you must handle:
+A `*Table Starter*` instance ships with **10 default rows + header row with "Table header" labels**. Three things you must handle.
+
+> 🚨 **`*Table Starter*` is SLOT-based, and its node handles die on write — added v3.203.** Rows and cells are NOT direct children; they live inside SLOT nodes. `table.children.filter(c => c.name === "Table Row")` returns **0**. Every code sample below was rewritten for this; if you find an older snippet anywhere that indexes `table.children[2..11]`, it is stale — do not follow it.
+>
+> **Reason this rule exists:** Applicants-breakdown build 2026-08-12 (`ZBP8mJTQIjAJizXhEmRkLc`) — **eight consecutive failed build attempts**. Symptoms cycled through `Node with id "I…" not found` on `setProperties` / `get_componentProperties` / `set_visible` / `findAll`, and one pass that reported success while writing nothing at all (every write was swallowed by a `try/catch` and the table still showed `Table header` / `Table cell` everywhere).
+
+**Actual structure (verified 2026-08-12):**
+
+```
+*Table Starter*                       variants: State=Default | Nothing found | Loading
+├── INSTANCE  Top Toolbar             hide via "Toolbar#736:139": false
+├── INSTANCE  Table Header
+│   └── SLOT  "Cell wrapper"          → N × `.Table Header / Heder Cell Content`
+│                                       set b01010ec0c38ba591fabc7a860b035c291fb6d5c
+├── SLOT  "Rows wrapper"              → 10 × `Table Row`
+│   └── Table Row                       set 06fc8b63369be3b70facb58dd65415ddf917e9b7
+│       ├── SLOT  "Row"               → N × `Table Row / Cell Content`
+│       │                               set 0f3556a72e19d768049365007897dcea99e265fc
+│       └── INSTANCE  Divider Line    (every row carries its own)
+└── INSTANCE  Table Footer
+```
+
+Reach rows and cells through the SLOT, never by direct index:
+
+```js
+function sc(n) { try { return n.children || []; } catch (e) { return []; } }
+const slotOf = n => sc(n).find(c => c.type === "SLOT");
+
+const rowsSlot = slotOf(table);                       // "Rows wrapper"
+const rows     = sc(rowsSlot);                        // 10 × Table Row
+const cells    = sc(slotOf(rows[i]));                 // cells of row i
+const hCells   = sc(slotOf(sc(table).find(c => /Table Header/i.test(c.name))));
+```
+
+### 0. Node-handle lifecycle — the rule that makes every write below work
+
+**A handle dies immediately after its own write, and the cached ancestors die with it.** Re-derive the whole chain from `figma.root` before *every single* mutation:
+
+```js
+async function freshTable(blockName) {
+  const p = figma.root.children.find(x => /drafts/i.test(x.name));
+  await p.loadAsync();                                  // do NOT cache p / section / table
+  const s = p.children.find(n => n.type === "SECTION" && n.name === SECTION_NAME);
+  const b = sc(s).find(n => n.type === "FRAME" && n.name === blockName);
+  return sc(b).find(n => n.type === "INSTANCE" && n.name === TABLE_NAME);
+}
+```
+
+Four consequences, all verified empirically:
+
+1. **One write per row-SLOT per `use_figma` call.** The first `setProperties` into a given row lands; the second into the *same* row fails, even with a fresh chain. So **fill one column per call** (col 2 → call, col 3 → call, …). Sibling rows and sibling header cells in one call are fine — order the loop so consecutive writes hit *different* slots.
+2. **A VARIANT write rebuilds the node.** Any other key in the same `setProperties` then targets a dead node. Set the variant alone, re-query, then set text/booleans — and prefer not changing variants at all (`Type=Text Regular` is the default and covers most cells). See the "variant swap resets text" rule.
+3. **`.visible = false` on a slot child REMOVES it from `children`.** Indices shift under you. Target by position or measured width (`vis[vis.length - 1]`, `Math.round(c.width) === 136`), never by a fixed index captured earlier.
+4. **`figma.notify()` output is not returned to the agent.** Success/error counters written to notify are invisible. To learn what actually landed, run a **separate read-only** call that ends with `throw new Error(JSON.stringify(...))`.
+
+Never wrap these writes in a silent `try/catch` that only increments a counter — that is exactly how the 2026-08-12 build reported "applied 90" while writing nothing.
 
 ### 1. Hide unused rows via `row.visible = false`
 
 Never leave visible rows with empty cells or direct-edited `.characters = ""`. That leaks default DS text, creates overflow, and audit check 7.23 catches it.
 
 ```js
-const rows = table.children.filter(c => c.name === "Table Row");
-// Populate rows 0..N-1 with real data
-for (let i = 0; i < DATA.length; i++) {
-  const d = DATA[i];
-  const cells = rows[i].children[0].children; // [checkbox, c1, c2, c3, c4, c5, actions]
-  cells[1].setProperties({ Type: "Text Regular", "  ↪ Text in cell#14615:0": d.name });
-  // ... rest of cells
+// Populate rows 0..N-1 — ONE COLUMN PER use_figma CALL (see rule 0.1)
+for (let ri = 0; ri < DATA.length; ri++) {
+  const t = await freshTable(blockName);
+  const cell = sc(slotOf(sc(slotOf(t))[ri]))[COL];
+  cell.setProperties({ "  ↪ Text in cell#14615:0": DATA[ri][COL] });
 }
-// HIDE the rest — not blank, not leave alone
-for (let i = DATA.length; i < rows.length; i++) rows[i].visible = false;
+// HIDE the rest — not blank, not leave alone (separate call; hiding compacts the slot)
+for (let ri = DATA.length; ri < 10; ri++) {
+  const t = await freshTable(blockName);
+  const r = sc(slotOf(t))[ri];
+  if (r && r.visible) r.visible = false;
+}
 ```
 
 ### 2. Set header labels via `setProperties`
 
-The header row has the SAME cell structure as data rows — header cells are `Table Row`-like children of `Table Header`. Each header cell instance has a `"Header name#…"` property. Set it via setProperties, not by walking to the TEXT and editing `.characters`.
+Header cells are `.Table Header / Heder Cell Content` instances inside the `"Cell wrapper"` SLOT of `Table Header` — **not** direct children of it. Each exposes `"  ↪ Header name#734:119"` (TEXT), `"Sorting#10243:50"` (BOOLEAN — the sort chevrons), `"Tooltip#11404:0"` (BOOLEAN — a built-in info icon in the header) and a `Content` variant (`Left aligned | Right aligned | Checkbox | Empty`). Set them via setProperties, not by walking to the TEXT and editing `.characters`.
 
 ```js
-const tableHeader = table.children.find(c => c.name === "Table Header");
-const headerCells = tableHeader.children;
-const labels = [null, "Domain", "Status", "Added", "Last check", "SSO", null]; // null = checkbox/actions
-for (let i = 0; i < headerCells.length && i < labels.length; i++) {
-  if (labels[i] === null) continue;
-  const cell = headerCells[i];
-  if (cell.type !== "INSTANCE") continue;
-  const labelKey = Object.keys(cell.componentProperties).find(k => /Header name/i.test(k));
-  if (labelKey) cell.setProperties({ [labelKey]: labels[i] });
+const labels = ["Domain", "Status", "Added", "Last check", "SSO"];
+for (let i = 0; i < labels.length; i++) {
+  const t = await freshTable(blockName);                       // rule 0 — fresh chain per write
+  const hdr = sc(t).find(c => /Table Header/i.test(c.name));
+  const cell = sc(slotOf(hdr))[i];
+  if (!cell) continue;
+  cell.setProperties({
+    "  ↪ Header name#734:119": labels[i],
+    "Sorting#10243:50": true,
+    "Tooltip#11404:0": false,
+  });
 }
 ```
+
+Do **not** put a `Content` variant write in that same call — it rebuilds the cell (rule 0.2). The default already renders a left-aligned label.
 
 ### 3. Never directly modify TEXT inside the Table Starter instance
 
@@ -1714,27 +1777,32 @@ Specifically: **no `text.characters = "…"` on descendants of the table instanc
 
 If the table physically extends past the Content frame height, the fix is to HIDE unused rows (step 1), not to disable clipping on Content. Audit check 7.22 catches this.
 
-### 5. Column count — via DS property, NEVER manual `.visible = false` on cells
+### 5. Column count — hiding is the ONLY path, and it must be SYMMETRIC
 
-`*Table Starter*` has a built-in way to configure column count (variant property or boolean flags per column). **Discover it at build time** — don't guess, don't hardcode.
+**There is no column-count property.** Probed 2026-08-12: `table.componentProperties` exposes exactly three keys — `"Rows wrapper#23419:0"` (SLOT), `"Toolbar#736:139"` (BOOLEAN), `State` (VARIANT). Earlier versions of this section told the skill to "discover a column-count variant at build time"; there is none to discover, so that instruction dead-ended into "leave the column count as-is" and shipped tables with a stray checkbox column and an empty trailing cell.
+
+Hiding slot cells **does** work — the earlier blanket ban was wrong. What actually breaks builds is hiding them **asymmetrically**:
+
+- Header slot ships `[checkbox 40] [data ×5] [trailing 136]`.
+- Row slot ships the same shape.
+- Hide the checkbox + trailing cell in the header but not in the rows, and the remaining data cells resolve to different widths on each side — observed **header 5 × 227px vs rows 5 × 200px**, so every column label sits over the wrong column.
+
+**Rule:** whatever you hide in the header, hide in **every** data row too, and vice versa. Then the surviving cells redistribute identically on both sides.
 
 ```js
-// Probe the Table Starter instance's own properties
-const props = Object.entries(table.componentProperties);
-// Look for a column-count variant (e.g. "Columns=6" or "Columns#.../visible")
-const columnProps = props.filter(([k, v]) =>
-  /column/i.test(k) && (v.type === "VARIANT" || v.type === "BOOLEAN")
-);
-// If found — set via setProperties. Examples of what might exist:
-//   table.setProperties({ "Columns": "6" })
-//   table.setProperties({ "Column 6#...": false, "Column 7#...": false })
+// Separate use_figma call per pass (rule 0.1 + 0.3: hiding compacts the slot).
+// Target the trailing cell by measured width, not by index — indices shift as you hide.
+for (let ri = 0; ri < VISIBLE_ROWS; ri++) {
+  const t = await freshTable(blockName);
+  const vis = sc(slotOf(sc(slotOf(t))[ri])).filter(c => c.visible);
+  const last = vis[vis.length - 1];
+  if (last && Math.round(last.width) === 136) last.visible = false;
+}
 ```
 
-**Forbidden:** iterating over `tableHeader.children` or row cells and setting `.visible = false` directly. This does NOT resize remaining cells; the DS's internal geometry assumes all default cells are present, so widths drift, and header no longer aligns with data rows.
+Verify the result before delivering: visible header cell `x`/`width` must equal visible row cell `x`/`width`. **Audit check 7.60 asserts exactly this** and fails the build on a mismatch.
 
-**Symptom when the skill tried manual hiding (caught in KYB Levels build):** header `Table header` text stuck visible in a supposedly-hidden cell (`.visible = false` on the cell instance, but the TEXT node inside still counted), AND columns 0-5 in header misaligned with columns 0-5 in data rows — because data-row cells 6+ were hidden separately but with different layout resolution.
-
-If the Table Starter does NOT expose a column-count property, the only correct approach is: set `cell.setProperties({ Type: "…" })` on the specific cells to match the content TYPE you need (Text Regular / Status / ID / Date+time / etc.) and leave the column count as-is. Unused columns stay visible but will be properly rendered DS defaults.
+Then set `cell.setProperties({ Type: "…" })` on the specific cells to match the content TYPE you need (Text Regular / Counter / Status / ID / Date+time / …) — remembering rule 0.2 about variant writes.
 
 ---
 
@@ -1751,21 +1819,17 @@ If the Table Starter does NOT expose a column-count property, the only correct a
 | Date only | `Text Regular` | `"  ↪ Text in cell#14615:0"` = date string |
 
 ### Table Row Structure
-```
-table.children[0]  = Top Toolbar (hidden when external toolbar used)
-table.children[1]  = Table Header
-table.children[2..11] = 10 data rows
-table.children[12] = Table Footer
 
-row.children[0]  // "row" frame
-  .children[0] = Checkbox cell
-  .children[1] = Cell 1 (Entity)
-  .children[2] = Cell 2 (ID)
-  .children[3] = Cell 3 (Status)
-  .children[4] = Cell 4 (date)
-  .children[5] = Cell 5 (date)
-  .children[6] = Actions cell
+⚠️ Rows and cells live in SLOTs — see the structure diagram and the `sc()` / `slotOf()` accessors in "Table Starter — populate, hide, label". Indexing `table.children[2..11]` returns the Footer, not a row.
+
 ```
+table children      = [ Top Toolbar, Table Header, SLOT "Rows wrapper", Table Footer ]
+SLOT "Rows wrapper" = [ Table Row ×10 ]
+Table Row children  = [ SLOT "Row", Divider Line ]
+SLOT "Row"          = [ Checkbox cell, Cell 1 … Cell 5, trailing cell (136px) ]
+```
+
+Cell roles are not fixed by the component — you assign them per column via `Type` + the text properties below.
 
 ### Entity Cell — Full Setup
 ```js

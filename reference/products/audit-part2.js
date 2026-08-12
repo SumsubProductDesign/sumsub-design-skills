@@ -1,4 +1,4 @@
-// ===== AUDIT SEGMENT 2/3 (7.31 → before 7.48) =====
+// ===== AUDIT SEGMENT 2/3 (7.31 → before 7.48, plus 7.44 Case-page block) =====
 // Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
 // After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
@@ -645,6 +645,119 @@ for (const node of all) {
   const adjacentText = siblings.find(s => s.type === "TEXT" && (s.characters || "").length > 0 && formControlKeywordRe.test(s.characters));
   if (adjacentText) {
     issues.push(`7.54 custom-checkbox-imitation: ${node.type} "${node.name}" (${w}×${h}, radius=${radius}) next to TEXT "${(adjacentText.characters || "").slice(0, 50)}". Likely custom checkbox imitation — replace with *Checkbox* INSTANCE (key 75d3375164e69aca223d08d09fd79e82dda14343), *Radiobutton* (7d3fe5b1e904f4e4a880092412543f40fdeacc60), or *Toggle* (99562b687e3078c4a570af195c74a899fbbe83a4) as appropriate.`);
+  }
+}
+
+// 7.44. Case page (Pattern B) — Frame 270990504 wrapper + Container + Tab Basic alignment.
+// ⚠️ v3.148: measurements updated to CURRENT canonical (drift confirmed via
+// get_metadata on 4045:2323380, 2026-05-22). The pre-v3.146 layout (header
+// at (0,0,1440,88), wrapper at (0,96,992,804), right col at (992,96)) is DEAD.
+// Current canonical has a 52px collapsed Sidebar at (0,0), shifting everything:
+//   root.children = [
+//     *Sidebar* (52×900 @ 0,0, Type=Case management Collapsed=True),
+//     Case page header (1388×88 @ 52,0),
+//     Frame 270990504 (964×812 @ 52,88, FRAME, VERTICAL, no padding, clipsContent, FIXED height) {
+//       Subheader (964×56, padding 32/32/0/1, CENTER/MAX align) { *Tab Basic* @ x=32 (FILL) },
+//       Container (964×scroll, padding 32/24/24/24, itemSpacing 24) { Overview content @ 908 }
+//     },
+//     Case page right column (424×812 @ 1016,88)
+//   ]
+// Layout sum: 52 + 964 + 424 = 1440. This block folds in the former prose
+// checklist #9 (wrapper.height FIXED + Tab Basic.x==32) so the runnable
+// verbatim script actually asserts them. See case-management-pattern.md.
+//
+// Trigger: any frame whose first-level INSTANCE child is `Case page header`.
+{
+  const casePageHeaders = root.findAll(n =>
+    n.type === "INSTANCE" &&
+    n.mainComponent?.parent?.name === "Case page header"
+  );
+  for (const cph of casePageHeaders) {
+    const screen = cph.parent;
+    if (!screen) continue;
+
+    // 7.44a — header position (post-drift: x=52, 1388×88)
+    if (Math.abs(cph.x - 52) > 0.5 || Math.abs(cph.y) > 0.5) {
+      issues.push(`Pattern B "${screen.name}": Case page header at (${Math.round(cph.x)},${Math.round(cph.y)}) — must be at (52, 0) (after the 52px Sidebar).`);
+    }
+    if (Math.abs(cph.width - 1388) > 0.5 || Math.abs(cph.height - 88) > 0.5) {
+      issues.push(`Pattern B "${screen.name}": Case page header is ${Math.round(cph.width)}×${Math.round(cph.height)} — must be 1388×88.`);
+    }
+
+    // 7.44b — left wrapper presence + position + FIXED height
+    const leftWrapper = screen.children.find(c =>
+      c.type === "FRAME" && (c.name === "Frame 270990504" || /Frame\s*\d+/.test(c.name))
+    );
+    if (!leftWrapper) {
+      issues.push(`Pattern B "${screen.name}": missing left wrapper FRAME (expected name "Frame 270990504"). Don't drop "Case page Overview tab content" directly into root — it must be wrapped in Frame 270990504 → Container with proper paddings. See case-management-pattern.md.`);
+    } else {
+      if (Math.abs(leftWrapper.x - 52) > 0.5 || Math.abs(leftWrapper.y - 88) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": left wrapper at (${Math.round(leftWrapper.x)},${Math.round(leftWrapper.y)}) — must be (52, 88) (after Sidebar, flush below 88px header, NO gap).`);
+      }
+      if (Math.abs(leftWrapper.width - 964) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": left wrapper width=${Math.round(leftWrapper.width)} — must be 964 (1440 − 52 Sidebar − 424 right col).`);
+      }
+      // folded from prose #9: wrapper MUST be FIXED at 812, not auto-grown to wrap 2400+px Container
+      if (leftWrapper.height > 900) {
+        issues.push(`Pattern B "${screen.name}": left wrapper height=${Math.round(leftWrapper.height)} — must be 812. Wrapper grew because layoutSizingVertical was not set to FIXED after appendChild; it hugged the Container's 2400+px content. Set clipsContent=true + FIXED height 812.`);
+      } else if (Math.abs(leftWrapper.height - 812) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": left wrapper height=${Math.round(leftWrapper.height)} — must be 812.`);
+      }
+
+      // 7.44c — Subheader inside left wrapper + Tab Basic left-alignment (folded from #9)
+      const subheader = leftWrapper.children.find(c => c.type === "FRAME" && /Subheader/i.test(c.name));
+      if (!subheader) {
+        issues.push(`Pattern B "${screen.name}": left wrapper has no Subheader FRAME. Required: HORIZONTAL frame named ".Header Full Screen Page / Subheader", padding 32/32/0/1, CENTER/MAX alignment, containing *Tab Basic* with 6 tabs.`);
+      } else {
+        const padOK = subheader.paddingLeft === 32 && subheader.paddingRight === 32;
+        if (!padOK) {
+          issues.push(`Pattern B "${screen.name}": Subheader paddings are L=${subheader.paddingLeft}/R=${subheader.paddingRight} — must be L=32, R=32.`);
+        }
+        if (subheader.primaryAxisAlignItems !== "CENTER" || subheader.counterAxisAlignItems !== "MAX") {
+          issues.push(`Pattern B "${screen.name}": Subheader alignment is ${subheader.primaryAxisAlignItems}/${subheader.counterAxisAlignItems} — must be CENTER/MAX (anchors Tab Basic to bottom at y=23).`);
+        }
+        // folded from prose #9: Tab Basic MUST be FILL → left-aligned at x=32, not centered at ~224
+        const tabBasic = subheader.findOne(n => n.type === "INSTANCE" && /\*?Tab Basic\*?/.test(n.name));
+        if (tabBasic && tabBasic.x > 50) {
+          issues.push(`Pattern B "${screen.name}": *Tab Basic* at x=${Math.round(tabBasic.x)} — must be x=32 (left-aligned). Tab Basic was not set to layoutSizingHorizontal="FILL", so Subheader's CENTER alignment centered the HUG-sized strip (~224.5 in a 964 wrapper).`);
+        }
+      }
+
+      // 7.44d — Container inside left wrapper
+      const container = leftWrapper.children.find(c => c.type === "FRAME" && c.name === "Container");
+      if (!container) {
+        issues.push(`Pattern B "${screen.name}": left wrapper has no Container FRAME. Required: VERTICAL frame named "Container", paddings 32/32/24/24 (L/R/T/B), itemSpacing 24, holding "Case page Overview tab content" at width 908 (FIXED; overflows the 900 content box by 8 → 24px visual right gutter).`);
+      } else {
+        // v3.153: pR=32 (was wrongly 24). Verified canonical Container 4045:2323405: L=R=32 (spacing/3xl), T=B=24 (spacing/2xl).
+        const expectedPads = { paddingLeft: 32, paddingRight: 32, paddingTop: 24, paddingBottom: 24 };
+        for (const [side, expected] of Object.entries(expectedPads)) {
+          if (container[side] !== expected) {
+            issues.push(`Pattern B "${screen.name}": Container ${side} = ${container[side]} — must be ${expected}. (Canonical Case page Container paddings: L=32, R=32, T=24, B=24, itemSpacing=24.)`);
+          }
+        }
+        if (container.itemSpacing !== 24) {
+          issues.push(`Pattern B "${screen.name}": Container itemSpacing = ${container.itemSpacing} — must be 24.`);
+        }
+      }
+    }
+
+    // 7.44e — right column position (post-drift: x=1016, 424×812)
+    const rightCol = screen.children.find(c =>
+      c.type === "INSTANCE" && c.mainComponent?.name === "Case page right column"
+    );
+    if (rightCol) {
+      if (Math.abs(rightCol.x - 1016) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": Case page right column at x=${Math.round(rightCol.x)} — must be x=1016 (52 Sidebar + 964 wrapper). Right edge 1016+424=1440, flush with canvas edge, NO right margin in current canonical.`);
+      }
+      if (Math.abs(rightCol.y - 88) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": Case page right column at y=${Math.round(rightCol.y)} — must be y=88 (vertically aligned with left wrapper).`);
+      }
+      if (Math.abs(rightCol.width - 424) > 0.5 || Math.abs(rightCol.height - 812) > 0.5) {
+        issues.push(`Pattern B "${screen.name}": Case page right column is ${Math.round(rightCol.width)}×${Math.round(rightCol.height)} — must be 424×812.`);
+      }
+    } else {
+      issues.push(`Pattern B "${screen.name}": no Case page right column instance found. Pattern B requires it at (1016, 88) with 424×812.`);
+    }
   }
 }
 
