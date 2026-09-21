@@ -137,6 +137,16 @@ Python. That is what the check is for.
 | the fonts the design uses, reachable by a web page | Google Fonts, or a file you can inline; confirmed in Step 0 before promising fidelity |
 | *optional:* a Vercel account in the team, `npx vercel login` run once by you, the team slug from `npx vercel teams list` | Step 9 only; without it the prototype is still built and handed over as a file. The scripts never log in for you |
 
+> **Credentials, if you publish (Step 9).** The normal path is `npx vercel login`, run once by
+> you: the CLI keeps its own credential and the scripts never see it. If you instead need a
+> non-interactive credential — a shared machine, CI — it belongs in the keychain and reaches the
+> command through **`auth-core`**, the corporate launcher, installed from the same internal
+> marketplace as this plugin (`claude plugin install auth-core@sumsub-internal-marketplace`). On
+> first run it asks for the secret once and stores it; afterwards it injects it into the child
+> process for that one command. `scripts/_vercel.sh` prints the exact invocation when it finds no
+> credentials. Never export a token into the shell by hand — that is the one thing the marketplace
+> refuses, and it leaks the secret to every later command in the session.
+
 **`$SKILL` is this folder, and no file in the skill spells it out.** Where the
 skill is installed is not its business: shipped in the `sumsub-design` plugin it
 is `${CLAUDE_PLUGIN_ROOT}/skills/figma-to-prototype`, inside a versioned plugin

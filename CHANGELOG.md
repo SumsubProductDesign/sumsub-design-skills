@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.207.0 — 2026-09-21 (document the auth-core dependency)
+Follow-on to v3.206.0: once the publish script routes a non-interactive credential through `auth-core`, the marketplace requires the dependency to be documented rather than implied. `SKILL.md` now states, beside the Vercel prerequisite, that `vercel login` is the normal path; that a non-interactive credential belongs in the keychain and arrives through `auth-core` (installed from the same internal marketplace, asking for the secret once on first run); and that exporting a token into the shell by hand is the one thing the marketplace refuses, because it leaks the secret to every later command in the session.
+
 ## v3.206.0 — 2026-09-21 (figma-to-prototype: two corporate-marketplace policy gates)
 Publishing v3.205.0 to the internal GitLab marketplace was refused by its validator, and both findings were real rather than bureaucratic. Fixed at the source.
 
