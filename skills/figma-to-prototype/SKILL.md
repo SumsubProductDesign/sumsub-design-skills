@@ -148,6 +148,12 @@ per session and every command below is copy-pasteable:
 export SKILL=<the folder this SKILL.md is in>     # packaged: ${CLAUDE_PLUGIN_ROOT}/skills/<name>
 ```
 
+> A variable exported in one Bash call does not survive into the next one, and it never reaches
+> an MCP server. If you need it to persist across the session, the corporate **`shell-env`** plugin
+> is the mechanism for exposing variables to the Bash tool and to MCP servers — install it from the
+> internal marketplace. Nothing in this skill requires it: every command below can take the export
+> and the work in the same call.
+
 Scripts inside the skill find their siblings through `__dirname` / `__file__` and
 need nothing. `$SKILL` is for the two places that are outside it: the commands you
 type, and the generator the project keeps (Step 3).

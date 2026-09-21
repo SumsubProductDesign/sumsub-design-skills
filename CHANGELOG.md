@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.206.0 — 2026-09-21 (figma-to-prototype: two corporate-marketplace policy gates)
+Publishing v3.205.0 to the internal GitLab marketplace was refused by its validator, and both findings were real rather than bureaucratic. Fixed at the source.
+
+- **No plaintext secret in the shell.** `scripts/_vercel.sh` told the user to `export VERCEL_TOKEN=…` when they needed a non-interactive credential. The marketplace requires secrets to live in the keychain and reach the process through the `auth-core-sumsub` launcher; the script now prints that invocation instead. It never read the variable itself — `vercel login` remains the normal path — so nothing changes in how publishing works.
+- **`export` in a skill now points at `shell-env`.** A variable exported in one Bash call does not survive into the next and never reaches an MCP server; the marketplace expects any skill that exports one to name the `shell-env` plugin as the mechanism. Added beside the `$SKILL` export, with the note that this skill does not need it.
+
+Unrelated, for whoever maintains the marketplace: `npm run validate` also fails on a clean `master` with `root: Unrecognized key: "$schema"` — claude CLI 2.1.66 no longer accepts that key in `.claude-plugin/marketplace.json`.
+
 ## v3.205.0 — 2026-09-21 (figma-to-prototype: integration fixes after review)
 Follow-ups to the merge of v3.204.0, found reviewing the contributed skill against the rest of the plugin.
 

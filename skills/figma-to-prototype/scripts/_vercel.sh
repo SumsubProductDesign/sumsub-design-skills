@@ -1,7 +1,9 @@
 # sourced by publish.sh / unpublish.sh — resolve a Vercel CLI and check auth
 if command -v vercel >/dev/null 2>&1; then VC="vercel"; else VC="npx --yes vercel@latest"; fi
-# Never echo the token. Auth comes from `vercel login` (interactive, the user runs it once)
-# or from VERCEL_TOKEN in the environment; the CLI picks either up on its own.
+# Never echo the credential. Auth comes from `vercel login` (interactive, the user runs it
+# once) and the CLI picks it up on its own. A non-interactive credential must arrive through
+# the corporate auth-core-sumsub launcher, which reads it from the keychain and hands it to
+# the child process — never a plaintext secret exported into the shell by hand.
 vc() { $VC "$@"; }
 # The account is the last line of `whoami` — but only after the noise is gone:
 # npx prints `npm notice …` lines and the CLI prints its own version banner, and
@@ -22,7 +24,10 @@ vc_require_auth() {
     echo "Vercel: not logged in (no credentials, or the stored token has expired)." >&2
     echo "Run this yourself once, then re-run the command:" >&2
     echo "  npx vercel login" >&2
-    echo "Or export a token from vercel.com/account/tokens: export VERCEL_TOKEN=..." >&2
+    echo "For a non-interactive credential, keep it in the keychain and launch through" >&2
+    echo "auth-core-sumsub rather than exporting it into the shell:" >&2
+    echo "  uv run --with auth-core-sumsub --with keyring python -m auth_core_sumsub \\" >&2
+    echo "    --service vercel --secret token:VERCEL_AUTH:'Vercel token' -- <command>" >&2
     return 1
   fi
   echo "$who"
