@@ -1,0 +1,6 @@
+#!/bin/bash
+# git pre-commit hook for this skill: runs scripts/lint.sh (both levels).
+# Install once:   ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+# Bypass once:    git commit --no-verify
+# Quick mode (no headless renders, ~1s): LINT_QUICK=1 git commit …
+exec "$(git rev-parse --show-toplevel)/scripts/lint.sh" ${LINT_QUICK:+--quick}

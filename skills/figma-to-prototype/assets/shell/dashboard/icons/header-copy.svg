@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="small/copy">
+<g id="Shape">
+<path d="M3.5 4C3.5 3.72386 3.72386 3.5 4 3.5H9V2.5H4C3.17157 2.5 2.5 3.17157 2.5 4V9H3.5V4Z" fill="#1E2939"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5 6C5 5.44772 5.44772 5 6 5H12C12.5523 5 13 5.44772 13 6V12C13 12.5523 12.5523 13 12 13H6C5.44772 13 5 12.5523 5 12V6ZM6 6H12V12H6V6Z" fill="#1E2939"/>
+</g>
+</g>
+</svg>

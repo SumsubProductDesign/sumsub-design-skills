@@ -1,0 +1,460 @@
+{
+ "_source": {
+  "top_level": "the designer's final layout, 2026-09-18 (screenshot of the product sidebar): 18 visible items in this order; four Figma items carry hidden:true and are skipped unless a config's menu.items names them. Labels are the product's; figma_label keeps the Figma component's label where it differs. Icons: Figma exports (outline + filled sets), Solutions from the dev sprite",
+  "figma_layout": "Base components / Dashboard UI Kit, branch F3eDy4iSOV1qt1BiffoFd4 — master component 23287:109253 (Ver=New, Type=Basic, Sandbox=No), sidebar instance 23287:109254, header 23287:109256; Page instance 29845:74710 is the same",
+  "nesting": "screenshots of the expanded sidebar supplied by the designer, 2026-09-17",
+  "dev_differences": {
+   "Verifications Control": "dev label for Figma's Tasks",
+   "Compliance Hub": "dev label for Figma's Operator",
+   "Transactions and travel rule": "dev casing; Figma: Transactions and Travel Rule",
+   "Review panel, Client lists (top level)": "Figma-only; no dev sprite icon yet",
+   "Marketplace": "Figma label at position 16; the product item is Solutions (kept) — Figma to be updated"
+  },
+  "nesting_label_differences": {
+   "note": "the Figma example sidebar 29905:77088 is a component demo; nesting labels come from the designer's dev screenshots",
+   "Applicants": "Figma demo shows Individuals, Companies, Actions, Networks (no Re-Checks)",
+   "Integrations → Verification levels": "Figma demo: Individuals, Companies; dev: Individual levels, Company levels",
+   "Integrations": "Figma demo: SDK translations, Client list; dev: SDK text, Client lists"
+  }
+ },
+ "_rules": {
+  "max_depth": 2,
+  "top_level": "icon + label; active = filled icon and bold label",
+  "group": "label + chevron; expanded = chevron up; a collapsed group containing the active leaf keeps its label bold",
+  "leaf": "label only; active = 12px-radius pill #E5E7EB, bold label",
+  "connector": "a bracket from the group down to the active leaf appears when the active leaf is the first child of an expanded group; behaviour for a non-first active child not yet observed",
+  "default_open": "the first child in order: a leaf is selected, a group is expanded and its first leaf selected (Integrations → Verification levels → Individual levels; Settings → Team → Members). Case management and Dev space start on the leaf Overview — assumed from order, not observed",
+  "dynamic": "Integrations → Global settings: its leaves depend on which verification levels the client has configured",
+  "hidden": "hidden:true — not rendered by default; menu.items (a whitelist) can still name the item. Kept so the data and icons survive until the layout changes again"
+ },
+ "items": [
+  {
+   "label": "Dashboard",
+   "icon": "dashboard",
+   "children": []
+  },
+  {
+   "label": "Summy AI Copilot",
+   "icon": "AI-paw",
+   "children": []
+  },
+  {
+   "label": "Applicants",
+   "icon": "applicants",
+   "default_open": [
+    "Individuals"
+   ],
+   "children": [
+    {
+     "label": "Individuals"
+    },
+    {
+     "label": "Companies"
+    },
+    {
+     "label": "Actions"
+    },
+    {
+     "label": "Networks"
+    },
+    {
+     "label": "Re-Checks"
+    }
+   ]
+  },
+  {
+   "label": "Integrations",
+   "icon": "integration",
+   "default_open": [
+    "Verification levels",
+    "Individual levels"
+   ],
+   "children": [
+    {
+     "label": "Verification levels",
+     "children": [
+      {
+       "label": "Individual levels"
+      },
+      {
+       "label": "Company levels"
+      }
+     ]
+    },
+    {
+     "label": "Workflow builder",
+     "children": [
+      {
+       "label": "Active workflow"
+      },
+      {
+       "label": "Test workflow"
+      },
+      {
+       "label": "Examples"
+      },
+      {
+       "label": "Yaml"
+      }
+     ]
+    },
+    {
+     "label": "Global settings",
+     "dynamic": "leaves follow the client's configured levels",
+     "children": [
+      {
+       "label": "General"
+      },
+      {
+       "label": "User verification"
+      },
+      {
+       "label": "Business verification"
+      },
+      {
+       "label": "AML screening"
+      },
+      {
+       "label": "Data comparison"
+      }
+     ]
+    },
+    {
+     "label": "Customizations"
+    },
+    {
+     "label": "SDK text"
+    },
+    {
+     "label": "Client lists"
+    },
+    {
+     "label": "Database products",
+     "children": [
+      {
+       "label": "Active products"
+      },
+      {
+       "label": "Available products"
+      }
+     ]
+    },
+    {
+     "label": "Questionnaires"
+    }
+   ]
+  },
+  {
+   "label": "Reusable identity",
+   "icon": "reusable-identity",
+   "default_open": [
+    "Partners"
+   ],
+   "children": [
+    {
+     "label": "Partners"
+    },
+    {
+     "label": "Reusable KYC"
+    }
+   ]
+  },
+  {
+   "label": "Transactions and travel rule",
+   "figma_label": "Transactions and Travel Rule",
+   "icon": "transaction-monitoring",
+   "default_open": [
+    "Transactions"
+   ],
+   "children": [
+    {
+     "label": "Transactions"
+    },
+    {
+     "label": "Rules manager",
+     "children": [
+      {
+       "label": "Installed rules"
+      },
+      {
+       "label": "Rules library"
+      },
+      {
+       "label": "Archived rules"
+      }
+     ]
+    },
+    {
+     "label": "Events"
+    },
+    {
+     "label": "Analytics",
+     "children": [
+      {
+       "label": "Transaction monitoring"
+      },
+      {
+       "label": "Travel rule"
+      }
+     ]
+    },
+    {
+     "label": "Network"
+    },
+    {
+     "label": "Settings",
+     "children": [
+      {
+       "label": "General"
+      },
+      {
+       "label": "Set up Travel Rule"
+      },
+      {
+       "label": "Travel Rule"
+      },
+      {
+       "label": "Tags"
+      },
+      {
+       "label": "Applicant risk scoring"
+      },
+      {
+       "label": "AML screening"
+      },
+      {
+       "label": "Wallet address book"
+      }
+     ]
+    },
+    {
+     "label": "VASPs list"
+    }
+   ]
+  },
+  {
+   "label": "AML screening",
+   "icon": "aml",
+   "default_open": [
+    "Checks"
+   ],
+   "children": [
+    {
+     "label": "Checks"
+    }
+   ]
+  },
+  {
+   "label": "Case management",
+   "icon": "case-management",
+   "default_open": [
+    "Overview"
+   ],
+   "children": [
+    {
+     "label": "Overview"
+    },
+    {
+     "label": "My cases",
+     "children": [
+      {
+       "label": "All assigned cases"
+      }
+     ]
+    },
+    {
+     "label": "All cases"
+    },
+    {
+     "label": "Settings",
+     "children": [
+      {
+       "label": "Blueprints"
+      },
+      {
+       "label": "Case statuses"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "label": "Solutions",
+   "icon": "apps",
+   "_note": "designer's decision 2026-09-17: the product item is Solutions (dev label, dev sprite icon symbol-apps-filled-large); Figma still shows Marketplace with the first-unreviewed icon at this position — the icon must be exported from Figma once the component is updated, until then the dev sprite's apps icon is the source",
+   "children": []
+  },
+  {
+   "label": "Statistics",
+   "icon": "statistics",
+   "default_open": [
+    "Analytics"
+   ],
+   "children": [
+    {
+     "label": "Analytics"
+    },
+    {
+     "label": "Statistics"
+    }
+   ]
+  },
+  {
+   "label": "Reports",
+   "icon": "reports",
+   "children": []
+  },
+  {
+   "label": "Billing",
+   "icon": "billing",
+   "default_open": [
+    "Billing overview"
+   ],
+   "children": [
+    {
+     "label": "Billing overview"
+    },
+    {
+     "label": "Service usage"
+    },
+    {
+     "label": "Invoices"
+    }
+   ]
+  },
+  {
+   "label": "Settings",
+   "icon": "settings",
+   "default_open": [
+    "Team",
+    "Members"
+   ],
+   "children": [
+    {
+     "label": "Team",
+     "children": [
+      {
+       "label": "Members"
+      },
+      {
+       "label": "Roles"
+      },
+      {
+       "label": "Active sessions"
+      },
+      {
+       "label": "Connected apps"
+      },
+      {
+       "label": "SSO login"
+      },
+      {
+       "label": "Activity log"
+      }
+     ]
+    },
+    {
+     "label": "Branding"
+    },
+    {
+     "label": "Business information"
+    }
+   ]
+  },
+  {
+   "label": "Dev space",
+   "icon": "dev-space",
+   "default_open": [
+    "Overview"
+   ],
+   "children": [
+    {
+     "label": "Overview"
+    },
+    {
+     "label": "Webhooks",
+     "children": [
+      {
+       "label": "Webhook manager"
+      },
+      {
+       "label": "Webhook logs"
+      }
+     ]
+    },
+    {
+     "label": "App tokens"
+    },
+    {
+     "label": "WebSDK settings"
+    },
+    {
+     "label": "OIDC Settings"
+    }
+   ]
+  },
+  {
+   "label": "Marketplace",
+   "icon": "first-unreviewed",
+   "_note": "the product's item next to Solutions — designer's layout 2026-09-18; icon is the Figma export at the former position 16",
+   "children": []
+  },
+  {
+   "label": "Verifications Control",
+   "figma_label": "Tasks",
+   "icon": "tasks",
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  },
+  {
+   "label": "Compliance Hub",
+   "figma_label": "Operator",
+   "icon": "operator",
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  },
+  {
+   "label": "Mission control",
+   "icon": "mission-control",
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  },
+  {
+   "label": "Device intelligence",
+   "icon": "fingerprint",
+   "hidden": true,
+   "default_open": [
+    "Devices"
+   ],
+   "children": [
+    {
+     "label": "Devices"
+    },
+    {
+     "label": "Analytics"
+    }
+   ]
+  },
+  {
+   "label": "Client lists",
+   "icon": "client-lists",
+   "hidden": true,
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  },
+  {
+   "label": "Review panel",
+   "icon": "reviews-panel",
+   "hidden": true,
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  },
+  {
+   "label": "Admin area",
+   "icon": "admin",
+   "hidden": true,
+   "_note": "no nesting for now — designer's decision 2026-09-17, to be revisited",
+   "children": []
+  }
+ ]
+}

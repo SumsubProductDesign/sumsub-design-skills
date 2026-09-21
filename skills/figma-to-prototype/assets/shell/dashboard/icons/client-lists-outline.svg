@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="large/client-lists-outline">
+<g id="Shape">
+<path d="M8 8.75H14V7.25H8V8.75Z" fill="#1E2939"/>
+<path d="M16 12.75H8V11.25H16V12.75Z" fill="#1E2939"/>
+<path d="M8 16.75H16V15.25H8V16.75Z" fill="#1E2939"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4 5C4 3.89543 4.89543 3 6 3H18C19.1046 3 20 3.89543 20 5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V5ZM6 4.5H18C18.2761 4.5 18.5 4.72386 18.5 5V19C18.5 19.2761 18.2761 19.5 18 19.5H6C5.72386 19.5 5.5 19.2761 5.5 19V5C5.5 4.72386 5.72386 4.5 6 4.5Z" fill="#1E2939"/>
+</g>
+</g>
+</svg>

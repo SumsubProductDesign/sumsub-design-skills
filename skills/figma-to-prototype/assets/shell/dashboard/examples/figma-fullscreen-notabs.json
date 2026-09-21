@@ -1,0 +1,126 @@
+{
+ "layout": "fullscreen",
+ "canvas": {
+  "width": 1440,
+  "height": 1080
+ },
+ "client": "Key_name",
+ "page": {
+  "section": "Section name",
+  "title": "Page title",
+  "keyName": "Key name"
+ },
+ "hover": false,
+ "menu": {
+  "active": [
+   "Dashboard"
+  ],
+  "override": [
+   {
+    "label": "Dashboard",
+    "icon": "dashboard",
+    "children": []
+   },
+   {
+    "label": "Summy AI Copilot",
+    "icon": "AI-paw",
+    "children": []
+   },
+   {
+    "label": "Applicants",
+    "icon": "applicants",
+    "children": []
+   },
+   {
+    "label": "Integrations",
+    "icon": "integration",
+    "children": []
+   },
+   {
+    "label": "Reusable identity",
+    "icon": "reusable-identity",
+    "children": []
+   },
+   {
+    "label": "Transactions and Travel Rule",
+    "icon": "transaction-monitoring",
+    "children": []
+   },
+   {
+    "label": "AML screening",
+    "icon": "aml",
+    "children": []
+   },
+   {
+    "label": "Case management",
+    "icon": "case-management",
+    "children": []
+   },
+   {
+    "label": "Device intelligence",
+    "icon": "fingerprint",
+    "children": []
+   },
+   {
+    "label": "Client lists",
+    "icon": "client-lists",
+    "children": []
+   },
+   {
+    "label": "Statistics",
+    "icon": "statistics",
+    "children": []
+   },
+   {
+    "label": "Reports",
+    "icon": "reports",
+    "children": []
+   },
+   {
+    "label": "Billing",
+    "icon": "billing",
+    "children": []
+   },
+   {
+    "label": "Settings",
+    "icon": "settings",
+    "children": []
+   },
+   {
+    "label": "Dev space",
+    "icon": "dev-space",
+    "children": []
+   },
+   {
+    "label": "Marketplace",
+    "icon": "first-unreviewed",
+    "children": []
+   },
+   {
+    "label": "Tasks",
+    "icon": "tasks",
+    "children": []
+   },
+   {
+    "label": "Operator",
+    "icon": "operator",
+    "children": []
+   },
+   {
+    "label": "Review panel",
+    "icon": "reviews-panel",
+    "children": []
+   },
+   {
+    "label": "Mission control",
+    "icon": "mission-control",
+    "children": []
+   },
+   {
+    "label": "Admin area",
+    "icon": "admin",
+    "children": []
+   }
+  ]
+ }
+}
