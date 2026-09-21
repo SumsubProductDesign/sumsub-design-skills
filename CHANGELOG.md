@@ -4,6 +4,20 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.205.0 — 2026-09-21 (figma-to-prototype: integration fixes after review)
+Follow-ups to the merge of v3.204.0, found reviewing the contributed skill against the rest of the plugin.
+
+- **The eval was reachable from a build.** `assets/eval.md` opens with "if you are the agent being evaluated, STOP" — and the skill's own reference table told the agent to read it. That is how run 6 lost its Step 0 rows, recorded in the file itself. The table row now says never during a build and who the file is for, and the Step-7 mention carries the same warning.
+- **Trigger phrases are English again.** The `description` listed its Russian triggers verbatim; per the standing rule they read as English with "Works in Russian and English" (user feedback, 2026-09-10: *"Описание в самом скиле должно быть только на английском"*). Added the `argument-hint` every other skill has.
+- **The pixel fixture no longer fails on somebody else's Chrome.** The whole-page check demanded an exact `0.00%` against a baseline PNG recorded by one browser. Text antialiasing differs between Chrome versions — Chrome 153 scores 0.03% as scattered single pixels along glyph edges, nothing changed — so the pre-commit hook was red on every machine but the author's. Floor is now 0.10% and the check prints the measured figure; a real regression moves whole blocks, far above it.
+- **The pre-commit hook found no linter.** It resolved `<repo-root>/scripts/lint.sh`, which inside this plugin is an unrelated directory. It now looks in both layouts and says so instead of dying.
+- **The skill knew the wrong address for itself.** `SKILL.md` and eval row 22 both stated it lives under `~/.claude/skills/` with no plugin root — true standalone, false since it shipped here, and row 22 scored the inverted branch. Both cases are now named and scored separately.
+- **Docs caught up:** `figma-to-prototype` added to `README.md` (structure tree and its own section) and to `INSTALL.md` (8 skills, not 7; commands table; its extra Chrome/Node/curl prerequisites). The README's "5 slash commands" had been stale for several releases.
+- Bundled Geist woff2 now records its SIL OFL 1.1 licence in `assets/shell/dashboard/VERSION.md`.
+- Flagged for the author, deliberately not reconstructed: four rows of the run table in `assets/eval.md` are a cell short, so their values read under the wrong run (the Save/cursor defects belong to run 5, "not scored" to run 6). These are measured numbers — only the author knows which run each belongs to.
+
+Lint after the changes: **240 checks, clean**.
+
 ## v3.204.0 — 2026-09-21 (new skill: figma-to-prototype — a Figma frame becomes a working prototype)
 A Figma frame becomes a pixel-exact, self-contained clickable HTML prototype for a moderated
 interview, a demo or a review; an existing prototype is extended with a screen, a panel, a theme

@@ -506,7 +506,19 @@ fs.writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-
   # enough to hide a whole panel changing from grey #f3f4f6 to cream #fffbeb (a sum of 30)
   FXD=$(TH=6 "$DIR/zonediff.sh" "$ROOT/assets/components/reference/fixture-1200x900.png" "$T/fx/view_1200.png" \
         '[["page",0,0,1200,900]]' "$T/fx/diff.png" 2>&1)
-  expect "the whole-page fixture renders exactly as recorded (assets/components/reference/)" "page 0.00%" "$FXD"
+  # 0.10%, not 0.00%: the baseline PNG is recorded by one Chrome and re-rendered by whichever
+  # Chrome the colleague has, and text antialiasing differs between versions — Chrome 153 against
+  # a baseline recorded earlier scores 0.03% as scattered single pixels along glyph edges, with no
+  # element changed. Demanding an exact match made this hook red on every machine but the author's,
+  # which is how a gate stops being read. A real regression is far above the floor: the panel
+  # recolour this check exists to catch moves whole blocks, not glyph edges. If a diff lands
+  # between 0.00 and 0.10, open "$T/fx/diff.png" — scattered dots on text is the antialiasing,
+  # a solid shape is a regression.
+  FXP=$(printf '%s' "$FXD" | grep -oE '[0-9]+\.[0-9]+%' | head -1 | tr -d '%')
+  [ -n "$FXP" ] || FXP=99
+  awk -v p="$FXP" 'BEGIN{exit !(p<=0.10)}' \
+    && pass "the whole-page fixture renders as recorded (assets/components/reference/): $FXP% ≤ 0.10" \
+    || fail "the whole-page fixture drifted: $FXP% > 0.10 — look at the diff map before re-recording"
 
   expect "list-table.js renders a spec: header, one row, flex column css" "true true 1" "$(node -e '
 const {render}=require(process.argv[1]);const r=render({columns:[{key:"chk",label:"__checkbox__",width:40},{key:"a",label:"A",width:100},{key:"b",label:"B",flex:1,min:200}],rows:[{a:"x",b:"y"}],footer:{show:"10",found:"1",page:{of:"3"}}},(n,w,h)=>"<svg></svg>");

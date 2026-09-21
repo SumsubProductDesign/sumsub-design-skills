@@ -15,7 +15,7 @@
 
 # Sumsub Design Skills
 
-Claude Code plugin for the Sumsub Product Design team. Adds 5 slash commands that automate routine Figma tasks: generating component documentation, adding screen annotations, creating mockups, building on-demand components, and auditing designs for system compliance.
+Claude Code plugin for the Sumsub Product Design team. Adds 8 slash commands that automate routine design tasks: building Dashboard, WebSDK and Sumsub ID mockups, generating component documentation, adding screen annotations, building on-demand components, auditing designs for system compliance, and turning a finished design into a clickable HTML prototype.
 
 All skills work through the Figma MCP server (registered automatically with the plugin) and use the Sumsub Dashboard design system (Base components, Organisms, semantic variables).
 
@@ -70,6 +70,20 @@ Creates mockups for **Sumsub ID** product line — separate brand from Dashboard
 ```
 
 For Sumsub ID **WebSDK auth flow** (welcome / status onboarding screens) → use `/sumsub-design:websdk-mockup` instead.
+
+### `/sumsub-design:figma-to-prototype` — Clickable HTML Prototype
+
+Turns a Figma design into a pixel-exact, self-contained clickable HTML prototype for a usability interview, a demo or a review — then extends it (a screen, a panel, a theme, a state) and publishes it to a URL for a remote session. The design is read as **data** through the Figma MCP server, and every build is verified by measurement rather than by eye.
+
+```
+/sumsub-design:figma-to-prototype https://figma.com/design/<key>?node-id=<id>
+/sumsub-design:figma-to-prototype add a dark theme to the prototype
+/sumsub-design:figma-to-prototype publish it — I need a link for tomorrow's session
+```
+
+Ships the dashboard shell in three layouts, the design system's controls as markup, and `doctor.sh`, which reports in one command what a machine can do. Chrome 112+, Node 18+ and curl are required; Python 3 and a Vercel account each open one named part (reading a designer's SVG exports, and publishing).
+
+> This is the one skill that goes **out of** Figma. The others build **inside** it.
 
 ### `/sumsub-design:sumsub-design-review` — Design System Audit
 
@@ -134,6 +148,13 @@ sumsub-design-skills/
 │   │   └── reference/
 │   │       ├── sumsub-id-pattern.md        # Account (384) + Connect (947) + Reusable KYC (P1)
 │   │       └── reusable-identity-pattern.md
+│   ├── figma-to-prototype/                 # /sumsub-design:figma-to-prototype (Figma → clickable HTML)
+│   │   ├── SKILL.md                                # ten steps, from the two opening questions to handover
+│   │   ├── references/                             # 12 docs: MCP behaviour, baking, interaction, theming, publishing, traps
+│   │   ├── assets/shell/                           # dashboard shell in three layouts, gated against its Figma render
+│   │   ├── assets/components/                      # DS controls as markup + dscheck.js (Storybook drift watch)
+│   │   ├── assets/templates/                       # elastic form + elastic list
+│   │   └── scripts/                                # headless renders, pixel probes, zone diffs, doctor.sh, lint.sh
 │   └── websdk-mockup/                      # /sumsub-design:websdk-mockup (WebSDK flows)
 │       ├── SKILL.md                                # canonical Examples-driven assembly
 │       └── reference/

@@ -147,7 +147,7 @@ Quit and reopen Claude Desktop so it picks up the new skills:
 
 > After this step, the marketplace also appears in **Claude Desktop → Settings → Customize → Plugins** alongside "Anthropic & Partners". You can enable/disable individual plugins from there. All install/update still goes through the CLI commands above.
 
-The plugin bundles **7 skills**:
+The plugin bundles **8 skills**:
 
 - `sumsub-mockup` — Dashboard mockups (table pages, detail pages, drawers, modals)
 - `websdk-mockup` — WebSDK flow screens (Welcome, Document Type, Camera, Liveness, etc.)
@@ -156,6 +156,9 @@ The plugin bundles **7 skills**:
 - `sumsub-specs-docs` — Generate Specs documentation pages with anatomy + Do/Don't cards
 - `sumsub-screen-annotations` — Add Scenarios annotations above mockup screens
 - `sumsub-design-review` — Audit a mockup for design system compliance
+- `figma-to-prototype` — Turn a Figma design into a clickable HTML prototype for user testing, and publish it to a URL
+
+> `figma-to-prototype` needs a little more than the others on your machine: **Chrome 112+, Node 18+ and curl**. Python 3 and a Vercel account each open one optional part (reading a designer's SVG exports, and publishing a prototype). Run `doctor.sh` inside the skill folder and it reports what is missing and the line that installs it.
 
 Plus the **Figma remote MCP server** (`https://mcp.figma.com/mcp`), registered automatically via the plugin's `.mcp.json`. It still needs a one-time **authentication**:
 
@@ -195,6 +198,7 @@ Claude Code should pick up the skill, ask where to create the mockup, and start 
 | `/sumsub-design:sumsub-specs-docs [component]` | Generate a Specs page with component anatomy |
 | `/sumsub-design:sumsub-screen-annotations` | Add Scenarios annotations above every screen on the current page |
 | `/sumsub-design:sumsub-design-review` | Audit a mockup for design system compliance |
+| `/sumsub-design:figma-to-prototype [figma-url]` | Turn a Figma design into a clickable HTML prototype, extend it, or publish it to a URL |
 
 All commands are entered in the **Claude Code** tab.
 

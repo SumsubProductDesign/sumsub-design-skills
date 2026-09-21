@@ -8,10 +8,9 @@ description: >-
   interactive or working prototype or mockup, one for user testing or respondents, "make the
   mockup clickable", "make this screen work", "an HTML version of this Figma", a pixel-perfect or
   1:1 build of a design, "add dark theme / a panel / a state to the prototype", or a link to send
-  a respondent. Russian: кликабельный или интерактивный прототип из фигмы, прототип для интервью
-  или юзабилити-теста, оживить макет, собрать прототип по макету, сделать экран из фигмы рабочим,
-  добавить экран / тему / состояние в прототип, выложить прототип ссылкой. Not for a quick
-  approximate mockup — that is built the ordinary way.
+  a respondent. Works in Russian and English. Not for a quick approximate mockup — that is built
+  the ordinary way, and not for building inside Figma itself.
+argument-hint: "[figma-url or what to add to the prototype]"
 ---
 
 # Figma → pixel-exact clickable prototype
@@ -139,9 +138,10 @@ Python. That is what the check is for.
 | *optional:* a Vercel account in the team, `npx vercel login` run once by you, the team slug from `npx vercel teams list` | Step 9 only; without it the prototype is still built and handed over as a file. The scripts never log in for you |
 
 **`$SKILL` is this folder, and no file in the skill spells it out.** Where the
-skill is installed is not its business: today it is a folder under
-`~/.claude/skills/`, after packaging it is `${CLAUDE_PLUGIN_ROOT}/skills/<name>`
-inside a versioned plugin directory that changes on every update. Export it once
+skill is installed is not its business: shipped in the `sumsub-design` plugin it
+is `${CLAUDE_PLUGIN_ROOT}/skills/figma-to-prototype`, inside a versioned plugin
+directory that changes on every update; installed standalone it is a folder under
+`~/.claude/skills/`, with no plugin root to resolve against. Export it once
 per session and every command below is copy-pasteable:
 
 ```bash
@@ -228,6 +228,11 @@ That proves the tools and the documents, not the behaviour. Before handing the
 skill to someone new, or after a material change to this file, run the one
 real build described in `assets/eval.md` — a fixed three-frame design, a
 twenty-one-row checklist, and the numbers of the last accepted run.
+
+**That file is the answer sheet: if you are the agent doing the build, do not
+open it.** It is read by the maintainer setting the run up, who pastes the brief
+in; an agent that has seen the frames' contents or the checklist cannot be scored
+on them, which is exactly how run 6 lost its Step 0 rows.
 
 The other thing that goes stale is the component library: the design system
 moves and `assets/components/controls.js` keeps rendering last quarter's
@@ -839,7 +844,7 @@ when the screenshot already gave every id-free answer, the call is skipped.
 | `assets/components/VERSION.md` | the controls' values and states, their source, and what is not covered yet |
 | `assets/run-log-template.md` | the run log the prototype keeps at `_work/run-log.md` (Step 8): what was asked, decided, measured, and where the skill was wrong. Offered to the user once, sent by nobody but them |
 | `assets/handoff-template.md` | writing the handoff |
-| `assets/eval.md` | checking the skill itself: one real run on a fixed design, with the checklist and the last accepted numbers |
+| `assets/eval.md` | **never during a build — it is the answer sheet.** It holds the fixed brief, the frames' contents and the checklist a run is scored against, so opening it while working invalidates that run (it has already happened once). It is for the maintainer scoring the skill, between runs |
 
 | Script | What it does |
 |---|---|

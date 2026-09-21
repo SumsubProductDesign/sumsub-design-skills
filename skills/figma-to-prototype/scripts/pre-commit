@@ -1,6 +1,17 @@
 #!/bin/bash
 # git pre-commit hook for this skill: runs scripts/lint.sh (both levels).
-# Install once:   ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+#
+# The linter is looked up in both layouts, because the repo root is not the skill
+# root once this ships inside a plugin: in sumsub-design the skill sits at
+# skills/figma-to-prototype/ and the repo root holds an unrelated scripts/.
+#
+# Install once:   ln -sf ../../skills/figma-to-prototype/scripts/pre-commit .git/hooks/pre-commit
+#   (standalone:  ln -sf ../../scripts/pre-commit .git/hooks/pre-commit)
 # Bypass once:    git commit --no-verify
 # Quick mode (no headless renders, ~1s): LINT_QUICK=1 git commit …
-exec "$(git rev-parse --show-toplevel)/scripts/lint.sh" ${LINT_QUICK:+--quick}
+ROOT="$(git rev-parse --show-toplevel)"
+for LINT in "$ROOT/skills/figma-to-prototype/scripts/lint.sh" "$ROOT/scripts/lint.sh"; do
+  [ -x "$LINT" ] && exec "$LINT" ${LINT_QUICK:+--quick}
+done
+echo "pre-commit: lint.sh not found under $ROOT — skipping the skill's lint" >&2
+exit 0
