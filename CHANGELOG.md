@@ -4,6 +4,19 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.204.0 — 2026-09-21 (new skill: figma-to-prototype — a Figma frame becomes a working prototype)
+A Figma frame becomes a pixel-exact, self-contained clickable HTML prototype for a moderated
+interview, a demo or a review; an existing prototype is extended with a screen, a panel, a theme
+or a state; either is published to a URL for a remote session and taken down afterwards. The
+design is read as data through the Figma MCP server (a designer's SVG exports are the fallback)
+and every build is verified by measurement rather than by eye. Ships the product's dashboard shell
+in three layouts — basic, fullscreen, and fullscreen flush to the rail — each gated against its
+own Figma render; the design system's controls as markup, watched against the live Storybook by
+`dscheck.js`; and the two fluid page shapes, the elastic form and the elastic list, each with a
+measured floor. `doctor.sh` reports in one command what a machine can do: Chrome 112+, Node 18+
+and curl are required, while Python 3 and a Vercel account each close one named part and leave
+the ten steps of the main path alone.
+
 ## v3.203.0 — 2026-08-12 (`*Table Starter*` is SLOT-based and its node handles die on write; audit 7.60)
 Found while building the Applicants-breakdown residual-row options in Global Settings (`ZBP8mJTQIjAJizXhEmRkLc`): **eight consecutive failed build attempts** before the table could be filled at all. The documented Table Starter recipe had gone stale and the failure mode was invisible — errors read `Node with id "I…" not found` on `setProperties` / `get_componentProperties` / `set_visible` / `findAll`, and one pass reported "applied 90 writes" while writing **nothing** (every write swallowed by a `try/catch` counter; the delivered table still showed `Table header` / `Table cell` in every cell).
 

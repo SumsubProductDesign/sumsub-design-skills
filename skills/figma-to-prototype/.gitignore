@@ -1,0 +1,5 @@
+# scratch output from the measurement tools
+_*.png
+# crop.js names its output compare.png when a project has no _work/shots; one was committed by
+# accident on 2026-09-18 and sat in the skill until 2026-09-21
+compare.png

@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="large/reviews-panel-outline">
+<g id="Shape">
+<path d="M11.25 14.5V11H12.75V14.5H11.25Z" fill="#1E2939"/>
+<path d="M11.25 15.5V17H12.75V15.5H11.25Z" fill="#1E2939"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3.23804 17.7715L10.6888 4.36022C11.2603 3.33151 12.7397 3.33151 13.3112 4.36022L20.762 17.7715C21.3174 18.7713 20.5945 20 19.4507 20H4.54928C3.40555 20 2.6826 18.7713 3.23804 17.7715ZM12 5.08868L4.54928 18.5L19.4507 18.5L12 5.08868Z" fill="#1E2939"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,713 @@
+{
+  "note": "What scripts/dscheck.js reads out of the live Storybook and compares with VERSION.md. One entry per value the components depend on. Hover, focus and anything behind a click cannot be read here and stay a human look (Step 7).",
+  "upstream": "storybook.sumsub.net",
+  "taken": "2026-09-18",
+  "waitMs": 20000,
+  "components": [
+    {
+      "component": "input",
+      "checks": [
+        {
+          "what": "small box",
+          "story": "forms-snsinput--input-sizes",
+          "sel": ".sns-input-box.size-small",
+          "expect": {
+            "h": "24",
+            "padding": "0px 8px",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "medium box",
+          "story": "forms-snsinput--input-sizes",
+          "sel": ".sns-input-box.size-medium",
+          "expect": {
+            "h": "32",
+            "padding": "4px 12px",
+            "borderRadius": "8px"
+          }
+        },
+        {
+          "what": "large box",
+          "story": "forms-snsinput--input-sizes",
+          "sel": ".sns-input-box.size-large",
+          "expect": {
+            "h": "40",
+            "padding": "8px 12px",
+            "borderRadius": "8px"
+          }
+        },
+        {
+          "what": "error fill",
+          "story": "forms-snsinput--input-states",
+          "sel": ".sns-input.error .sns-input-box",
+          "expect": {
+            "backgroundColor": "rgb(254, 242, 242)"
+          }
+        },
+        {
+          "what": "disabled fill",
+          "story": "forms-snsinput--input-states",
+          "sel": ".sns-input.disabled .sns-input-box",
+          "expect": {
+            "backgroundColor": "rgb(243, 244, 246)"
+          }
+        },
+        {
+          "what": "warning fill",
+          "story": "forms-snsinput--input-states",
+          "sel": ".sns-input.warning .sns-input-box",
+          "expect": {
+            "backgroundColor": "rgb(255, 251, 235)"
+          }
+        },
+        {
+          "what": "label above the box",
+          "story": "forms-snsinput--input-states",
+          "sel": ".sns-input .sns-label label",
+          "expect": {
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "fontWeight": "500",
+            "color": "rgb(3, 7, 18)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "button",
+      "checks": [
+        {
+          "what": "primary large",
+          "story": "design-system-snsbutton--primary",
+          "sel": ".sns-button.type-primary.status-default.state-normal.size-large",
+          "expect": {
+            "h": "40",
+            "padding": "8px 16px",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(3, 7, 18)",
+            "color": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "secondary large",
+          "story": "design-system-snsbutton--secondary",
+          "sel": ".sns-button.type-secondary.status-default.state-normal.size-large",
+          "expect": {
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(30, 41, 57)"
+          }
+        },
+        {
+          "what": "ai, large",
+          "story": "design-system-snsbutton--ai",
+          "sel": ".sns-button.type-ai.state-normal.status-default.size-large",
+          "expect": {
+            "h": "40",
+            "backgroundImage": "linear-gradient(90deg, rgb(224, 231, 255) 0%, rgb(243, 232, 255) 100%)",
+            "color": "rgb(30, 41, 57)",
+            "borderColor": "rgb(233, 213, 255)"
+          }
+        },
+        {
+          "what": "ai tertiary gradient text",
+          "story": "design-system-snsbutton--ai-tertiary",
+          "sel": ".sns-button.type-ai-tertiary.state-normal.status-default.size-large .sns-button-content",
+          "expect": {
+            "backgroundImage": "linear-gradient(135deg, rgb(129, 140, 248) 12.26%, rgb(147, 51, 234) 61.93%)",
+            "webkitTextFillColor": "rgba(0, 0, 0, 0)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "radio",
+      "checks": [
+        {
+          "what": "mark, unselected",
+          "story": "forms-snsradiobutton--playground",
+          "sel": ".sns-radio-button:not(.checked) .sns-radio-button-checkmark",
+          "expect": {
+            "w": "16",
+            "h": "16",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "mark, selected",
+          "story": "forms-snsradiobutton--playground",
+          "sel": ".sns-radio-button.checked .sns-radio-button-checkmark",
+          "expect": {
+            "backgroundColor": "rgb(3, 7, 18)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "checkbox",
+      "checks": [
+        {
+          "what": "mark box",
+          "story": "forms-snscheckbox--playground",
+          "sel": ".sns-checkbox-input-wrapper",
+          "expect": {
+            "w": "16",
+            "h": "16",
+            "borderRadius": "4px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "tag",
+      "checks": [
+        {
+          "what": "grey tag",
+          "story": "design-system-snstag--playground",
+          "sel": ".sns-tag-box.color-grey",
+          "expect": {
+            "padding": "4px 8px",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(243, 244, 246)",
+            "color": "rgb(30, 41, 57)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "counter",
+      "checks": [
+        {
+          "what": "filled pill, small blue",
+          "story": "design-system-snscounter--filled",
+          "sel": ".counter.type-filled.default.small.blue",
+          "expect": {
+            "h": "20",
+            "minWidth": "20px",
+            "padding": "2px 6px",
+            "borderRadius": "9999px",
+            "backgroundColor": "rgb(219, 234, 254)"
+          }
+        },
+        {
+          "what": "outline blue",
+          "story": "design-system-snscounter--outline",
+          "sel": ".counter.blue.type-outline.default",
+          "expect": {
+            "outlineStyle": "solid",
+            "outlineColor": "rgb(147, 197, 253)",
+            "color": "rgb(30, 64, 175)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        },
+        {
+          "what": "dashed grey",
+          "story": "design-system-snscounter--dashed",
+          "sel": ".counter.grey.type-dashed.default.small",
+          "expect": {
+            "outlineStyle": "dashed",
+            "outlineColor": "rgb(153, 161, 175)",
+            "color": "rgb(30, 41, 57)",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "medium pill text",
+          "story": "design-system-snscounter--filled",
+          "sel": ".counter.blue.type-filled.default.medium div",
+          "expect": {
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "fontWeight": "500"
+          }
+        }
+      ]
+    },
+    {
+      "component": "link",
+      "checks": [
+        {
+          "what": "blue link",
+          "story": "design-system-snslink--default",
+          "sel": "a.sns-link.blue",
+          "expect": {
+            "color": "rgb(37, 99, 235)",
+            "textDecorationLine": "underline"
+          }
+        }
+      ]
+    },
+    {
+      "component": "tabs",
+      "checks": [
+        {
+          "what": "selected item",
+          "story": "design-system-snstabs--simple-example",
+          "sel": ".sns-tab.basic.sns-tab-selected",
+          "expect": {
+            "h": "32",
+            "color": "rgb(30, 41, 57)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "toast",
+      "checks": [
+        {
+          "what": "box",
+          "story": "design-system-snstoast--playground",
+          "sel": ".sns-toast",
+          "expect": {
+            "w": "476",
+            "padding": "16px",
+            "borderRadius": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "alert",
+      "checks": [
+        {
+          "what": "medium box",
+          "story": "design-system-snsalert--playground",
+          "sel": ".sns-alert.size-medium",
+          "expect": {
+            "padding": "16px",
+            "borderRadius": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "card",
+      "checks": [
+        {
+          "what": "card box",
+          "story": "design-system-snscollapsiblecard--playground",
+          "sel": ".sns-collapsible-card.classic",
+          "expect": {
+            "borderRadius": "16px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "header bar, small",
+          "story": "design-system-snscollapsiblecard--playground",
+          "sel": ".sns-collapsible-card.size-small .header-bar",
+          "expect": {
+            "h": "40",
+            "padding": "8px",
+            "gap": "8px",
+            "backgroundColor": "rgb(243, 244, 246)"
+          }
+        },
+        {
+          "what": "chevron box",
+          "story": "design-system-snscollapsiblecard--playground",
+          "sel": ".sns-collapsible-card .button-box",
+          "expect": {
+            "w": "24",
+            "h": "24",
+            "borderRadius": "8px"
+          }
+        },
+        {
+          "what": "chevron icon",
+          "story": "design-system-snscollapsiblecard--playground",
+          "sel": ".sns-collapsible-card .toggle-icon",
+          "expect": {
+            "w": "16",
+            "h": "16",
+            "color": "rgb(74, 85, 101)"
+          }
+        },
+        {
+          "what": "open body, small",
+          "story": "design-system-snscollapsiblecard--playground",
+          "sel": ".sns-collapsible-card.open.size-small .content",
+          "expect": {
+            "padding": "8px 8px 12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "status",
+      "checks": [
+        {
+          "what": "grey pill, medium",
+          "story": "design-system-snsstatus--playground",
+          "sel": ".sns-status.size-medium",
+          "expect": {
+            "h": "24",
+            "padding": "0px 8px",
+            "borderRadius": "9999px",
+            "gap": "4px",
+            "backgroundColor": "rgb(243, 244, 246)",
+            "borderColor": "rgb(209, 213, 220)",
+            "color": "rgb(30, 41, 57)"
+          }
+        },
+        {
+          "what": "dot",
+          "story": "design-system-snsstatus--playground",
+          "sel": ".sns-status .sns-badge.small",
+          "expect": {
+            "w": "6",
+            "h": "6",
+            "backgroundColor": "rgb(106, 114, 130)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "multiselect",
+      "checks": [
+        {
+          "what": "trigger, large",
+          "story": "forms-snsmultiselect--preselected-items",
+          "sel": ".sns-select-control.size-large",
+          "expect": {
+            "h": "40",
+            "padding": "8px 12px"
+          }
+        },
+        {
+          "what": "trigger box",
+          "story": "forms-snsmultiselect--preselected-items",
+          "sel": ".sns-input-box.size-large",
+          "expect": {
+            "h": "40",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "emptyState",
+      "checks": [
+        {
+          "what": "container",
+          "story": "design-system-snsemptystate--playground",
+          "sel": ".sns-empty-state",
+          "expect": {
+            "padding": "24px",
+            "borderRadius": "12px",
+            "justifyContent": "center"
+          }
+        },
+        {
+          "what": "vertical layout",
+          "story": "design-system-snsemptystate--playground",
+          "sel": ".sns-empty-state .layout-vertical",
+          "expect": {
+            "gap": "16px",
+            "textAlign": "center",
+            "alignItems": "center"
+          }
+        },
+        {
+          "what": "title",
+          "story": "design-system-snsemptystate--playground",
+          "sel": ".sns-empty-state .title",
+          "expect": {
+            "fontSize": "20px",
+            "lineHeight": "28px",
+            "fontWeight": "500",
+            "color": "rgb(3, 7, 18)"
+          }
+        },
+        {
+          "what": "description",
+          "story": "design-system-snsemptystate--playground",
+          "sel": ".sns-empty-state .description",
+          "expect": {
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "color": "rgb(30, 41, 57)",
+            "marginTop": "8px"
+          }
+        },
+        {
+          "what": "buttons row",
+          "story": "design-system-snsemptystate--playground",
+          "sel": ".sns-empty-state .buttons",
+          "expect": {
+            "gap": "12px",
+            "marginTop": "16px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "statusSelect",
+      "checks": [
+        {
+          "what": "green pill, medium",
+          "story": "design-system-snsstatusselect--playground",
+          "sel": ".sns-status-select.size-medium",
+          "expect": {
+            "h": "24",
+            "padding": "0px 8px",
+            "borderRadius": "9999px",
+            "columnGap": "4px",
+            "backgroundColor": "rgb(220, 252, 231)",
+            "borderColor": "rgb(187, 247, 208)",
+            "color": "rgb(22, 101, 52)"
+          }
+        },
+        {
+          "what": "chevron",
+          "story": "design-system-snsstatusselect--playground",
+          "sel": ".sns-status-select-chevron",
+          "expect": {
+            "w": "16",
+            "h": "16",
+            "color": "rgb(22, 163, 74)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "codeBlock",
+      "checks": [
+        {
+          "what": "panel",
+          "story": "design-system-snscodeblock--default",
+          "sel": ".code-block",
+          "expect": {
+            "borderRadius": "12px",
+            "backgroundColor": "rgb(249, 250, 251)",
+            "borderColor": "rgb(209, 213, 220)"
+          }
+        },
+        {
+          "what": "header",
+          "story": "design-system-snscodeblock--default",
+          "sel": ".code-block .code-header",
+          "expect": {
+            "padding": "8px 20px"
+          }
+        },
+        {
+          "what": "gutter",
+          "story": "design-system-snscodeblock--default",
+          "sel": ".prism-editor-line-numbers",
+          "expect": {
+            "padding": "0px 12px 0px 20px",
+            "color": "rgb(74, 85, 101)",
+            "fontSize": "12px",
+            "lineHeight": "18px"
+          }
+        },
+        {
+          "what": "code area",
+          "story": "design-system-snscodeblock--default",
+          "sel": ".prism-editor-wrapper",
+          "expect": {
+            "padding": "16px 0px",
+            "backgroundColor": "rgb(249, 250, 251)",
+            "fontSize": "12px",
+            "lineHeight": "18px"
+          }
+        },
+        {
+          "what": "header title",
+          "story": "design-system-snscodeblock--default",
+          "sel": ".code-block-header-title",
+          "expect": {
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontWeight": "700",
+            "color": "rgb(3, 7, 18)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "searchBar",
+      "checks": [
+        {
+          "what": "medium box",
+          "story": "design-system-snssearchbar--playground",
+          "sel": ".sns-search-bar.size-medium",
+          "expect": {
+            "h": "32",
+            "padding": "4px 12px",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "leading glyph",
+          "story": "design-system-snssearchbar--playground",
+          "sel": ".sns-search-bar .leading-icon",
+          "expect": {
+            "w": "16",
+            "h": "16",
+            "marginRight": "8px",
+            "color": "rgb(30, 41, 57)"
+          }
+        },
+        {
+          "what": "control",
+          "story": "design-system-snssearchbar--playground",
+          "sel": ".sns-search-bar .control",
+          "expect": {
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "color": "rgb(30, 41, 57)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "tagMultiselect",
+      "checks": [
+        {
+          "what": "trigger box",
+          "story": "forms-snstagmultiselect--playground",
+          "sel": ".sns-input-box.size-large",
+          "expect": {
+            "h": "40",
+            "borderRadius": "8px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "control padding",
+          "story": "forms-snstagmultiselect--playground",
+          "sel": ".sns-select-control.size-large",
+          "expect": {
+            "padding": "8px 12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "modal",
+      "checks": [
+        {
+          "what": "small card",
+          "story": "design-system-snsmodal--playground",
+          "click": "button.sns-button",
+          "sel": ".sns-modal",
+          "expect": {
+            "w": "480",
+            "padding": "16px 24px",
+            "borderRadius": "16px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "header",
+          "story": "design-system-snsmodal--playground",
+          "click": "button.sns-button",
+          "sel": ".sns-modal-header",
+          "expect": {
+            "h": "52",
+            "gap": "16px"
+          }
+        },
+        {
+          "what": "backdrop",
+          "story": "design-system-snsmodal--playground",
+          "click": "button.sns-button",
+          "sel": ".sns-modal-backdrop",
+          "expect": {
+            "backgroundColor": "rgba(0, 0, 0, 0.5)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "selectMenu",
+      "checks": [
+        {
+          "what": "popover",
+          "story": "forms-snsselect--playground",
+          "click": ".sns-select-control",
+          "sel": ".sns-popover",
+          "expect": {
+            "borderRadius": "12px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "borderColor": "rgb(229, 231, 235)",
+            "maxHeight": "400px"
+          }
+        },
+        {
+          "what": "row",
+          "story": "forms-snsselect--playground",
+          "click": ".sns-select-control",
+          "sel": ".select-option-box",
+          "expect": {
+            "h": "40",
+            "padding": "8px 12px",
+            "columnGap": "8px"
+          }
+        },
+        {
+          "what": "search box",
+          "story": "forms-snsselect--playground",
+          "click": ".sns-select-control",
+          "sel": ".sns-popover .rounded-md",
+          "expect": {
+            "h": "32",
+            "borderRadius": "8px",
+            "borderColor": "rgb(209, 213, 220)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "dataList",
+      "checks": [
+        {
+          "what": "rows 8 apart",
+          "story": "design-system-snsdatalist--playground",
+          "sel": ".data-list-wrapper",
+          "expect": {
+            "rowGap": "8px",
+            "flexDirection": "column"
+          }
+        },
+        {
+          "what": "label and value 16 apart",
+          "story": "design-system-snsdatalist--playground",
+          "sel": ".sns-data-list-item",
+          "expect": {
+            "columnGap": "16px",
+            "h": "24"
+          }
+        },
+        {
+          "what": "label 14/24 in the default family",
+          "story": "design-system-snsdatalist--playground",
+          "sel": ".label-text",
+          "expect": {
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "color": "rgb(54, 65, 83)"
+          }
+        },
+        {
+          "what": "value colour and its 4px gap",
+          "story": "design-system-snsdatalist--playground",
+          "sel": ".sns-data-list-item .value-column",
+          "expect": {
+            "columnGap": "4px",
+            "flexGrow": "1"
+          }
+        }
+      ]
+    }
+  ],
+  "frame": "1000x420",
+  "batch": 3,
+  "varsStory": "design-system-snsstatus--playground"
+}

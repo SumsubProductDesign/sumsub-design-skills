@@ -1,0 +1,7 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="15" height="16.5" viewBox="0 0 15 16.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Union">
+<path id="Vector" d="M6 2.5H9C10.6569 2.5 12 3.84315 12 5.5C12 7.15685 10.6569 8.5 9 8.5H5C3.34315 8.5 2 9.84315 2 11.5C2 13.1569 3.34315 14.5 5 14.5H9" stroke="#030712" stroke-width="1.5"/>
+<path id="Vector_2" d="M0 1C0 0.447715 0.447715 0 1 0H5C5.55228 0 6 0.447715 6 1V4C6 4.55228 5.55228 5 5 5H1C0.447715 5 0 4.55228 0 4V1Z" fill="#030712"/>
+<path id="Vector_3" opacity="0.7" d="M9 12.5C9 11.9477 9.44772 11.5 10 11.5H14C14.5523 11.5 15 11.9477 15 12.5V15.5C15 16.0523 14.5523 16.5 14 16.5H10C9.44772 16.5 9 16.0523 9 15.5V12.5Z" fill="#030712"/>
+</g>
+</svg>

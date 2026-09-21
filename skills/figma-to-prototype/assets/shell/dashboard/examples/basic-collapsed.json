@@ -1,0 +1,30 @@
+{
+  "layout": "basic",
+  "sidebar": "collapsed",
+  "canvas": {
+    "width": 1280,
+    "height": 720
+  },
+  "client": "Key_name",
+  "page": {
+    "title": "Page title",
+    "keyName": "Key name",
+    "tabs": [
+      "Tab_1",
+      {
+        "label": "Tab_2",
+        "tag": "Beta"
+      },
+      "Tab_3"
+    ],
+    "activeTab": "Tab_1"
+  },
+  "production": true,
+  "hover": false,
+  "menu": {
+    "active": [
+      "Integrations"
+    ],
+    "expanded": []
+  }
+}
