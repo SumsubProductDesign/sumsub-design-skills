@@ -277,9 +277,15 @@ async function copyVarsFromRef(refRoot, page, anchors) {
       for (const [path, rn] of mr) { const bn = mb.get(path); if (!bn) continue;
         if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
         // sizing: the designers switch fixed-width blocks to FILL (or pin a column FIXED) when the content gets wider — copy it
-        try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal;
-          if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
-          if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); }
+        // …but never a FIXED width that doesn't fit where the block now sits: the published Aside is 400 and doesn't stretch, while a
+        // branch reference may show the same column at 424 with no panel around it (Case page right column → 24 px overflow).
+        try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
+          const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
+          const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
+          if (rs === "FIXED" && (inPanel || rn.width > room + 1)) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
+          else {
+            if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
+            if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); } }
         } catch (e) {}
         for (const prop of ["fills", "strokes"]) { try {
           const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);

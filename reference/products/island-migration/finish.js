@@ -29,9 +29,13 @@ const R = refRoot.findAll(n => n.name === a && n.visible), B = page.findAll(n =>
 for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr, mb; try { mr = collect(R[i]); mb = collect(B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
 for (const [path, rn] of mr) { const bn = mb.get(path); if (!bn) continue;
 if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
-try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal;
+try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
+const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
+const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
+if (rs === "FIXED" && (inPanel || rn.width > room + 1)) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
+else {
 if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
-if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); }
+if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); } }
 } catch (e) {}
 for (const prop of ["fills", "strokes"]) { try {
 const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);

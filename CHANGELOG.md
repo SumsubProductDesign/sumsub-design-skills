@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.210.1 — 2026-09-29 (engine fix found by the first skill run)
+The first real run of the skill (Case page / Financial data) matched the designers' reference, but its log showed six extra calls: `finish.js` had copied the reference's FIXED 424 width onto the right column inside the published 400 `Aside`, the audit flagged the 24 px overflow, and the skill fixed it by hand after two failed attempts to widen the panel. `finish.js` no longer copies a fixed reference width that doesn't fit where the block now sits (a side panel, or wider than the parent's room) — the block goes FILL instead.
+
 ## v3.210.0 — 2026-09-29 (island migration engine ships with the skill; content fills the width)
 The migration was run by hand on the designers' test set and every lesson went back into the skill (user feedback: *"we need to check that you can rebuild layouts, then the skill can do the same"*, *"don't forget to teach the skill"*).
 
