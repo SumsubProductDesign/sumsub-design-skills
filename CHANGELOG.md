@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.214.1 — 2026-09-29 (island migration: two fixes from the TM Transaction skill run)
+First skill run on TM Transaction / General info (`3305:69962` vs reference `311:53619`): plan and build matched the reference; two defects surfaced.
+
+- **`finish.js` crashed its own audit.** v3.214.0 regenerated `finish.js` without `refPlacement`, which the `notIsland` check calls for every bare block — any screen with a bare card in `Main content` (the TM Customers card) threw `refPlacement is not defined` in call 2. Restored, and a new `node scripts/check-island-engine.js` fails when either generated file calls a helper it doesn't define.
+- **Copy button follows the title.** When the header title comes from the reference, the title's copy button now comes from the reference too. Before, the original's copy button (it sat next to the transaction ID) stayed on and showed next to `Transfer: - 250,000.00 USD`, which the reference doesn't have.
+
 ## v3.214.0 — 2026-09-29 (island migration: TM Transaction — header stack, reference layout with the original's data)
 Getting TM Transaction / General info ready for a skill run. The user's rules for it: *"as it's done in this reference, that's right"* and, when asked, *"the reference's layout, the original's data"*.
 

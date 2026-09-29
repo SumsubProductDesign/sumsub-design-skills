@@ -17,6 +17,12 @@ for (const c of k) { if (cardLike(c)) { cards++; continue; } if (c.height <= 90)
 if (c.type === "FRAME" && isCardLayout(c, depth + 1)) { cards += 2; continue; } return false; }
 return cards >= 2; }
 const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingBlock(k[0]) && k.filter(cardLike).length >= Math.ceil(k.length / 2); };
+function refPlacement(refRoot, name) {
+if (!refRoot) return null;
+const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
+return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
+}
 const repaint = (n, prop, variable) => { const base = n[prop] && n[prop][0] ? JSON.parse(JSON.stringify(n[prop][0])) : { type: "SOLID", color: { r: 1, g: 1, b: 1 } };
 delete base.boundVariables; n[prop] = [figma.variables.setBoundVariableForPaint(base, "color", variable)]; };
 async function copyVarsFromRef(refRoot, page, anchors) {

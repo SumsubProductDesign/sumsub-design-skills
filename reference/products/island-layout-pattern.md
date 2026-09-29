@@ -257,7 +257,7 @@ The migration may **not** invent: no new content or data, no copy edits, no comp
 The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`:
 - `build.js` — **call 1.** Paste the file into `use_figma` and append `return JSON.stringify(await migrateOne("<screen node id>"));`
 - `finish.js` — **call 2, a separate `use_figma` call.** Append `return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<reference node id, or null>"));`
-- `island-migration-lib.js` — the same code, commented, for reading and maintenance. Change it there, then regenerate the two files.
+- `island-migration-lib.js` — the same code, commented, for reading and maintenance. Change it there, then regenerate the two files. Then run `node scripts/check-island-engine.js` — it fails when `build.js` or `finish.js` calls a helper it no longer defines (v3.214.0 shipped `finish.js` without `refPlacement`).
 
 **Why two calls.** After blocks move into slots, node proxies inside the same call go stale ("node … does not exist" while walking the moved tree). A throw rolls back **everything** that call did, the build included. Call 2 starts with fresh proxies.
 

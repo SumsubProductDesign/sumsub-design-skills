@@ -303,7 +303,7 @@ async function buildIsland(scr, a, crumb) {
     // a placeholder title (Case refs: "SSO Login") shares nothing with the original and is ignored
     const refTitle = rh && rh.componentProperties["Title text#3817:0"] ? String(rh.componentProperties["Title text#3817:0"].value) : null;
     const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
-    if (refTitle && reuses(refTitle)) { try { getHdr().setProperties({ "Title text#3817:0": refTitle }); notes.push("title from the reference: " + refTitle); } catch (e) {} }
+    if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; getHdr().setProperties(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }   // the copy button belongs to the title it sits next to
     const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = t.characters.trim();
         if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch (e) {} } } };
     const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
