@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.213.0 — 2026-09-29 (island migration: three fixes from the Levels / Steps skill run)
+The third skill run (Levels / Steps) matched the designers' reference, but three things still needed a hand fix afterwards. The engine now does them itself.
+
+- **Breadcrumb from the reference.** When the old screen has no breadcrumb, the migrated header takes it from the designers' reference (Levels / Steps now shows `Levels`). If neither has one, the breadcrumb is hidden instead of showing the default `Section name`. `planOne` reports the breadcrumb it will use.
+- **The test section grows with the screen.** A migrated screen that ends up taller than its `(made by Claude)` section no longer spills out of it — `finish.js` grows the section and reports it as `sectionFit`.
+- **No false "not in an island" warning.** The audit flagged `Steps` as a block outside an island, although the reference places it bare on the grey too. Blocks the reference itself places bare or split are no longer flagged.
+- Checked on the Levels / Steps result: audit lists all empty, re-running `finish.js` changes nothing, the section grows 960 → 1743 to fit the 1583-tall screen, the breadcrumb resolves to `Levels`.
+
 ## v3.212.0 — 2026-09-29 (grey screens only, plan before build, placement from the reference)
 The second skill run (Levels / Configurations) produced a grey page with an island — but that screen is white in the designers' table (user feedback: *"should this screen have a grey background at all, according to the file I sent?"*), and the next candidate (Levels / Steps) would have been built wrong too. The scope was also restated: *"only screens that contain the grey background and islands — the point is to help designers not do it by hand, but only for the needed screens."*
 
