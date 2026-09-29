@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.213.2 — 2026-09-29 (correction: move what the new layout requires)
+v3.213.1 went too far: it banned any restructuring. User feedback: *"moving buttons, statuses and so on is needed too, if the new layout requires it."* The rule is now: the migration invents nothing (no new content, no copy edits, no components the original doesn't have), but it **moves existing elements where the new layout expects them** — actions, status, risk score, IDs and the applicant into the header slots, tabs into the sub-header, a details / notes column into the side panel — when the designers' reference or table requires it (TM Transaction).
+
 ## v3.213.1 — 2026-09-29 (the migration invents nothing)
 User feedback: *"the skill must not invent anything of its own: just switch on the grey background and put the needed content into islands or collapsible cards on the grey, that's all."* Written into the doc and `SKILL.md` as a hard rule: the migration does two things — the grey island layout (with the original header carried as it is) and content into islands, cards and collapsible cards left bare on the grey. It never restructures a screen: no moving buttons, status or IDs into the header, no new sidebars, no sub-header tabs, no copy edits, no new components — even where the designers' reference or table comments redesigned it (TM Transaction).
 

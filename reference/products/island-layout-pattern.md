@@ -241,11 +241,14 @@ Radius: keep the block's own. The old `Documents block old` stays at its compone
 
 ### 6.2 The migration engine — two files, two calls. Run them, don't write your own
 
-**No inventions — the migration does exactly two things** (user feedback: *"the skill must not invent anything of its own: just switch on the grey background and put the needed content into islands or collapsible cards on the grey, that's all"*):
-1. the screen goes onto the grey island layout (a live `Page`, the original header carried into its header as it is — same title, breadcrumb, tabs, actions);
-2. the content goes into islands — or stays on the grey as it is when it already is a card / collapsible card (`*Collapsible Card*`, `APCardCollapsible`, `Case page info` …).
+**No inventions — but move what the new layout requires** (user feedback, in two steps: *"the skill must not invent anything of its own: just switch on the grey background and put the needed content into islands or collapsible cards on the grey"*, then: *"moving buttons, statuses and so on is needed too, if the new layout requires it"*).
 
-Nothing else. No moving buttons, status, risk score or IDs into the header, no new side panels or sidebars, no tabs moved into a sub-header, no copy edits, no components the original doesn't have — even where the designers' reference or their table comments did such a redesign (TM Transaction: "move buttons into the header… add a full sidebar on the right" — that is the designers' job, not the migration's). Blocks the original has are placed; blocks it doesn't have are never created.
+The migration may:
+1. put the screen onto the grey island layout (a live `Page`);
+2. put the content into islands — or leave it bare on the grey when it already is a card / collapsible card (`*Collapsible Card*`, `APCardCollapsible`, `Case page info` …);
+3. **move existing elements to where the new layout expects them** — actions, status, risk score, IDs, the applicant / counterparty into the `Page` header's slots; tabs into the header's sub-header; a details or notes column into the side panel — when the new layout (the designers' reference for that screen, or their table comment, e.g. TM Transaction: *"move buttons into the header, move status / risk score / ID / applicant into the header, a full sidebar on the right with transaction details and Notes, tabs into the sub-header, islands for the data blocks"*) requires it.
+
+The migration may **not** invent: no new content or data, no copy edits, no components or blocks the original doesn't have, no decorative changes the new layout doesn't call for. Every element in the result comes from the original; only its place changes.
 
 **Scope: only screens that go grey + islands.** The migration moves old screens onto the grey island layout — the ones the designers marked grey (their table: "Apply grey" / "Apply grey + islands"). A screen whose reference is white stays on the white layout and is **not** migrated: the engine stops with `stopped: "the reference is WHITE…"`. Say so to the designer instead of building anything.
 
