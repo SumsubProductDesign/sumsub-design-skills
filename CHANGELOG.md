@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.208.0 — 2026-09-29 (island layout retrained on the production model; the old `Page` key was dead)
+The island layout moved from a branch into Base main and was republished (user feedback: *"we merged the working version of this layout, which lived in a branch, into the main file"*). The goal stated with it: *"rebuild old mockups on the new layout with the skill, not by hand."* Retrained from the designers' spec on Base page `Layout` `8828:117083`.
+
+- **The skill was broken before this release.** `Page`'s key changed in the merge — `ccd4779c…` no longer exists, and every island build failed on its first import. Now `f9071958…`.
+- **New model.** `Page` holds a nested `Page / Body` whose `Content` axis has seven layouts — `◻️ Default` (white, one block) and `◼️ Ghost` (grey, structured) — with optional section navigation and left or right side panels, and inside it `Page / Body / Default` sets the content width (`1084 max` / `1920 max` / `Full width`) and an optional side column. New parts: `IslandCard`, `Aside`, `Bottom bar`, `Canvas`, `Actions bar`.
+- **The designers' selection rules are encoded:** `Basic` by default and `Full screen page` only for focused work on one entity (this replaces "every drill-down is Fullscreen"); Default for a single block, Ghost for several groups or any side panel; width by content type; the left-panel / drawer / inspector decision tree; Canvas for workflow editors only.
+- **Migration now rebuilds to the canon** (user decision: *"By the canon — groups into islands"*): each content group goes into its own `IslandCard` whole, the side column into `Side content`. Old KYC level editors land exactly on the canonical Ghost + `1084 max` + side layout, 640 + 64 + 380, centred 148/148.
+- **`migrateFrameToIsland` is rewritten and validated verbatim** on two real screens. Two defects found only by running the exact doc code: the `IslandCard` does not grow (it ships fixed at 153 with its inner slot on FILL — slot to HUG first, then the island), and **a side column that was a FRAME instead of an INSTANCE was deleted with the source**. The function now finds content by role rather than node type, and refuses to delete a source that still holds visible content — it reports `kept` instead.
+- **Removed a contradiction that had survived in `SKILL.md`:** it still said to migrate the header by flipping the old header's `Version` Old→New — the rule that made past runs abandon the `Page` instance four times. The doc had fixed this long ago; `SKILL.md` now agrees: use the `Page`'s own header.
+- Closed two open questions: the canonical sidebar is **257** (not 264), and sandbox is the **yellow** border plus `Sandbox alert` — the spec's "green statusbar" wording contradicts the component.
+
 ## v3.207.0 — 2026-09-21 (document the auth-core dependency)
 Follow-on to v3.206.0: once the publish script routes a non-interactive credential through `auth-core`, the marketplace requires the dependency to be documented rather than implied. `SKILL.md` now states, beside the Vercel prerequisite, that `vercel login` is the normal path; that a non-interactive credential belongs in the keychain and arrives through `auth-core` (installed from the same internal marketplace, asking for the secret once on first run); and that exporting a token into the shell by hand is the one thing the marketplace refuses, because it leaks the secret to every later command in the session.
 

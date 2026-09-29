@@ -1,352 +1,378 @@
-# Island Layout (Ver=New) + Migration — Dashboard
+# Island Layout — Dashboard (production model)
 
-> The post-redesign Dashboard layout: main content lives inside a rounded white **"island" card** floating on a grey page, with insets **top / right / bottom** and **flush-left against the sidebar**.
-> Canonical `Page` component: file `tJMo5DkqQUN0H6N8apN0N7`, set `24836:83444` (variants Ver=New × Type=Basic|Full screen page × Sandbox=No|Yes, all 1440×1080).
-> Validated end-to-end by migrating 26 KYC level-editor mockups (file `xhjtb7G71gVOawl0pOilSx`) 2026-06-15.
-
----
-
-## 0. THE ESSENCE (read this first — it is the whole job)
-
-**Building/migrating an island screen = exactly three steps, nothing more:**
-1. **Instantiate the WHOLE-layout component `Page`** (set `ccd4779c…`) — it already contains the sidebar + island + rounded card + header. You never assemble any of that yourself.
-2. **Apply the right VARIANT:** `Type` = `Basic` (1st level) / `Full screen page` (2nd level), `Sandbox` = `No`/`Yes`. The variant drives the whole chrome (sidebar width, header style, sandbox border + plashka).
-3. **Put the content INSIDE its slot** (`"Main content"` / `"Side content"`), removing the default placeholder.
-
-That's it. Do **NOT** hand-build the island from frames. Do **NOT** detach the instance. Do **NOT** recreate the sidebar/card/header as your own nodes. If you find yourself calling `figma.createFrame()` for an "Island"/"Body"/"Card" — STOP: you're doing it wrong; instantiate `Page` instead. (The only exception is a logged import-throw — see §2 HARD RULE.) The header's title/breadcrumb/tabs/buttons are configured ON the Page instance's built-in header; the page-specific body goes in the slot.
-
-> **"Build / create island versions of these screens" = copy-mode migration. RUN `migrateFrameToIsland` (§5) on each source frame — do NOT hand-roll your own assembly.** The header action-carry (`Show actions slot=true` + carry `Create level`/Save/kebab) lives ONLY in that function. Hand-rolling "set title + tabs and done" silently DROPS the action buttons and leaves the Actions slot hidden (real defect, §5/§7). Migrate vs build is the same job — one function.
+> The Dashboard layout since the island redesign: content lives in white rounded islands floating on a grey page, with the sidebar flush left.
+> **Canonical source:** Base components `tJMo5DkqQUN0H6N8apN0N7`, page **Layout `8828:117083`** — variants plus the designers' usage specs. Ignore its `Archive` section.
+> **Production merge 2026-09-29:** the layout moved from a branch into Base main and was republished. The model changed (nested `Page / Body` with seven layouts, islands, side panels), and **the `Page` key changed** — `ccd4779c…` no longer exists.
+> **Validated 2026-09-29** end to end on a copy of an old KYC level-editor mockup (`xhjtb7G71gVOawl0pOilSx`, output `22283:102978`): live `Page` instance, Ghost + 1084 + side content, each content group in its own `IslandCard`, header with breadcrumb, tabs and carried actions, height preserved, content centred 148/148.
 
 ---
 
-## 1. Structure & dimensions
+## 0. THE ESSENCE — four decisions, then fill the slots
+
+An island screen is **one live `Page` instance**. You never assemble the sidebar, island, card or header yourself — they are inside `Page`. You make four choices and put the content into slots:
+
+1. **`Page` → `Type`** — `Basic` by default; `Full screen page` only for focused work on one entity (§2.1). Plus `Sandbox` Yes/No (§5).
+2. **The nested `Page / Body` → `Content`** — `◻️ Default` for a single block, `◼️ Ghost` for structured content with several groups or a side panel (§2.2).
+3. **The nested `Page / Body / Default` → `Type`** — content width `1084 max` / `1920 max` / `Full width`, and `Show side content` if there is supporting content (§2.3).
+4. **Fill the slots** — `Main content`, and when used `Side content`, the `Aside` panel, the `Section navigation`. In Ghost, **each content group goes into its own `Page / Body / IslandCard`**.
+
+Do **NOT** hand-build the island from frames. Do **NOT** detach the instance. If you are about to call `figma.createFrame()` for an "Island" / "Body" / "Card" — stop and instantiate `Page`.
+
+> **"Build / create island versions of these screens" is copy-mode migration.** Run `migrateFrameToIsland` (§6) on each source frame. The header action carry-over lives only in that function; hand-rolling "set title + tabs" silently drops the action buttons.
+
+---
+
+## 1. Anatomy
 
 ```
-Page (HORIZONTAL, fill semantic/background/neutral/subtlest/normal #f3f4f6 — the grey page)
-├── *Sidebar*  (flush-left, full height; layoutAlign="STRETCH")
-│      1st-level page → 257 (expanded) · 2nd-level/detail → 52 (collapsed)
-└── Island (VERTICAL, padding T8 / R8 / B8 / L0 [spacing/s], gap 8 [spacing/s])
-    ├── (optional) Statusbar — rounded-8 trial bar (NOT the sandbox indicator; see §4)
-    └── Main body (HORIZONTAL, gap 8)
-        ├── Body  = the content card
-        │     fill semantic/background/neutral/inverse/normal #ffffff
-        │     border-radius 16 (border-radius/xl), 1px border
-        │       semantic/border/neutral/subtlest/normal #e5e7eb   (→ YELLOW in sandbox, §4)
-        │     clipsContent = true
-        │     ├── (optional) Sandbox alert plashka (24h, §4) — FIRST child when sandbox
-        │     ├── *Header* (Generic 1st-level OR Fullscreen 2nd-level, §3) — INSIDE the card
-        │     └── content (the page content / Page-Body / re-hosted content)
-        └── (optional) AI Assistant — 344w right card, radius 16, purple border
+Page  (INSTANCE — set f9071958…; Ver=New × Type × Sandbox; bool Statusbar, Summy AI)
+├── *Sidebar*        257 expanded (Basic) · 52 collapsed (Full screen page)
+└── Island           VERTICAL, padding T8 R8 B8 L0, gap 8
+    ├── Statusbar    (bool Statusbar) — trial / billing / incident bar ABOVE the island
+    └── Main body    HORIZONTAL
+        ├── Body     the card: radius 16, stroke #e5e7eb (#fad24a in sandbox), clipsContent=true
+        │   ├── Sandbox alert   24h — only in Sandbox=Yes
+        │   ├── *Header*        Basic → Type=Generic 56 · Full screen → Type=Fullscreen (Future main version) 97
+        │   └── Page / Body     ← NESTED INSTANCE — layout axis `Content` (7 values)
+        │       ├── Section navigation  240, slot `Items`            — Nav layouts only
+        │       ├── Page / Body / Aside 400, slot `Content`          — Left layout (before Main)
+        │       ├── Main
+        │       │   ├── Page / Body / Default   ← `Type` = width; bool `Show side content`
+        │       │   │   └── Body → slots `Main content` + `Side content` (380)
+        │       │   ├── Actions bar             (bool Floating bars)  — Ghost only
+        │       │   └── Page / Body / Bottom bar (bool Bottom bar)
+        │       ├── Page / Body / Aside 400, slot `Content`          — Right layouts (after Main)
+        │       └── *Drawer Basic*  504        (bool Drawer)
+        └── AI Assistant 344  (bool Summy AI) — docked right inside the island
 ```
 
 Layout math:
-- **Basic (1st level):** sidebar 257 + island 1183 → card 1175 wide.
-- **Full screen page (2nd level):** sidebar 52 + island 1388 → card **1380** wide.
-- Card height = page_height − 16 (island T+B padding). Content area = card − header.
+- **Basic:** sidebar 257 + island 1183 → card **1175**.
+- **Full screen page:** sidebar 52 + island 1388 → card **1380**.
+- Island insets are 8 top/right/bottom and **0 on the left** — the sidebar is flush against it.
+- The sidebar is **257**, not 264 — an HTML shell elsewhere uses 264; the Figma canon is 257.
 
 ---
 
-## 2. Component & token keys (verified)
+## 2. Choosing — rules from the designers' spec
+
+### 2.1 `Page` → `Type`
+
+| | **Basic** (default) | **Full screen page** |
+|---|---|---|
+| Sidebar | full, with section names (257) | collapsed, icon-only (52) |
+| Header | Generic 56, search + actions | Fullscreen 97, breadcrumb + subheader tabs |
+| Use for | dashboards, lists, forms, settings, regular pages | focused work on **one entity** (applicant page, case), canvas editors, SDK previews, detail views that need full width |
+
+**Quick rule (verbatim from the spec):** *"default to Basic. Switch to Full-screen only when the content benefits from extra horizontal space and user requires focus working with an entity (applicant page, case etc)."*
+
+This replaces the old "every drill-down is Fullscreen" rule. A level editor, a rule editor, a case, an applicant — Fullscreen. A settings sub-page that is just a form — Basic.
+
+**Migration signal:** a ✕ (Close) in the old header means the screen is an entity editor → Full screen page with a breadcrumb.
+
+### 2.2 The nested `Page / Body` → `Content`
+
+| Value | Background | When |
+|---|---|---|
+| `◻️ Main (Default)` | white — one card | **Single block:** exactly one entity or one settings block. Forms, single-table pages, individual settings. |
+| `◻️ Nav + Main (Default)` | white | the same, plus a section-navigation sidebar |
+| `◼️ Main (Ghost)` | grey | **Structured content:** several entities or setting groups → **one `IslandCard` per group** |
+| `◼️ Nav + Main (Ghost)` | grey | structured, with section navigation |
+| `◼️ Left + Main (Ghost)` | grey | main content + a **left panel** |
+| `◼️ Main + Right (Ghost)` | grey | main content + a **right panel** |
+| `◼️ Nav + Main + Right (Ghost)` | grey | navigation + main + right panel |
+
+*"Don't use Default for pages with multiple islands or any side panel. Use Ghost instead."* In the spec, `◻️` is labelled **White** and `◼️` **Grey**.
+
+### 2.3 The nested `Page / Body / Default` → `Type` (content width)
+
+| `Type` | Use for |
+|---|---|
+| `1084 max` | **forms, settings, single-column content, readable text.** Centred; can include a right-hand side column (`Show side content`). |
+| `1920 max` | dashboards, analytics views, multi-column tables — anything where more horizontal data helps. Margins only on large screens. |
+| `Full width` | heavy data interfaces with no max width (applicant page). |
+
+`Show side content#23483:22` = true opens the 380 `Side content` slot next to `Main content` inside the same width. At `1084 max` this is the canonical **640 main + 64 gap + 380 side** — exactly the old KYC editor's form + overview.
+
+### 2.4 Side panels — which one
+
+| Question | Answer |
+|---|---|
+| Does the interaction change the core structure, or navigate to another section of the entity? | **Panel on the left** (`Left + Main`) |
+| Is the user doing a focused, temporary task, or editing one sub-item? | **Drawer on the right** (`Drawer` bool, 504, non-modal, pushes content) |
+| Is it persistent metadata or admin settings that don't change the main layout? | **Inspector on the right** (`Main + Right`, `Page / Body / Aside`) |
+
+Left panel = navigation or controls that affect the main area. Right panel = notes, secondary settings.
+
+### 2.5 Other parts
+
+- **`Page / Body / Canvas`** — edge-to-edge editor with a dotted background, nodes and connections. **Workflow editors only.** Not for sequential rule lists or step builders — those are Ghost + right panel.
+- **Bottom bar** (`Bottom bar` bool) — sticky page-level actions (Save / Cancel) inside the island, reachable while content scrolls.
+- **Statusbar** (`Statusbar` bool) — account-level announcements above the island (trial, billing, incidents). Not the sandbox indicator.
+- **Summy AI** (`Summy AI` bool) — the assistant, docked to the right edge inside the island.
+- **Scroll** happens inside the island: it keeps its rounded shape and the scrollbar sits inside it. A table footer with pagination and bulk actions is pinned to the island's bottom edge.
+
+---
+
+## 3. Keys (verified importable from a consumer file, 2026-09-29)
 
 ### Components
+
 | Component | Key | Notes |
 |---|---|---|
-| `Page` SET | `ccd4779c69fbf17342db36c7fe57d1160306efdf` | **PUBLISHED (2026-06-15) — importable. INSTANTIATE it** (see Build approach). Variant props: `Type` (Basic/Full screen page), `Sandbox` (No/Yes), `Statusbar`, `Summy AI`. Slots: `Main content` 1340 / `Side content` 380 / `Items` nav. |
-| `Page / Body` SET | `8aab14fc18dca0e4c85886e38dc337a1ad56f50b` | importable; variant `Type=Default White` `382d07f935f0972fd0353684e511bd9783b6027e`; slots `"Main content"` (1340) / `"Side content"` (380) / `"Items"` nav |
-| `*Sidebar*` SET | `60be5cbb4d070ccc4853589a555d949c3f23f62e` | use `Collapsed=True` variant for 2nd-level (52w) |
-| `*Header*` SET | `387e2cf61b1bf4f2045d3ccefecc5c7820a86889` | see §3 for the two variants |
-| `Sandbox alert` COMP | `07975654154febad577eac9662d90acf79dfa29c` | OBSOLETE for builds — sandbox is now a `Page` `Sandbox=Yes` variant (§4). (Still unpublished, but no longer needed.) |
-| `Statusbar` SET (trial/sandbox-only billing bar) | `cbab86a47d47d8399a03be80dbded51317d61610` | `type=Sandbox only` is a BILLING msg — NOT the in-app sandbox indicator |
+| `Page` SET | `f907195876aad003b980b77d6e9471e9418a0941` | **the key changed in the production merge** — old `ccd4779c…` is gone |
+| ↳ New / Basic / Sandbox=No | `416075ee47bfeaa6bb2af2c6d9c0e6aa42cfe654` | |
+| ↳ New / Basic / Sandbox=Yes | `bd1c35e2729636c98f825ebbda3299a744296b0f` | |
+| ↳ New / Full screen page / Sandbox=No | `f4bc3fe0518829fa8dd663e94bf2d43baf763260` | |
+| ↳ New / Full screen page / Sandbox=Yes | `232a23ebb4eba2c27f49f7bcd423599def09e06e` | |
+| `Page / Body` SET | `8aab14fc18dca0e4c85886e38dc337a1ad56f50b` | nested inside `Page`; axis `Content` |
+| `Page / Body / Default` SET | `1fcbe28eda798209b6eb5c64c1ec7187b4710199` | `Type` = Full width `a3bd91e0…` · 1920 max `b07ace9e…` · 1084 max `acfbe0ec…` |
+| `Page / Body / IslandCard` | `3595d612ef3d886a2dd9a4744add8b74f4ac9606` | slot `Slot#25553:0`, bool `Heading#26638:9`, slot `↪ Title end slot#29828:11` |
+| `Page / Body / Aside` SET | `f7a41f1306d0c8f75553c8801c965294ad13fa39` | `Paddings` Yes/No, slot `Content#25573:0`, 400 wide |
+| `Page / Body / Bottom bar` | `2037e3d864da0304353b295421b92d202ed2f605` | slot `Slot#24573:0` |
+| `Page / Body / Canvas` | `fcf81f4f947bf5936ff036e251e98c01026ea5bf` | slot `Main content#23544:4`, bool `Drawer` |
+| `Actions bar` | `cafdcaf97cce5f477442ceef58db31e562a9c180` | floating bar, Ghost only |
+| `Actions bar / Island` | `5542edd9177a0b66b5f516a51f72d071751bce83` | slot `Content#23502:1` |
+| `Heading` SET | `a091684f0950b62d772727002d12854b4321e23b` | Figma-only heading helper, `Mode` = Page / Card / Block |
+| `*Header*` SET | `387e2cf61b1bf4f2045d3ccefecc5c7820a86889` | Generic `64ebf8f1…` · Fullscreen `1dd02328…` — use the one inside `Page`, don't import it |
 
-### Variables (importVariableByKeyAsync)
+Variant **keys are stable** across the branch, the old publication and the merge (`382d07f9…` was "Default White", is now "◻️ Main (Default)"). Variant **names and axes changed** — always set properties by the names in this doc, never by the old ones (`Type=Default White`, `Left side`, `Right side`, `Navigation Sidebar` no longer exist on `Page / Body`).
+
+### Property names you will set
+
+| On | Property | Values |
+|---|---|---|
+| `Page` | `Type` / `Sandbox` / `Ver` | `Basic`, `Full screen page` / `No`, `Yes` / `New` |
+| `Page` | `Statusbar#23483:10`, `Summy AI#24227:0` | bool |
+| `Page / Body` (nested) | `Content` | `◻️ Main (Default)`, `◻️ Nav + Main (Default)`, `◼️ Main (Ghost)`, `◼️ Nav + Main (Ghost)`, `◼️ Left + Main (Ghost)`, `◼️ Main + Right (Ghost)`, `◼️ Nav + Main + Right (Ghost)` |
+| `Page / Body` (nested) | `Drawer#23483:6`, `Bottom bar#24573:1`, `Floating bars#26598:0` | bool |
+| `Page / Body / Default` (nested) | `Type` | `Full width`, `1920 max`, `1084 max` |
+| `Page / Body / Default` (nested) | `Show side content#23483:22` | bool |
+
+The `◻️` / `◼️` characters are part of the value — copy them exactly.
+
+### Tokens
+
 | Token | Key | Value |
 |---|---|---|
-| `spacing/s` (island pad + gap) | `5a8e4573770ee8f921f141c1ab6c96835c3125a0` | 8 |
-| `border-radius/xl` (card radius) | `03884e014085a48cf26670632be200a02b5a160c` | 16 |
-| `semantic/background/neutral/subtlest/normal` (page bg) | `e7129860062f42ee2a929d1b4ccacd21133a03ee` | #f3f4f6 |
-| `semantic/background/neutral/inverse/normal` (card fill) | `567811a0cf497ac911288a2f4a75a1d89ebff75c` | #ffffff |
-| `semantic/border/neutral/subtlest/normal` (card border, normal) | `40baade65c87f4b56fd67b027ec695d0984fae39` | #e5e7eb |
-| `semantic/border/yellow/subtle/normal` (card border, SANDBOX) | `ed34b693cbe71abf562e9cb323ec44fc96bd3a94` | #fad24a |
-| `semantic/background/yellow/subtlest/normal` (interim plashka fill) | `f65302a79ce509d4d324e533c1e36fc1c3e9fc9e` | #fffbeb |
-| `semantic/text/yellow/normal` (interim plashka text) | `8e208782e664c4f5e9a5af91465b43a86ad731b9` | #d27a0a |
+| page background `semantic/background/neutral/subtlest/normal` | `e7129860062f42ee2a929d1b4ccacd21133a03ee` | #f3f4f6 |
+| card / island fill `semantic/background/neutral/inverse/normal` | `567811a0cf497ac911288a2f4a75a1d89ebff75c` | #ffffff |
+| card border `semantic/border/neutral/subtlest/normal` | `40baade65c87f4b56fd67b027ec695d0984fae39` | #e5e7eb |
+| sandbox border `semantic/border/yellow/subtle/normal` | `ed34b693cbe71abf562e9cb323ec44fc96bd3a94` | #fad24a |
+| `border-radius/xl` | `03884e014085a48cf26670632be200a02b5a160c` | 16 |
+| `spacing/s` | `5a8e4573770ee8f921f141c1ab6c96835c3125a0` | 8 |
 
-### Build approach — INSTANTIATE the `Page` component + fill its slot. NEVER detach, NEVER hand-build (except fallback).
-
-🛑 **The layout must be a live `Page` component INSTANCE with content placed into its slot — do NOT detach the instance, and do NOT assemble the island from raw frames.** (user feedback 2026-06-15: *"the skill must use an instance of the layout component, not detach it and replace the slot with the needed content"*.)
-
-**Preferred (canonical) path:**
-```js
-const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
-const page = pageSet.children.find(c => /Full screen page/.test(c.name) /* or Basic */).createInstance();
-// fill the content slot (do NOT detach):
-const slot = page.findAll(n => n.type==="SLOT").filter(s => !/image|left bar/i.test(s.name))
-  .sort((a,b)=>(b.width*b.height)-(a.width*a.height))[0];   // "Main content" / "Slot"
-slot.insertChild(0, contentInstance);     // slot.insertChild — never appendChild, never detach
-// configure the Page's own *Header* (already Version=New) + sandbox variant via the Page's variant props.
-```
-
-**✅ `Page` is PUBLISHED (2026-06-15) — the instance approach is validated and REQUIRED. Use it.** Validated end-to-end recipe:
-```js
-const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
-// variant by level + sandbox: Type=Basic|Full screen page, Sandbox=No|Yes (Sandbox is a VARIANT prop — §4)
-const page = pageSet.children.find(c => /Type=Full screen page/.test(c.name) && /Sandbox=No/.test(c.name)).createInstance();
-// Put the WHOLE content block into "Main content" (1340) and leave "Side content" HIDDEN.
-// (Do NOT split into Main/Side columns — it breaks positioned content; see §5.) Capture placeholder
-// refs BEFORE insert and remove by ref (reading slot.children[].name AFTER insertChild throws on a stale node).
-const main = page.findAll(n=>n.type==="SLOT").find(s=>/Main content/i.test(s.name));
-const ph = [...main.children];          // default placeholder(s), captured before insert
-main.insertChild(0, content);           // `content` = the whole content block
-for (const p of ph) { try { p.remove(); } catch(e){} }
-// header: the Page's built-in header is Version=New Fullscreen — configure it (title/crumb + relabel its Subheader tabs from the original):
-const hdr = page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
-hdr.setProperties({ "Title text#3817:0": title });
-hdr.findOne(n=>/Breadcrumb/i.test(n.name))?.setProperties({ "Name#6638:5": crumb });
-const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
-const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
-origTabLabels.forEach((lbl,i)=>{ items[i].setProperties({ "Label text#4517:0": lbl }); items[i].visible=true; });  // relabel from original
-items.slice(origTabLabels.length).forEach(it=>it.visible=false);  // hide extras
-```
-Validated: result is a live `Page` INSTANCE (`type==="INSTANCE"`), content slotted, default placeholders removed, header tabs relabeled to the original (`Steps / Configurations / Checks Execution Flow`).
-
-### 🛑🛑 HARD RULE — import-first, instance-MANDATORY (hand-build is BANNED unless the import actually throws)
-
-The recurring failure: the skill keeps **hand-building the island from raw frames even though `Page` imports fine** — defaulting to the familiar path and calling it "the fallback". This is BANNED. Enforce mechanically:
-
-1. **MANDATORY first step of any island build/migration:** `const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf")`.
-2. **If that resolves (it does — Page is published) → you MUST instantiate `Page` and fill its slot. Hand-building raw frames is FORBIDDEN.**
-3. Hand-build is permitted **ONLY** if step 1 *throws*, and your build log MUST paste the actual thrown error string. No error string in the log ⇒ hand-build was illegitimate ⇒ the build FAILS.
-
-**Banned rationalizations (each = an automatic FAIL):**
-- "I'll hand-build the island" / "assemble the frames" — when Page imports.
-- "hand-build is the safe/familiar/fallback path" — fallback requires a thrown import error, logged.
-- "the §7 audit passed" — §7's instance check is only satisfied by an actual `Page` INSTANCE OR a logged import-throw; a hand-built tree with no logged throw FAILS it.
-- "the result looks the same" — a detached/hand-built frame tree is NOT a component instance; it won't track redesign updates and is a different node type. Looking similar is irrelevant.
-
-`Sandbox alert` (`07975654…`) is **no longer needed**: sandbox is a `Page` variant (§4).
+You rarely need these — `Page` and `IslandCard` bind them already. They are here for the audit.
 
 ---
 
-## 3. Two header types — select by nesting level
+## 4. Header — use the `Page`'s own header, configure it from the original
 
-Both are the SAME `*Header*` set (`387e2cf6…`, `Version=New`); the `Type` variant differs:
-
-| | 1st level (regular) | 2nd level (breadcrumbs) |
-|---|---|---|
-| Header `Type` variant | **`Generic`** | **`Fullscreen (Future main version)`** |
-| Variant key | `64ebf8f14b269eb122b7ce2edeef2ea65149f553` | `1dd023284d167fbcd71bd862294ff4028a7b5be0` |
-| Native height | 56 | 97 (with Subheader) |
-| Sidebar | 257 (expanded) | 52 (collapsed) |
-| Use when | **section landing** opened directly from a sidebar item (Applicants, Transactions, Settings home) | **drill-down inside a section** (an applicant, a Rule/Blueprint editor, a sub-setting) where a breadcrumb path makes sense |
-
-**Selection heuristic:** content reached by clicking a sidebar item → Generic + 257 sidebar. Content nested under a section (detail / editor / sub-config) → Fullscreen breadcrumbs + 52 sidebar.
-
-**Migration signal:** a **✕ (Close) in the OLD header = 2nd level** → replace with the breadcrumbs (Fullscreen) header. The breadcrumb trail replaces the ✕ (path back).
-
-### 🛑 Header: use the `Page` instance's OWN header — configure it from the original, then DISCARD the old header
-
-When you instantiate `Page` (the required path, §0/§2), it ALREADY contains a clean `Version=New` Fullscreen header. **Use THAT header. Do NOT keep or "flip" the old header** — READ the old header's labels (title, Subheader tab labels, action-button labels) and apply them to the Page's header; the old header is removed with the old frame.
+`Page` already contains a clean Version=New header of the right type. **Use it.** Read the old header's labels and apply them; the old header is discarded with the old frame.
 
 ```js
-const hdr = page.findOne(n => n.type==="INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);  // the Page's OWN header
-hdr.setProperties({ "Title text#3817:0": title, "Key#5362:0": false });   // Key=false drops the 'Key name' badge → clean
-hdr.findOne(n=>/Breadcrumb/i.test(n.name))?.setProperties({ "Name#6638:5": "Levels" });
-const tb = hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
-const items = tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
-origTabLabels.forEach((l,i)=>{ items[i].setProperties({ "Label text#4517:0": l }); items[i].visible=true; });
-items.slice(origTabLabels.length).forEach(it=>it.visible=false);
-// action buttons: carry the original's ANCESTOR-VISIBLE buttons from its ACTION group ("Buttons"/"Buttons Bar"):
-// the text actions (Create level / Run level / Save) AND the icon-only ⋮ 'More'/kebab (Content=Icon Only, Type=Secondary).
-// SKIP the AI (icon Primary) + help (icon Tertiary) — the Page header already provides those. A button's own .visible
-// can be true while its parent (Key/applicant area: ID / External ID / Add tag) is hidden — walk parents, skip
-// non-rendered. Then Show actions slot#6943:20=true, clone each into the "Actions slot", SET clone.visible=true
-// (clones arrive hidden), and DROP the slot's default secondary 'Button' placeholder (it re-seeds — remove any leftover
-// labelled exactly 'Button'). Validated: Create level + kebab render; Key-area junk and the default secondary excluded.
+const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+hdr.setProperties({ "Title text#3817:0": title, "Key#5362:0": false });      // Key=false removes the stray 'Key name' badge
+hdr.findOne(n => /Breadcrumb/i.test(n.name))?.setProperties({ "Name#6638:5": "Levels" });
+// relabel the Subheader tabs from the original, hide the extras
+const items = hdr.findOne(n => /^\*Tab Basic\*/.test(n.name)).findAll(n => /Tab Basic \/ Item/i.test(n.name));
+items.forEach((it, i) => { if (i < tabs.length) { it.setProperties({ "Label text#4517:0": tabs[i] }); it.visible = true; } else it.visible = false; });
 ```
-✅ **Verified**: the Page's own header configured this way is CLEAN — `Levels / New level` + the original tabs (`Steps / Configurations / Checks Execution Flow`), with `Key=false` removing the only stray badge. No applicant junk.
 
-🔴 **Do NOT flip the OLD header's `Version` Old→New** (this was the pre-publish hand-build trick). Flipping the OLD applicant-context header surfaces junk (ClientNickname / ID / Suspicious / a default 'Button') — which is exactly what made past runs bail to hand-build. That junk does NOT exist on the Page instance's OWN header. The `Version`-flip / keep-old-header approach is **only** valid in the hand-build fallback (when `Page` is unimportable); on the instance path, always use the Page's own header.
+**Action buttons — carry the original's, exactly.** From the old header's action group (parent named `Buttons` / `Buttons Bar`) take the **ancestor-visible** buttons: text actions (`Create level`, `Save`, `Run level`) **and** the icon-only ⋮ kebab (`Content=Icon Only, Type=Secondary`). Skip the AI (icon Primary) and help (icon Tertiary) buttons — the `Page` header has its own. Then `Show actions slot#6943:20 = true`, clone each into the `Actions slot`, set `clone.visible = true` (clones arrive hidden), and remove the slot's default placeholder `Button`.
+
+🔴 **Never flip the OLD header's `Version` Old→New.** That was a trick from before `Page` was published. The old applicant-context header surfaces junk when flipped (ClientNickname, ID, Suspicious, a default `Button`), and that junk is what made past runs abandon the instance and hand-build. It does not exist on the `Page`'s own header.
 
 ---
 
-## 4. Sandbox mode — detect by VISIBLE indicator, never by presence
+## 5. Sandbox — a state, detected by a VISIBLE indicator
 
-Sandbox is a STATE, not a default. When a screen is in sandbox:
-- Card **border → yellow** `semantic/border/yellow/subtle/normal` #fad24a (instead of neutral #e5e7eb).
-- A **`Sandbox alert` plashka** (24h, #fef3c7) as the **first child inside the Body card** (above the header).
+Sandbox is the `Page` variant **`Sandbox=Yes`**: it brings the yellow card border `#fad24a` and the 24-high `Sandbox alert` as the card's first child. Never build either by hand; `Sandbox alert` is not importable on its own and doesn't need to be.
 
-### 🛑 Detection rule (hard-won)
-**`sandbox = the sandbox indicator EXISTS AND is ancestor-visible`** — walk every parent's `.visible`. NEVER flag sandbox from mere node/text presence. The old `Header-levels` component contains a "You are in sandbox mode" TEXT in EVERY instance but **hidden** — detecting by `findOne(TEXT, /sandbox/)` falsely marks all screens sandbox (this happened: 26 frames wrongly got yellow borders + plashkas). Correct:
-```js
-const t = oldHeader.findOne(n => n.type==="TEXT" && /sandbox mode/i.test(n.characters));
-let visible = !!t; let p=t; while(p && p!==oldHeader){ if(p.visible===false){visible=false;break;} p=p.parent; }
-const sandbox = visible && t.visible;   // only true if actually rendered
-```
+**Detection:** `sandbox = the indicator exists AND is ancestor-visible` — walk every parent's `.visible`. Old `Header-levels` headers carry a hidden "You are in sandbox mode" text in **every** instance; detecting by presence marked 26 screens as sandbox that weren't.
 
-### Applying sandbox — use the `Page` `Sandbox=Yes` VARIANT (not hand-built)
-Sandbox is a **variant property of the `Page` component**: instantiate `…Sandbox=Yes` (or set the `Sandbox` variant prop). The yellow island border + the `Sandbox alert` plashka come built-in — no hand-building, and the standalone `Sandbox alert` component is NOT needed. The detection rule above only decides WHICH variant (Yes/No) to use.
-
-> Hand-built plashka (only for the legacy hand-build fallback when the `Page` component is unavailable): a 24h HORIZONTAL frame, fill `semantic/background/yellow/subtlest`, `layoutSizingVertical="FIXED"; resize(w,24)` (createFrame defaults 100×100 → must set 24), Geist Medium 12/16 text. Prefer the `Page Sandbox=Yes` variant instead.
+> The designers' spec text says *"A green statusbar sits above the island"* for sandbox. The component itself uses the **yellow** border and `Sandbox alert` — trust the component. The green bar is the `Statusbar` in trial mode, which is a different thing.
 
 ---
 
-## 5. Migration procedure — old full-bleed → island
+## 6. Migration — old full-bleed screen → island
 
-Two modes: **in-place** (transform the existing frame; simulates "apply new layout to existing mockups after redesign") or **copy** (clone into a new section). Both use the same transform; in-place keeps the frame's x/y and does NOT clone.
+A migration **re-lays out** the screen on the new layout; it never rebuilds content from scratch. Every original element survives: header labels, tabs and actions, all content groups, the side content, every overlay.
 
-> 🛑 **"Build new island versions of these screens" IS copy-mode migration — RUN `migrateFrameToIsland`, do NOT hand-roll a build.** A request phrased as *build / assemble / create island versions of the screens in section X* reads like a fresh build, and the skill's reflex is to hand-assemble: clone the body into a `Page` instance, set title + breadcrumb + tabs… and STOP there — **silently dropping the header action buttons** (`Create level` / Save / kebab). That happened on the KYC "Configurations" build (2026-06-15): 5 Page instances, content + breadcrumb + tabs all correct, but `Create level` was missing and the `Actions slot` was left **hidden** (its Button was the Page's own default placeholder, never the carried action). The action-carry (`Show actions slot=true` + carry the original's ancestor-visible actions, §3/step 4) lives ONLY inside `migrateFrameToIsland`. So: **whether the ask says "migrate" or "build", point `migrateFrameToIsland` at each source frame** (copy mode: keep the source, place the output in free space). Never re-implement the header config by hand — you will drop the buttons.
+**Placement.** Output goes on the **source's page**, never `figma.currentPage`. In copy mode, create a `(made by Claude)` section and **`section.appendChild`** each screen — a Section does not adopt frames that merely overlap it.
 
-**Placement:** migrated output goes on the SOURCE's page, NOT `figma.currentPage` (which is a reflex from dashboard/websdk builders → lands on the wrong page). For a copy: `clone()` then append to the source's page, positioned clear of the source. For in-place: don't move.
+### Mapping an old screen onto the new layout
 
-> 🛑 **If you create a wrapper SECTION for copy/build output, the screens MUST be its CHILDREN — `section.appendChild(inst)`.** Failure mode (KYC "Configurations" build 2026-06-15): the skill created a `(made by Claude)` section but left the 5 `Page` instances as **page-level siblings BESIDE it** — so the section looked empty and the user asked (user feedback): *"does the skill think it actually did something?"*. A Section does NOT adopt frames by geometric overlap; you must explicitly `appendChild`. Procedure: create the section → for each screen `section.appendChild(inst)` → lay them out in a row (fixed gap, e.g. `inst.x = col*(1440+GAP)`, coords are RELATIVE to the section once parented) → then confirm the section's bounds actually enclose every screen. Do NOT create a section and add the instances to the page.
+1. **Page type** — entity editor / detail (✕ in the old header) → `Full screen page`; otherwise `Basic`.
+2. **Groups** — the old content column is usually a frame whose children are the setting groups (`General`, `Steps`, …). More than one group, or any side column → **Ghost**. Exactly one block and no side column → **Default**, and the block goes straight into `Main content` with no island.
+3. **Width** — forms and settings → `1084 max`; tables and dashboards → `1920 max`; heavy data → `Full width`.
+4. **Side column** (an `Overview`, a tip, notes) → `Show side content = true`, into `Side content`.
+5. **Each group goes into its own `IslandCard` WHOLE** — with its own title and description. Do not move a group's title into the island's `Heading`: on an instance the `Heading`'s `Description` text has no visibility property, so it can't be found or shown, and moving the title there would drop the description. Old groups with their own grey `#f6f7f9` container keep it — inside a white island it reads exactly as it did on the old white page.
 
-### 🛑 Preservation principle — a migration RESKINS + REFRAMES, it NEVER rebuilds from scratch
-Keep EVERY original element: the header (re-skin via the Version flip, §3 — keeps its tabs/buttons/title/breadcrumb), the content, and ALL overlays (toasts, dropdowns, notes). Losing the subheader tabs, the header action buttons, or the toast messages = FAIL. Do not delete-and-recreate any of them; restructure what's already there.
-
-### Per-frame transform (INSTANCE-based — required now that `Page` is published)
-```
-0. Capture origH = frame.height.
-1. Read the OLD frame (capture, don't discard):
-   - original header → its TITLE, Subheader tab LABELS, action-button labels.
-   - content → main column + side column (e.g. Body 640 + Overview 380).
-   - overlays → ALL Toast / Dropdown instances.
-   - sandbox → VISIBLE indicator (§4), not mere presence.
-2. Instantiate Page: Type=Full screen page (2nd level) / Basic (1st level); Sandbox=Yes ONLY if detected.
-3. Move the WHOLE content into the "Main content" slot; leave "Side content" HIDDEN (Main is then 1340 and
-   fits the form+overview pair as the original positioned it). Do NOT split form→Main / overview→Side — that
-   left-flushes the form in a shrunk 896 column and breaks the layout. Remove the slot's default placeholder.
-   (insertChild into a SLOT invalidates the node ref — re-fetch from slot.children for any follow-up edit.)
-4. Configure the Page's built-in header (Version=New) from the original — PRESERVE its content:
-   Title (`Title text#3817:0`), breadcrumb crumb (`Name#6638:5`), relabel the Subheader tabs from the
-   original (`Label text#4517:0`) + hide extras, carry the original action buttons (enable + label).
-   Do NOT leave the junk default tabs (Tab_1…5); do NOT strip the real tabs/buttons.
-5. Overlays (Toast/Dropdown) → place as SIBLINGS of the Page instance (in its parent), positioned over it.
-   A Page INSTANCE cannot accept appended children (instance children are LOCKED → `page.appendChild(ov)` is
-   illegal and drops the overlay — this deleted toasts in a real run). Re-position: `ov.x = page.x+1440-w-32`.
-6. Place the Page instance at the old frame's position; remove the old frame. Result IN PLACE = a live
-   `Page` INSTANCE in the same spot. Preserve origH (resize the instance to 1440×origH — §6).
-```
-### ✅ EXACT validated migration function — COPY AND RUN THIS verbatim (do NOT write your own)
-
-The skill keeps writing its own build code and defaulting to hand-build. **Do not.** This function is validated end-to-end (live `Page` INSTANCE, height preserved 800, content in slots, header tabs preserved). Use it per frame:
+### ✅ The validated function — copy and run it, don't write your own
 
 ```js
-async function migrateFrameToIsland(srcFrame){
+// ancestor-visible check. Compare by ID: node proxies are NOT reference-stable, so `p !== stop`
+// silently fails and the walk runs up to the PAGE, which has no `.visible`.
+const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
+  while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible === false) return false; p = p.parent; }
+  return true; };
+
+async function migrateFrameToIsland(srcFrame) {
   const origH = Math.round(srcFrame.height);
-  // 1. READ the original (capture, don't discard)
-  const oldHeader = srcFrame.findOne(n=>n.type==="INSTANCE" && /Header-levels|^\*Header\*/.test(n.name));
-  const innerHdr  = oldHeader ? (oldHeader.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)) || oldHeader) : null;
-  const tabLabels = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/Tab Basic \/ Item/i.test(n.name)&&n.visible)
-      .map(t=>{const tx=t.findOne(x=>x.type==="TEXT"&&x.visible);return tx?tx.characters:null;}).filter(Boolean) : [];
-  let title="Title"; const tn=innerHdr&&innerHdr.findOne(n=>n.type==="TEXT"&&n.name==="Title"); if(tn)title=tn.characters;
-  // sandbox = VISIBLE indicator only (ancestor-aware), never mere presence
-  let sandbox=false; if(innerHdr){const s=innerHdr.findOne(n=>n.type==="TEXT"&&/sandbox mode/i.test(n.characters)); if(s){let p=s,v=s.visible;while(p&&p!==innerHdr){if(p.visible===false){v=false;break;}p=p.parent;} sandbox=v;}}
-  const content  = srcFrame.children.find(c=>c.type==="FRAME"&&c.name==="Content"); // the WHOLE level-editor content (form + overview as the original positioned them)
-  const overlays = srcFrame.children.filter(c=>c.type==="INSTANCE"&&/Toast|Dropdown/i.test(c.name));
-  // 2. INSTANTIATE the whole-layout Page (MANDATORY — if this throws, log the error; only then fallback)
-  const pageSet = await figma.importComponentSetByKeyAsync("ccd4779c69fbf17342db36c7fe57d1160306efdf");
-  const variant = pageSet.children.find(c=>/Type=Full screen page/.test(c.name) && new RegExp("Sandbox="+(sandbox?"Yes":"No")).test(c.name));
+  // ── 1. READ the original ──────────────────────────────────────────────
+  const oldHeader = srcFrame.findOne(n => n.type === "INSTANCE" && /Header-levels|^\*Header\*/.test(n.name));
+  const innerHdr  = oldHeader ? (oldHeader.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)) || oldHeader) : null;
+  const tabLabels = innerHdr ? innerHdr.findAll(n => n.type === "INSTANCE" && /Tab Basic \/ Item/i.test(n.name) && rendered(n, innerHdr))
+      .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); return x ? x.characters : null; }).filter(Boolean) : [];
+  let title = "Title"; const tn = innerHdr && innerHdr.findOne(n => n.type === "TEXT" && n.name === "Title"); if (tn) title = tn.characters;
+  let sandbox = false;
+  if (innerHdr) { const s = innerHdr.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) sandbox = rendered(s, innerHdr) && s.visible; }
+  const content  = srcFrame.children.find(c => c.type === "FRAME" && c.name === "Content");
+  const bodyFr   = content && content.findOne(n => n.type === "FRAME" && n.name === "Body");
+  const groups   = bodyFr ? bodyFr.children.filter(c => c.visible !== false) : [];
+  // side column = whatever else is visible in Content besides the body — by ROLE, not by node type:
+  // the same Overview is an INSTANCE in one mockup and a FRAME in the next. Matching INSTANCE only lost it.
+  const others   = content ? content.children.filter(c => c.visible !== false && (!bodyFr || c.id !== bodyFr.id)) : [];
+  const side     = others.find(c => /Overview|Side|Aside|Tip/i.test(c.name)) || others[0] || null;
+  const overlays = srcFrame.children.filter(c => c.type === "INSTANCE" && /Toast|Dropdown/i.test(c.name));
+  const ghost    = groups.length > 1 || !!side;          // several groups or a side column → Ghost
+
+  // ── 2. INSTANTIATE Page (mandatory — if the import throws, log the error; only then consider a fallback) ──
+  const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
+  const pageType = oldHeader ? "Full screen page" : "Basic";   // entity editor with a ✕ → Full screen; adjust per §2.1
+  const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + pageType) && c.name.includes("Sandbox=" + (sandbox ? "Yes" : "No")));
   const page = variant.createInstance();
-  const parent=srcFrame.parent, x=srcFrame.x, y=srcFrame.y, nm=srcFrame.name;
-  parent.appendChild(page); page.x=x; page.y=y; page.name=nm;
-  // 3. FILL the Main content slot with the WHOLE content (do NOT split into Main/Side columns — that left-flushes the form
-  //    in a shrunk 896 column and breaks the layout). Leave Side content HIDDEN → Main content slot = 1340, fits the pair.
-  //    NOTE: insertChild into a SLOT INVALIDATES the inserted node's reference — re-fetch from slot.children afterwards.
-  if(content){
-    const slot=page.findAll(n=>n.type==="SLOT").find(s=>/Main content/i.test(s.name));
-    const ph=[...slot.children];                 // capture placeholders BEFORE insert (avoid stale-node throw)
-    slot.insertChild(0, content);
-    for(const p of ph){try{p.remove();}catch(e){}}
-    // optional recenter the form+overview pair within 1340 — RE-FETCH the node first (original ref is now stale):
-    try{ const placed=slot.children.find(c=>c.type==="FRAME"&&c.children&&c.children.length>1) || slot.children[0];
-      const kids=placed.children.filter(c=>c.visible!==false); const minX=Math.min(...kids.map(c=>c.x)), maxXR=Math.max(...kids.map(c=>c.x+c.width));
-      const shift=(slot.width-(maxXR-minX))/2-minX; if(Math.abs(shift)>1)kids.forEach(k=>{try{k.x=k.x+shift;}catch(e){}}); }catch(e){}
+  const parent = srcFrame.parent, x = srcFrame.x, y = srcFrame.y;
+  parent.appendChild(page); page.x = x; page.y = y; page.name = srcFrame.name;
+
+  // ── 3. LAYOUT: nested Page / Body → Content; then re-fetch and set the width ──
+  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body")
+      .setProperties({ "Content": ghost ? "◼️ Main (Ghost)" : "◻️ Main (Default)" });
+  // changing a variant invalidates refs below it — re-fetch
+  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default")
+      .setProperties({ "Type": "1084 max", "Show side content#23483:22": !!side });   // forms/settings; tables → "1920 max"
+
+  // ── 4. CONTENT: in Ghost, each group → its own IslandCard, WHOLE ──
+  const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+  const mph = [...mainSlot.children];                    // capture placeholders BEFORE inserting
+  if (ghost) {
+    const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
+    const cards = [];
+    for (const g of groups) {
+      const ic = icComp.createInstance(); srcFrame.parent.appendChild(ic);   // fill it BEFORE it goes into the slot
+      const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
+      const ph = [...slot.children]; slot.insertChild(0, g); for (const p of ph) { try { p.remove(); } catch (e) {} }
+      // ⚠️ the island ships FIXED at 153 with its Slot on FILL — it will NOT grow. Slot → HUG first, then the island.
+      const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
+      try { sl.children[0].layoutSizingHorizontal = "FILL"; } catch (e) {}   // group fills the island width (640 → 592 inside)
+      try { sl.layoutSizingVertical = "HUG"; } catch (e) {}
+      try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
+      cards.push(ic);
+    }
+    cards.forEach((ic, i) => mainSlot.insertChild(i, ic));
+  } else if (bodyFr) {
+    mainSlot.insertChild(0, bodyFr);                     // Default: one block, no island
   }
-  // (Side content slot stays hidden — the editor content is a single positioned block, not two columns.)
-  // 4. CONFIGURE the Page's built-in Version=New header from the original
-  const hdr=page.findOne(n=>n.type==="INSTANCE"&&/^\*Header\*/.test(n.name)&&n.visible);
-  if(hdr){ try{hdr.setProperties({"Title text#3817:0":title, "Key#5362:0":false});}catch(e){}  // Key=false → clean (no 'Key name' badge)
-    const bc=hdr.findOne(n=>/Breadcrumb/i.test(n.name)); if(bc){try{bc.setProperties({"Name#6638:5":"Levels"});}catch(e){}}
-    const tb=hdr.findOne(n=>/^\*Tab Basic\*/.test(n.name));
-    if(tb&&tabLabels.length){const items=tb.findAll(n=>/Tab Basic \/ Item/i.test(n.name));
-      items.forEach((it,i)=>{try{ if(i<tabLabels.length){it.setProperties({"Label text#4517:0":tabLabels[i]});it.visible=true;} else it.visible=false; }catch(e){}});}
-    // CARRY the original action buttons into the header's "Actions slot": the text actions (Create level / Run
-    // level / Save) AND the icon-only ⋮ 'More'/kebab. Clone them in, SET VISIBLE (clones arrive visible=false),
-    // then DROP the slot's default secondary 'Button' placeholder. srcFrame still exists here (removed in step 7).
-    try{
-      // ⚠️ ANCESTOR-visible only — a button's own .visible can be true while its parent (the Key/applicant area:
-      // ID / External ID / Add tag) is hidden. Filtering by b.visible alone clones that junk. Walk parents.
-      const rendered=(n)=>{let p=n;while(p&&p!==innerHdr){if(p.visible===false)return false;p=p.parent;}return n.visible;};
-      // candidates = ancestor-visible *Button* in the original's ACTION group (parent name contains "Buttons" —
-      // i.e. "Buttons" / "Buttons Bar"), NOT the Key/Close/Info areas.
-      const cands = innerHdr ? innerHdr.findAll(n=>n.type==="INSTANCE"&&/^\*Button\*/.test(n.name)).filter(b=>{
-        if(!rendered(b)) return false; let pn=""; try{pn=b.parent.name;}catch(e){} return /Buttons/i.test(pn); }) : [];
-      const origBtns=[];
-      for(const b of cands){ let vn=""; try{const mc=await b.getMainComponentAsync(); vn=mc?mc.name:"";}catch(e){}
-        const t=b.findOne(x=>x.type==="TEXT"&&x.visible); const lbl=t?t.characters.trim():"";
-        const isTextAction = lbl.length>1 && !/^Button$/i.test(lbl);              // Create level / Run level / Save
-        const isMoreKebab  = /Icon Only/i.test(vn) && /Type=Secondary/i.test(vn); // the ⋮ 'More' button (icon Secondary)
-        if(isTextAction || isMoreKebab) origBtns.push(b);   // carry text actions + kebab; SKIP AI (icon Primary) & help (icon Tertiary) — Page header already shows those
-      }
-      if(origBtns.length){
-        hdr.setProperties({"Show actions slot#6943:20":true});
-        const aSlot = hdr.findAll(n=>n.type==="SLOT").find(s=>/Actions slot/i.test(s.name));
-        if(aSlot){ const ph=[...aSlot.children];   // slot's default placeholder(s) — incl. a Secondary 'Button'
-          for(const ob of [...origBtns].reverse()){ const c=ob.clone(); aSlot.insertChild(0,c); try{c.visible=true;}catch(e){} }  // ⚠️ clone arrives hidden → set visible
-          for(const p of ph){try{p.remove();}catch(e){}}
-          // belt-and-suspenders: the slot can re-seed a default secondary 'Button' — drop any leftover labelled exactly 'Button'
-          for(const c of [...aSlot.children]){ try{const tt=c.findOne(x=>x.type==="TEXT"&&x.visible); if(tt&&/^Button$/i.test(tt.characters.trim())) c.remove();}catch(e){} }
-        }
-      }
-    }catch(e){}
+  for (const p of mph) { try { p.remove(); } catch (e) {} }
+  for (const c of mainSlot.children) { try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+
+  // ── 5. SIDE content ──
+  if (side) {
+    const sideSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
+    const sph = [...sideSlot.children]; sideSlot.insertChild(0, side); for (const p of sph) { try { p.remove(); } catch (e) {} }
   }
-  // 5. OVERLAYS — a Page INSTANCE cannot accept appended children (instance children are LOCKED → page.appendChild(ov)
-  //    is illegal and silently drops the toast). Place overlays as SIBLINGS of the Page instance, positioned over it.
-  for(const ov of overlays){ try{ parent.appendChild(ov); ov.x = page.x + 1440 - Math.round(ov.width) - 32; ov.y = page.y + 80; }catch(e){} }
-  // 6. PRESERVE original height
-  try{page.resize(1440, origH);}catch(e){}
-  // 7. remove the now-empty old frame (in-place). For COPY mode: clone srcFrame first and pass the clone.
-  try{srcFrame.remove();}catch(e){}
-  return page;
+
+  // ── 6. HEADER: the Page's own header, from the original (§4) ──
+  const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+  try { hdr.setProperties({ "Title text#3817:0": title, "Key#5362:0": false }); } catch (e) {}
+  const bc = hdr.findOne(n => /Breadcrumb/i.test(n.name)); if (bc) { try { bc.setProperties({ "Name#6638:5": "Levels" }); } catch (e) {} }
+  const tb = hdr.findOne(n => /^\*Tab Basic\*/.test(n.name));
+  if (tb && tabLabels.length) { tb.findAll(n => /Tab Basic \/ Item/i.test(n.name)).forEach((it, i) => { try {
+      if (i < tabLabels.length) { it.setProperties({ "Label text#4517:0": tabLabels[i] }); it.visible = true; } else it.visible = false; } catch (e) {} }); }
+  const cands = innerHdr ? innerHdr.findAll(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name))
+      .filter(b => rendered(b, innerHdr) && b.visible && /Buttons/i.test(b.parent ? b.parent.name : "")) : [];
+  const carry = [];
+  for (const b of cands) { let vn = ""; try { const mc = await b.getMainComponentAsync(); vn = mc ? mc.name : ""; } catch (e) {}
+    const t = b.findOne(x => x.type === "TEXT" && x.visible); const lbl = t ? t.characters.trim() : "";
+    if ((lbl.length > 1 && !/^Button$/i.test(lbl)) || (/Icon Only/i.test(vn) && /Type=Secondary/i.test(vn))) carry.push(b); }
+  if (carry.length) { try { hdr.setProperties({ "Show actions slot#6943:20": true });
+      const aSlot = hdr.findAll(n => n.type === "SLOT").find(s => /Actions slot/i.test(s.name));
+      const aph = [...aSlot.children];
+      for (const ob of [...carry].reverse()) { const c = ob.clone(); aSlot.insertChild(0, c); try { c.visible = true; } catch (e) {} }
+      for (const p of aph) { try { p.remove(); } catch (e) {} }
+      for (const c of [...aSlot.children]) { try { const tt = c.findOne(x => x.type === "TEXT" && x.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
+    } catch (e) {} }
+
+  // ── 7. OVERLAYS as SIBLINGS (a Page instance's children are locked) ──
+  for (const ov of overlays) { try { parent.appendChild(ov); ov.x = page.x + 1440 - Math.round(ov.width) - 32; ov.y = page.y + 80; } catch (e) {} }
+  // ── 8. PRESERVE the original height ──
+  try { page.resize(1440, origH); } catch (e) {}
+  // ── 9. PRESERVATION GUARD — never delete a source that still holds visible content ──
+  // Anything still visible in Content was NOT carried over. Removing the source would delete it for good.
+  const leftovers = content ? content.children.filter(c => c.visible !== false && (!bodyFr || c.id !== bodyFr.id)) : [];
+  // in the Default branch the body itself moved into the slot and its old ref is stale — reading it can throw
+  let bodyLeft = [];
+  try { if (bodyFr && !bodyFr.removed && bodyFr.parent && bodyFr.parent.id === content.id) bodyLeft = bodyFr.children.filter(c => c.visible !== false); } catch (e) {}
+  if (leftovers.length || bodyLeft.length) {
+    srcFrame.name = srcFrame.name + " — NOT MIGRATED: " + [...leftovers, ...bodyLeft].map(n => n.name).join(", ");
+    return { page, kept: [...leftovers, ...bodyLeft].map(n => n.name) };   // source kept — report it, don't delete
+  }
+  try { srcFrame.remove(); } catch (e) {}
+  return { page, kept: [] };
 }
 ```
-Validated result per frame: `page.type==="INSTANCE"`, `page.height===origH`, content in the Main slot (Side hidden), header = breadcrumb + title + the original tabs + the original action buttons (e.g. `Create level`) carried into the Actions slot, overlays preserved as siblings.
+
+It returns `{ page, kept }`. `kept` is empty when the migration was complete and the source was removed. If it lists names, **the source was NOT deleted** — it is renamed `… — NOT MIGRATED: <names>` so nothing is lost; report it and handle those nodes.
+
+**Validated verbatim, 2026-09-29, two screens in section `22283:92486`:**
+- `22283:102978` — `Overview` is an INSTANCE: `Page` 1440×800 · `Full screen page`, `Sandbox=No` · `◼️ Main (Ghost)` · `1084 max` + side · `IslandCard`(General) 104 + `IslandCard`(Steps) 698, groups 592 wide · Overview in `Side content` · header `Levels /` + `New level` + tabs Steps / Configurations / Checks Execution Flow + `Create level` and the kebab · centred 148/148.
+- `22288:29691` — `Overview` is a FRAME and the screen has a Toast: same result, Overview in `Side content`, the Toast placed beside the instance, islands 104 + 794.
+
+The `◻️ Default` branch (one block, no side column) is written to the same rules but **has not been run on a real screen yet** — every KYC editor has a side column. Check it on the first Default screen you migrate.
+
+The content can be taller than the viewport (here 802 in a 647 zone). That is correct — the content scrolls inside the island, and the old screen was clipped the same way. **Do not grow the frame**: a migration keeps the original height.
 
 ---
 
-## 6. Sizing rules (every one caused a real bug — get them right)
+## 7. Sizing and API gotchas — each one broke a real run
 
-1. **Preserve the original outer height.** A migration must NOT change the frame's dimensions. Set the frame `counterAxisSizingMode="FIXED"; resize(1440, origH)`, then cascade `layoutSizingVertical="FILL"` down island → mainBody → card → content. Header stays 56; card `clipsContent=true` clips overflow. (Header shrank 120→56, so the content zone is actually a bit larger, but the frame stays exactly 800/1130/etc.)
-   - ❌ Letting the frame HUG content (`counterAxisSizingMode=AUTO`) makes heights drift (800→922…). Wrong for migration.
-   - (Only a from-scratch standalone build may hug; an existing-mockup migration must preserve height.)
-2. **Recenter content AFTER container widths settle.** Re-hosted content that was LEFT-constrained does not auto-recenter when the card shrinks 1440→1380. Recenter LAST (after card/island/frame widths are final, content.width==1380): `shift=(content.width - span)/2 - minX; children.forEach(c=>c.x+=shift)`. CENTER-constrained content lands 148/148 on its own (shift≈0). ❌ Running the recenter while `content.width` is still a transient (~640, before card FILL) overshoots → content at x=-492.
-3. **Overlays (hand-build fallback only): ABSOLUTE, set AFTER the frame is auto-layout.** `layoutPositioning="ABSOLUTE"` is a no-op while the parent is still NONE-layout → the overlay stays in flow and squishes the island (1388→936). Set it after HORIZONTAL layout is applied; reposition relative to the frame. **On the INSTANCE path the Page instance CANNOT hold appended overlays (children locked) — place them as SIBLINGS of the instance instead (§5).**
-4. **Sidebar fills height via `layoutAlign="STRETCH"`**, not `layoutSizingVertical="FILL"` against a hugging parent.
-5. **Hide the sidebar border (TEMPORARY):** the inner `Sidebar` instance has a right-edge `#e1e5ea` stroke that draws a line at the sidebar/island boundary; clear it (`strokes=[]`) for a seamless flush sidebar. (Reversible; the new Sidebar component will likely handle this itself.)
-6. **Hand-built frames: always set BOTH `layoutSizing` axes** — `createFrame()` defaults to 100×100 (this is why the Sandbox alert shipped 100px tall when only width was set).
-
----
-
-## 7. Migration audit (property-level — assert VALUES, not presence)
-
-> Hard lesson from this session: a structural/skeleton check ("does the island/card/header exist?") passes builds that are present-but-wrong. The review must assert actual property VALUES. Each check below caught a real defect.
-
-For every migrated frame:
-- [ ] **Layout shell is a live `Page` component INSTANCE** — ENFORCE mechanically: the audit itself runs `try{ await figma.importComponentSetByKeyAsync("ccd4779c…"); pageImportable=true }catch{ pageImportable=false }`. Then for each migrated frame, check whether its shell is a `Page` instance (a descendant INSTANCE whose `mainComponent.parent` is the `Page` set) vs a hand-built `Island` FRAME. **If `pageImportable` AND the shell is a hand-built frame tree → FAIL** ("hand-built while Page was importable"). Hand-build passes ONLY when `pageImportable===false` AND the build log pasted the thrown import error.
-- [ ] **Frame height == original** (migration preserves outer dimensions).
-- [ ] Frame width 1440; island width == sidebar-complement (1388 collapsed / 1183 expanded).
-- [ ] Sidebar 52/257; **no `#e1e5ea` border stroke** remaining.
-- [ ] Card: border == expected (#e5e7eb normal / #fad24a sandbox — driven by §4 detection, NOT presence); radius == 16.
-- [ ] **Sandbox correctness:** if not actually sandbox → neutral border AND no Sandbox alert plashka. If sandbox → yellow border AND plashka **height == 24**.
-- [ ] **Header content reproduced (instance path):** the Page's own Version=New header shows title + breadcrumb + the **original Subheader tabs** (relabeled) + the **original ANCESTOR-VISIBLE action buttons from the "Buttons"/"Buttons Bar" group** carried into the Actions slot — both the **text actions** (`Create level` / Run level / Save) **and the icon-only ⋮ 'More'/kebab** (`Content=Icon Only, Type=Secondary`), each `visible=true` (clones arrive hidden). A header with only breadcrumb+title (real actions missing) = FAIL. FAIL conditions (over- or under-carry): carrying the old header's hidden Key-area buttons (ID / External ID / Add tag); leaving the slot's default secondary `Button` placeholder in the Actions slot; **dropping the kebab/'More' and leaving the default secondary `Button` in its place** (filter by ancestor-visibility + carry the icon Secondary, don't rely on own `.visible` or text-only).
-- [ ] **Carried action is ANCESTOR-VISIBLE — assert the Actions slot RENDERS, not just that a button sits in it.** Walk the Actions slot's parent chain: if the slot (or any ancestor) is `visible:false`, the carried `Create level`/action does NOT render even with `clone.visible=true`. A `Page` header ships a default `*Button*` inside a HIDDEN Actions slot; a build that sets title/tabs but never runs the action-carry leaves exactly that — slot `visible:false`, the original primary action (`Create level`) absent, only the Page's default help icon showing. **`Show actions slot#6943:20` must be `true` AND the original primary action must be ancestor-visible in the final header.** Actions-slot present-but-hidden with the real action missing = FAIL (caught on the Configurations build — see §5). This is the ancestor-visibility class again: per-node `.visible=true` ≠ renders.
-- [ ] **Overlays PRESERVED:** every original Toast/Dropdown still exists (count matches the old frame) as a SIBLING of the Page instance, positioned over it. (Instance path: they CANNOT be children of the Page instance — instance children are locked. Hand-build fallback: ABSOLUTE child.) A missing toast = FAIL.
-- [ ] **Content NOT split / not broken inside:** the editor content went into the "Main content" slot as one block with "Side content" left HIDDEN; the form is NOT left-flushed in a shrunk 896 column. Content centered-ish (|L−R| ≤ 40) AND no overflow.
-- [ ] **Output lives INSIDE its wrapper section (copy/build):** if the build created a wrapper Section, every produced screen must be a `child` of that Section (parent === the Section), NOT a page-level sibling. Assert `section.children.length === screenCount` AND the section's bounding box encloses all screens. An empty/near-empty section with the screens beside it = FAIL (Section does not adopt frames by overlap — you must `appendChild`).
-- [ ] **Page-load:** nodes on a non-current page return null from `getNodeByIdAsync` until `page.loadAsync()`. A nested section is found via `page.findOne` (recursive), not `page.children.find`.
+1. **`IslandCard` won't grow on its own.** It ships FIXED at 153 with its inner `Slot` on FILL — set `Slot.layoutSizingVertical = "HUG"` first, then the island's. Island only → stays 153 and clips the group.
+2. **Hidden layers inside an instance don't exist for `findAll`.** While `IslandCard`'s `Heading` is off, none of its texts can be found. After `Heading#26638:9 = true` only `Name` appears; `Description` has no visibility property, so it can never be found or shown on an instance.
+3. **Node proxies are not reference-stable.** Compare nodes by `.id`, never with `===` / `!==`. An ancestor walk that stops on `p !== stop` runs to the PAGE and throws on `.visible`.
+4. **Changing a variant invalidates the refs below it.** After `Page / Body`'s `Content` changes, re-fetch `Page / Body / Default` and the slots.
+5. **`insertChild` into a SLOT invalidates the inserted node's ref.** Re-fetch it from `slot.children` for any follow-up. Capture a slot's placeholders **before** inserting and remove them by the captured refs.
+6. **Fill an `IslandCard` before putting it into the slot** — once inside, your reference to it is stale.
+6a. **Find content by ROLE, never by node type.** The same `Overview` is an INSTANCE in one mockup and a FRAME in the next; matching `type === "INSTANCE"` missed it, and deleting the source then deleted the Overview with it. Side column = whatever is visible in `Content` besides the body. And the **preservation guard** (step 9) must stay: never remove a source that still holds visible content.
+7. **A `Page` instance can't take appended children.** Overlays (Toast / Dropdown) go next to it, as siblings.
+8. **Preserve the original height** — `page.resize(1440, origH)`. Letting it hug makes heights drift.
+9. **Output on the source's page, inside the section** — `section.appendChild`, never beside it.
 
 ---
 
-## 8. Notes
-- ✅ `Page` component set (`ccd4779c…`) — **published 2026-06-15**; instantiate it (Build approach). Resolved the earlier blocker.
-- `Sandbox alert` (`07975654…`) — unpublished, but OBSOLETE: sandbox is a `Page` `Sandbox=Yes` variant.
-- The hidden "You are in sandbox mode" TEXT baked into the old `Header-levels` is a detection trap (see §4) — detect sandbox by VISIBLE indicator only.
+## 8. Audit — assert values, not presence
+
+A skeleton check ("is there an island? a header?") passes screens that are present but wrong. For every migrated screen:
+
+- [ ] **Shell is a live `Page` INSTANCE** from set `f9071958…`. Hand-built frames while `Page` imports = **FAIL**.
+- [ ] **`Type`** matches §2.1; **`Sandbox`** matches the *visible* indicator (§5).
+- [ ] **Nested `Page / Body` `Content`** matches §2.2: several groups or a side column → Ghost; one block → Default.
+- [ ] **`Page / Body / Default` `Type`** matches §2.3; `Show side content` is true exactly when there is side content.
+- [ ] **Every original content group is present** — count of `IslandCard`s in `Main content` equals the count of visible groups in the old body (Ghost). None missing, none merged.
+- [ ] **Each `IslandCard` hugs its content** — island height = group height + 48 (16 card padding + 8 slot padding, top and bottom). An island at exactly 153 = the HUG was not applied = **FAIL**.
+- [ ] **Groups fill the island width** and nothing overflows it.
+- [ ] **Side content** holds the old side column (Overview / tip), 380 wide — whether it was an INSTANCE or a FRAME in the original.
+- [ ] **Nothing lost:** `migrateFrameToIsland` returned `kept: []` for every screen, and no frame on the page is named `… — NOT MIGRATED: …`. A non-empty `kept` means that screen is unfinished.
+- [ ] **Header**: title, breadcrumb, the original tabs relabelled (none of the default `Tab_1…5`), and the original **ancestor-visible** actions — text actions and the kebab — in a **rendered** Actions slot. Missing actions, the default placeholder `Button`, or the old header's hidden Key-area buttons = **FAIL**.
+- [ ] **Overlays preserved** — every original Toast / Dropdown exists, as a sibling of the instance.
+- [ ] **Height = original**; width 1440.
+- [ ] **Content centred** — left and right gaps inside the card equal (148/148 at 1084 in a 1380 card).
+- [ ] **Placement** — on the source's page, and a child of its `(made by Claude)` section.
+
+---
+
+## 9. Notes
+
+- The spec lives on Base page `Layout` `8828:117083`: `Page` spec `29444:103014`, `Page / Body / Default` spec `29402:122705` (incl. the left/right decision tree `29828:239828`), `Canvas` `29825:227598`, `IslandCard` `26638:747879`.
+- After any future change to the layout in Base, **re-check the imports from a consumer file** — the Base file and the published library drifted apart once already (2026-09-29: the merge landed before the republish, and consumer files saw the old four-variant model).
+- `Sandbox alert` (`07975654…`) is not importable on its own — it doesn't need to be; it comes with `Sandbox=Yes`.
