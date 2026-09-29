@@ -237,7 +237,7 @@ Radius: keep the block's own. The old `Documents block old` stays at its compone
 
 **Bind by key** in a consumer file: `await figma.variables.importVariableByKeyAsync(key)`; in the reference's own file the reference's variable ids resolve directly.
 
-**Check that every block actually renders.** A clone of a heavy instance can come out blank on canvas while its data looks complete (Case / Overview sample: the second `Documents block old / Document` showed as an empty bordered box). Replace such a block with a fresh copy — from the reference if there is one.
+**Known risk: a cloned block can render blank.** In the Case / Overview sample the second `Documents block old / Document` showed on canvas as an empty bordered box, while its tree, texts and even an SVG export were complete — so no read-only check catches it. When the user reports an empty island or block, replace it with a fresh copy (from the reference if there is one) instead of re-inspecting the data.
 
 ### ✅ The validated function — copy and run it, don't write your own
 

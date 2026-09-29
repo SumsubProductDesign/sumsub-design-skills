@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.209.1 — 2026-09-29 (correction: a blank-rendering clone can't be detected by reading data)
+v3.209.0 told the skill to "check that every block actually renders". There is no read-only way to do that: the blank `Documents` block in the Case / Overview sample had a complete tree, all its texts and a full SVG export. The doc now states it as a known risk with the fix — when the user reports an empty block, replace it with a fresh copy, from the reference if there is one.
+
 ## v3.209.0 — 2026-09-29 (island migration: everything in islands, and the variables come from the designers' references)
 First sample rebuilt on the new layout (Case page / Overview) was reviewed against the designers' after-version. User feedback: *"everything must sit in islands, tables too. Look at the after version (and always do so, you can)"* and *"take the stroke colours, like the other variables, from the reference and write the right variable settings into the skill"*.
 
