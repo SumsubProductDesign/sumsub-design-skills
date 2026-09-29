@@ -1,5 +1,7 @@
 // FINISH — call 2 of 2, a SEPARATE use_figma call. Append:  return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<ref node id or null>"));
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
+const _LS = new RegExp("[" + String.fromCharCode(0x2028, 0x2029, 0x85) + "]", "g");
+const clean = o => JSON.parse(JSON.stringify(o).replace(_LS, " "));
 const isHeadingBlock = n => /title|heading|header/i.test(n.name) && n.height <= 90;
 const unwrapSingle = n => { let c = n; while (c && c.type !== "INSTANCE" && vis(c).length === 1 && "children" in vis(c)[0]) c = vis(c)[0]; return c; };
 const fillOf = n => (n && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false) ? n.fills[0].color : null;
@@ -106,12 +108,6 @@ if (b.x + b.width > kb.x + kb.width + 1 && rendered(d, k)) { inside.push(k.name 
 }
 return { fit, inside };
 }
-function refPlacement(refRoot, name) {
-if (!refRoot) return null;
-const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
-let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
-return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
-}
 function fitSection(page) {
 const s = page.parent; if (!s || s.type !== "SECTION") return null;
 let r = 0, b = 0; for (const c of s.children) { r = Math.max(r, c.x + c.width); b = Math.max(b, c.y + c.height); }
@@ -136,5 +132,5 @@ const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page /
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-return { pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) } };
+return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) } });
 }

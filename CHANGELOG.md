@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.214.0 — 2026-09-29 (island migration: TM Transaction — header stack, reference layout with the original's data)
+Getting TM Transaction / General info ready for a skill run. The user's rules for it: *"as it's done in this reference, that's right"* and, when asked, *"the reference's layout, the original's data"*.
+
+- **Header stack.** A full-width entity band right under the top header (TM `Header / Finance`: amount, status, Confirm · Pending · Approve · Add to case, Score / Applicant / Assignee) plus the tab strip under it are now one header: chrome, not content, not a column. The actions come from the band only — the top header's icon-only Summy AI / help are app chrome and the reference doesn't carry them.
+- **Header by the reference, data from the original.** The reference's title is taken when it re-uses the original's data (`Transfer: - 250,000.00 USD`); its Info and Additional-info rows are cloned and filled with the original's status, score and ID; what only the reference has (the `Suspicious` tag) stays.
+- **Side panel by the reference.** The reference's side column decides which blocks show and in what order: the original's `Transaction details` and `Notes` move in; the reference-only `Assignee` / `Related case` block is cloned and gets the original's assignee.
+- **New audit note** `header values not placed` — a label / value of the band that ended up nowhere in the result.
+- **U+2028 in returned texts cut the MCP response** (`Failed to parse SSE message … EOF … column ~20000`, three failed TM reads). Every engine result is cleaned now; the doc's §7.16 shows how to clean your own reads.
+- `planOne(id, refId)` takes an optional reference id and reports the header stack (`header2`, `subheader`).
+- Checked with `planOne` on TM Transaction `3234:23512` vs its reference `311:53619`: Full screen page · Main + Right (Ghost) · Full width; Customers card bare, AML checks / Properties / Matched rules / Events in islands; side panel Transaction details + Notes; tabs General info / Related transactions — all as in the reference.
+
 ## v3.213.2 — 2026-09-29 (correction: move what the new layout requires)
 v3.213.1 went too far: it banned any restructuring. User feedback: *"moving buttons, statuses and so on is needed too, if the new layout requires it."* The rule is now: the migration invents nothing (no new content, no copy edits, no components the original doesn't have), but it **moves existing elements where the new layout expects them** — actions, status, risk score, IDs and the applicant into the header slots, tabs into the sub-header, a details / notes column into the side panel — when the designers' reference or table requires it (TM Transaction).
 

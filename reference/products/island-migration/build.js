@@ -5,6 +5,8 @@ while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
 const box = (n, ref) => { const a = n.absoluteTransform, r = ref.absoluteTransform; return { x: Math.round(a[0][2] - r[0][2]), y: Math.round(a[1][2] - r[1][2]), w: Math.round(n.width), h: Math.round(n.height) }; };
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
+const _LS = new RegExp("[" + String.fromCharCode(0x2028, 0x2029, 0x85) + "]", "g");
+const clean = o => JSON.parse(JSON.stringify(o).replace(_LS, " "));
 const _idCache = new Map();
 const idsOf = n => { if (!n) return new Set(); if (_idCache.has(n.id)) return _idCache.get(n.id);
 const s = new Set([n.id]); if ("findAll" in n) for (const x of n.findAll(() => true)) s.add(x.id); _idCache.set(n.id, s); return s; };
@@ -46,9 +48,13 @@ const sbW = sidebar ? Math.round(sidebar.width) : 0;
 const header = all.filter(n => { const b = box(n, scr); return b.y <= 2 && b.h >= 40 && b.h <= 160 && b.x >= sbW - 2 && b.w >= 0.7 * (W - sbW) &&
 (/header/i.test(n.name) || /Header/.test(mainName(n))); }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
 const hdrH = header ? Math.round(header.height) : 0;
-const subheader = all.filter(n => { const b = box(n, scr); return !contains(header, n) && b.y >= hdrH - 2 && b.y <= hdrH + 24 && b.h >= 32 && b.h <= 72 &&
+let stackBottom = header ? box(header, scr).y + box(header, scr).h : 0;
+const header2 = !header ? null : all.filter(n => { const b = box(n, scr); return !contains(header, n) && Math.abs(b.y - stackBottom) <= 8 && b.w >= 0.9 * (W - sbW) && b.h >= 40 && b.h <= 200 &&
+(/header/i.test(n.name) || /Header/.test(mainName(n))) && "findOne" in n && !!n.findOne(x => x.type === "INSTANCE" && /^\*Button/.test(x.name)); }).sort((a, b) => b.height - a.height)[0] || null;
+if (header2) stackBottom = box(header2, scr).y + box(header2, scr).h;
+const subheader = all.filter(n => { const b = box(n, scr); return !contains(header, n) && !contains(header2, n) && b.y >= Math.min(hdrH, stackBottom) - 2 && b.y <= stackBottom + 32 && b.h >= 32 && b.h <= 72 &&
 "findOne" in n && !!n.findOne(x => /^\*Tab Basic\*|Tab Basic \/ Item/.test(x.name)); }).sort((a, b) => b.width - a.width)[0] || null;
-const isChrome = n => contains(header, n) || contains(sidebar, n) || contains(subheader, n);
+const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n);
 let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
 if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
 !isChrome(n) && "children" in n; }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
@@ -90,7 +96,7 @@ return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true
 const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
 let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) sandbox = rendered(s, scr) && s.visible; }
 const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
-return { W, H, nodes: { sidebar, header, subheader, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
+return { W, H, nodes: { sidebar, header, header2, subheader, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
 report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
 main: main ? main.name : null, left: left ? left.name : null, right: right ? right.name : null,
 islands: content.includes("Ghost") ? groups.filter(g => !isHeadingBlock(g)).map(g => g.name) : [], table, overlays: overlays.map(o => o.name) } };
@@ -121,10 +127,35 @@ const bc = h.findOne(n => n.type === "INSTANCE" && /Breadcrumb/i.test(n.name) &&
 const t = bc.findAll(n => n.type === "TEXT" && n.visible).map(n => n.characters.trim()).find(s => s.length > 1 && s !== "/");
 return t && !/^Section name$/i.test(t) ? t : null;
 }
+async function sideFromReference(page, refRoot, colName, labelValue, notes) {
+if (!refRoot) return;
+const col = page.findOne(n => n.name === colName && n.visible); if (!col || !("children" in col)) return;
+const refMain = refRoot.findAll(n => n.type === "SLOT" && /^(Main content|Side content)$/.test(n.name));
+const refCol = refMain.flatMap(sl => sl.children).find(k => k.visible && /right column|side content/i.test(k.name)) ||
+refRoot.findAll(n => n.type === "SLOT" && n.name === "Content" && n.parent && /Aside/.test(n.parent.name)).flatMap(sl => sl.children).find(k => k.visible);
+if (!refCol || !("children" in refCol)) return;
+const firstText = n => { const t = n.type === "TEXT" ? n : (n.findOne ? n.findOne(q => q.type === "TEXT" && q.visible) : null); return t ? t.characters.trim() : ""; };
+let at = 0;
+for (const rb of refCol.children.filter(k => k.visible)) {
+const mine = col.children.find(k => k.visible && (k.name === rb.name || k.name.trim().toLowerCase() === firstText(rb).toLowerCase()));
+if (mine) { at = col.children.indexOf(mine) + 1; continue; }
+const c = rb.clone(); col.insertChild(Math.min(at, col.children.length), c); at++;
+try { c.layoutSizingHorizontal = "FILL"; } catch (e) {}
+const T = c.findAll(q => q.type === "TEXT" && q.visible);
+for (let i = 0; i < T.length - 1; i++) { const v = labelValue[T[i].characters.trim().toLowerCase()];
+if (v && T[i + 1].characters.trim() !== v) { try { await figma.loadFontAsync(T[i + 1].fontName); T[i + 1].characters = v; } catch (e) {} } }
+notes.push("side block from the reference: " + (firstText(rb) || rb.name));
+}
+}
 async function buildIsland(scr, a, crumb) {
 const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
 const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
 const R = headerRegions(nodes.header, scr);
+if (nodes.header2) { const R2 = headerRegions(nodes.header2, scr); if (R2.actions.length) R.actions = R2.actions; R.status = R.status || R2.status; R.crumb = R.crumb || R2.crumb; R.key = R.key || R2.key; R.addInfo = R.addInfo || R2.addInfo; }
+const stackTexts = [nodes.header, nodes.header2, nodes.subheader].filter(Boolean).flatMap(h => h.findAll(t => t.type === "TEXT" && t.visible && rendered(t, scr)).map(t => t.characters.trim())).filter(Boolean);
+const labelValue = {}; if (nodes.header2) for (const f of nodes.header2.findAll(n => n.type === "FRAME" && n.visible)) { const tx = f.children.filter(k => k.visible).flatMap(k => k.type === "TEXT" ? [k] : (k.findAll ? k.findAll(t => t.type === "TEXT" && t.visible) : []));
+if (tx.length === 2 && /^[A-Za-z][A-Za-z ]+$/.test(tx[0].characters.trim())) labelValue[tx[0].characters.trim().toLowerCase()] = tx[1].characters.trim(); }
+const origId = (stackTexts.find(t => /^ID\s*:/i.test(t)) || null);
 const hdr0 = nodes.header;
 const cands = hdr0 ? hdr0.findAll(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name) && rendered(n, scr) && n.visible) : [];
 const carry = [];
@@ -192,6 +223,7 @@ if (nodes.right) {
 if (plan.sideContent) { const sc = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
 if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} } } }
 else intoAside(nodes.right, "right");
+try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, notes); } catch (e) { notes.push("side from reference: " + e.message); }
 }
 const getHdr = () => page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
 const hslot = re => { const h = getHdr(); return h && h.findAll(n => n.type === "SLOT").find(s => re.test(s.name)); };
@@ -204,8 +236,26 @@ if (R.key) { try { getHdr().setProperties({ "↪ Key Name#6943:13": R.key }); } 
 const bc = getHdr().findOne(n => n.type === "INSTANCE" && /Breadcrumb/i.test(n.name)); const crumbText = R.crumb || crumb || refCrumb(a.refRoot);
 if (bc && crumbText) { try { bc.setProperties({ "Name#6638:5": crumbText }); } catch (e) {} }
 else if (bc) { try { getHdr().setProperties({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
-if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { notes.push("status: " + e.message); } }
-if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { notes.push("additional info: " + e.message); } }
+const rh = a.refRoot ? a.refRoot.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible) : null;
+const refSlot = re => rh ? rh.findAll(n => n.type === "SLOT" && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
+const refTitle = rh && rh.componentProperties["Title text#3817:0"] ? String(rh.componentProperties["Title text#3817:0"].value) : null;
+const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
+if (refTitle && reuses(refTitle)) { try { getHdr().setProperties({ "Title text#3817:0": refTitle }); notes.push("title from the reference: " + refTitle); } catch (e) {} }
+const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = t.characters.trim();
+if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch (e) {} } } };
+const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
+if (rInfo) { try { getHdr().setProperties({ "Show Info slot#6985:0": true });
+const stT = R.status ? (R.status.type === "TEXT" ? R.status : R.status.findOne(q => q.type === "TEXT" && q.visible)) : null, stLbl = stT ? stT.characters.trim() : null;
+const src = rInfo.children.filter(k => k.visible).map(k => { const t = k.findOne ? k.findOne(q => q.type === "TEXT" && q.visible) : null;
+return (/Status/i.test(k.name) && stLbl && t && t.characters.trim() !== stLbl) ? R.status : k; });
+fillSlot(/^Info slot/i, src);
+const sc = labelValue["score"]; const s1 = hslot(/^Info slot/i);
+if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = c.findOne(q => q.type === "TEXT" && q.visible); if (t && t.characters.trim() !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch (e) {} } }
+notes.push("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { notes.push("ref info: " + e.message); } }
+else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { notes.push("status: " + e.message); } }
+if (rAdd) { try { getHdr().setProperties({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
+const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); notes.push("additional info row from the reference, ID from the original"); } catch (e) { notes.push("ref additional info: " + e.message); } }
+else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { notes.push("additional info: " + e.message); } }
 try { const tbOf = () => getHdr().findOne(n => /^\*Tab Basic\*/.test(n.name));
 const wsOf = () => { const tb = tbOf(); return tb && tb.findAll(n => n.type === "SLOT").find(s => /Items wrapper/i.test(s.name)); };
 if (tbOf() && plan.tabs.length) {
@@ -222,9 +272,12 @@ for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findO
 }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
 try { page.resize(origW, origH); } catch (e) {}
+try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).map(t => t.characters.trim()));
+const shownLow = new Set([...shown].map(t => t.toLowerCase()));
+const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !shownLow.has(k)).map(([k, v]) => k + ": " + v); if (lost.length) notes.push("header values not placed: " + lost.join(", ")); } catch (e) {}
 _idCache.clear();                                                          // the tree changed — rebuild id sets
 const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
-!contains(nodes.header, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n));
+!contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n));
 if (leftover.length) { scr.name = name + " — NOT MIGRATED: " + [...new Set(leftover.map(n => n.name))].slice(0, 6).join(", ");
 return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }
 try { scr.remove(); } catch (e) {}
@@ -236,10 +289,10 @@ return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills
 (() => { const c = n.fills[0].color; return c.r > 0.93 && c.r < 0.985 && Math.abs(c.r - c.b) < 0.03; })() &&
 (() => { const b = n.absoluteBoundingBox; const ix = Math.max(0, Math.min(b.x + b.width, mb.x + mb.width) - Math.max(b.x, mb.x)), iy = Math.max(0, Math.min(b.y + b.height, mb.y + mb.height) - Math.max(b.y, mb.y)); return ix * iy > 0.4 * mb.width * mb.height; })()).length > 0;
 }
-async function planOne(scrId) {
+async function planOne(scrId, refOverride) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
 let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
-const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = m ? m[1] : null;
+const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : null);
 _idCache.clear(); const a = analyze(scr);
 let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
@@ -250,9 +303,10 @@ const rp = refPlacement(refP, g.name);
 const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
 blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
-return { id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
+return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
 plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
-blocks, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title };
+blocks, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
+header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
 async function migrateOne(scrId) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
@@ -271,6 +325,6 @@ const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
 if (ms && !a.nodes.table) a.plan.width = (ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max";
 a.W = Math.round(refP.width); a.H = Math.round(refP.height); }
 const r = await buildIsland(scr, a, null);
-return { id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
-kept: r.kept, notes: r.notes };
+return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
+kept: r.kept, notes: r.notes });
 }
