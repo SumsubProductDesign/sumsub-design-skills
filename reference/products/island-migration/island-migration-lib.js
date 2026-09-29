@@ -372,19 +372,40 @@ function narrowFills(page) {
     if (inner - n.width > 4) out.push(n.name + " " + Math.round(n.width) + "/" + Math.round(inner)); if (out.length > 8) break; }
   return out;
 }
+// The published side panels have a fixed width (Aside 400, Side content 380). A side column copied with the reference's sizing can
+// be wider — Case page right column is FIXED 424 in the reference, which puts it in Main content on the branch Page — and then
+// sticks out of the panel (Financial data run 29.09: overflow "Content: Case page right column"; resizing the nested Aside does
+// not persist). Make every side-slot child that is wider than its slot FILL it, then check nothing inside it sticks out.
+function fitSideColumns(page) {
+  const fit = [], inside = [];
+  const rendered = (n, stop) => { let q = n; while (q && q.id !== stop.id) { if (q.visible === false) return false; q = q.parent; } return true; };
+  for (const s of page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))))) {
+    const inner = s.width - (s.paddingLeft || 0) - (s.paddingRight || 0);
+    for (const k of s.children.filter(c => c.visible)) {
+      if (k.width - inner > 1) { const w0 = Math.round(k.width);
+        try { k.layoutSizingHorizontal = "FILL"; fit.push(k.name + " " + w0 + " → " + Math.round(k.width)); } catch (e) { fit.push(k.name + " " + w0 + " > " + Math.round(inner) + ": " + e.message); } }
+      const kb = k.absoluteBoundingBox; if (!kb || !("findAll" in k)) continue;
+      for (const d of k.findAll(x => x.visible && !!x.absoluteBoundingBox)) { const b = d.absoluteBoundingBox;
+        if (b.x + b.width > kb.x + kb.width + 1 && rendered(d, k)) { inside.push(k.name + " › " + d.name + " " + Math.round(b.width)); if (inside.length > 6) break; } }
+    }
+  }
+  return { fit, inside };
+}
 async function finishAndAudit(pageId, refId) {
   const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
   let fin;
   try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; }
   const gridIssues = stretchToWidth(page, !!refId);
+  const side = fitSideColumns(page);
   const pb = page.absoluteTransform[1][2];
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-  const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible).map(k => k.absoluteTransform[1][2] - pb + k.height)));
+  // FILL-height children follow the page (a side column spanning the Aside) — counting them grows the page on every run.
+  const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
   if (bottom + 20 > page.height) { try { page.resize(page.width, Math.ceil(bottom + 28)); } catch (e) {} }
   const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
   const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page / Body / IslandCard" && !cardLike(k) && !isCardLayout(k)).map(k => k.name) : ["no main slot"];
   const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
       (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
   const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-  return { pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, narrowFills: narrowFills(page), vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) } };
+  return { pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) } };
 }

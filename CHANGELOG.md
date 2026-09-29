@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.211.0 — 2026-09-29 (island migration: side columns fit their panel)
+v3.210.1 stopped `finish.js` from copying a reference width that doesn't fit the side panel. This release adds the safety net and the audit around it: the reference keeps `Case page right column` FIXED at 424, while the published `Aside` is locked at 400 and does not resize. User feedback: *"teach the engine to stretch the column to the Aside"*.
+
+- **`finish.js` fits side columns to their panel.** After the reference's sizing is copied, any child of `Side content` or an `Aside` that is wider than its slot is set to `FILL`. New audit fields: `sideFit` (what was fitted) and `sideOverflow` (anything still sticking out inside the column — must be empty).
+- **Re-running `finish.js` no longer grows the page.** A side column stretched to the page height was counted as content, so every run added 20px (1181 → 1201). Stretch-to-height children are now skipped in that check.
+- Doc: §6.2, §7.14–15 and a new §8 audit line. Validated on `3269:66191`: column 424 → 400, `overflow` and `sideOverflow` empty, height stays 1181 across runs (checked on the v3.210.0 copy step, where the 424 is still copied — with v3.210.1 the net usually has nothing to fit).
+
 ## v3.210.1 — 2026-09-29 (engine fix found by the first skill run)
 The first real run of the skill (Case page / Financial data) matched the designers' reference, but its log showed six extra calls: `finish.js` had copied the reference's FIXED 424 width onto the right column inside the published 400 `Aside`, the audit flagged the 24 px overflow, and the skill fixed it by hand after two failed attempts to widen the panel. `finish.js` no longer copies a fixed reference width that doesn't fit where the block now sits (a side panel, or wider than the parent's room) — the block goes FILL instead.
 
