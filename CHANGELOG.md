@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.213.1 — 2026-09-29 (the migration invents nothing)
+User feedback: *"the skill must not invent anything of its own: just switch on the grey background and put the needed content into islands or collapsible cards on the grey, that's all."* Written into the doc and `SKILL.md` as a hard rule: the migration does two things — the grey island layout (with the original header carried as it is) and content into islands, cards and collapsible cards left bare on the grey. It never restructures a screen: no moving buttons, status or IDs into the header, no new sidebars, no sub-header tabs, no copy edits, no new components — even where the designers' reference or table comments redesigned it (TM Transaction).
+
 ## v3.213.0 — 2026-09-29 (island migration: three fixes from the Levels / Steps skill run)
 The third skill run (Levels / Steps) matched the designers' reference, but three things still needed a hand fix afterwards. The engine now does them itself.
 
