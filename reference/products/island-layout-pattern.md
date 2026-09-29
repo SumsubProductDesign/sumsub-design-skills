@@ -3,6 +3,7 @@
 > The Dashboard layout since the island redesign: content lives in white rounded islands floating on a grey page, with the sidebar flush left.
 > **Canonical source:** Base components `tJMo5DkqQUN0H6N8apN0N7`, page **Layout `8828:117083`** — variants plus the designers' usage specs. Ignore its `Archive` section.
 > **Production merge 2026-09-29:** the layout moved from a branch into Base main and was republished. The model changed (nested `Page / Body` with seven layouts, islands, side panels), and **the `Page` key changed** — `ccd4779c…` no longer exists.
+> **Designers' after-references rule (2026-09-29):** when the old screen has a designer-made "after" version (the migration test page names copies `… — before (ref <nodeId>)`), **read that reference first and match it** — composition, what sits in which island, and the variables (§6.1). A survey of all 45 references: every content block sits in an island — **tables, lists and empty states too**; the only blocks standing bare on the grey are ones that already are cards themselves.
 > **Validated 2026-09-29** end to end on a copy of an old KYC level-editor mockup (`xhjtb7G71gVOawl0pOilSx`, output `22283:102978`): live `Page` instance, Ghost + 1084 + side content, each content group in its own `IslandCard`, header with breadcrumb, tabs and carried actions, height preserved, content centred 148/148.
 
 ---
@@ -12,7 +13,7 @@
 An island screen is **one live `Page` instance**. You never assemble the sidebar, island, card or header yourself — they are inside `Page`. You make four choices and put the content into slots:
 
 1. **`Page` → `Type`** — `Basic` by default; `Full screen page` only for focused work on one entity (§2.1). Plus `Sandbox` Yes/No (§5).
-2. **The nested `Page / Body` → `Content`** — `◻️ Default` for a single block, `◼️ Ghost` for structured content with several groups or a side panel (§2.2).
+2. **The nested `Page / Body` → `Content`** — for a **migrated** screen always a `◼️ … (Ghost)` layout: everything lives in islands, a lone table included (§2.2). `◻️ Default` only for a new screen the designer explicitly asks for as one white card.
 3. **The nested `Page / Body / Default` → `Type`** — content width `1084 max` / `1920 max` / `Full width`, and `Show side content` if there is supporting content (§2.3).
 4. **Fill the slots** — `Main content`, and when used `Side content`, the `Aside` panel, the `Section navigation`. In Ghost, **each content group goes into its own `Page / Body / IslandCard`**.
 
@@ -83,6 +84,8 @@ This replaces the old "every drill-down is Fullscreen" rule. A level editor, a r
 | `◼️ Nav + Main + Right (Ghost)` | grey | navigation + main + right panel |
 
 *"Don't use Default for pages with multiple islands or any side panel. Use Ghost instead."* In the spec, `◻️` is labelled **White** and `◼️` **Grey**.
+
+> **Migration: always Ghost, everything in islands — tables too.** Костя, 2026-09-29, on a sample where a table sat flat on the grey: *"все должно находиться в островах, и таблицы тоже"*. Every designer after-reference agrees: Payment methods, Devices, Transactions, Events log, Report settings, even `*Empty State*` — each in its own `IslandCard`. A single table page is `◼️ Main (Ghost)` with the table (and its Block Title) inside one island, not `◻️ Main (Default)`.
 
 ### 2.3 The nested `Page / Body / Default` → `Type` (content width)
 
@@ -158,11 +161,15 @@ The `◻️` / `◼️` characters are part of the value — copy them exactly.
 | page background `semantic/background/neutral/subtlest/normal` | `e7129860062f42ee2a929d1b4ccacd21133a03ee` | #f3f4f6 |
 | card / island fill `semantic/background/neutral/inverse/normal` | `567811a0cf497ac911288a2f4a75a1d89ebff75c` | #ffffff |
 | card border `semantic/border/neutral/subtlest/normal` | `40baade65c87f4b56fd67b027ec695d0984fae39` | #e5e7eb |
+| bare card fill `semantic/background/secondary/normal` | `da81bccfef06f3de221bafbb9b5ee6a161eb9000` | #ffffff |
+| table row fill `components/table/background-row-normal` | `b651c3b1b3a1d5b4066af62493435b81f3635acb` | #ffffff |
+| grey area `semantic/background/neutral/ghost/normal` | `e50636958c4d5a6917b4fb1e32a7de92ded72f85` | #f9fafb |
+| gap between islands `spacing/lg` | `2b3382099953af94f32cb6ffe5c7f44c74d5fed7` | 16 |
 | sandbox border `semantic/border/yellow/subtle/normal` | `ed34b693cbe71abf562e9cb323ec44fc96bd3a94` | #fad24a |
 | `border-radius/xl` | `03884e014085a48cf26670632be200a02b5a160c` | 16 |
 | `spacing/s` | `5a8e4573770ee8f921f141c1ab6c96835c3125a0` | 8 |
 
-You rarely need these — `Page` and `IslandCard` bind them already. They are here for the audit.
+`Page` and `IslandCard` bind their own. The rows added above are what **you** bind on migrated blocks — see §6.1.
 
 ---
 
@@ -204,10 +211,33 @@ A migration **re-lays out** the screen on the new layout; it never rebuilds cont
 ### Mapping an old screen onto the new layout
 
 1. **Page type** — entity editor / detail (✕ in the old header) → `Full screen page`; otherwise `Basic`.
-2. **Groups** — the old content column is usually a frame whose children are the setting groups (`General`, `Steps`, …). More than one group, or any side column → **Ghost**. Exactly one block and no side column → **Default**, and the block goes straight into `Main content` with no island.
+2. **Groups** — the old content column is usually a frame whose children are the setting groups (`General`, `Steps`, …). **Always Ghost** — one group, several groups, a single table: each goes into an island.
+   - A block that already **is a card** (radius ≥ 8 and a white fill or its own border — `APCardCollapsible`, `Case page info`, `Tip`) stands on the grey as is. Wrapping it in an `IslandCard` would double the card.
+   - A **wrapper of cards** (an instance whose children are mostly cards, e.g. `Case page Overview tab content`) is laid out part by part in `Main content`: the cards as they are, every non-card part (a `Transactions` table frame, a plain block) in its own `IslandCard`. Clone the parts, then remove the wrapper. Every part stays a live instance; only the wrapper loses its link, exactly as in the designers' reference. Never `detachInstance()`.
 3. **Width** — forms and settings → `1084 max`; tables and dashboards → `1920 max`; heavy data → `Full width`.
 4. **Side column** (an `Overview`, a tip, notes) → `Show side content = true`, into `Side content`.
 5. **Each group goes into its own `IslandCard` WHOLE** — with its own title and description. Do not move a group's title into the island's `Heading`: on an instance the `Heading`'s `Description` text has no visibility property, so it can't be found or shown, and moving the title there would drop the description. Old groups with their own grey `#f6f7f9` container keep it — inside a white island it reads exactly as it did on the old white page.
+
+### 6.1 Variables on migrated blocks (from the designers' after-references)
+
+Components bring their own variables, but the old blocks carry the pre-island ones — a darker border, a raw white. The designers override them in every reference. Do the same, **after** the blocks are in place:
+
+| Block | Property | Variable | Key |
+|---|---|---|---|
+| A card standing bare on the grey (`Case page info`, `.Case page applicant info`, `Documents block old / Document`, `APCardCollapsible` …) | fill | `semantic/background/secondary/normal` | `da81bccfef06f3de221bafbb9b5ee6a161eb9000` |
+| the same | stroke | `semantic/border/neutral/subtlest/normal` | `40baade65c87f4b56fd67b027ec695d0984fae39` |
+| A side-column organism (`Case page right column`) and its top block (`.Case page checklist`) | stroke | `semantic/border/neutral/subtlest/normal` | `40baade65c87f4b56fd67b027ec695d0984fae39` |
+| A table's wrapper frame inside an island (`Transactions`) | fill | **none** — the island gives the white | — |
+| Table rows inside an island (`Txn table / Row`, `Table Row` …) | fill | `components/table/background-row-normal` | `b651c3b1b3a1d5b4066af62493435b81f3635acb` |
+| `Page / Body / IslandCard` itself | fill / stroke / radius | **leave as published** (`neutral/inverse/normal`, `border/neutral/subtlest/normal`, `border-radius/xl` 16). References built on the branch show `components/layout/island/card/background-normal` — same white, the published component wins. | — |
+
+Radius: keep the block's own. The old `Documents block old` stays at its component radius 12 (the references keep it too).
+
+**When an after-reference exists, copy its variables instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill or stroke variable that differs from yours, bind the reference's (`setBoundVariableForPaint` on a copy of its paint). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
+
+**Bind by key** in a consumer file: `await figma.variables.importVariableByKeyAsync(key)`; in the reference's own file the reference's variable ids resolve directly.
+
+**Check that every block actually renders.** A clone of a heavy instance can come out blank on canvas while its data looks complete (Case / Overview sample: the second `Documents block old / Document` showed as an empty bordered box). Replace such a block with a fresh copy — from the reference if there is one.
 
 ### ✅ The validated function — copy and run it, don't write your own
 
@@ -236,7 +266,7 @@ async function migrateFrameToIsland(srcFrame) {
   const others   = content ? content.children.filter(c => c.visible !== false && (!bodyFr || c.id !== bodyFr.id)) : [];
   const side     = others.find(c => /Overview|Side|Aside|Tip/i.test(c.name)) || others[0] || null;
   const overlays = srcFrame.children.filter(c => c.type === "INSTANCE" && /Toast|Dropdown/i.test(c.name));
-  const ghost    = groups.length > 1 || !!side;          // several groups or a side column → Ghost
+  const ghost    = true;                                 // migration: everything lives in islands — a lone table too (§2.2)
 
   // ── 2. INSTANTIATE Page (mandatory — if the import throws, log the error; only then consider a fallback) ──
   const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
@@ -356,7 +386,10 @@ A skeleton check ("is there an island? a header?") passes screens that are prese
 
 - [ ] **Shell is a live `Page` INSTANCE** from set `f9071958…`. Hand-built frames while `Page` imports = **FAIL**.
 - [ ] **`Type`** matches §2.1; **`Sandbox`** matches the *visible* indicator (§5).
-- [ ] **Nested `Page / Body` `Content`** matches §2.2: several groups or a side column → Ghost; one block → Default.
+- [ ] **Nested `Page / Body` `Content`** is a Ghost layout (§2.2) — a lone table included.
+- [ ] **Nothing outside an island** — every child of `Main content` is an `IslandCard` or a block that is itself a card (radius ≥ 8 + white fill or own border). A table, list or empty state standing bare = **FAIL**.
+- [ ] **Variables per §6.1** — bare cards `background/secondary/normal` + `border/neutral/subtlest/normal`, side column border `subtlest`, table rows `components/table/background-row-normal`, table wrapper without fill. With an after-reference: zero fill/stroke differences against it outside the `IslandCard` internals.
+- [ ] **Compared with the after-reference** when one exists — same blocks, same islands, same order.
 - [ ] **`Page / Body / Default` `Type`** matches §2.3; `Show side content` is true exactly when there is side content.
 - [ ] **Every original content group is present** — count of `IslandCard`s in `Main content` equals the count of visible groups in the old body (Ghost). None missing, none merged.
 - [ ] **Each `IslandCard` hugs its content** — island height = group height + 48 (16 card padding + 8 slot padding, top and bottom). An island at exactly 153 = the HUG was not applied = **FAIL**.

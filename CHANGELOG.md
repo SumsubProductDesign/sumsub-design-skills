@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.209.0 — 2026-09-29 (island migration: everything in islands, and the variables come from the designers' references)
+First sample rebuilt on the new layout (Case page / Overview) was reviewed against the designers' after-version. User feedback: *"everything must sit in islands, tables too. Look at the after version (and always do so, you can)"* and *"take the stroke colours, like the other variables, from the reference and write the right variable settings into the skill"*.
+
+- **Everything lives in islands — tables, lists and empty states too.** A survey of all 45 designer references confirmed it: Payment methods, Devices, Transactions, Events log, Report settings and `*Empty State*` each sit in their own `IslandCard`. Migrated screens are now always a `◼️ … (Ghost)` layout; a lone table page is Ghost with the table inside one island, no longer `◻️ Main (Default)`.
+- **Blocks that already are cards stand bare on the grey** (radius ≥ 8 and a white fill or their own border — `APCardCollapsible`, `Case page info`, `Tip`), so they are never double-wrapped. A wrapper of cards (e.g. `Case page Overview tab content`) is laid out part by part, with every non-card part in its own island — the way the designers did it in the reference.
+- **New §6.1 "Variables on migrated blocks"** in the island doc, taken from the references: bare cards `semantic/background/secondary/normal` + `semantic/border/neutral/subtlest/normal` (the old blocks carried a darker `base/neutral/40` border), side-column border `subtlest`, table rows `components/table/background-row-normal`, a table's wrapper frame without fill, and the published `IslandCard` left as is. All keys listed; four tokens added to the doc's token table.
+- **Reference first.** When a designer's after-version exists, the skill reads it before building and copies its composition and fill/stroke variables block by block (a documented diff-and-copy procedure).
+- **New audit checks:** nothing in `Main content` outside an island or a self-card; variables per §6.1 (or zero differences against the reference); result compared with the reference; every block actually renders — a clone of a heavy instance can come out blank on canvas while its data looks complete.
+
 ## v3.208.0 — 2026-09-29 (island layout retrained on the production model; the old `Page` key was dead)
 The island layout moved from a branch into Base main and was republished (user feedback: *"we merged the working version of this layout, which lived in a branch, into the main file"*). The goal stated with it: *"rebuild old mockups on the new layout with the skill, not by hand."* Retrained from the designers' spec on Base page `Layout` `8828:117083`.
 
