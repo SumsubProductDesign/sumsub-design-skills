@@ -76,7 +76,8 @@ function analyze(scr) {
   let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
   if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
       !isChrome(n) && "children" in n; }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
-  for (let g = 0; !cols && container && g < 6; g++) { cols = sideBySide(container, scr); if (cols) break; const k = vis(container);
+  // the header may sit INSIDE the content frame (Levels: Header-levels is a child of Content) — ignore chrome when looking for columns
+  for (let g = 0; !cols && container && g < 6; g++) { cols = sideBySideList(vis(container).filter(c => !isChrome(c)), scr); if (cols) break; const k = vis(container).filter(c => !isChrome(c));
     if (k.length === 1 && "children" in k[0] && !isTableNode(k[0])) container = k[0]; else break; }
   let main = null, left = null, right = null;
   if (cols) { const widest = cols.slice().sort((a, b) => b.b.w - a.b.w)[0]; main = widest.c;
@@ -138,6 +139,16 @@ function headerRegions(h, scr) {
       !!inA(n, /Actions/i) && !inA(n, /Additional info/i) && !inA(n, /\*Button/));
   return { crumb: cr ? cr.characters.trim() : null, key: keyT ? keyT.characters.trim() : null, status, addInfo, copy, actions };
 }
+// ─── REFERENCE PLACEMENT: where does the designer's after-version put a block? ───
+// "island" — inside a Page / Body / IslandCard; "split" — bare, but islands live inside it (a mixed wrapper);
+// "bare" — on the grey as is; null — not in the reference (fall back to the rules). Levels Steps: the titled "Steps" group
+// is bare on grey in the reference while the look-alike "Case routing" sits in an island — only the reference can tell.
+function refPlacement(refRoot, name) {
+  if (!refRoot) return null;
+  const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+  let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
+  return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
+}
 async function buildIsland(scr, a, crumb) {
   const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
   const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
@@ -179,15 +190,19 @@ async function buildIsland(scr, a, crumb) {
     if (pending.length) bundles.push(pending);
     const cards = [];
     for (const bundle of bundles) {
+      // the reference decides first; the rules only where the block isn't in the reference
+      const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name);
+      if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
+      if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
       // already a card, or a stack of cards (Case page Overview tab content) → straight on grey, no wrapping island
-      if (bundle.length === 1 && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
-      if (bundle.length === 1 && isCardStack(bundle[0])) {
+      if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
+      if (bundle.length === 1 && (rp === "split" || isCardStack(bundle[0]))) {
         // a wrapper of cards (Case page Overview tab content): its parts become separate items of the main column,
         // exactly like the designers' after-reference. Cards stay bare, a non-card part (Transactions table) gets its own island.
         // The wrapper's own component link is lost (the reference does the same); every part stays a live instance.
         const stack = bundle[0]; const flat = [];
-        for (const part of vis(stack)) { const c = part.clone();
-          if (cardLike(part) || isCardLayout(part)) { cards.push(c); continue; }
+        for (const part of vis(stack)) { const c = part.clone(); const pp = refPlacement(a.refRoot, part.name);
+          if (pp === "bare" || (pp !== "island" && (cardLike(part) || isCardLayout(part)))) { cards.push(c); continue; }
           flat.push(part.name); cards.push(wrapInIsland([c])); }
         if (flat.length) notes.push("split " + stack.name + " into parts; islands added for: " + flat.join(", "));
         try { stack.remove(); } catch (e) { notes.push("could not remove the original " + stack.name + " — guard will keep the source"); }
@@ -331,6 +346,32 @@ async function finishIsland(page, refId) {
 // Call 1 `migrateOne(id)` builds. Call 2 `finishAndAudit(pageId, refId)` copies variables and audits.
 // They MUST be separate use_figma calls: after blocks move into slots, node proxies in the same call go stale
 // ("node … does not exist" while walking the moved tree) and the throw rolls the whole build back.
+// grey = a grey surface (ghost #f9fafb / subtlest #f3f4f6) under at least 40 % of the reference's main content area
+function refIsGrey(P) {
+  const ms = P.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms || !ms.absoluteBoundingBox) return null; const mb = ms.absoluteBoundingBox;
+  return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false && !!n.absoluteBoundingBox &&
+    (() => { const c = n.fills[0].color; return c.r > 0.93 && c.r < 0.985 && Math.abs(c.r - c.b) < 0.03; })() &&
+    (() => { const b = n.absoluteBoundingBox; const ix = Math.max(0, Math.min(b.x + b.width, mb.x + mb.width) - Math.max(b.x, mb.x)), iy = Math.max(0, Math.min(b.y + b.height, mb.y + mb.height) - Math.max(b.y, mb.y)); return ix * iy > 0.4 * mb.width * mb.height; })()).length > 0;
+}
+// PLAN ONLY — read-only. Run it first and compare with the reference before building (§6.2 step 0).
+async function planOne(scrId) {
+  const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
+  let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
+  const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = m ? m[1] : null;
+  _idCache.clear(); const a = analyze(scr);
+  let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
+    if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
+  const grey = refP ? refIsGrey(refP) : null;
+  const blocks = []; let pending = [];
+  for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
+    const rp = refPlacement(refP, g.name);
+    const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
+    blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
+  if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
+  return { id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
+    plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
+    blocks, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title };
+}
 async function migrateOne(scrId) {
   const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
   let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
@@ -341,6 +382,8 @@ async function migrateOne(scrId) {
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
+  if (refP && refIsGrey(refP) === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
+  a.refRoot = refP;
   if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
     const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
     if (ms && !a.nodes.table) a.plan.width = (ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max";

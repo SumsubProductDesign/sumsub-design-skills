@@ -4,6 +4,15 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.212.0 — 2026-09-29 (grey screens only, plan before build, placement from the reference)
+The second skill run (Levels / Configurations) produced a grey page with an island — but that screen is white in the designers' table (user feedback: *"should this screen have a grey background at all, according to the file I sent?"*), and the next candidate (Levels / Steps) would have been built wrong too. The scope was also restated: *"only screens that contain the grey background and islands — the point is to help designers not do it by hand, but only for the needed screens."*
+
+- **Scope: grey + islands only.** A screen whose reference is white is not migrated: `migrateOne` stops with `stopped: "the reference is WHITE…"`. Detection: a grey surface under at least 40 % of the reference's main content.
+- **Plan first.** New read-only `planOne(id)` in `build.js`: page type, grey/white verdict, layout, side column, and every block's placement marked `(reference)` or `(rule)`. The skill runs it and compares with the reference before any build.
+- **Placement from the reference.** Each block goes where the designer put the same-named block — in an island, bare, or split. The rules only cover blocks the reference doesn't have. (Levels Steps: the titled "Steps" group is bare on grey in the reference, the look-alike "Case routing" is in an island.)
+- **Fix:** the old header sitting inside the content frame (Levels `Header-levels`) no longer hides the side column from the column detection.
+- Checked read-only on Levels / Steps: Full screen page · Ghost · 1084 + side (Overview) · General and Steps bare, as in the reference.
+
 ## v3.211.0 — 2026-09-29 (island migration: side columns fit their panel)
 v3.210.1 stopped `finish.js` from copying a reference width that doesn't fit the side panel. This release adds the safety net and the audit around it: the reference keeps `Case page right column` FIXED at 424, while the published `Aside` is locked at 400 and does not resize. User feedback: *"teach the engine to stretch the column to the Aside"*.
 

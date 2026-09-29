@@ -241,6 +241,10 @@ Radius: keep the block's own. The old `Documents block old` stays at its compone
 
 ### 6.2 The migration engine — two files, two calls. Run them, don't write your own
 
+**Scope: only screens that go grey + islands.** The migration moves old screens onto the grey island layout — the ones the designers marked grey (their table: "Apply grey" / "Apply grey + islands"). A screen whose reference is white stays on the white layout and is **not** migrated: the engine stops with `stopped: "the reference is WHITE…"`. Say so to the designer instead of building anything.
+
+**Step 0 — plan first, read-only.** Before any build call run `planOne(id)` (in `build.js`) and compare its plan with the reference: page type, grey or white, layout (`Main` / `Main + Right` / `Left + Main`, side column), and every block — `bare` / `island` / `split`, each marked `(reference)` or `(rule)`. Build only when it matches. When it doesn't, fix the engine first or stop and ask — never hand a screen to the build knowing the plan is off.
+
 The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`:
 - `build.js` — **call 1.** Paste the file into `use_figma` and append `return JSON.stringify(await migrateOne("<screen node id>"));`
 - `finish.js` — **call 2, a separate `use_figma` call.** Append `return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<reference node id, or null>"));`
@@ -250,14 +254,17 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **What call 1 does (`migrateOne`):** analyses the screen by geometry and roles → plan (§2) → replaces the screen **in place** with a live `Page` instance: header from the original's regions (breadcrumb, title + copy, status → Info slot, Key, the Additional-info row, all actions incl. `*Button AI*`, every tab incl. extra ones cloned into the `Items wrapper` slot, the selected tab), content per the island rules below, side columns into `Aside` / `Side content`, overlays beside the instance. **With a reference** (the copy's name carries `(ref <nodeId>)`): page `Type`, content width and page size come from the reference. The source is removed only when nothing visible is left in it (`kept: []`).
 
+**Placement from the reference first.** When a reference exists, each block goes where the designer put the same-named block: inside an `IslandCard` → island; bare on the grey → bare; bare with islands inside → split. The rules below apply only to blocks the reference doesn't have. (Why: the titled "Steps" group of the Levels editor is bare on grey in its reference, while the look-alike "Case routing" sits in an island — no general rule tells them apart.)
+
 **Island rules the engine applies** (all from the designers' after-references):
-1. **Always Ghost** — everything lives in islands on the grey, a lone table and empty states too.
+1. **Grey screens only, always Ghost** — on a grey screen everything lives in islands, a lone table and empty states too.
 2. **A card** (radius ≥ 8 + white fill or own border) stands bare. An instance that only wraps one card of its size counts as that card.
 3. **A layout of cards** — every leaf block is a card, through plain frames and grids; small rows (≤ 90: a quick-links bar, a name row) allowed — stays **whole and bare** (CM managers overview, `Blueprint body`).
 4. **A titled group** — first child is a `Block Title` / heading — goes into **one island whole**, even if the rest are cards (`Case routing`: title + option cards).
 5. **A mixed wrapper** — mostly cards, some plain blocks (`Case page Overview tab content` with a `Transactions` table) — is laid out part by part: cards bare, each non-card part in its own island. Parts are cloned (never `detachInstance()`); only the wrapper loses its link, as in the reference.
 6. **A padded container around one block** (`Container` → `Events log`) is not a group: the block itself is the group.
 7. **Never descend into an instance's sublayers** when looking for groups — they can't be moved.
+7a. **Chrome doesn't count as a column.** The old header can sit inside the content frame (Levels: `Header-levels` is a child of `Content`); header, sidebar and sub-header are ignored when looking for side-by-side columns — otherwise the side column (Overview) is missed.
 8. Anything else → one island per group; a heading block rides on top of the next group.
 
 **What call 2 does (`finishAndAudit`):** copies fill/stroke variables **and horizontal sizing** from the reference block by block (or applies the §6.1 defaults and stretches fixed blocks without one, §7.10), checks that grid rows span their grids, **fits side columns to their panel** (§7.14), grows the page if the content runs past its bottom, and returns the audit — `main` (what sits in `Main content`), `notIsland`, `overflow`, `gridIssues`, `sideFit` (what was fitted, informational), `sideOverflow`, `narrowFills`, the variable count. **Every list in the audit must be empty.**
