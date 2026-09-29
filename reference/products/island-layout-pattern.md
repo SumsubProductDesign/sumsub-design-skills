@@ -19,7 +19,7 @@ An island screen is **one live `Page` instance**. You never assemble the sidebar
 
 Do **NOT** hand-build the island from frames. Do **NOT** detach the instance. If you are about to call `figma.createFrame()` for an "Island" / "Body" / "Card" — stop and instantiate `Page`.
 
-> **"Build / create island versions of these screens" is copy-mode migration.** Run `migrateFrameToIsland` (§6) on each source frame. The header action carry-over lives only in that function; hand-rolling "set title + tabs" silently drops the action buttons.
+> **"Build / create island versions of these screens" is copy-mode migration.** Run the engine (§6.2: `build.js`, then `finish.js` in a separate call) on each source frame. The header carry-over lives only in the engine; hand-rolling "set title + tabs" silently drops the action buttons, status and tabs.
 
 ---
 
@@ -233,135 +233,38 @@ Components bring their own variables, but the old blocks carry the pre-island on
 
 Radius: keep the block's own. The old `Documents block old` stays at its component radius 12 (the references keep it too).
 
-**When an after-reference exists, copy its variables instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill or stroke variable that differs from yours, bind the reference's (`setBoundVariableForPaint` on a copy of its paint). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
+**When an after-reference exists, copy its variables — and its horizontal sizing (§7.10) — instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill or stroke variable that differs from yours, bind the reference's (`setBoundVariableForPaint` on a copy of its paint). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
 
 **Bind by key** in a consumer file: `await figma.variables.importVariableByKeyAsync(key)`; in the reference's own file the reference's variable ids resolve directly.
 
 **Known risk: a cloned block can render blank.** In the Case / Overview sample the second `Documents block old / Document` showed on canvas as an empty bordered box, while its tree, texts and even an SVG export were complete — so no read-only check catches it. When the user reports an empty island or block, replace it with a fresh copy (from the reference if there is one) instead of re-inspecting the data.
 
-### ✅ The validated function — copy and run it, don't write your own
+### 6.2 The migration engine — two files, two calls. Run them, don't write your own
 
-```js
-// ancestor-visible check. Compare by ID: node proxies are NOT reference-stable, so `p !== stop`
-// silently fails and the walk runs up to the PAGE, which has no `.visible`.
-const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
-  while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible === false) return false; p = p.parent; }
-  return true; };
+The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`:
+- `build.js` — **call 1.** Paste the file into `use_figma` and append `return JSON.stringify(await migrateOne("<screen node id>"));`
+- `finish.js` — **call 2, a separate `use_figma` call.** Append `return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<reference node id, or null>"));`
+- `island-migration-lib.js` — the same code, commented, for reading and maintenance. Change it there, then regenerate the two files.
 
-async function migrateFrameToIsland(srcFrame) {
-  const origH = Math.round(srcFrame.height);
-  // ── 1. READ the original ──────────────────────────────────────────────
-  const oldHeader = srcFrame.findOne(n => n.type === "INSTANCE" && /Header-levels|^\*Header\*/.test(n.name));
-  const innerHdr  = oldHeader ? (oldHeader.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)) || oldHeader) : null;
-  const tabLabels = innerHdr ? innerHdr.findAll(n => n.type === "INSTANCE" && /Tab Basic \/ Item/i.test(n.name) && rendered(n, innerHdr))
-      .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); return x ? x.characters : null; }).filter(Boolean) : [];
-  let title = "Title"; const tn = innerHdr && innerHdr.findOne(n => n.type === "TEXT" && n.name === "Title"); if (tn) title = tn.characters;
-  let sandbox = false;
-  if (innerHdr) { const s = innerHdr.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) sandbox = rendered(s, innerHdr) && s.visible; }
-  const content  = srcFrame.children.find(c => c.type === "FRAME" && c.name === "Content");
-  const bodyFr   = content && content.findOne(n => n.type === "FRAME" && n.name === "Body");
-  const groups   = bodyFr ? bodyFr.children.filter(c => c.visible !== false) : [];
-  // side column = whatever else is visible in Content besides the body — by ROLE, not by node type:
-  // the same Overview is an INSTANCE in one mockup and a FRAME in the next. Matching INSTANCE only lost it.
-  const others   = content ? content.children.filter(c => c.visible !== false && (!bodyFr || c.id !== bodyFr.id)) : [];
-  const side     = others.find(c => /Overview|Side|Aside|Tip/i.test(c.name)) || others[0] || null;
-  const overlays = srcFrame.children.filter(c => c.type === "INSTANCE" && /Toast|Dropdown/i.test(c.name));
-  const ghost    = true;                                 // migration: everything lives in islands — a lone table too (§2.2)
+**Why two calls.** After blocks move into slots, node proxies inside the same call go stale ("node … does not exist" while walking the moved tree). A throw rolls back **everything** that call did, the build included. Call 2 starts with fresh proxies.
 
-  // ── 2. INSTANTIATE Page (mandatory — if the import throws, log the error; only then consider a fallback) ──
-  const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
-  const pageType = oldHeader ? "Full screen page" : "Basic";   // entity editor with a ✕ → Full screen; adjust per §2.1
-  const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + pageType) && c.name.includes("Sandbox=" + (sandbox ? "Yes" : "No")));
-  const page = variant.createInstance();
-  const parent = srcFrame.parent, x = srcFrame.x, y = srcFrame.y;
-  parent.appendChild(page); page.x = x; page.y = y; page.name = srcFrame.name;
+**What call 1 does (`migrateOne`):** analyses the screen by geometry and roles → plan (§2) → replaces the screen **in place** with a live `Page` instance: header from the original's regions (breadcrumb, title + copy, status → Info slot, Key, the Additional-info row, all actions incl. `*Button AI*`, every tab incl. extra ones cloned into the `Items wrapper` slot, the selected tab), content per the island rules below, side columns into `Aside` / `Side content`, overlays beside the instance. **With a reference** (the copy's name carries `(ref <nodeId>)`): page `Type`, content width and page size come from the reference. The source is removed only when nothing visible is left in it (`kept: []`).
 
-  // ── 3. LAYOUT: nested Page / Body → Content; then re-fetch and set the width ──
-  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body")
-      .setProperties({ "Content": ghost ? "◼️ Main (Ghost)" : "◻️ Main (Default)" });
-  // changing a variant invalidates refs below it — re-fetch
-  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default")
-      .setProperties({ "Type": "1084 max", "Show side content#23483:22": !!side });   // forms/settings; tables → "1920 max"
+**Island rules the engine applies** (all from the designers' after-references):
+1. **Always Ghost** — everything lives in islands on the grey, a lone table and empty states too.
+2. **A card** (radius ≥ 8 + white fill or own border) stands bare. An instance that only wraps one card of its size counts as that card.
+3. **A layout of cards** — every leaf block is a card, through plain frames and grids; small rows (≤ 90: a quick-links bar, a name row) allowed — stays **whole and bare** (CM managers overview, `Blueprint body`).
+4. **A titled group** — first child is a `Block Title` / heading — goes into **one island whole**, even if the rest are cards (`Case routing`: title + option cards).
+5. **A mixed wrapper** — mostly cards, some plain blocks (`Case page Overview tab content` with a `Transactions` table) — is laid out part by part: cards bare, each non-card part in its own island. Parts are cloned (never `detachInstance()`); only the wrapper loses its link, as in the reference.
+6. **A padded container around one block** (`Container` → `Events log`) is not a group: the block itself is the group.
+7. **Never descend into an instance's sublayers** when looking for groups — they can't be moved.
+8. Anything else → one island per group; a heading block rides on top of the next group.
 
-  // ── 4. CONTENT: in Ghost, each group → its own IslandCard, WHOLE ──
-  const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
-  const mph = [...mainSlot.children];                    // capture placeholders BEFORE inserting
-  if (ghost) {
-    const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
-    const cards = [];
-    for (const g of groups) {
-      const ic = icComp.createInstance(); srcFrame.parent.appendChild(ic);   // fill it BEFORE it goes into the slot
-      const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
-      const ph = [...slot.children]; slot.insertChild(0, g); for (const p of ph) { try { p.remove(); } catch (e) {} }
-      // ⚠️ the island ships FIXED at 153 with its Slot on FILL — it will NOT grow. Slot → HUG first, then the island.
-      const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
-      try { sl.children[0].layoutSizingHorizontal = "FILL"; } catch (e) {}   // group fills the island width (640 → 592 inside)
-      try { sl.layoutSizingVertical = "HUG"; } catch (e) {}
-      try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
-      cards.push(ic);
-    }
-    cards.forEach((ic, i) => mainSlot.insertChild(i, ic));
-  } else if (bodyFr) {
-    mainSlot.insertChild(0, bodyFr);                     // Default: one block, no island
-  }
-  for (const p of mph) { try { p.remove(); } catch (e) {} }
-  for (const c of mainSlot.children) { try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+**What call 2 does (`finishAndAudit`):** copies fill/stroke variables **and horizontal sizing** from the reference block by block (or applies the §6.1 defaults and stretches fixed blocks without one, §7.10), checks that grid rows span their grids, grows the page if the content runs past its bottom, and returns the audit — `main` (what sits in `Main content`), `notIsland`, `overflow`, `gridIssues`, `narrowFills`, the variable count. **Every list in the audit must be empty.**
 
-  // ── 5. SIDE content ──
-  if (side) {
-    const sideSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
-    const sph = [...sideSlot.children]; sideSlot.insertChild(0, side); for (const p of sph) { try { p.remove(); } catch (e) {} }
-  }
+**Validated 2026-09-29** on the New Layout test page (`gzKyS6BzWDlmBMLJspM7WP`, page `3234:38`): Case / Overview `3236:64403` (mixed wrapper split, Transactions in an island, header regions, 6 tabs), CM managers overview general / team / blueprints `3256:63838` · `3259:64158` · `3261:64392` (layout of cards bare, `Full screen page` + `Full width` from the reference, 28 / 197 / 89 variables copied). The team, blueprints and general screens exposed the fixed-width defect (§7.10) — fixed by copying the reference's sizing.
 
-  // ── 6. HEADER: the Page's own header, from the original (§4) ──
-  const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
-  try { hdr.setProperties({ "Title text#3817:0": title, "Key#5362:0": false }); } catch (e) {}
-  const bc = hdr.findOne(n => /Breadcrumb/i.test(n.name)); if (bc) { try { bc.setProperties({ "Name#6638:5": "Levels" }); } catch (e) {} }
-  const tb = hdr.findOne(n => /^\*Tab Basic\*/.test(n.name));
-  if (tb && tabLabels.length) { tb.findAll(n => /Tab Basic \/ Item/i.test(n.name)).forEach((it, i) => { try {
-      if (i < tabLabels.length) { it.setProperties({ "Label text#4517:0": tabLabels[i] }); it.visible = true; } else it.visible = false; } catch (e) {} }); }
-  const cands = innerHdr ? innerHdr.findAll(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name))
-      .filter(b => rendered(b, innerHdr) && b.visible && /Buttons/i.test(b.parent ? b.parent.name : "")) : [];
-  const carry = [];
-  for (const b of cands) { let vn = ""; try { const mc = await b.getMainComponentAsync(); vn = mc ? mc.name : ""; } catch (e) {}
-    const t = b.findOne(x => x.type === "TEXT" && x.visible); const lbl = t ? t.characters.trim() : "";
-    if ((lbl.length > 1 && !/^Button$/i.test(lbl)) || (/Icon Only/i.test(vn) && /Type=Secondary/i.test(vn))) carry.push(b); }
-  if (carry.length) { try { hdr.setProperties({ "Show actions slot#6943:20": true });
-      const aSlot = hdr.findAll(n => n.type === "SLOT").find(s => /Actions slot/i.test(s.name));
-      const aph = [...aSlot.children];
-      for (const ob of [...carry].reverse()) { const c = ob.clone(); aSlot.insertChild(0, c); try { c.visible = true; } catch (e) {} }
-      for (const p of aph) { try { p.remove(); } catch (e) {} }
-      for (const c of [...aSlot.children]) { try { const tt = c.findOne(x => x.type === "TEXT" && x.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
-    } catch (e) {} }
-
-  // ── 7. OVERLAYS as SIBLINGS (a Page instance's children are locked) ──
-  for (const ov of overlays) { try { parent.appendChild(ov); ov.x = page.x + 1440 - Math.round(ov.width) - 32; ov.y = page.y + 80; } catch (e) {} }
-  // ── 8. PRESERVE the original height ──
-  try { page.resize(1440, origH); } catch (e) {}
-  // ── 9. PRESERVATION GUARD — never delete a source that still holds visible content ──
-  // Anything still visible in Content was NOT carried over. Removing the source would delete it for good.
-  const leftovers = content ? content.children.filter(c => c.visible !== false && (!bodyFr || c.id !== bodyFr.id)) : [];
-  // in the Default branch the body itself moved into the slot and its old ref is stale — reading it can throw
-  let bodyLeft = [];
-  try { if (bodyFr && !bodyFr.removed && bodyFr.parent && bodyFr.parent.id === content.id) bodyLeft = bodyFr.children.filter(c => c.visible !== false); } catch (e) {}
-  if (leftovers.length || bodyLeft.length) {
-    srcFrame.name = srcFrame.name + " — NOT MIGRATED: " + [...leftovers, ...bodyLeft].map(n => n.name).join(", ");
-    return { page, kept: [...leftovers, ...bodyLeft].map(n => n.name) };   // source kept — report it, don't delete
-  }
-  try { srcFrame.remove(); } catch (e) {}
-  return { page, kept: [] };
-}
-```
-
-It returns `{ page, kept }`. `kept` is empty when the migration was complete and the source was removed. If it lists names, **the source was NOT deleted** — it is renamed `… — NOT MIGRATED: <names>` so nothing is lost; report it and handle those nodes.
-
-**Validated verbatim, 2026-09-29, two screens in section `22283:92486`:**
-- `22283:102978` — `Overview` is an INSTANCE: `Page` 1440×800 · `Full screen page`, `Sandbox=No` · `◼️ Main (Ghost)` · `1084 max` + side · `IslandCard`(General) 104 + `IslandCard`(Steps) 698, groups 592 wide · Overview in `Side content` · header `Levels /` + `New level` + tabs Steps / Configurations / Checks Execution Flow + `Create level` and the kebab · centred 148/148.
-- `22288:29691` — `Overview` is a FRAME and the screen has a Toast: same result, Overview in `Side content`, the Toast placed beside the instance, islands 104 + 794.
-
-The `◻️ Default` branch (one block, no side column) is written to the same rules but **has not been run on a real screen yet** — every KYC editor has a side column. Check it on the first Default screen you migrate.
-
-The content can be taller than the viewport (here 802 in a 647 zone). That is correct — the content scrolls inside the island, and the old screen was clipped the same way. **Do not grow the frame**: a migration keeps the original height.
+**Page height.** With a reference the page takes the reference's size, then grows if the moved content is taller. Without one it keeps the original size.
 
 ---
 
@@ -377,6 +280,10 @@ The content can be taller than the viewport (here 802 in a 647 zone). That is co
 7. **A `Page` instance can't take appended children.** Overlays (Toast / Dropdown) go next to it, as siblings.
 8. **Preserve the original height** — `page.resize(1440, origH)`. Letting it hug makes heights drift.
 9. **Output on the source's page, inside the section** — `section.appendChild`, never beside it.
+10. **Old blocks carry the old FIXED widths — content must fill the new width.** Old screens were narrower, so their cards and columns are `FIXED` at the old sizes. Moved into a wider island layout they leave a gap at the end of every row (CM team overview: grid cards 362 in a 1340 grid, `Team` 552 in a 662 column — user feedback: *"content inside the islands does not take all the available width, though it should"*). The designers fix it per block in the reference: grid children → `FILL`, and where a side column stays fixed they pin it `FIXED` and let the main one fill (managers general: 772 `FILL` + 552 `FIXED`). `finish.js` copies the reference's horizontal sizing block by block; without a reference it sets grid children to `FILL` and stretches a `FIXED` card that is narrower than its stack. Then every grid row must span its grid (`gridIssues`) and nothing may stop short of its parent (`narrowFills`). A dump that abbreviates `FIXED` and `FILL` to one letter hides exactly this — print them in full.
+11. **Build and variables in one call = the whole build rolled back** (§6.2). Keep them in two calls.
+12. **Never send heavy calls back to back** — user feedback: *"never make many heavy requests at once, it always ends with the MCP going down"*. A build call (20–30 KB of code, a whole screen) is one call, then a light check or a stop. No batching several screens into one call, no queue of builds: a burst of them took the Figma MCP down for the whole session (503 on everything, even `whoami`).
+13. **An MCP `503` on a heavy call usually means nothing was applied.** Check the state with a light read-only call before retrying; retry one screen per call. If a light call gets `503` too, the server is down — wait, don't loop.
 
 ---
 
@@ -390,15 +297,16 @@ A skeleton check ("is there an island? a header?") passes screens that are prese
 - [ ] **Nothing outside an island** — every child of `Main content` is an `IslandCard` or a block that is itself a card (radius ≥ 8 + white fill or own border). A table, list or empty state standing bare = **FAIL**.
 - [ ] **Variables per §6.1** — bare cards `background/secondary/normal` + `border/neutral/subtlest/normal`, side column border `subtlest`, table rows `components/table/background-row-normal`, table wrapper without fill. With an after-reference: zero fill/stroke differences against it outside the `IslandCard` internals.
 - [ ] **Compared with the after-reference** when one exists — same blocks, same islands, same order.
+- [ ] **Content fills the available width** — `gridIssues` and `narrowFills` from `finish.js` are empty: every grid row spans its grid, every `FILL` child reaches its parent's inner width. Half-filled islands = **FAIL** (Костя: *"контент внутри островов не занимает всю доступную ширину, хотя должен"*).
 - [ ] **`Page / Body / Default` `Type`** matches §2.3; `Show side content` is true exactly when there is side content.
 - [ ] **Every original content group is present** — count of `IslandCard`s in `Main content` equals the count of visible groups in the old body (Ghost). None missing, none merged.
 - [ ] **Each `IslandCard` hugs its content** — island height = group height + 48 (16 card padding + 8 slot padding, top and bottom). An island at exactly 153 = the HUG was not applied = **FAIL**.
 - [ ] **Groups fill the island width** and nothing overflows it.
 - [ ] **Side content** holds the old side column (Overview / tip), 380 wide — whether it was an INSTANCE or a FRAME in the original.
-- [ ] **Nothing lost:** `migrateFrameToIsland` returned `kept: []` for every screen, and no frame on the page is named `… — NOT MIGRATED: …`. A non-empty `kept` means that screen is unfinished.
+- [ ] **Nothing lost:** `migrateOne` returned `kept: []` for every screen, and no frame on the page is named `… — NOT MIGRATED: …`. A non-empty `kept` means that screen is unfinished.
 - [ ] **Header**: title, breadcrumb, the original tabs relabelled (none of the default `Tab_1…5`), and the original **ancestor-visible** actions — text actions and the kebab — in a **rendered** Actions slot. Missing actions, the default placeholder `Button`, or the old header's hidden Key-area buttons = **FAIL**.
 - [ ] **Overlays preserved** — every original Toast / Dropdown exists, as a sibling of the instance.
-- [ ] **Height = original**; width 1440.
+- [ ] **Size** — with a reference: the reference's width and height, grown only if the moved content is taller; without one: the original size.
 - [ ] **Content centred** — left and right gaps inside the card equal (148/148 at 1084 in a 1380 card).
 - [ ] **Placement** — on the source's page, and a child of its `(made by Claude)` section.
 

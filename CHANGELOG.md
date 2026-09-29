@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.210.0 — 2026-09-29 (island migration engine ships with the skill; content fills the width)
+The migration was run by hand on the designers' test set and every lesson went back into the skill (user feedback: *"we need to check that you can rebuild layouts, then the skill can do the same"*, *"don't forget to teach the skill"*).
+
+- **The engine is now part of the plugin** — `reference/products/island-migration/`: `build.js` (call 1, `migrateOne`) and `finish.js` (call 2, `finishAndAudit`), plus the commented source. It replaces the old KYC-only `migrateFrameToIsland`. Two calls are mandatory: after blocks move into slots, proxies in the same call go stale and a throw rolls the whole build back.
+- **Island rules from the references, now encoded:** always Ghost; a card stands bare; a layout of cards (every leaf a card) stays whole and bare; a titled group (Block Title first) goes into one island whole; a mixed wrapper is split, cards bare and every other part in its own island; a padded container around one block is not a group; never descend into an instance's sublayers.
+- **Reference-guided:** a copy named `(ref <nodeId>)` takes page type, content width and size from the reference, and its fill/stroke variables **and horizontal sizing** block by block.
+- **Content fills the available width.** Old blocks carry FIXED widths of the narrower old layout and left rows half-empty (user feedback: *"content inside the islands does not take all the available width, though it should"*). The reference's sizing is copied; without a reference grid children go FILL and narrow fixed cards stretch. New audit fields `gridIssues` and `narrowFills` must be empty.
+- **Header carried region by region:** breadcrumb, title + copy, status → Info slot, Key, the Additional-info row, every action incl. `*Button AI*`, all tabs (extra ones cloned into `Items wrapper`), the selected tab.
+- **Working rules:** one screen, then show it; never heavy `use_figma` calls back to back (user feedback: *"never make many heavy requests at once, it always ends with the MCP going down"*); a `503` means check state with a light call before any retry.
+- Validated on the New Layout test page: Case / Overview and the three CM managers overviews.
+
 ## v3.209.1 — 2026-09-29 (correction: a blank-rendering clone can't be detected by reading data)
 v3.209.0 told the skill to "check that every block actually renders". There is no read-only way to do that: the blank `Documents` block in the Case / Overview sample had a complete tree, all its texts and a full SVG export. The doc now states it as a known risk with the fix — when the user reports an empty block, replace it with a fresh copy, from the reference if there is one.
 
