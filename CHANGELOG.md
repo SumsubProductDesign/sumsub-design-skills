@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.216.0 — 2026-09-30 (island migration: paddings from the reference)
+The TM Transaction re-run on v3.215.0 (`3347:77660`) matched the reference everywhere except one card: `Customers card / Finance` was 808 tall instead of 792, because the designers tightened its inner padding from 24 to 16 in the reference.
+
+- **Paddings and gaps now come from the reference too.** For every block that has a same-named twin in the reference, the finish call takes its paddings and gap, bound to the same spacing variable when the reference uses one — the way it already takes fills, strokes and width. Grid layouts are left alone.
+- Checked on a temporary copy of the result (deleted afterwards): only the four paddings inside `Customers card / Finance` changed, the card is 792 as in the reference, nothing else moved, and the audit stayed empty.
+
 ## v3.215.0 — 2026-09-30 (island migration: islands as the designers build them)
 Checked the TM Transaction skill run (`3326:75230`) against its reference: layout, header and side panel matched, but every island was taller than the reference's (AML checks 400 vs 336, Properties 496 vs 432; page 3989 vs 3773). Two causes, both taken from the designers' references:
 

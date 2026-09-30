@@ -45,6 +45,15 @@ else {
 if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
 if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); } }
 } catch (e) {}
+try { if (rn.layoutMode && rn.layoutMode !== "NONE" && rn.layoutMode !== "GRID" && bn.layoutMode === rn.layoutMode) { const changed = [];
+for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) {
+const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k];
+if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
+let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
+try { bn.setBoundVariable(k, null); } catch (e) {}
+if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
+changed.push((k === "itemSpacing" ? "gap" : k.replace("padding", "").toLowerCase()) + " " + Math.round(rv)); }
+if (changed.length) applied.push(a + path + " spacing → " + changed.join(", ")); } } catch (e) { skipped.push(a + path + " spacing: " + e.message); }
 for (const prop of ["fills", "strokes"]) { try {
 const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
 const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
