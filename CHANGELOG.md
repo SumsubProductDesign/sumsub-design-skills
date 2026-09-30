@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.0 — 2026-09-30 (island migration: never rename layers; TM Related transactions)
+- **Layers are never renamed.** The team asked for it as a rule: the migration keeps every layer's name. The one place the engine did rename — a screen it couldn't finish got `… — NOT MIGRATED: …` appended — is gone; the screen keeps its name and `kept` lists what's left in it.
+- **The header band and the tab strip are never content**, however deep they sit. On TM Related transactions they share one frame with the table; the plan put the band into an island of its own. Now they go to the header and the table alone goes into the island, as in the reference.
+- **Older tab items are recognised** (`Tab / Basic / Item` next to `.Tab Basic / Item`), so all three tabs carry over with the right one selected.
+- **A `Section name` breadcrumb counts as none**, so the reference's breadcrumb (`Transactions`) is used.
+- **The plan shows the width the build will use** — with a reference it's the reference's (Full width), not the rule's guess.
+
 ## v3.216.0 — 2026-09-30 (island migration: paddings from the reference)
 The TM Transaction re-run on v3.215.0 (`3347:77660`) matched the reference everywhere except one card: `Customers card / Finance` was 808 tall instead of 792, because the designers tightened its inner padding from 24 to 16 in the reference.
 

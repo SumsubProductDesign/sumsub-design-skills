@@ -53,7 +53,7 @@ const header2 = !header ? null : all.filter(n => { const b = box(n, scr); return
 (/header/i.test(n.name) || /Header/.test(mainName(n))) && "findOne" in n && !!n.findOne(x => x.type === "INSTANCE" && /^\*Button/.test(x.name)); }).sort((a, b) => b.height - a.height)[0] || null;
 if (header2) stackBottom = box(header2, scr).y + box(header2, scr).h;
 const subheader = all.filter(n => { const b = box(n, scr); return !contains(header, n) && !contains(header2, n) && b.y >= Math.min(hdrH, stackBottom) - 2 && b.y <= stackBottom + 32 && b.h >= 32 && b.h <= 72 &&
-"findOne" in n && !!n.findOne(x => /^\*Tab Basic\*|Tab Basic \/ Item/.test(x.name)); }).sort((a, b) => b.width - a.width)[0] || null;
+"findOne" in n && !!n.findOne(x => /^\*Tab Basic\*|Tab( \/)? Basic \/ Item/.test(x.name)); }).sort((a, b) => b.width - a.width)[0] || null;
 const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n);
 let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
 if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
@@ -68,10 +68,10 @@ else if (container) main = container;
 const table = !!main && isTableNode(main);
 let groups = [];
 if (main) { if (table) { const u = unwrap(main); groups = [vis(u).find(isTableSelf) ? u : u]; }
-else { let inner = unwrap(main); let k = vis(inner).filter(x => !(subheader && x.id === subheader.id));
-if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = inner.type === "INSTANCE" ? [inner] : vis(inner); }
-if (isCardLayout(inner) && !(subheader && contains(inner, subheader))) groups = [inner];          // a layout of cards stays whole
-else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width)) ? k : [inner]; } }
+else { let inner = unwrap(main); let k = vis(inner).filter(x => !isChrome(x));
+if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = inner.type === "INSTANCE" ? [inner] : vis(inner).filter(x => !isChrome(x)); }
+const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];          // a layout of cards stays whole
+else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width)) ? k : (hasChrome && k.length ? k : [inner]); } }
 const isOv = n => n.type === "INSTANCE" && /Toast|Dropdown|Modal|Drawer/i.test(n.name + " " + mainName(n));
 const hasOvAncestor = n => { let p = n.parent; while (p && p.id !== scr.id && p.type !== "PAGE") { if (isOv(p)) return true; p = p.parent; } return false; };
 const overlays = all.filter(n => isOv(n) && !hasOvAncestor(n) && !contains(header, n) && !contains(main, n) && !contains(left, n) && !contains(right, n));
@@ -90,7 +90,7 @@ const width = table ? (W >= 1900 ? "1920 max" : "Full width") : (content === "�
 let title = null; if (header) { const t = header.findOne(n => n.type === "TEXT" && n.name === "Title" && rendered(n, scr)) ||
 header.findAll(n => n.type === "TEXT" && rendered(n, scr) && n.characters.trim().length > 1).sort((a, b) => (b.fontSize || 0) - (a.fontSize || 0))[0]; if (t) title = t.characters.trim(); }
 const tabSrc = [header, subheader].filter(Boolean);
-const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Tab Basic \/ Item/i.test(n.name) && rendered(n, scr)))
+const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Tab( \/)? Basic \/ Item/i.test(n.name) && rendered(n, scr)))
 .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
 return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
 const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
@@ -105,7 +105,7 @@ function headerRegions(h, scr) {
 if (!h) return { actions: [] };
 const inA = (n, re) => { let q = n.parent; while (q && q.id !== h.id) { if (re.test(q.name)) return q; q = q.parent; } return null; };
 const T = h.findAll(n => n.type === "TEXT" && n.visible && rendered(n, scr));
-const cr = T.find(t => inA(t, /Breadcrumb/i) && t.characters.trim().length > 1);
+const cr = T.find(t => inA(t, /Breadcrumb/i) && t.characters.trim().length > 1 && !/^Section name$/i.test(t.characters.trim()));
 const keyT = T.find(t => /^Key name$/i.test(t.name) && !inA(t, /Additional info/i));
 const status = h.findOne(n => n.id !== h.id && /status/i.test(n.name) && n.visible && rendered(n, scr) && !inA(n, /status/i)) || null;
 const addInfo = h.findOne(n => /^Additional info$/i.test(n.name) && "children" in n && n.visible && rendered(n, scr)) || null;
@@ -316,7 +316,7 @@ const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !sho
 _idCache.clear();                                                          // the tree changed — rebuild id sets
 const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
 !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n));
-if (leftover.length) { scr.name = name + " — NOT MIGRATED: " + [...new Set(leftover.map(n => n.name))].slice(0, 6).join(", ");
+if (leftover.length) {
 return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }
 try { scr.remove(); } catch (e) {}
 return { page, kept: [], notes };
@@ -334,7 +334,8 @@ const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : n
 _idCache.clear(); const a = analyze(scr);
 let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-const grey = refP ? refIsGrey(refP) : null;
+const grey = refP ? refIsGrey(refP) : null; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
+const planWidth = rms && !a.nodes.table ? ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max") : a.plan.width;
 const blocks = []; let pending = [];
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
 const rp = refPlacement(refP, g.name);
@@ -342,7 +343,7 @@ const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare 
 blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
 return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
-plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
+plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
 blocks, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
 header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
