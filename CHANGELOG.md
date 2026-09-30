@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.215.0 — 2026-09-30 (island migration: islands as the designers build them)
+Checked the TM Transaction skill run (`3326:75230`) against its reference: layout, header and side panel matched, but every island was taller than the reference's (AML checks 400 vs 336, Properties 496 vs 432; page 3989 vs 3773). Two causes, both taken from the designers' references:
+
+- **The island's `Slot` has no padding.** All three references (Case / Overview, Financial data, TM Transaction) set the published `Slot` padding 8 to 0. The engine now does the same; several blocks in one island get a 16 gap.
+- **No card in a card.** TM blocks carry a card of their own inside the island (`Block`: padding 24, radius 12, border 1). The references drop it — the island is the card. The engine now removes that chrome from a full-width wrapper (border + radius ≥ 8 + padding ≥ 16) by overrides, never detaching; small cards inside it (`AML check card`) and tables are left alone. The audit note reads `no card in a card: <block> › <wrapper>`.
+- Checked on a temporary copy of the TM original (deleted afterwards): AML checks 336, Properties 432, AML check cards 426 — as in the reference; page 1440×3773 — the reference's size; every audit list empty. Matched rules (892 vs 888) and Events (1020 vs 1072) differ only where the designer re-built the block's content in the reference.
+- Doc: §6.2 island rules 9–10, §7.5 (a block's sublayers get new ids once it is in a slot — change them before the move), §8 island height = group + 32.
+
 ## v3.214.2 — 2026-09-30 (island migration: side panel sectioned like the reference)
 User feedback on the TM Transaction result: *"something seems to have gone wrong in the top part of the sidebar compared to the reference."* The reference's right column is a flush panel of divided sections (`Case page right column`: no padding, each block a `.Case page checklist` section with 16 padding and a bottom divider). The engine put the column into an `Aside` with 20 padding and cloned only the Assignee section, so its dividers floated inside the padding (a stray vertical line, a short bottom line), while Transaction details and Notes sat unsectioned 48 apart.
 

@@ -141,11 +141,11 @@ const sectioned = padOf(refCol) === 0 && refBlocks.length >= 2 && refBlocks.ever
 if (sectioned) {
 let as = col.parent; while (as && !(as.type === "INSTANCE" && as.name === "Page / Body / Aside")) as = as.parent;
 if (as && padOf(as) > 0) { try { as.setProperties({ "Paddings": "No" }); } catch (e) { notes.push("aside paddings: " + e.message); } }
-col = page.findOne(n => n.name === colName && n.visible);
+col = page.findOne(n => n.name === colName && n.visible);                 // the variant change re-creates the subtree
 col.itemSpacing = refCol.itemSpacing || 0;
 notes.push("side column: flush sections as in the reference");
 }
-const sectionLike = async (rb) => {
+const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
 const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
 try { w.strokes = JSON.parse(JSON.stringify(rb.strokes || [])); w.strokeAlign = rb.strokeAlign;
@@ -154,7 +154,7 @@ const bv = rb.boundVariables || {};
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) { if (!bv[k]) continue;
 try { let v = await figma.variables.getVariableByIdAsync(bv[k].id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); if (v) w.setBoundVariable(k, v); } catch (e) {} }
 return w; };
-let at = 0; const used = new Set();
+let at = 0; const used = new Set();   // a block already matched or cloned is not matched again (the reference's Assignee section and Transaction details section share the name .Case page checklist)
 for (const rb of refBlocks) {
 const ft = firstText(rb).toLowerCase(), free = k => k.visible && !used.has(k.id);
 const mine = col.children.find(k => free(k) && ft && (k.name.trim().toLowerCase() === ft || firstText(k).toLowerCase() === ft)) || col.children.find(k => free(k) && k.name === rb.name && !ft);
@@ -175,6 +175,12 @@ for (let i = 0; i < T.length - 1; i++) { const v = labelValue[T[i].characters.tr
 if (v && T[i + 1].characters.trim() !== v) { try { await figma.loadFontAsync(T[i + 1].fontName); T[i + 1].characters = v; } catch (e) {} } }
 notes.push("side block from the reference: " + (firstText(rb) || rb.name));
 }
+}
+function stripCardChrome(c, fullW) {
+const r = typeof c.cornerRadius === "number" ? c.cornerRadius : 0, pad = Math.max(c.paddingTop || 0, c.paddingLeft || 0);
+if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false;
+for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { c.setBoundVariable(p, null); } catch (e) {} }
+c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBottom = c.paddingLeft = 0; return true;
 }
 async function buildIsland(scr, a, crumb) {
 const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
@@ -203,12 +209,15 @@ const mph = [...mainSlot.children];
 if (plan.content.includes("Ghost")) {
 const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
 const wrapInIsland = nodesIn => {                                       // fill the island BEFORE it goes into the slot
+for (const g of nodesIn) { try { for (const c of [g, ...vis(g)]) if (stripCardChrome(c, g.width)) notes.push("no card in a card: " + g.name + " › " + c.name); } catch (e) {} }
 const ic = icComp.createInstance(); parent.appendChild(ic);
 try { ic.setProperties({ "Heading#26638:9": false }); } catch (e) {}   // the block brings its own title (Block Title / Title)
 const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
 const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch (e) {} }
 const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
 for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch (e) {} }
+sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.children.length > 1) sl.itemSpacing = 16; } catch (e) {}
 try { sl.layoutSizingVertical = "HUG"; } catch (e) {}                  // island ships FIXED 153 with a FILL slot — HUG both
 try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
 return ic; };

@@ -226,6 +226,15 @@ async function sideFromReference(page, refRoot, colName, labelValue, notes) {
     notes.push("side block from the reference: " + (firstText(rb) || rb.name));
   }
 }
+// Card chrome = own border + radius ≥ 8 + inner padding ≥ 16 on a (nearly) full-width wrapper. Stripped by overrides only
+// (strokes, radius, padding — unbound from their variables first); the instance is never detached. Tables (padding 0) and
+// small cards inside the wrapper don't qualify.
+function stripCardChrome(c, fullW) {
+  const r = typeof c.cornerRadius === "number" ? c.cornerRadius : 0, pad = Math.max(c.paddingTop || 0, c.paddingLeft || 0);
+  if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false;
+  for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { c.setBoundVariable(p, null); } catch (e) {} }
+  c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBottom = c.paddingLeft = 0; return true;
+}
 async function buildIsland(scr, a, crumb) {
   const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
   const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
@@ -259,12 +268,20 @@ async function buildIsland(scr, a, crumb) {
   if (plan.content.includes("Ghost")) {
     const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
     const wrapInIsland = nodesIn => {                                       // fill the island BEFORE it goes into the slot
+      // NO CARD IN A CARD — the island is the card. A full-width wrapper in the block that draws a card of its own (TM: `Block`
+      // p24 r12 border 1 around the AML check cards) loses that chrome, as in the reference; the small cards inside keep theirs.
+      // Done BEFORE the move: once a block is inside the island's slot its sublayers get new ids and the old proxies throw.
+      for (const g of nodesIn) { try { for (const c of [g, ...vis(g)]) if (stripCardChrome(c, g.width)) notes.push("no card in a card: " + g.name + " › " + c.name); } catch (e) {} }
       const ic = icComp.createInstance(); parent.appendChild(ic);
       try { ic.setProperties({ "Heading#26638:9": false }); } catch (e) {}   // the block brings its own title (Block Title / Title)
       const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
       const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch (e) {} }
       const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
       for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+      // every designers' reference (Case Overview 16:20783, Financial data 21:44203, TM Transaction 311:53619) sets the island's
+      // Slot padding to 0 — the content sits right on the card's own 16. The published default 8 made every island 16 taller.
+      try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch (e) {} }
+        sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.children.length > 1) sl.itemSpacing = 16; } catch (e) {}
       try { sl.layoutSizingVertical = "HUG"; } catch (e) {}                  // island ships FIXED 153 with a FILL slot — HUG both
       try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
       return ic; };
