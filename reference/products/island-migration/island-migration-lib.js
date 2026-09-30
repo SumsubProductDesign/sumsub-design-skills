@@ -175,17 +175,50 @@ return t && !/^Section name$/i.test(t) ? t : null;
 // by label ("Assignee" → the original header's "James Smith"). Data stays the original's; only the layout follows the reference.
 async function sideFromReference(page, refRoot, colName, labelValue, notes) {
   if (!refRoot) return;
-  const col = page.findOne(n => n.name === colName && n.visible); if (!col || !("children" in col)) return;
+  let col = page.findOne(n => n.name === colName && n.visible); if (!col || !("children" in col)) return;
   const refMain = refRoot.findAll(n => n.type === "SLOT" && /^(Main content|Side content)$/.test(n.name));
   const refCol = refMain.flatMap(sl => sl.children).find(k => k.visible && /right column|side content/i.test(k.name)) ||
     refRoot.findAll(n => n.type === "SLOT" && n.name === "Content" && n.parent && /Aside/.test(n.parent.name)).flatMap(sl => sl.children).find(k => k.visible);
   if (!refCol || !("children" in refCol)) return;
   const firstText = n => { const t = n.type === "TEXT" ? n : (n.findOne ? n.findOne(q => q.type === "TEXT" && q.visible) : null); return t ? t.characters.trim() : ""; };
-  let at = 0;
-  for (const rb of refCol.children.filter(k => k.visible)) {
-    const mine = col.children.find(k => k.visible && (k.name === rb.name || k.name.trim().toLowerCase() === firstText(rb).toLowerCase()));
-    if (mine) { at = col.children.indexOf(mine) + 1; continue; }
-    const c = rb.clone(); col.insertChild(Math.min(at, col.children.length), c); at++;
+  // A reference column can be a FLUSH panel of divided sections (TM Transaction: `Case page right column`, padding 0, every block a
+  // `.Case page checklist` section with padding 16 and a bottom divider). Then the panel goes flush too and each of our blocks is put
+  // in a section like the reference's — otherwise the cloned sections keep dividers that float inside the Aside's 20 padding
+  // (user feedback on the first TM run: "something went wrong in the top part of the sidebar compared to the reference").
+  const padOf = n => (n.paddingTop || 0) + (n.paddingLeft || 0);
+  const refBlocks = refCol.children.filter(k => k.visible);
+  const sectioned = padOf(refCol) === 0 && refBlocks.length >= 2 && refBlocks.every(k => padOf(k) > 0);
+  if (sectioned) {
+    let as = col.parent; while (as && !(as.type === "INSTANCE" && as.name === "Page / Body / Aside")) as = as.parent;
+    if (as && padOf(as) > 0) { try { as.setProperties({ "Paddings": "No" }); } catch (e) { notes.push("aside paddings: " + e.message); } }
+    col = page.findOne(n => n.name === colName && n.visible);                 // the variant change re-creates the subtree
+    col.itemSpacing = refCol.itemSpacing || 0;
+    notes.push("side column: flush sections as in the reference");
+  }
+  const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
+    const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
+    for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
+    try { w.strokes = JSON.parse(JSON.stringify(rb.strokes || [])); w.strokeAlign = rb.strokeAlign;
+      for (const k of ["strokeTopWeight", "strokeRightWeight", "strokeBottomWeight", "strokeLeftWeight"]) w[k] = rb[k]; } catch (e) {}
+    const bv = rb.boundVariables || {};
+    for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) { if (!bv[k]) continue;
+      try { let v = await figma.variables.getVariableByIdAsync(bv[k].id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); if (v) w.setBoundVariable(k, v); } catch (e) {} }
+    return w; };
+  let at = 0; const used = new Set();   // a block already matched or cloned is not matched again (the reference's Assignee section and Transaction details section share the name .Case page checklist)
+  for (const rb of refBlocks) {
+    const ft = firstText(rb).toLowerCase(), free = k => k.visible && !used.has(k.id);
+    const mine = col.children.find(k => free(k) && ft && (k.name.trim().toLowerCase() === ft || firstText(k).toLowerCase() === ft)) || col.children.find(k => free(k) && k.name === rb.name && !ft);
+    if (mine) { used.add(mine.id);
+      if (sectioned && padOf(mine) === 0 && mine.name !== rb.name) {
+        const w = await sectionLike(rb), mid = mine.id; col.insertChild(Math.max(0, col.children.findIndex(k => k.id === mid)), w);
+        try { w.layoutSizingHorizontal = "FILL"; w.layoutSizingVertical = "HUG"; } catch (e) {}
+        const m2 = col.children.find(k => k.id === mid) || col.findOne(k => k.id === mid); w.appendChild(m2);
+        try { m2.layoutSizingHorizontal = "FILL"; } catch (e) {}
+        notes.push("side block in a section like the reference: " + m2.name);
+        used.add(w.id); at = col.children.findIndex(k => k.id === w.id) + 1;
+      } else at = col.children.findIndex(k => k.id === mine.id) + 1;
+      continue; }
+    const c = rb.clone(); col.insertChild(Math.min(at, col.children.length), c); at++; used.add(c.id);
     try { c.layoutSizingHorizontal = "FILL"; } catch (e) {}
     const T = c.findAll(q => q.type === "TEXT" && q.visible);
     for (let i = 0; i < T.length - 1; i++) { const v = labelValue[T[i].characters.trim().toLowerCase()];

@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.214.2 — 2026-09-30 (island migration: side panel sectioned like the reference)
+User feedback on the TM Transaction result: *"something seems to have gone wrong in the top part of the sidebar compared to the reference."* The reference's right column is a flush panel of divided sections (`Case page right column`: no padding, each block a `.Case page checklist` section with 16 padding and a bottom divider). The engine put the column into an `Aside` with 20 padding and cloned only the Assignee section, so its dividers floated inside the padding (a stray vertical line, a short bottom line), while Transaction details and Notes sat unsectioned 48 apart.
+
+- **Flush sectioned panel.** When the reference's side column has no padding and every block in it is a padded section, the `Aside` goes `Paddings = No`, the column takes the reference's gap, and each of our blocks is put in a section with the reference section's padding and dividers.
+- **Matching by first text, each block once.** The reference's Assignee and Transaction details sections share the name `.Case page checklist`; matching by name found the just-cloned Assignee block and silently skipped Transaction details. Blocks are now matched by their first text, and a block already matched or cloned is never matched again.
+- Proxies compared by `.id` instead of `indexOf` in the side-panel code (doc §7.3).
+- Checked on a fresh copy of the original: Assignee / Transaction details / Notes in flush sections with dividers, as in the reference; the copy was removed afterwards.
+
 ## v3.214.1 — 2026-09-29 (island migration: two fixes from the TM Transaction skill run)
 First skill run on TM Transaction / General info (`3305:69962` vs reference `311:53619`): plan and build matched the reference; two defects surfaced.
 
