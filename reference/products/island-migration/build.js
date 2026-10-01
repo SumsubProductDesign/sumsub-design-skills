@@ -181,6 +181,7 @@ notes.push("side block from the reference: " + (firstText(rb) || rb.name));
 function stripCardChrome(c, fullW) {
 const r = typeof c.cornerRadius === "number" ? c.cornerRadius : 0, pad = Math.max(c.paddingTop || 0, c.paddingLeft || 0);
 if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false;
+if (c.parent && "children" in c.parent && c.parent.children.filter(s => s.visible !== false && s.name === c.name).length > 1) return false;
 for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { c.setBoundVariable(p, null); } catch (e) {} }
 c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBottom = c.paddingLeft = 0; return true;
 }
@@ -224,6 +225,10 @@ sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.
 try { sl.layoutSizingVertical = "HUG"; } catch (e) {}                  // island ships FIXED 153 with a FILL slot — HUG both
 try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
 return ic; };
+const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE") top = p; return top; };
+const wrappers = new Map();
+nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); });
+if (wrappers.size) notes.push("groups inside instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
 const bundles = []; let pending = [];
 for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); continue; } bundles.push([...pending, g]); pending = []; }
 if (pending.length) bundles.push(pending);
@@ -244,6 +249,7 @@ continue; }
 cards.push(wrapInIsland(bundle));
 }
 cards.forEach((ic, i) => mainSlot.insertChild(i, ic));
+for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); notes.push("wrapper removed: " + wn); } catch (e) {} }
 } else if (nodes.groups[0]) {
 mainSlot.insertChild(0, nodes.groups[0]);                               // (unused since 29.09 — every plan is Ghost)
 }

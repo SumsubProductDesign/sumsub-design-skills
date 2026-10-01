@@ -240,7 +240,8 @@ async function sideFromReference(page, refRoot, colName, labelValue, notes) {
 // small cards inside the wrapper don't qualify.
 function stripCardChrome(c, fullW) {
   const r = typeof c.cornerRadius === "number" ? c.cornerRadius : 0, pad = Math.max(c.paddingTop || 0, c.paddingLeft || 0);
-  if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false;
+  if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false; // a layer with same-named siblings is an item of a list of cards (Blueprint `Case routing / Options` ×3), not a wrapper
+  if (c.parent && "children" in c.parent && c.parent.children.filter(s => s.visible !== false && s.name === c.name).length > 1) return false;
   for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { c.setBoundVariable(p, null); } catch (e) {} }
   c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBottom = c.paddingLeft = 0; return true;
 }
@@ -298,6 +299,13 @@ async function buildIsland(scr, a, crumb) {
       try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
       return ic; };
     // a heading block (Block Title / Title) is not an island of its own — it rides on top of the next group
+    // groups that are layers of an INSTANCE (Blueprint New blueprint: `Blueprint general settings` is an instance, General fields /
+    // Assignment / … its layers) can't be moved — insertChild throws. They are cloned out, as rule 5 does with mixed wrappers, and the
+    // instance itself is removed once the cards are placed. Its name is read BEFORE the removal (reading it after throws → rollback).
+    const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE") top = p; return top; };
+    const wrappers = new Map();
+    nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); });
+    if (wrappers.size) notes.push("groups inside instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
     const bundles = []; let pending = [];
     for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); continue; } bundles.push([...pending, g]); pending = []; }
     if (pending.length) bundles.push(pending);
@@ -323,6 +331,7 @@ async function buildIsland(scr, a, crumb) {
       cards.push(wrapInIsland(bundle));
     }
     cards.forEach((ic, i) => mainSlot.insertChild(i, ic));
+    for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); notes.push("wrapper removed: " + wn); } catch (e) {} }
   } else if (nodes.groups[0]) {
     mainSlot.insertChild(0, nodes.groups[0]);                               // (unused since 29.09 — every plan is Ghost)
   }
@@ -435,7 +444,10 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   // runs pair index by index, extra layers take the last reference layer of their run (v3.217.8 — before, the walk stopped at `Content`
   // and the 9 items kept the white fill the designer hid on all 7).
   const kidsOf = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
-  const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1]; if (l && l.name === k.name) l.items.push(k); else out.push({ name: k.name, items: [k] }); } return out; };
+  // a heading pairs by ROLE: the designer swaps the old `Block Title (🔴Figma only)` for `Heading` (Blueprint Assignment / Deadlines, top
+  // padding 16 → 0) — by name they never met and every such island stayed 16 taller
+  const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title)\b/i.test(nm) ? "⟨heading⟩" : nm;
+  const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1], nm = roleOf(k.name); if (l && l.name === nm) l.items.push(k); else out.push({ name: nm, items: [k] }); } return out; };
   const runSig = n => runs(kidsOf(n)).map(r => r.name).join("|");
   const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.length !== br.length || rr.some((r, i) => r.name !== br[i].name)) return null;
     const p = []; br.forEach((b, i) => b.items.forEach((k, j) => p.push([rr[i].items[Math.min(j, rr[i].items.length - 1)], k]))); return p; };

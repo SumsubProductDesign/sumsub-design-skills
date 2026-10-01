@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.9 — 2026-10-01 (island migration: three fixes from Blueprint General settings)
+The Blueprint New blueprint / General settings run matched its reference only after three hand fixes in the session. The engine now does all three itself:
+- **Blocks inside a component instance are migrated.** On this screen the whole content column is one component, and its blocks couldn't be moved into islands — the build stopped. They are now copied out into islands and the old component is removed.
+- **A list of option cards keeps its frames.** The three options in Case routing lost their border and padding as if they were a card inside a card. Cards that come as a list are no longer touched.
+- **A heading swapped in the reference is still matched.** The designer replaced the old block title with a heading with no top padding; the engine didn't pair them, and two islands stayed 16 px taller. Headings are now matched by role.
+- Checked on a temporary copy of the original (deleted afterwards): the build and finish calls ran with no hand fixes — islands 218 / 392 / 284 / 152 and page 1440×1247, as in the reference; the option cards keep their frames.
+
 ## v3.217.8 — 2026-10-01 (island migration: lists of a different length follow the reference)
 The Blueprint New blueprint · Case content run matched its reference (Full screen, Preset Select and Blueprint body bare on the grey, the overview in the side column, header from the original, no doubled icons). One difference was spotted in review and fixed by hand; the engine now handles it itself:
 - **The side overview no longer sits on a white plate.** The designer hid the white background of the overview list in the reference. Our list has more items than the reference's (9 vs 7, the original's data), so the finish step never reached the items and left them white on the grey. Now a list is matched with the reference's even when it is longer or shorter, and the extra items follow the last one.

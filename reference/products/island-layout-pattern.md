@@ -289,6 +289,12 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **A fixed width that spans its parent stays "full width".** When a layer in the reference is FIXED and exactly as wide as its parent (Case page FIU reports: table row dividers 884 in an 884 row), the result's layer spans its own parent instead of taking the number — the island is wider here (Aside 400 vs a 424 column), and copying 884 would leave the dividers 24 short. The finish log lists only the changes that actually took.
 
+**Groups that are layers of an instance are cloned out.** When the content column is a component instance (Blueprint New blueprint: `Blueprint general settings`, its groups General fields / Assignment / Case routing / Deadlines are its layers), the groups can't be moved into islands — `insertChild` throws "Node is inside of an instance" and the whole call rolls back. They are cloned, as rule 5 does with mixed wrappers, and the instance is removed once the cards are placed (its name is read before the removal).
+
+**A list of cards keeps its chrome.** "No card in a card" (rule 10) skips a layer that has same-named siblings — it is an item of a list (Blueprint `Case routing / Options` ×3, each r12 · p8/16 · border), not a wrapper; the reference keeps their frames.
+
+**Headings pair by role.** The designer swaps the old `Block Title (🔴Figma only)` for a `Heading` in the reference (Blueprint Assignment / Deadlines, top padding 16 → 0). The reference walk treats `Block Title` / `Heading` / `Title` / `Body / Title` as one role, so the heading's padding comes over and the islands keep the reference's height.
+
 **No doubled header icons.** The published `*Header*` brings its own Summy AI and help icons outside the Actions slot. Old Case page headers keep the same two inside their actions row, so they were copied into the slot as well and showed twice (Case page AML, Financial data). After the actions are copied, an icon-only button whose icon the header already shows outside the slot is removed (`the header has its own normal/AI-paw — the copied one removed`); if the header's own icon is hidden, the copy stays.
 
 **A side column that is a component instance** (CM `Case page right column`) keeps its own blocks — nothing can be inserted into an instance, so the reference block matching is skipped for it (only the flush-sections step applies). Walking it after the Aside variant change threw on stale sublayer ids (Case page AML run).
