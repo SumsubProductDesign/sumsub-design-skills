@@ -231,13 +231,13 @@ Components bring their own variables, but the old blocks carry the pre-island on
 | Table rows inside an island (`Txn table / Row`, `Table Row` …) | fill | `components/table/background-row-normal` | `b651c3b1b3a1d5b4066af62493435b81f3635acb` |
 | `Page / Body / IslandCard` itself | fill / stroke / radius | **leave as published** (`neutral/inverse/normal`, `border/neutral/subtlest/normal`, `border-radius/xl` 16). References built on the branch show `components/layout/island/card/background-normal` — same white, the published component wins. | — |
 
-Radius: keep the block's own. The old `Documents block old` stays at its component radius 12 (the references keep it too).
+Radius: with a reference, the paired reference layer's radius, bound to its variable when it has one. The designers round cards 12 → 16 for the island layout (CM Overview for managers: `.To do`, `Team` … on `border-radius/xl`), while some blocks keep theirs (`Documents block old` stays 12 in every reference). Without a reference, keep the block's own.
 
-**When an after-reference exists, copy its variables — and its horizontal sizing (§7.10) and inner spacing — instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill or stroke variable that differs from yours, bind the reference's (`setBoundVariableForPaint` on a copy of its paint). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
+**When an after-reference exists, copy its variables — and its horizontal sizing (§7.10) and inner spacing — instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill, stroke, spacing or corner-radius variable (or sets a value) that differs from yours, take the reference's (paints via `setBoundVariableForPaint` on a copy of its paint, spacing and radius via `setBoundVariable`). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
 
 **Bind by key** in a consumer file: `await figma.variables.importVariableByKeyAsync(key)`; in the reference's own file the reference's variable ids resolve directly.
 
-**Known risk: a cloned block can render blank.** In the Case / Overview sample the second `Documents block old / Document` showed on canvas as an empty bordered box, while its tree, texts and even an SVG export were complete — so no read-only check catches it. When the user reports an empty island or block, replace it with a fresh copy (from the reference if there is one) instead of re-inspecting the data.
+**A copied block can look empty on the canvas.** It is a redraw problem, not lost data. See §7, gotcha 17: check the data, don't replace the block, and ask the designer to reopen the file.
 
 ### 6.2 The migration engine — two files, two calls. Run them, don't write your own
 

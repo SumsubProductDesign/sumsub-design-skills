@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.219.0 — 2026-10-01 (island migration: corner radius from the reference)
+- **Cards take the reference's corner radius.** In the CM Overview for managers reference the designers rounded every card from 12 to 16 (`border-radius/xl`) and cut the padding from 24 to 16. The engine already copied the padding but not the radius, so a result would have had 16-padding cards at radius 12. It now takes the radius of the paired reference layer, bound to its variable. Blocks the designers left at 12, such as `Documents block old`, stay at 12.
+- **Dry run on the 11 screens already accepted:** the rule changes only two layers, both towards the reference. They are TM `Customers card / Finance` and Blueprint `Preset Select` (12 → 16), the second of which had been listed as an accepted difference.
+- **Checked on CM Overview for managers / general.** A temporary copy of the original, deleted afterwards, was rebuilt with no hand fixes. The content frame is 1340×1432, the columns are 772 and 552, and all five cards are r16 at the reference's sizes. All audit lists are empty.
+- The doc's old note telling you to replace a block that looks empty with a copy from the reference is gone. It now points to gotcha 17: reopen the file.
+
 ## v3.218.1 — 2026-10-01 (island migration: a block that looks empty)
 - The skill run on Case page Overview matched its reference with no hand fixes.
 - One block looked empty on the canvas: the second Documents block (Proof of address). Its data matched the original exactly and an export drew it in full. Reopening the file fixed it, so Figma had simply not redrawn the copied component.
