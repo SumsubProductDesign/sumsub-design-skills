@@ -484,15 +484,21 @@ async function copyVarsFromRef(refRoot, page, anchors) {
         } catch (e) {}
         // paddings and gaps: the designers retune a block's inner spacing for the island layout (TM: `Customers card / Finance`,
         // heading and info padding 24 → 16) — take the reference's value, bound to its spacing variable when it has one
-        try { if (rn.layoutMode && rn.layoutMode !== "NONE" && rn.layoutMode !== "GRID" && bn.layoutMode === rn.layoutMode) { const changed = [];
-            for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) {
+        // a grid child's alignment in its cell (CM team overview: `Team` MIN → AUTO in the reference, with FILL)
+        try { if (rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
+            if (rn[k] && bn[k] && rn[k] !== bn[k] && !(ov && mc && mc[k] === rn[k])) { bn[k] = rn[k]; applied.push(a + path + " " + (k === "gridChildHorizontalAlign" ? "cell align H" : "cell align V") + " → " + rn[k]); } } } catch (e) {}
+        // a GRID has no itemSpacing of its own — its gaps are gridRowGap / gridColumnGap (CM team overview: the Team / SLA grid's bottom
+        // padding 16 → 0 in the reference; skipping grids left 16 px of extra grey under the row)
+        try { if (rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
+            const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
+            for (const k of spKeys) {
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k];
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
               if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own spacing, not an override
               let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
               try { bn.setBoundVariable(k, null); } catch (e) {}
               if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
-              changed.push((k === "itemSpacing" ? "gap" : k.replace("padding", "").toLowerCase()) + " " + Math.round(rv)); }
+              changed.push((k === "itemSpacing" ? "gap" : k === "gridRowGap" ? "row gap" : k === "gridColumnGap" ? "column gap" : k.replace("padding", "").toLowerCase()) + " " + Math.round(rv)); }
             if (changed.length) applied.push(a + path + " spacing → " + changed.join(", ")); } } catch (e) { skipped.push(a + path + " spacing: " + e.message); }
         // corner radius: the designers round the cards up for the island layout (CM Overview for managers: `.To do`, `Team` … 12 → 16,
         // bound to border-radius/xl) while some blocks keep theirs (`Documents block old` stays 12 in every reference) — so take the

@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.220.0 — 2026-10-01 (island migration: grids follow the reference)
+- **Grids take the reference's spacing.** The engine copied paddings and gaps from the reference everywhere except grid frames. In the CM Overview for managers / team reference the designers cut the Team / SLA grid's bottom padding from 16 to 0, so a result would have kept 16 px of extra grey under that row. Grids now take the reference's paddings, row gap and column gap, bound to its spacing variables.
+- **A card keeps the reference's place in its grid cell.** `Team` sits at MIN in the original and at AUTO in the reference. The engine now copies the cell alignment with the width.
+- Dry run on the 12 accepted screens: none of them has a grid, so nothing changes there.
+- Checked on CM Overview for managers / team with a temporary copy of the original, deleted afterwards. With no hand fixes it matched the reference: content frame 1340×1970, Team / SLA 662×506, the second Quick links row 40 tall, ten team member cards 436×316 at r16 and p16. All audit lists came back empty.
+
 ## v3.219.0 — 2026-10-01 (island migration: corner radius from the reference)
 - **Cards take the reference's corner radius.** In the CM Overview for managers reference the designers rounded every card from 12 to 16 (`border-radius/xl`) and cut the padding from 24 to 16. The engine already copied the padding but not the radius, so a result would have had 16-padding cards at radius 12. It now takes the radius of the paired reference layer, bound to its variable. Blocks the designers left at 12, such as `Documents block old`, stay at 12.
 - **Dry run on the 11 screens already accepted:** the rule changes only two layers, both towards the reference. They are TM `Customers card / Finance` and Blueprint `Preset Select` (12 → 16), the second of which had been listed as an accepted difference.
