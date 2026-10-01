@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.218.0 — 2026-10-01 (island migration: the reference can be passed in)
+- **A designer's reference no longer has to be in the screen's name.** Until now the build picked up the reference only from `(ref …)` in the screen's name, and only the test copies are named like that. A real screen would have been rebuilt without its reference. `migrateOne` now takes the reference node as a second argument, the same way `planOne` and `finishAndAudit` already do. The skill passes the reference given in the request to all three calls. The screen is never renamed to carry it.
+- Checked on Case page Overview, the first screen tested this way: a temporary copy of the original, deleted afterwards, rebuilt with the reference passed in. It matched the reference with no hand fixes:
+  - five blocks stand bare and Transactions sits in an island;
+  - the page is 1440×2564;
+  - all audit lists are empty.
+
 ## v3.217.9 — 2026-10-01 (island migration: three fixes from Blueprint General settings)
 The Blueprint New blueprint / General settings run matched its reference only after three hand fixes in the session. The engine now does all three itself:
 - **Blocks inside a component instance are migrated.** On this screen the whole content column is one component, and its blocks couldn't be moved into islands — the build stopped. They are now copied out into islands and the old component is removed.

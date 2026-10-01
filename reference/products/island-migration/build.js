@@ -1,5 +1,5 @@
-// BUILD — call 1 of 2. Paste this file into use_figma and append:  return JSON.stringify(await migrateOne("<screen node id>"));
-// PLAN ONLY (read-only, run it first):  return JSON.stringify(await planOne("<screen node id>"));
+// BUILD — call 1 of 2. Paste this file into use_figma and append:  return JSON.stringify(await migrateOne("<screen node id>", "<reference node id, optional>"));
+// PLAN ONLY (read-only, run it first):  return JSON.stringify(await planOne("<screen node id>", "<reference node id, optional>"));
 const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
 while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible === false) return false; p = p.parent; } return true; };
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
@@ -357,10 +357,10 @@ plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.val
 blocks, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
 header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
-async function migrateOne(scrId) {
+async function migrateOne(scrId, refOverride) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
 let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
-const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = m ? m[1] : null, name = scr.name;
+const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : null), name = scr.name;
 _idCache.clear(); const a = analyze(scr);
 if (!a.confident) return { id: scrId, name, stopped: "not confident", notes: a.notes };
 let refP = null;
