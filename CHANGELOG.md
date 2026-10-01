@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.218.1 — 2026-10-01 (island migration: a block that looks empty)
+- The skill run on Case page Overview matched its reference with no hand fixes.
+- One block looked empty on the canvas: the second Documents block (Proof of address). Its data matched the original exactly and an export drew it in full. Reopening the file fixed it, so Figma had simply not redrawn the copied component.
+- The doc and the skill now say: check such a block in its data, don't rebuild it, and tell the designer to reopen the file.
+
 ## v3.218.0 — 2026-10-01 (island migration: the reference can be passed in)
 - **A designer's reference no longer has to be in the screen's name.** Until now the build picked up the reference only from `(ref …)` in the screen's name, and only the test copies are named like that. A real screen would have been rebuilt without its reference. `migrateOne` now takes the reference node as a second argument, the same way `planOne` and `finishAndAudit` already do. The skill passes the reference given in the request to all three calls. The screen is never renamed to carry it.
 - Checked on Case page Overview, the first screen tested this way: a temporary copy of the original, deleted afterwards, rebuilt with the reference passed in. It matched the reference with no hand fixes:
