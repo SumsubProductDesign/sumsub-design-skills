@@ -2,7 +2,7 @@
 // Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
 // After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
-// Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
+// Audit script — paste and adapt ROOT_ID + productContext (+ inPlace in part 1) — the ONLY edits allowed.
 // Runs as the body of a use_figma call, so top-level await is available.
 // ⚠️ v3.200: MUST be getNodeByIdAsync. The sync getNodeById only resolves nodes on
 // figma.currentPage, and currentPage is whatever the desktop app has active (it RESETS
@@ -27,7 +27,7 @@ const all = root.findAll(n => true);
 // whose ancestor chain (between itself and root) passes through an INSTANCE.
 function isInsideInstance(n) {
   let p = n.parent;
-  while (p && p !== root && p.type !== "PAGE") {
+  while (p && p.id !== root.id && p.type !== "PAGE") {
     if (p.type === "INSTANCE") return true;
     p = p.parent;
   }
@@ -36,7 +36,7 @@ function isInsideInstance(n) {
 // Helper: is the node visible on canvas? (walks up checking every ancestor's visible flag)
 function isVisible(n) {
   let cur = n;
-  while (cur && cur !== root) {
+  while (cur && cur.id !== root.id) {
     if (cur.visible === false) return false;
     cur = cur.parent;
   }
@@ -664,7 +664,7 @@ if (productContext === "tm") {
   for (const t of texts) {
     // is it inside a Table Row/cell, and NOT inside a *Status* instance?
     let p = t.parent, inCell = false, inStatus = false;
-    while (p && p !== root) {
+    while (p && p.id !== root.id) {
       if (/\*Status\*/.test(mcParentName(p))) { inStatus = true; break; }
       if (/Table Row|Cell Content|Cell/i.test(p.name||"")) inCell = true;
       p = p.parent;

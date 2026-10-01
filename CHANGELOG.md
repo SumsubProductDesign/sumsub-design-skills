@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.222.0 — 2026-10-01 (audit: works on migrated screens)
+- **The full audit no longer crashes on a migrated screen.** `audit-part1..3` compared nodes with `!==`, so they missed the root when it was a live `Page` instance. They then walked up to the page and crashed on `.visible`. Skills had to patch their own copy to finish the audit. All comparisons now use the node id.
+- **No false failures after a migration.** On the team rerun, part 1 reported four issues and none of them was real:
+  - **White content frame:** an island `Page` is grey by design, so this check now skips island roots.
+  - **Drafts page and section rules:** a new flag `inPlace = true` in part 1 turns them off when the user picked where the screen lives.
+- **Checked on CM Overview for managers / team** (`3510:297168`): the corrected checks found no issues and didn't crash.
+- **SKILL.md:** the full audit is required after a migration too, with `inPlace = true`. The blueprints run had skipped it.
+
 ## v3.221.0 — 2026-10-01 (island migration: blocks the designer rebuilt keep their side padding)
 - **No more titles flush with the card edge.** In CM Overview for managers the designers moved the side padding of `Open cases`, `TR widget` and `Team` from the card into new wrapper frames. The card became 16/0/16/0 and the wrappers carry the 16. The engine copied 16/0/16/0 onto our blocks, which have no such wrappers, so their contents ended up flush with the edge. This shipped unnoticed in the accepted team result: the `Team` title and rows sit at 0 there instead of 16. Now a block whose inside the designer rebuilt takes only top and bottom padding from the reference and keeps its own side padding.
 - **The blocks beside a rebuilt one still get the reference's look.** Before, one rebuilt block stopped the whole row from taking anything. Its neighbours now take width, radius, fill and stroke, never spacing.

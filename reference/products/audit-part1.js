@@ -2,7 +2,7 @@
 // Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
 // After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
-// Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
+// Audit script — paste and adapt ROOT_ID + productContext (+ inPlace in part 1) — the ONLY edits allowed.
 // Runs as the body of a use_figma call, so top-level await is available.
 // ⚠️ v3.200: MUST be getNodeByIdAsync. The sync getNodeById only resolves nodes on
 // figma.currentPage, and currentPage is whatever the desktop app has active (it RESETS
@@ -16,6 +16,12 @@ const root = await figma.getNodeByIdAsync("ROOT_ID_HERE");
 // Set to "flow-builder" | "applicant-page" | "table-page" | "tm" | "case-management" | null,
 // OR an object { canonicalMap, requiresCanonical } for canonical-match builds.
 const productContext = null;
+// v3.222: inPlace = true when the task rebuilt an EXISTING screen where it stands (island migration of a designer's
+// screen, a test copy the user placed): the user chose the page and section, so Rule #0 (Drafts page) and Rule 7.7
+// (#404040 section named "(made by Claude)") don't apply. The third allowed edit, next to ROOT_ID and productContext.
+const inPlace = false;
+// v3.222: an island-layout root (a live `Page` instance) is grey by design — the white content-frame check doesn't apply
+const islandRoot = root.type === "INSTANCE" && (() => { try { const m = root.mainComponent; return !!m && !!m.parent && m.parent.type === "COMPONENT_SET" && m.parent.name === "Page"; } catch (e) { return false; } })();
 // ⚠️ v3.151: `page` is used by checks 7.46/7.47/7.48/7.45 (root must live on a Drafts page,
 // section containment). Derive it from root's ancestor chain so those checks run verbatim.
 let page = root.parent;
@@ -27,7 +33,7 @@ const all = root.findAll(n => true);
 // whose ancestor chain (between itself and root) passes through an INSTANCE.
 function isInsideInstance(n) {
   let p = n.parent;
-  while (p && p !== root && p.type !== "PAGE") {
+  while (p && p.id !== root.id && p.type !== "PAGE") {
     if (p.type === "INSTANCE") return true;
     p = p.parent;
   }
@@ -36,7 +42,7 @@ function isInsideInstance(n) {
 // Helper: is the node visible on canvas? (walks up checking every ancestor's visible flag)
 function isVisible(n) {
   let cur = n;
-  while (cur && cur !== root) {
+  while (cur && cur.id !== root.id) {
     if (cur.visible === false) return false;
     cur = cur.parent;
   }
@@ -65,7 +71,7 @@ for (const t of all) {
   if (!styleName || !headingStyleRe.test(styleName)) continue;
   // Skip TEXT nodes that are inside a SECTION directly (section title, allowed)
   let p = t.parent, insideSection = false;
-  while (p && p !== root) {
+  while (p && p.id !== root.id) {
     if (p.type === "SECTION") { insideSection = true; break; }
     p = p.parent;
   }
@@ -110,7 +116,7 @@ if (headerInst) {
     if (!/Type=Tabs/.test(n.mainComponent?.name || "")) return false;
     // walk up to root checking visibility — if any ancestor is hidden, this sub-instance doesn't render
     let cur = n;
-    while (cur && cur !== headerInst) {
+    while (cur && cur.id !== headerInst.id) {
       if (cur.visible === false) return false;
       cur = cur.parent;
     }
@@ -118,7 +124,7 @@ if (headerInst) {
   });
   const standaloneTabs = all.filter(n =>
     n.type === "INSTANCE" && n.name === "*Tab Basic*" && n.visible !== false &&
-    !headerInst.findAll(x => x === n).length
+    !headerInst.findAll(x => x.id === n.id).length
   );
   if (headerHasVisibleTabs && standaloneTabs.length) {
     issues.push(`Double tabs: Header has VISIBLE Subheader=Tabs AND ${standaloneTabs.length} standalone *Tab Basic* below — keep only one`);
@@ -223,7 +229,7 @@ const contentFrames = all.filter(n =>
   n.type === "FRAME" && !isInsideInstance(n) &&
   /^(Content|BG Content|Page Content|Body|Main column|Columns|Right panel|Container)$/i.test(n.name)
 );
-for (const cf of contentFrames) {
+for (const cf of (islandRoot ? [] : contentFrames)) {
   const fill = cf.fills?.[0];
   if (!fill || fill.visible === false) {
     issues.push(`Content frame "${cf.name}" has no fill — set it to semantic/background/neutral/inverse/normal (white). Otherwise page looks grey.`);
@@ -346,7 +352,7 @@ for (const [phrase, count] of Object.entries(defaultPhraseHits)) {
 {
   let p = root.parent;
   while (p && p.type !== "PAGE") p = p.parent;
-  if (p && p.type === "PAGE" && !/drafts/i.test(p.name)) {
+  if (!inPlace && p && p.type === "PAGE" && !/drafts/i.test(p.name)) {
     issues.push(`Root is on page "${p.name}" — expected a page with "Drafts" in its name (Rule #0). If the user didn't specify another page, move to the Drafts page or create one.`);
   }
 }
@@ -354,7 +360,7 @@ for (const [phrase, count] of Object.entries(defaultPhraseHits)) {
 // 7.15. SECTION background + naming check — Rules 7.7. If root is inside a
 // SECTION, verify (a) fill = #404040 and (b) name ends with "(made by Claude)".
 {
-  let anc = root.parent;
+  let anc = inPlace ? null : root.parent;
   while (anc && anc.type !== "PAGE") {
     if (anc.type === "SECTION") {
       // Fill check

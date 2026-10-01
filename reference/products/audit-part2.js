@@ -2,7 +2,7 @@
 // Run: set ROOT_ID_HERE + productContext (top), run via use_figma, collect {issues, info}.
 // After all 3: concatenate issues + info; PASS iff total issues==0. Surface info[] (esp 7.56 stale warning).
 // Self-contained (<50KB, comments intact, NO stripping).
-// Audit script — paste and adapt ROOT_ID + productContext (the ONLY two edits allowed).
+// Audit script — paste and adapt ROOT_ID + productContext (+ inPlace in part 1) — the ONLY edits allowed.
 // Runs as the body of a use_figma call, so top-level await is available.
 // ⚠️ v3.200: MUST be getNodeByIdAsync. The sync getNodeById only resolves nodes on
 // figma.currentPage, and currentPage is whatever the desktop app has active (it RESETS
@@ -27,7 +27,7 @@ const all = root.findAll(n => true);
 // whose ancestor chain (between itself and root) passes through an INSTANCE.
 function isInsideInstance(n) {
   let p = n.parent;
-  while (p && p !== root && p.type !== "PAGE") {
+  while (p && p.id !== root.id && p.type !== "PAGE") {
     if (p.type === "INSTANCE") return true;
     p = p.parent;
   }
@@ -36,7 +36,7 @@ function isInsideInstance(n) {
 // Helper: is the node visible on canvas? (walks up checking every ancestor's visible flag)
 function isVisible(n) {
   let cur = n;
-  while (cur && cur !== root) {
+  while (cur && cur.id !== root.id) {
     if (cur.visible === false) return false;
     cur = cur.parent;
   }
@@ -132,7 +132,7 @@ for (const md of all.filter(n => n.type === "INSTANCE" && (n.mainComponent?.pare
   const visibleBtns = footer.findAll(n => {
     if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
     let cur = n;
-    while (cur && cur !== root) {
+    while (cur && cur.id !== root.id) {
       if (cur.visible === false) return false;
       cur = cur.parent;
     }
@@ -232,7 +232,7 @@ const DEFAULT_TEXTS = new Set([
     // Visible-chain check
     let cur = t.parent;
     let visibleChain = true;
-    while (cur && cur !== root) {
+    while (cur && cur.id !== root.id) {
       if (cur.visible === false) { visibleChain = false; break; }
       cur = cur.parent;
     }
@@ -270,7 +270,7 @@ const DEFAULT_TEXTS = new Set([
     // by findAll and its (already-not-rendered) buttons were flagged.
     let pchk = ctr;
     let containerInVisibleChain = true;
-    while (pchk && pchk !== root) {
+    while (pchk && pchk.id !== root.id) {
       if (pchk.visible === false) { containerInVisibleChain = false; break; }
       pchk = pchk.parent;
     }
@@ -278,7 +278,7 @@ const DEFAULT_TEXTS = new Set([
     const visBtns = ctr.findAll(n => {
       if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
       let cur = n;
-      while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
+      while (cur && cur.id !== root.id) { if (cur.visible === false) return false; cur = cur.parent; }
       return true;
     });
     const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters).filter(Boolean);
@@ -303,7 +303,7 @@ const DEFAULT_TEXTS = new Set([
     const selectedNodes = sb.findAll(n => /selected/i.test(n.name) || /\.selected/i.test(n.name) || /active/i.test(n.name));
     const visSelected = selectedNodes.filter(n => {
       let cur = n;
-      while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
+      while (cur && cur.id !== root.id) { if (cur.visible === false) return false; cur = cur.parent; }
       return n.visible !== false;
     });
     // Also probe for nav-item instances whose Selected variant is "true" / "Yes"
@@ -323,7 +323,7 @@ const DEFAULT_TEXTS = new Set([
         if (typeof sv === "string" && /active/i.test(sv)) return true;
         return /State=Active/i.test(n.mainComponent?.name || "");
       } catch (e) { return false; }
-    }).filter(n => { let c = n; while (c && c !== root) { if (c.visible === false) return false; c = c.parent; } return true; });
+    }).filter(n => { let c = n; while (c && c.id !== root.id) { if (c.visible === false) return false; c = c.parent; } return true; });
     if (visSelected.length === 0 && selectedItems.length === 0 && stateActiveItems.length === 0) {
       // Soft warning: not all Sidebar variants expose a Selected property
       // (e.g. Type=Billing variant has no per-page active state via Plugin
@@ -352,7 +352,7 @@ const DEFAULT_TEXTS = new Set([
     const visBtns = h.findAll(n => {
       if (!(n.type === "INSTANCE" && n.name === "*Button*")) return false;
       let cur = n;
-      while (cur && cur !== root) { if (cur.visible === false) return false; cur = cur.parent; }
+      while (cur && cur.id !== root.id) { if (cur.visible === false) return false; cur = cur.parent; }
       return true;
     });
     const labels = visBtns.map(b => b.findOne(x => x.type === "TEXT" && x.name === "Button")?.characters || "").filter(Boolean);
@@ -382,7 +382,7 @@ const DEFAULT_TEXTS = new Set([
         // visible-chain check (use root, not container, to respect hidden grand-parents)
         let cur = cell;
         let visChain = true;
-        while (cur && cur !== root) {
+        while (cur && cur.id !== root.id) {
           if (cur.visible === false) { visChain = false; break; }
           cur = cur.parent;
         }
