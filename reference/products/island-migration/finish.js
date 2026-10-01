@@ -158,10 +158,35 @@ const w = Math.max(s.width, r + 80), h = Math.max(s.height, b + 80);
 if (w > s.width + 0.5 || h > s.height + 0.5) { s.resizeWithoutConstraints(w, h); return Math.round(w) + "×" + Math.round(h); }
 return null;
 }
+async function rebindOrphanVars(page) {
+const log = [], miss = new Set();
+let cols = []; try { cols = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync(); } catch (e) { return { rebound: 0, missing: ["no library access: " + e.message] }; }
+const live = new Set(cols.map(c => c.key));
+const base = cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color"); if (!base) return { rebound: 0, missing: ["Base color collection not available"] };
+const byName = new Map(); for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
+const colKey = new Map(), imported = new Map();
+const orphanTarget = async id => { const v = await figma.variables.getVariableByIdAsync(id); if (!v || !v.remote) return null;
+if (!colKey.has(v.variableCollectionId)) { let k = null; try { const c = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId); k = c ? c.key : null; } catch (e) {} colKey.set(v.variableCollectionId, k); }
+const ck = colKey.get(v.variableCollectionId); if (!ck || live.has(ck)) return null;
+const key = byName.get(v.name.toLowerCase()); if (!key) { miss.add(v.name); return null; }
+if (!imported.has(key)) imported.set(key, await figma.variables.importVariableByKeyAsync(key)); return { from: v.name, to: imported.get(key) }; };
+const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const ours = []; const walk = n => { ours.push(n); if (n.type === "INSTANCE" || !("children" in n)) return; for (const k of n.children) walk(k); };
+for (const s of slots) for (const k of s.children) walk(k);
+for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
+let changed = false; const next = [];
+for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await orphanTarget(b.id) : null;
+if (!t || !t.to) { next.push(p); continue; } const base0 = JSON.parse(JSON.stringify(p)); delete base0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(base0, "color", t.to)); changed = true; log.push(t.from + " → " + t.to.name); }
+if (changed) { try { n[prop] = next; } catch (e) {} } }
+const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
+return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...miss].slice(0, 6) };
+}
+
 async function finishAndAudit(pageId, refId) {
 const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
 let fin;
 try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; }
+let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
 const gridIssues = stretchToWidth(page, !!refId);
 const side = fitSideColumns(page);
 const pb = page.absoluteTransform[1][2];
@@ -175,5 +200,5 @@ const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page /
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) } });
+return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }
