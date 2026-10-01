@@ -217,6 +217,7 @@ const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
 const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch (e) {} }
 const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
 for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+for (const k of sl.children) { try { if (k.type === "FRAME" && k.layoutMode && k.layoutMode !== "NONE" && k.layoutSizingVertical !== "HUG") { const h0 = Math.round(k.height); k.layoutSizingVertical = "HUG"; if (Math.abs(k.height - h0) > 1) notes.push("hugs its content: " + k.name + " " + h0 + " → " + Math.round(k.height)); } } catch (e) {} }
 try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch (e) {} }
 sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.children.length > 1) sl.itemSpacing = 16; } catch (e) {}
 try { sl.layoutSizingVertical = "HUG"; } catch (e) {}                  // island ships FIXED 153 with a FILL slot — HUG both

@@ -284,6 +284,9 @@ async function buildIsland(scr, a, crumb) {
       const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch (e) {} }
       const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
       for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+      // an island hugs its content: an old wrapper with a FIXED height (it filled the old column — Case page Related cases: `Risk overview`
+      // 708 tall around 352 of content) would leave an empty band; auto-layout frames go HUG, as in the reference
+      for (const k of sl.children) { try { if (k.type === "FRAME" && k.layoutMode && k.layoutMode !== "NONE" && k.layoutSizingVertical !== "HUG") { const h0 = Math.round(k.height); k.layoutSizingVertical = "HUG"; if (Math.abs(k.height - h0) > 1) notes.push("hugs its content: " + k.name + " " + h0 + " → " + Math.round(k.height)); } } catch (e) {} }
       // every designers' reference (Case Overview 16:20783, Financial data 21:44203, TM Transaction 311:53619) sets the island's
       // Slot padding to 0 — the content sits right on the card's own 16. The published default 8 made every island 16 taller.
       try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch (e) {} }

@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.3 — 2026-10-01 (island migration: islands hug their content)
+- **No empty band at the bottom of an island.** Old wrapper frames often have a fixed height that filled the old column: on Case page Related cases, `Risk overview` is 708 tall around 352 of content. Placed in an island, such a frame now takes the height of its content, as in the reference (352). Components keep their own height.
+
 ## v3.217.2 — 2026-10-01 (island migration: two fixes from the Case page AML run)
 The Case page AML skill run matched its reference (1440×1118, `AML screening` bare, the right column flush in the side panel, header from the original). It surfaced two engine defects that did no harm on this screen:
 - **No false "narrow block" warning for content-sized elements.** The audit flagged the `Tab Button History` switcher (240 wide by design) as a card that doesn't reach its edge. Elements sized to their content are no longer checked.
