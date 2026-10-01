@@ -434,6 +434,7 @@ const repaint = (n, prop, variable) => { const base = n[prop] && n[prop][0] ? JS
   delete base.boundVariables; n[prop] = [figma.variables.setBoundVariableForPaint(base, "color", variable)]; };
 async function copyVarsFromRef(refRoot, page, anchors) {
   const SEP = " › ", applied = [], skipped = [];
+  const { resolve } = await varResolver();
   const visFill = n => n.fills && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false;
   const visStroke = n => n.strokes && n.strokes.length && n.strokes[0].type === "SOLID" && n.strokes[0].visible !== false;
   // pairs come from a parallel walk, not from paths: where the reference hid, added or reordered a layer (Case page Events: the first
@@ -524,9 +525,9 @@ async function copyVarsFromRef(refRoot, page, anchors) {
           const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
           if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;   // the variant's own paint
           const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
-          if (rVis && rb && (!bVis || !bb || bb.id !== rb.id)) { let v = await figma.variables.getVariableByIdAsync(rb.id);
-            if (v && v.remote && v.key) { try { v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }   // consumer file: bind by key
+          if (rVis && rb) { const t = await resolve(rb.id), v = t && t.to;   // the reference's paint as its CURRENT variable (see varResolver)
             if (!v) { skipped.push(a + path + " " + prop + ": variable not found"); continue; }
+            if (bVis && bb && bb.id === v.id) continue;
             const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
             applied.push(a + path + " " + prop + " → " + v.name); }
           else if (!rVis && bVis && prop === "fills") { bn.fills = []; applied.push(a + path + " fills → none"); }
@@ -668,36 +669,57 @@ return null;
 // a library Update can't reach them). Rebind each to the same-named variable of the current Base `color` collection (names compared
 // case-insensitively: `Base/Neutral/90` → `base/neutral/90`). Only our content: the slot subtrees, never the inside of a component
 // instance (its paint is the component's).
+// One resolver for "which variable should this paint be bound to now" — shared by copyVarsFromRef and rebindOrphanVars, so the
+// reference's paint is copied as its CURRENT variable: a stale copy of a live library variable → the fresh import (same key), a
+// variable of a vanished library → the same-named Base `color` variable. Without it the finish copied the reference's orphan onto
+// our node and rebindOrphanVars rebound it straight back on every run (CM managers overview / team: 254 + 210 no-op writes per
+// run, and the whole call timed out with a 520).
+let _vr = null;
+function varResolver() {
+  if (_vr) return _vr;
+  _vr = (async () => {
+    let cols = null; try { cols = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync(); } catch (e) {}
+    const live = cols ? new Set(cols.map(c => c.key)) : null;
+    const base = cols ? cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color") : null;
+    const byName = new Map(); if (base) for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
+    const colKey = new Map(), byKey = new Map(), memo = new Map(), miss = new Set();
+    const imp = async key => { if (!byKey.has(key)) { let r = null; try { r = await figma.variables.importVariableByKeyAsync(key); } catch (e) {} byKey.set(key, r); } return byKey.get(key); };
+    const resolve = async id => {
+      if (memo.has(id)) return memo.get(id);
+      const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
+      if (v && v.remote && v.key) {
+        if (!colKey.has(v.variableCollectionId)) { let k = null; try { const c = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId); k = c ? c.key : null; } catch (e) {} colKey.set(v.variableCollectionId, k); }
+        const ck = colKey.get(v.variableCollectionId);
+        if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
+        else if (base) { const key = byName.get(v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); }
+      }
+      memo.set(id, out); return out; };
+    return { resolve, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
+  })();
+  return _vr;
+}
 async function rebindOrphanVars(page) {
-  const log = [], miss = new Set();
-  let cols = []; try { cols = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync(); } catch (e) { return { rebound: 0, missing: ["no library access: " + e.message] }; }
-  const live = new Set(cols.map(c => c.key));
-  const base = cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color"); if (!base) return { rebound: 0, missing: ["Base color collection not available"] };
-  const byName = new Map(); for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
-  const colKey = new Map(), imported = new Map(), stale = new Map();
-  const orphanTarget = async id => { const v = await figma.variables.getVariableByIdAsync(id); if (!v || !v.remote) return null;
-    if (!colKey.has(v.variableCollectionId)) { let k = null; try { const c = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId); k = c ? c.key : null; } catch (e) {} colKey.set(v.variableCollectionId, k); }
-    const ck = colKey.get(v.variableCollectionId); if (!ck) return null;
-    // a live library variable can still be a STALE copy: the file keeps an old import (same key, old value — base/neutral/10 = #f6f7f9
-    // after "Update all" in New Layout) next to the fresh one the engine imports; rebind to the fresh copy
-    if (live.has(ck)) { if (!stale.has(v.key)) { let fr = null; try { fr = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} stale.set(v.key, fr && fr.id !== v.id ? fr : null); } const fr = stale.get(v.key); return fr ? { from: v.name + " (stale copy)", to: fr } : null; }
-    const key = byName.get(v.name.toLowerCase()); if (!key) { miss.add(v.name); return null; }
-    if (!imported.has(key)) imported.set(key, await figma.variables.importVariableByKeyAsync(key)); return { from: v.name, to: imported.get(key) }; };
+  const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
+  const log = [];
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   const ours = []; const walk = n => { ours.push(n); if (n.type === "INSTANCE" || !("children" in n)) return; for (const k of n.children) walk(k); };
   for (const s of slots) for (const k of s.children) walk(k);
   for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
     let changed = false; const next = [];
-    for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await orphanTarget(b.id) : null;
-      if (!t || !t.to) { next.push(p); continue; } const base0 = JSON.parse(JSON.stringify(p)); delete base0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(base0, "color", t.to)); changed = true; log.push(t.from + " → " + t.to.name); }
+    for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await R.resolve(b.id) : null;
+      if (!t || t.kind === "same") { next.push(p); continue; } const base0 = JSON.parse(JSON.stringify(p)); delete base0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(base0, "color", t.to)); changed = true; log.push(t.from + (t.kind === "stale" ? " (stale copy)" : "") + " → " + t.to.name); }
     if (changed) { try { n[prop] = next; } catch (e) {} } }
   const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
-  return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...miss].slice(0, 6) };
+  return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...R.miss].slice(0, 6) };
 }
-async function finishAndAudit(pageId, refId) {
+// part: omit = everything in one call. On a big page (CM managers overview / team: ~790 reference pairs, ~13 s just to walk them)
+// the single call outruns the MCP connection ("connection lost" / 520) — then call it twice: part "copy" (copy from the
+// reference), then part "audit" (rebind colours + fixes + audit). Both are idempotent, so a dropped call is safe to repeat.
+async function finishAndAudit(pageId, refId, part) {
   const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
-  let fin;
-  try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; }
+  let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
+  if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
+  if (part === "copy") return clean({ pageId, part, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
   let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
   const gridIssues = stretchToWidth(page, !!refId);
   const side = fitSideColumns(page);
