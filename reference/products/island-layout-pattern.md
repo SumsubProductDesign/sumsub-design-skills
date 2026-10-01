@@ -281,6 +281,12 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **Never rename a layer** (designers' rule, asked by the team): the migration keeps every layer's name — the moved blocks, the source screen, and the result, which takes the source's name. New frames the engine creates for the layout (a side section like the reference's) take the reference's name.
 
+**A block the designer rebuilt inside keeps its side padding.** The designers sometimes move a card's side padding into new wrapper frames. In CM Overview for managers, `Open cases`, `TR widget` and `Team` went to 16/0/16/0 on the card, with the 16 carried by new `Frame 2131328793` wrappers. The engine adds no layers, so copying 16/0/16/0 left titles and rows flush with the card edge. The walk now has four modes:
+- **full** — the whole subtree pairs: everything is copied.
+- **stopped** — the block's own children pair, but one of them is rebuilt: only top and bottom padding and gaps are copied.
+- **restructured** — the block's own children don't pair: only top and bottom padding are copied.
+- **style** — the children of a stopped block take width, radius, fill and stroke, never spacing. On Case page Events an event's `Info` padding 12 → 0 compensates for a line hidden elsewhere in the reference, so spacing there must not be copied.
+
 **Reference layers are paired by a parallel walk, not by path.** Where the designer hid, added or reordered a layer inside a block, path indices shift and the wrong layers swap values (Case page Events: the first event's top connector line is hidden in the reference and its `Info` padding is 0 — the result got the 0 padding with its line still visible, text 12 above the dot). Now a block whose children's layer lists differ from the reference's is paired itself but not descended into. **Rotated layers, lines and vectors** never take the reference's width — a −90° connector line's width is its length (76 in a 16 frame), and comparing it with the frame turned the lines FILL.
 
 **A list may be longer or shorter than the reference's — that's data.** Consecutive layers with the same name are compared as one run: the reference shows 7 `.Blueprint overview item`, the original 9 — the runs still match, items pair index by index, and the two extra items take the last reference item's treatment. Before, the walk stopped at the list (`Content`) and the 9 items kept the white fill the designer had hidden on all 7 (Blueprint New blueprint · Case content). Any other difference in the layer list still stops the descent.

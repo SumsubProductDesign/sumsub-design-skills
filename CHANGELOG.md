@@ -4,6 +4,17 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.221.0 — 2026-10-01 (island migration: blocks the designer rebuilt keep their side padding)
+- **No more titles flush with the card edge.** In CM Overview for managers the designers moved the side padding of `Open cases`, `TR widget` and `Team` from the card into new wrapper frames. The card became 16/0/16/0 and the wrappers carry the 16. The engine copied 16/0/16/0 onto our blocks, which have no such wrappers, so their contents ended up flush with the edge. This shipped unnoticed in the accepted team result: the `Team` title and rows sit at 0 there instead of 16. Now a block whose inside the designer rebuilt takes only top and bottom padding from the reference and keeps its own side padding.
+- **The blocks beside a rebuilt one still get the reference's look.** Before, one rebuilt block stopped the whole row from taking anything. Its neighbours now take width, radius, fill and stroke, never spacing.
+- **Dry run on the 13 accepted screens.** Nothing changes beyond the radius fixes v3.219.0 already expected, plus one text colour on team. Case page Events keeps its event padding, so the v3.217.5 fix holds.
+- **Checked on CM Overview for managers / blueprints** with a temporary copy of the original, deleted afterwards:
+  - the row's bottom padding is 0, as in the reference;
+  - `Open cases` and `TR widget` fill the width at r16;
+  - team member cards are r16 with p16;
+  - no text sits at the card edge.
+- **What still differs:** the side padding inside `Open cases` and `TR widget` stays 24 and 20, against an effective 16 in the reference.
+
 ## v3.220.0 — 2026-10-01 (island migration: grids follow the reference)
 - **Grids take the reference's spacing.** The engine copied paddings and gaps from the reference everywhere except grid frames. In the CM Overview for managers / team reference the designers cut the Team / SLA grid's bottom padding from 16 to 0, so a result would have kept 16 px of extra grey under that row. Grids now take the reference's paddings, row gap and column gap, bound to its spacing variables.
 - **A card keeps the reference's place in its grid cell.** `Team` sits at MIN in the original and at AUTO in the reference. The engine now copies the cell alignment with the width.
