@@ -434,7 +434,7 @@ const repaint = (n, prop, variable) => { const base = n[prop] && n[prop][0] ? JS
   delete base.boundVariables; n[prop] = [figma.variables.setBoundVariableForPaint(base, "color", variable)]; };
 async function copyVarsFromRef(refRoot, page, anchors) {
   const SEP = " › ", applied = [], skipped = [];
-  const { resolve } = await varResolver();
+  const { resolve, prefetch } = await varResolver();
   const visFill = n => n.fills && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false;
   const visStroke = n => n.strokes && n.strokes.length && n.strokes[0].type === "SOLID" && n.strokes[0].visible !== false;
   // pairs come from a parallel walk, not from paths: where the reference hid, added or reordered a layer (Case page Events: the first
@@ -467,6 +467,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   for (const a of anchors) {
     const R = refRoot.findAll(n => n.name === a && n.visible), B = page.findAll(n => n.name === a && n.visible);
     for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
+      await prefetch(paintIds(mr.map(e => e[1])));
       for (const [path, rn, bn, ov, mode] of mr) {
         let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }   // another variant: compare with the reference's own main
         if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
@@ -682,28 +683,30 @@ function varResolver() {
     const live = cols ? new Set(cols.map(c => c.key)) : null;
     const base = cols ? cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color") : null;
     const byName = new Map(); if (base) for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
+    // everything is cached as a PROMISE, so `prefetch` can resolve a whole batch at once: one importVariableByKeyAsync is ~170 ms
+    // (up to ~850), sequentially that was 50–60 imports = tens of seconds per finish; 12 in parallel take ~0.2 s
     const colKey = new Map(), byKey = new Map(), memo = new Map(), miss = new Set();
-    const imp = async key => { if (!byKey.has(key)) { let r = null; try { r = await figma.variables.importVariableByKeyAsync(key); } catch (e) {} byKey.set(key, r); } return byKey.get(key); };
-    const resolve = async id => {
-      if (memo.has(id)) return memo.get(id);
+    const imp = key => { if (!byKey.has(key)) byKey.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return byKey.get(key); };
+    const colOf = vc => { if (!colKey.has(vc)) colKey.set(vc, figma.variables.getVariableCollectionByIdAsync(vc).then(c => c ? c.key : null).catch(() => null)); return colKey.get(vc); };
+    const resolve = id => { if (!memo.has(id)) memo.set(id, (async () => {
       const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
-      if (v && v.remote && v.key) {
-        if (!colKey.has(v.variableCollectionId)) { let k = null; try { const c = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId); k = c ? c.key : null; } catch (e) {} colKey.set(v.variableCollectionId, k); }
-        const ck = colKey.get(v.variableCollectionId);
+      if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
         if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const key = byName.get(v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); }
-      }
-      memo.set(id, out); return out; };
-    return { resolve, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
+        else if (base) { const key = byName.get(v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+      return out; })()); return memo.get(id); };
+    const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
+    return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
   })();
   return _vr;
 }
+const paintIds = nodes => { const out = []; for (const n of nodes) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (Array.isArray(ps)) for (const p of ps) if (p.boundVariables && p.boundVariables.color) out.push(p.boundVariables.color.id); } return out; };
 async function rebindOrphanVars(page) {
   const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
   const log = [];
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   const ours = []; const walk = n => { ours.push(n); if (n.type === "INSTANCE" || !("children" in n)) return; for (const k of n.children) walk(k); };
   for (const s of slots) for (const k of s.children) walk(k);
+  await R.prefetch(paintIds(ours));
   for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
     let changed = false; const next = [];
     for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await R.resolve(b.id) : null;
@@ -716,7 +719,7 @@ async function rebindOrphanVars(page) {
 // the single call outruns the MCP connection ("connection lost" / 520) — then call it twice: part "copy" (copy from the
 // reference), then part "audit" (rebind colours + fixes + audit). Both are idempotent, so a dropped call is safe to repeat.
 async function finishAndAudit(pageId, refId, part) {
-  const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
+  const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();   // no setCurrentPageAsync: the finish creates no nodes, and switching re-renders the whole page in the app (~16 s on the big test page)
   let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
   if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
   if (part === "copy") return clean({ pageId, part, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });

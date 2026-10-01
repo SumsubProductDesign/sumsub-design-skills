@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.226.0 — 2026-10-02 (island migration: faster finish)
+- **The finish no longer switches the app to the screen's page.** The finish creates no layers, so the switch was useless. It re-rendered the whole page in the app, about 16 s on the big test page, and the current page resets after the call anyway. The build call still switches, because it creates instances.
+- **Variable imports are fetched as one batch.** One `importVariableByKeyAsync` takes about 170 ms, sometimes 850. The resolver used to run them one by one, 50–60 per finish. Now it collects the variables of each reference block and of our content first and imports them together. When the variables are already loaded, 12 imports take about 0.2 s instead of 3.4 s. Cold, Figma still runs them largely in sequence.
+- **The CM Overview team page now finishes in one call** in about 56 s cold, without dropping. About 30 s of that is the first load of the big test page, which can't be skipped, and the audit itself takes about 1.5 s. The `"copy"` / `"audit"` split from v3.225.0 stays as the fallback for a dropped call.
+
 ## v3.225.0 — 2026-10-02 (island migration: no no-op colour churn, finish in two parts on big pages)
 - **The reference's colours are copied as their current variables.** Some references bind stale copies of Base variables or variables of the vanished library. The copy step now binds the fresh import or the same-named Base variable straight away, and skips nodes that already have it. Before, every run copied the old variable from the reference and the rebind step moved it straight back. On the CM Overview team page that was 254 + 210 useless writes per run. Now both are 0.
 - **Finish can run in two parts on big pages.** On CM Overview team, copying from the reference takes about 13 s and the audit about 64 s. In one call that is too long for the MCP connection: "connection lost" or a 520. `finishAndAudit` takes an optional third argument: `"copy"` runs only the copy from the reference, and `"audit"` runs the colour rebind, fixes and audit. Without the argument it runs everything in one call, as before. The skill splits the call when it drops.
