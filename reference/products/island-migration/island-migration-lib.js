@@ -448,7 +448,9 @@ async function copyVarsFromRef(refRoot, page, anchors) {
           if (rs === "FIXED" && (inPanel || rn.width > room + 1)) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
           else {
             if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
-            if (rs === "FIXED" && Math.abs(rn.width - bn.width) > 1) { bn.resize(rn.width, bn.height); applied.push(a + path + " width " + Math.round(rn.width)); } }
+            // a FIXED layer that spans its parent in the reference (FIU table row dividers: 884 in an 884 row) spans OUR parent — copying the
+            // number would leave it 24 short in a wider island. Only changes that actually took are logged.
+            if (rs === "FIXED") { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
         } catch (e) {}
         // paddings and gaps: the designers retune a block's inner spacing for the island layout (TM: `Customers card / Finance`,
         // heading and info padding 24 → 16) — take the reference's value, bound to its spacing variable when it has one

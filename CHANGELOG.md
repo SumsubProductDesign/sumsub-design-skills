@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.6 — 2026-10-01 (island migration: full-width layers stay full width)
+The Case page FIU reports run matched its reference with no hand fixes (1440×900, the table in an island, the right column in the side panel, AI / help once). One finding in the finish log:
+- **Layers that span their parent keep spanning it.** The reference's table row dividers are fixed at exactly the row's width (884). Our island is 24 wider, and the finish call copied the number. It didn't stick on this screen, but on another one dividers like these could stop 24 short of the edge. Now a fixed layer as wide as its parent in the reference is made as wide as its parent in the result.
+- **The finish log lists only changes that actually took** — it no longer reports a width that the layout immediately reverted.
+
 ## v3.217.5 — 2026-10-01 (island migration: reference values land on the right layers)
 The Case page Events run built the right layout (Events log in an island, right column in the side panel, AI / help icons once — the v3.217.4 fix worked), but the finish call put two reference values on the wrong layers. The skill fixed the result by hand; the engine now gets it right itself:
 - **Values from the reference land on the matching layers.** In the reference the designer hid the first event's top connector line and set its text padding to 0; the result took the 0 padding while keeping its line, so the first event's text sat 12 px above its dot. Blocks whose layer structure differs from the reference's are no longer filled with the reference's inner values.
