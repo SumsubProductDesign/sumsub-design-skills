@@ -430,16 +430,31 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   // pairs come from a parallel walk, not from paths: where the reference hid, added or reordered a layer (Case page Events: the first
   // event's top connector line hidden + its `Info` padding 0), path indices shift and the wrong layers get each other's values. A block
   // whose children's layer lists differ from the reference is paired itself but not descended into.
-  const sig = n => ("children" in n) ? n.children.filter(k => k.visible !== false).map(k => k.name).join("|") : "";
-  const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path) => { out.push([path, r, b]); if (sig(r) !== sig(b)) return;
-    const rk = ("children" in r) ? r.children.filter(k => k.visible !== false) : [], bk = ("children" in b) ? b.children.filter(k => k.visible !== false) : [];
-    if (rk.some((k, i) => sig(k) !== sig(bk[i]))) return;
-    const cnt = {}; rk.forEach((k, i) => { cnt[k.name] = (cnt[k.name] || 0) + 1; walk(k, bk[i], path + SEP + k.name + (cnt[k.name] > 1 ? "#" + cnt[k.name] : "")); }); };
+  // …except where the only difference is how many times a layer repeats — a list whose length is data (Blueprint overview block: the
+  // reference shows 7 `.Blueprint overview item`, the original 9; table rows). Consecutive same-named layers are compared as one run:
+  // runs pair index by index, extra layers take the last reference layer of their run (v3.217.8 — before, the walk stopped at `Content`
+  // and the 9 items kept the white fill the designer hid on all 7).
+  const kidsOf = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
+  const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1]; if (l && l.name === k.name) l.items.push(k); else out.push({ name: k.name, items: [k] }); } return out; };
+  const runSig = n => runs(kidsOf(n)).map(r => r.name).join("|");
+  const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.length !== br.length || rr.some((r, i) => r.name !== br[i].name)) return null;
+    const p = []; br.forEach((b, i) => b.items.forEach((k, j) => p.push([rr[i].items[Math.min(j, rr[i].items.length - 1)], k]))); return p; };
+  // the same component in ANOTHER VARIANT (reference items State=On, the original's State=Off): what differs between them is the
+  // variant — the data — not the designer's layout. Such a pair is not descended into (text / icon colours stay the original's), and
+  // on the pair itself only what the reference overrides against its own main component is copied (the hidden white fill).
+  const otherVariant = (r, b) => { if (r.type !== "INSTANCE" || b.type !== "INSTANCE") return false;
+    try { const rp = r.componentProperties || {}, bp = b.componentProperties || {};
+      return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
+  const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path) => { const ov = otherVariant(r, b); out.push([path, r, b, ov]); if (ov) return;
+    const kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids || kids.some(([x, y]) => runSig(x) !== runSig(y))) return;
+    const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : "")); }); };
     walk(rRoot, bRoot, "·"); return out; };
+  const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
   for (const a of anchors) {
     const R = refRoot.findAll(n => n.name === a && n.visible), B = page.findAll(n => n.name === a && n.visible);
     for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
-      for (const [path, rn, bn] of mr) {
+      for (const [path, rn, bn, ov] of mr) {
+        let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }   // another variant: compare with the reference's own main
         if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
         // sizing: the designers switch fixed-width blocks to FILL (or pin a column FIXED) when the content gets wider — copy it
         // …but never a FIXED width that doesn't fit where the block now sits: the published Aside is 400 and doesn't stretch, while a
@@ -461,6 +476,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
             for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) {
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k];
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
+              if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own spacing, not an override
               let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
               try { bn.setBoundVariable(k, null); } catch (e) {}
               if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
@@ -468,6 +484,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
             if (changed.length) applied.push(a + path + " spacing → " + changed.join(", ")); } } catch (e) { skipped.push(a + path + " spacing: " + e.message); }
         for (const prop of ["fills", "strokes"]) { try {
           const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
+          if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;   // the variant's own paint
           const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
           if (rVis && rb && (!bVis || !bb || bb.id !== rb.id)) { let v = await figma.variables.getVariableByIdAsync(rb.id);
             if (v && v.remote && v.key) { try { v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }   // consumer file: bind by key

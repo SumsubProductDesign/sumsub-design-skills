@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.8 — 2026-10-01 (island migration: lists of a different length follow the reference)
+The Blueprint New blueprint · Case content run matched its reference (Full screen, Preset Select and Blueprint body bare on the grey, the overview in the side column, header from the original, no doubled icons). One difference was spotted in review and fixed by hand; the engine now handles it itself:
+- **The side overview no longer sits on a white plate.** The designer hid the white background of the overview list in the reference. Our list has more items than the reference's (9 vs 7, the original's data), so the finish step never reached the items and left them white on the grey. Now a list is matched with the reference's even when it is longer or shorter, and the extra items follow the last one.
+- **Switched-off items stay switched off.** The reference shows the same items switched on; ours are off, as in the original. Only what the designer changed by hand is taken from the reference — the colours of the on/off state stay the original's.
+- Checked read-only on seven accepted screens (Case page Overview, AML, Financial data, Related cases, Events, FIU reports, TM Transaction): nothing changes on them.
+
 ## v3.217.7 — 2026-10-01 (island migration: old scrollbars are dropped)
 - **An old scrollbar on the screen no longer blocks the migration.** Both Blueprint New blueprint screens have a scrollbar thumb at the right edge. It belongs to neither the header nor the content, so it would have stayed behind in the source and the screen would have ended unfinished. The new page scrolls by itself, so the old thumb now goes away with the old header and sidebar.
 
