@@ -291,6 +291,8 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **`narrowFills` ignores HUG nodes** — a node sized to its content (the `Tab Button History` switcher inside `AML screening`) is narrow on purpose; only FILL blocks and FIXED cards are checked.
 
+**An old scrollbar thumb is chrome.** A `Scroll / Thumb` instance at the screen's right edge (Blueprint New blueprint: 6×380 at x=1425) is neither content nor header — the `Page` scrolls by itself. It is dropped with the old header and sidebar; before, it stayed in the source and the build ended with `kept: ["Scroll / Thumb"]`.
+
 **The old sidebar spans the 900 viewport.** A collapsed `*Sidebar*` is 900 tall even when the screen is taller (Case page AML: 52×900 in a 1160 frame). It is found against `0.8 × min(height, 900)`; before, it was missed, stayed in the source and the build ended with `kept: ["*Sidebar*"]`.
 
 **Chrome at every level.** The header, the header band and the tab strip are never content, however deep they sit: TM Related transactions keeps `Header / Finance`, the `*Tab Basic*` strip and the `Txn table` in one frame — the band and the tabs go to the header, the table alone is the content group. Tab items are recognised under both names, `.Tab Basic / Item` and the older `Tab / Basic / Item` (the selected tab too). A breadcrumb that is the placeholder `Section name` counts as none — the reference's is taken.

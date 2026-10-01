@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.7 — 2026-10-01 (island migration: old scrollbars are dropped)
+- **An old scrollbar on the screen no longer blocks the migration.** Both Blueprint New blueprint screens have a scrollbar thumb at the right edge. It belongs to neither the header nor the content, so it would have stayed behind in the source and the screen would have ended unfinished. The new page scrolls by itself, so the old thumb now goes away with the old header and sidebar.
+
 ## v3.217.6 — 2026-10-01 (island migration: full-width layers stay full width)
 The Case page FIU reports run matched its reference with no hand fixes (1440×900, the table in an island, the right column in the side panel, AI / help once). One finding in the finish log:
 - **Layers that span their parent keep spanning it.** The reference's table row dividers are fixed at exactly the row's width (884). Our island is 24 wider, and the finish call copied the number. It didn't stick on this screen, but on another one dividers like these could stop 24 short of the edge. Now a fixed layer as wide as its parent in the reference is made as wide as its parent in the result.

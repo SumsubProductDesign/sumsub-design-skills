@@ -83,7 +83,10 @@ function analyze(scr) {
   // a tab strip sitting right under the header (stack), outside it (e.g. Case page: tabs live in the left column) — chrome, not content
   const subheader = all.filter(n => { const b = box(n, scr); return !contains(header, n) && !contains(header2, n) && b.y >= Math.min(hdrH, stackBottom) - 2 && b.y <= stackBottom + 32 && b.h >= 32 && b.h <= 72 &&
       "findOne" in n && !!n.findOne(x => /^\*Tab Basic\*|Tab( \/)? Basic \/ Item/.test(x.name)); }).sort((a, b) => b.width - a.width)[0] || null;
-  const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n);
+  // an old scrollbar thumb is chrome too — the Page scrolls by itself (Blueprint New blueprint: `Scroll / Thumb` at the right edge kept the
+  // source alive as a leftover)
+  const scrollbars = all.filter(n => n.type === "INSTANCE" && /Scroll \/ Thumb/i.test(n.name + " " + mainName(n)));
+  const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n) || scrollbars.some(sb => contains(sb, n));
   // columns may be direct children of the screen with no shared wrapper (Case page: left column + right column)
   let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
   if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
@@ -130,7 +133,7 @@ function analyze(scr) {
   const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
   let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) sandbox = rendered(s, scr) && s.visible; }
   const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
-  return { W, H, nodes: { sidebar, header, header2, subheader, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
+  return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
     report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
       main: main ? main.name : null, left: left ? left.name : null, right: right ? right.name : null,
       islands: content.includes("Ghost") ? groups.filter(g => !isHeadingBlock(g)).map(g => g.name) : [], table, overlays: overlays.map(o => o.name) } };
@@ -408,7 +411,7 @@ async function buildIsland(scr, a, crumb) {
   // 9. PRESERVATION GUARD — the source may only go if nothing visible is left outside its old header (stack), sidebar and subheader
   _idCache.clear();                                                          // the tree changed — rebuild id sets
   const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
-      !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n));
+      !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n) && !(nodes.scrollbars || []).some(sb => contains(sb, n)));
   // never rename a layer (designers' rule): the source keeps its name; `kept` says what stayed in it
   if (leftover.length) {
     return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }
