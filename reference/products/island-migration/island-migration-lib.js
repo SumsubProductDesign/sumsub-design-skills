@@ -424,18 +424,25 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   const SEP = " › ", applied = [], skipped = [];
   const visFill = n => n.fills && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false;
   const visStroke = n => n.strokes && n.strokes.length && n.strokes[0].type === "SOLID" && n.strokes[0].visible !== false;
-  const collect = root => { const map = new Map(); const walk = (n, path) => { map.set(path, n); if (!("children" in n)) return; const cnt = {};
-      for (const k of n.children) { if (k.visible === false) continue; cnt[k.name] = (cnt[k.name] || 0) + 1; walk(k, path + SEP + k.name + (cnt[k.name] > 1 ? "#" + cnt[k.name] : "")); } };
-    walk(root, "·"); return map; };
+  // pairs come from a parallel walk, not from paths: where the reference hid, added or reordered a layer (Case page Events: the first
+  // event's top connector line hidden + its `Info` padding 0), path indices shift and the wrong layers get each other's values. A block
+  // whose children's layer lists differ from the reference is paired itself but not descended into.
+  const sig = n => ("children" in n) ? n.children.filter(k => k.visible !== false).map(k => k.name).join("|") : "";
+  const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path) => { out.push([path, r, b]); if (sig(r) !== sig(b)) return;
+    const rk = ("children" in r) ? r.children.filter(k => k.visible !== false) : [], bk = ("children" in b) ? b.children.filter(k => k.visible !== false) : [];
+    if (rk.some((k, i) => sig(k) !== sig(bk[i]))) return;
+    const cnt = {}; rk.forEach((k, i) => { cnt[k.name] = (cnt[k.name] || 0) + 1; walk(k, bk[i], path + SEP + k.name + (cnt[k.name] > 1 ? "#" + cnt[k.name] : "")); }); };
+    walk(rRoot, bRoot, "·"); return out; };
   for (const a of anchors) {
     const R = refRoot.findAll(n => n.name === a && n.visible), B = page.findAll(n => n.name === a && n.visible);
-    for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr, mb; try { mr = collect(R[i]); mb = collect(B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
-      for (const [path, rn] of mr) { const bn = mb.get(path); if (!bn) continue;
+    for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
+      for (const [path, rn, bn] of mr) {
         if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
         // sizing: the designers switch fixed-width blocks to FILL (or pin a column FIXED) when the content gets wider — copy it
         // …but never a FIXED width that doesn't fit where the block now sits: the published Aside is 400 and doesn't stretch, while a
         // branch reference may show the same column at 424 with no panel around it (Case page right column → 24 px overflow).
-        try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
+        // a rotated layer's width is its length (Events connector lines, -90°: width 76 in a 16 frame) — sizing is not compared or copied
+        if (!(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
           const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
           const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
           if (rs === "FIXED" && (inPanel || rn.width > room + 1)) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }

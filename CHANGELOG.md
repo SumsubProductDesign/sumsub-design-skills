@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.5 — 2026-10-01 (island migration: reference values land on the right layers)
+The Case page Events run built the right layout (Events log in an island, right column in the side panel, AI / help icons once — the v3.217.4 fix worked), but the finish call put two reference values on the wrong layers. The skill fixed the result by hand; the engine now gets it right itself:
+- **Values from the reference land on the matching layers.** In the reference the designer hid the first event's top connector line and set its text padding to 0; the result took the 0 padding while keeping its line, so the first event's text sat 12 px above its dot. Blocks whose layer structure differs from the reference's are no longer filled with the reference's inner values.
+- **Connector lines keep their length.** Rotated lines were compared with the width of their frame and switched to fill; lines, vectors and rotated layers no longer take sizing from the reference.
+- Checked read-only: on Events the first event is left untouched while the other events still pair; on TM Transaction the Customers card paddings still come from the reference.
+
 ## v3.217.4 — 2026-10-01 (island migration: no doubled AI / help icons in the header)
 The Case page Related cases run matched its reference — `Risk overview` hugs its content (352, island 384) as v3.217.3 intended. The skill found one more defect and fixed it by hand; the engine now does it itself:
 - **The Summy AI and help icons no longer appear twice in the header.** The new header has its own; old Case page headers carry the same two in their actions row, and they were copied next to the header's own. A copied icon-only button is dropped when the header already shows that icon. Checked read-only on the AML and Financial data results: exactly the two duplicates would go, every text action stays; the TM results are unaffected.
