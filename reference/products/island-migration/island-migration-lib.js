@@ -392,6 +392,9 @@ async function buildIsland(scr, a, crumb) {
     const acts = R.actions.length ? R.actions : carry;
     if (acts.length) { try { getHdr().setProperties({ "Show actions slot#6943:20": true }); fillSlot(/Actions slot/i, acts);
         for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findOne(q => q.type === "TEXT" && q.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
+        // the published header brings its own Summy AI and help icons outside the Actions slot; the old header kept them inside its Actions
+        // row, so they were copied twice (Case page AML / Financial data). An icon-only copy whose icon the header already shows goes.
+        try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
       } catch (e) { notes.push("actions: " + e.message); } }
   }
   // 7. overlays beside the instance (its children are locked)

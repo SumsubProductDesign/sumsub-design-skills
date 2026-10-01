@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.4 — 2026-10-01 (island migration: no doubled AI / help icons in the header)
+The Case page Related cases run matched its reference — `Risk overview` hugs its content (352, island 384) as v3.217.3 intended. The skill found one more defect and fixed it by hand; the engine now does it itself:
+- **The Summy AI and help icons no longer appear twice in the header.** The new header has its own; old Case page headers carry the same two in their actions row, and they were copied next to the header's own. A copied icon-only button is dropped when the header already shows that icon. Checked read-only on the AML and Financial data results: exactly the two duplicates would go, every text action stays; the TM results are unaffected.
+
 ## v3.217.3 — 2026-10-01 (island migration: islands hug their content)
 - **No empty band at the bottom of an island.** Old wrapper frames often have a fixed height that filled the old column: on Case page Related cases, `Risk overview` is 708 tall around 352 of content. Placed in an island, such a frame now takes the height of its content, as in the reference (352). Components keep their own height.
 

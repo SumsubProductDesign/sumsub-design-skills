@@ -281,6 +281,8 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **Never rename a layer** (designers' rule, asked by the team): the migration keeps every layer's name — the moved blocks, the source screen, and the result, which takes the source's name. New frames the engine creates for the layout (a side section like the reference's) take the reference's name.
 
+**No doubled header icons.** The published `*Header*` brings its own Summy AI and help icons outside the Actions slot. Old Case page headers keep the same two inside their actions row, so they were copied into the slot as well and showed twice (Case page AML, Financial data). After the actions are copied, an icon-only button whose icon the header already shows outside the slot is removed (`the header has its own normal/AI-paw — the copied one removed`); if the header's own icon is hidden, the copy stays.
+
 **A side column that is a component instance** (CM `Case page right column`) keeps its own blocks — nothing can be inserted into an instance, so the reference block matching is skipped for it (only the flush-sections step applies). Walking it after the Aside variant change threw on stale sublayer ids (Case page AML run).
 
 **`narrowFills` ignores HUG nodes** — a node sized to its content (the `Tab Button History` switcher inside `AML screening`) is narrow on purpose; only FILL blocks and FIXED cards are checked.
