@@ -145,6 +145,7 @@ col = page.findOne(n => n.name === colName && n.visible);                 // the
 col.itemSpacing = refCol.itemSpacing || 0;
 notes.push("side column: flush sections as in the reference");
 }
+if (col.type === "INSTANCE") { notes.push("side column is a component instance — its own blocks stay as they are"); return; }
 const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
 const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;

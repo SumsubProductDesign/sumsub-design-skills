@@ -280,6 +280,10 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **Never rename a layer** (designers' rule, asked by the team): the migration keeps every layer's name — the moved blocks, the source screen, and the result, which takes the source's name. New frames the engine creates for the layout (a side section like the reference's) take the reference's name.
 
+**A side column that is a component instance** (CM `Case page right column`) keeps its own blocks — nothing can be inserted into an instance, so the reference block matching is skipped for it (only the flush-sections step applies). Walking it after the Aside variant change threw on stale sublayer ids (Case page AML run).
+
+**`narrowFills` ignores HUG nodes** — a node sized to its content (the `Tab Button History` switcher inside `AML screening`) is narrow on purpose; only FILL blocks and FIXED cards are checked.
+
 **The old sidebar spans the 900 viewport.** A collapsed `*Sidebar*` is 900 tall even when the screen is taller (Case page AML: 52×900 in a 1160 frame). It is found against `0.8 × min(height, 900)`; before, it was missed, stayed in the source and the build ended with `kept: ["*Sidebar*"]`.
 
 **Chrome at every level.** The header, the header band and the tab strip are never content, however deep they sit: TM Related transactions keeps `Header / Finance`, the `*Tab Basic*` strip and the `Txn table` in one frame — the band and the tabs go to the header, the table alone is the content group. Tab items are recognised under both names, `.Tab Basic / Item` and the older `Tab / Basic / Item` (the selected tab too). A breadcrumb that is the placeholder `Section name` counts as none — the reference's is taken.

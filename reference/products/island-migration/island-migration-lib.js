@@ -198,6 +198,9 @@ async function sideFromReference(page, refRoot, colName, labelValue, notes) {
     col.itemSpacing = refCol.itemSpacing || 0;
     notes.push("side column: flush sections as in the reference");
   }
+  // a column that is a component instance (CM: `Case page right column`) carries the component's own blocks — nothing can be
+  // inserted into it, and walking its re-created sublayers after the Aside variant change throws on stale ids (Case page AML run)
+  if (col.type === "INSTANCE") { notes.push("side column is a component instance — its own blocks stay as they are"); return; }
   const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
     const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
     for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
@@ -555,7 +558,7 @@ function stretchToWidth(page, withRef) {
 // Any horizontal/vertical auto-layout child that was FILL in the source must still reach its parent's inner width.
 function narrowFills(page) {
   const out = [];
-  for (const n of page.findAll(x => x.visible && (x.layoutSizingHorizontal === "FILL" || cardLike(x)) && x.parent && x.parent.layoutMode === "VERTICAL" && x.parent.layoutSizingHorizontal !== "HUG")) {
+  for (const n of page.findAll(x => x.visible && (x.layoutSizingHorizontal === "FILL" || (cardLike(x) && x.layoutSizingHorizontal !== "HUG")) && x.parent && x.parent.layoutMode === "VERTICAL" && x.parent.layoutSizingHorizontal !== "HUG")) {
     const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0);
     if (inner - n.width > 4) out.push(n.name + " " + Math.round(n.width) + "/" + Math.round(inner)); if (out.length > 8) break; }
   return out;

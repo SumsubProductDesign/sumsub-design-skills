@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.2 — 2026-10-01 (island migration: two fixes from the Case page AML run)
+The Case page AML skill run matched its reference (1440×1118, `AML screening` bare, the right column flush in the side panel, header from the original). It surfaced two engine defects that did no harm on this screen:
+- **No false "narrow block" warning for content-sized elements.** The audit flagged the `Tab Button History` switcher (240 wide by design) as a card that doesn't reach its edge. Elements sized to their content are no longer checked.
+- **A side column that is a component instance is left as it is.** Matching its blocks against the reference failed on stale layer ids; an instance can't take extra blocks anyway, so the step now skips it cleanly instead of failing.
+
 ## v3.217.1 — 2026-10-01 (island migration: the old sidebar on taller screens)
 - **The old collapsed sidebar is found on screens taller than 900.** It spans the 900 viewport, so on Case page AML (1160 tall) it was missed and would have stayed behind in the source, leaving the screen unfinished. Checked on that screen: the sidebar is found and nothing is left outside the moved parts.
 

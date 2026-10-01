@@ -103,7 +103,7 @@ return log;
 }
 function narrowFills(page) {
 const out = [];
-for (const n of page.findAll(x => x.visible && (x.layoutSizingHorizontal === "FILL" || cardLike(x)) && x.parent && x.parent.layoutMode === "VERTICAL" && x.parent.layoutSizingHorizontal !== "HUG")) {
+for (const n of page.findAll(x => x.visible && (x.layoutSizingHorizontal === "FILL" || (cardLike(x) && x.layoutSizingHorizontal !== "HUG")) && x.parent && x.parent.layoutMode === "VERTICAL" && x.parent.layoutSizingHorizontal !== "HUG")) {
 const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0);
 if (inner - n.width > 4) out.push(n.name + " " + Math.round(n.width) + "/" + Math.round(inner)); if (out.length > 8) break; }
 return out;
