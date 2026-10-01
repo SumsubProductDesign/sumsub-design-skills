@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.217.1 — 2026-10-01 (island migration: the old sidebar on taller screens)
+- **The old collapsed sidebar is found on screens taller than 900.** It spans the 900 viewport, so on Case page AML (1160 tall) it was missed and would have stayed behind in the source, leaving the screen unfinished. Checked on that screen: the sidebar is found and nothing is left outside the moved parts.
+
 ## v3.217.0 — 2026-09-30 (island migration: never rename layers; TM Related transactions)
 - **Layers are never renamed.** The team asked for it as a rule: the migration keeps every layer's name. The one place the engine did rename — a screen it couldn't finish got `… — NOT MIGRATED: …` appended — is gone; the screen keeps its name and `kept` lists what's left in it.
 - **The header band and the tab strip are never content**, however deep they sit. On TM Related transactions they share one frame with the table; the plan put the band into an island of its own. Now they go to the header and the table alone goes into the island, as in the reference.

@@ -67,7 +67,8 @@ const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingB
 function analyze(scr) {
   const W = Math.round(scr.width), H = Math.round(scr.height), notes = [];
   const all = scr.findAll(n => n.visible !== false && rendered(n, scr));
-  const sidebar = all.filter(n => { const b = box(n, scr); return b.x <= 2 && b.y <= 2 && b.h >= 0.8 * H && b.w >= 44 && b.w <= 300 &&
+  // the old sidebar spans the 900 viewport, not a taller frame (Case page AML: 52×900 in a 1160 screen — missed at 0.8 × 1160)
+  const sidebar = all.filter(n => { const b = box(n, scr); return b.x <= 2 && b.y <= 2 && b.h >= 0.8 * Math.min(H, 900) && b.w >= 44 && b.w <= 300 &&
       (/sidebar|menu|navigation/i.test(n.name) || /Sidebar/.test(mainName(n))); }).sort((a, b) => b.height - a.height)[0] || null;
   const sbW = sidebar ? Math.round(sidebar.width) : 0;
   const header = all.filter(n => { const b = box(n, scr); return b.y <= 2 && b.h >= 40 && b.h <= 160 && b.x >= sbW - 2 && b.w >= 0.7 * (W - sbW) &&
