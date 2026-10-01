@@ -568,6 +568,14 @@ async function finishIsland(page, refId) {
 // They MUST be separate use_figma calls: after blocks move into slots, node proxies in the same call go stale
 // ("node … does not exist" while walking the moved tree) and the throw rolls the whole build back.
 // grey = a grey surface (ghost #f9fafb / subtlest #f3f4f6) under at least 40 % of the reference's main content area
+// The main column that is ALREADY a card goes over whole when the reference keeps that same block bare (TM Settings:
+// `.Content` is a white r12 card holding the title, the fields and the Button bar — split into its children it became
+// islands in a card, while the reference shows the one card, radius 16 from the reference)
+function keepWholeCard(a, refP) {
+const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || !cardLike(m)) return false;
+if (refPlacement(refP, m.name) !== "bare") return false;
+a.nodes.groups = [m]; return true;
+}
 function refIsGrey(P) {
   const ms = P.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms || !ms.absoluteBoundingBox) return null; const mb = ms.absoluteBoundingBox;
   return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false && !!n.absoluteBoundingBox &&
@@ -582,7 +590,7 @@ async function planOne(scrId, refOverride) {
   _idCache.clear(); const a = analyze(scr);
   let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-  const grey = refP ? refIsGrey(refP) : null; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null; // the same width rule migrateOne applies with a reference
+  const whole = keepWholeCard(a, refP); const grey = refP ? refIsGrey(refP) : null; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null; // the same width rule migrateOne applies with a reference
 const planWidth = rms && !a.nodes.table ? ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max") : a.plan.width;
   const blocks = []; let pending = [];
   for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
@@ -592,7 +600,7 @@ const planWidth = rms && !a.nodes.table ? ((rms.width >= 1280 || a.plan.content 
   if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
   return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
     plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
-    blocks, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
+    blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
     header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
 async function migrateOne(scrId, refOverride) {   // refOverride: the designer's reference node id, when the screen's name doesn't carry "(ref …)"
@@ -606,7 +614,7 @@ async function migrateOne(scrId, refOverride) {   // refOverride: the designer's
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
   if (refP && refIsGrey(refP) === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
-  a.refRoot = refP;
+  a.refRoot = refP; const whole = keepWholeCard(a, refP);
   if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
     const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
     if (ms && !a.nodes.table) a.plan.width = (ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max";

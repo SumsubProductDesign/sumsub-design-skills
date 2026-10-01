@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.227.0 — 2026-10-02 (island migration: a main column that is already a card stays whole)
+- **A main column that is already a card is moved whole.** In TM Settings the main column `.Content` is one white card holding the title, the fields and the Button bar. The engine split it into its children and put each in an island, so islands sat inside a card. When the main column is itself a card and the reference keeps a block of the same name bare, the engine now moves it as one card. The finish then gives it the reference's radius. `planOne` reports `wholeCard: true`.
+
 ## v3.226.0 — 2026-10-02 (island migration: faster finish)
 - **The finish no longer switches the app to the screen's page.** The finish creates no layers, so the switch was useless. It re-rendered the whole page in the app, about 16 s on the big test page, and the current page resets after the call anyway. The build call still switches, because it creates instances.
 - **Variable imports are fetched as one batch.** One `importVariableByKeyAsync` takes about 170 ms, sometimes 850. The resolver used to run them one by one, 50–60 per finish. Now it collects the variables of each reference block and of our content first and imports them together. When the variables are already loaded, 12 imports take about 0.2 s instead of 3.4 s. Cold, Figma still runs them largely in sequence.
