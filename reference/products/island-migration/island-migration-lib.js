@@ -674,10 +674,13 @@ async function rebindOrphanVars(page) {
   const live = new Set(cols.map(c => c.key));
   const base = cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color"); if (!base) return { rebound: 0, missing: ["Base color collection not available"] };
   const byName = new Map(); for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
-  const colKey = new Map(), imported = new Map();
+  const colKey = new Map(), imported = new Map(), stale = new Map();
   const orphanTarget = async id => { const v = await figma.variables.getVariableByIdAsync(id); if (!v || !v.remote) return null;
     if (!colKey.has(v.variableCollectionId)) { let k = null; try { const c = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId); k = c ? c.key : null; } catch (e) {} colKey.set(v.variableCollectionId, k); }
-    const ck = colKey.get(v.variableCollectionId); if (!ck || live.has(ck)) return null;
+    const ck = colKey.get(v.variableCollectionId); if (!ck) return null;
+    // a live library variable can still be a STALE copy: the file keeps an old import (same key, old value — base/neutral/10 = #f6f7f9
+    // after "Update all" in New Layout) next to the fresh one the engine imports; rebind to the fresh copy
+    if (live.has(ck)) { if (!stale.has(v.key)) { let fr = null; try { fr = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} stale.set(v.key, fr && fr.id !== v.id ? fr : null); } const fr = stale.get(v.key); return fr ? { from: v.name + " (stale copy)", to: fr } : null; }
     const key = byName.get(v.name.toLowerCase()); if (!key) { miss.add(v.name); return null; }
     if (!imported.has(key)) imported.set(key, await figma.variables.importVariableByKeyAsync(key)); return { from: v.name, to: imported.get(key) }; };
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));

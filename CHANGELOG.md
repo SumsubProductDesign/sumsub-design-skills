@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.224.0 — 2026-10-01 (island migration: stale variable copies refreshed)
+- **Colours stuck on an old copy of a Base variable are refreshed.** After "Update all" in New Layout, the file still kept old copies of Base variables beside the fresh ones. They had the same key and the old value, for example `base/neutral/10` = `#f6f7f9` instead of `#f3f4f6`. The same pass that rebinds the vanished library now also moves our content from an old copy to the fresh one. The colour is the same variable, now at its current value. Only the migrated content is touched, never the inside of a component.
+- **Checked on a copy of the CM Overview team result, deleted afterwards.** Old-palette colours went down from 223 to 32. 210 were rebound away from the vanished library and 44 were moved off old copies: buttons, cards, dividers and the purple status. All 32 that remain sit inside components: chips, counters, priority icons and the header logo. These come from the library itself. In Base, `*Chips*` still nests an old version of `*Counter*`, so this is one for the design team.
+
 ## v3.223.0 — 2026-10-01 (island migration: colours from a vanished library are rebound to Base)
 - **Old colours left over from an old library are fixed.** The CM Overview mockups bound their texts, dividers and status lines to a second `color` / `Design tokens` library that the file can no longer reach. Those colours were frozen at the pre-redesign palette: `#212736`, `#373d4d`, `#e1e5ea`. The finish call now rebinds each one to the same-named variable of the current Base library. Only the migrated content is touched, never the inside of a component, and the result's new `orphanVars` field lists every rebinding.
 - **Checked on a copy of the CM Overview team result, deleted afterwards.** 210 colours were rebound, and every name exists in Base. The old colours that remain sit inside components: chips, counters, priority icons, the header logo. They come from current Base variables that this file hasn't updated, and only accepting the Base library update in the file fixes them.
