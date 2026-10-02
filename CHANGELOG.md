@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.229.0 — 2026-10-02 (island migration: blocks that share an island in the reference share one here)
+- **Blocks that sit in one island in the reference go into one island.** In TM Settings / Create a VASP the designers put the title, the fields and the Button bar into one island. The engine wrapped each block in its own island, so the form came out as three islands. It now groups the blocks the way the reference does. `planOne` shows them as one line ending in `→ island (reference, shared)`.
+
 ## v3.228.0 — 2026-10-02 (island migration: colours and spacing on our content are checked and cleaned)
 - **The skill audit now looks at island content.** On an island screen everything sits in the slots of the `Page` instance, and the audit skipped anything inside an instance. Its colour, spacing and radius checks saw none of our layers and always came back clean. Slot content now counts as ours. New check 7.61 flags a visible fill or stroke without a variable, or one bound to a `base/*` token.
 - **Cards on the grey always get the island colours.** A card standing bare on the grey gets the `background/secondary` fill and the `border/neutral/subtlest` border, even when the designer's reference still has the old ones. TM Settings had a darker border and a plain white.

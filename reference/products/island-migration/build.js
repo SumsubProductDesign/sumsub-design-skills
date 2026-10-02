@@ -121,6 +121,21 @@ const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return nul
 let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
 return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
 }
+// Blocks that sit in ONE island in the reference go into one island here (TM Settings / Create a VASP: Name, the fields and the
+// Button bar share one IslandCard in 283:31704 — wrapped one by one they became three islands)
+function refIslandOf(refRoot, name) {
+if (!refRoot) return null;
+const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return q.id;
+return null;
+}
+function mergeSharedIslands(bundles, refRoot) {
+const out = []; let last = null;
+for (const b of bundles) { const isl = refIslandOf(refRoot, b[b.length - 1].name);
+if (isl && isl === last && out.length) out[out.length - 1] = out[out.length - 1].concat(b); else out.push(b);
+last = isl; }
+return out;
+}
 function refCrumb(refRoot) {
 if (!refRoot) return null;
 const h = refRoot.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible); if (!h) return null;
@@ -231,7 +246,7 @@ nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; i
 if (wrappers.size) notes.push("groups inside instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
 const bundles = []; let pending = [];
 for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); continue; } bundles.push([...pending, g]); pending = []; }
-if (pending.length) bundles.push(pending);
+if (pending.length) bundles.push(pending); { const mg = mergeSharedIslands(bundles, a.refRoot); if (mg.length < bundles.length) notes.push("one island for blocks that share one in the reference: " + mg.filter(b => b.length > 1).map(b => b.map(g => g.name).join(" + ")).join("; ")); bundles.length = 0; bundles.push(...mg); }
 const cards = [];
 for (const bundle of bundles) {
 const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name);
@@ -360,11 +375,12 @@ let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
 const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = sf.grey; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
 const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
-const blocks = []; let pending = [];
+const blocks = []; let pending = [], lastIsl = null;
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
 const rp = refPlacement(refP, g.name);
 const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
-blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
+const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
+lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
 return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
 plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
