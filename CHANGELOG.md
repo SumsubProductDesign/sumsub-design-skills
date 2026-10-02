@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.235.0 — 2026-10-02 (island migration: dropped wrapper cards are unboxed; radius 12 → 16 on the grey)
+- **A wrapper card the designers removed is removed here too.** In TM Settings / Complete to-do list everything sat in one white card: the title, an alert, six checklist cards and a button. In the reference they stand straight on the grey, and the checklist rows are cards of their own. The engine kept the white card, which would have put cards inside a card. Now, when our card isn't in the reference but its contents are on the grey outside any card or island there, its parts go over bare and the wrapper goes.
+- **Cards on the grey get radius 16.** This applies the designers' table rule "radius 12 → 16" to white cards with a border in the main column, outside islands. Tinted blocks such as alerts keep their own radius.
+
 ## v3.234.0 — 2026-10-02 (island migration: intended overflow kept; audit sidebar names fixed)
 - **Icons that are meant to overflow are no longer squeezed.** On Submit compliance the finish narrowed three 16 px stepper icons to 10 px to fit their container. In the reference they are wider than the container too. A block that overflows its parent in the reference keeps its width now.
 - **The audit's sidebar check uses the real DS names.** It expected "Transaction monitoring", but the DS option is "Transactions monitoring", so every TM screen got a false finding. The admin expectation is now "Admin area", reports are mapped to "Reports" on their own, and the AML entry is gone because the DS sidebar has no AML type.

@@ -126,6 +126,10 @@ if (hasStroke(k) && !(sb && sb.id === v.border.id)) { repaint(k, "strokes", v.bo
 const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
+{ let rx = null; try { rx = await figma.variables.importVariableByKeyAsync("03884e014085a48cf26670632be200a02b5a160c"); } catch (e) {}   // v3.235: designers' rule "radius 12 → 16" for white cards on the grey (Checklist row); not inside islands, not tinted blocks — the Alert keeps 12
+const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; return false; };
+if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
+try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
 async function finishIsland(page, refId) {
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);

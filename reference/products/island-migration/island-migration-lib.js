@@ -183,6 +183,17 @@ if (!refRoot || !("children" in g)) return null;
 const ids = g.children.filter(k => k.visible !== false).map(k => refIslandOf(refRoot, k.name));
 return ids.length && ids.every(id => id && id === ids[0]) ? ids[0] : null;
 }
+// v3.235: the designer dropped a wrapper card — our card isn't in the reference by name, but the blocks inside it sit in the
+// reference's main column on the grey, outside any island or card (Complete to-do list: .Content held the title, the alert,
+// six Checklist row cards and the button; the reference shows all of them bare) → its parts go over bare, the card goes
+function refUnboxed(refRoot, g) {
+if (!refRoot || !cardLike(g) || refPlacement(refRoot, g.name) || refIslandByKids(refRoot, g) || !("findAll" in g)) return false;
+const ms = refRoot.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms) return false;
+const names = [...new Set(g.findAll(x => x.visible !== false && x.type === "INSTANCE").map(x => x.name))];
+const wrapped = y => { for (let q = y.parent; q && q.id !== ms.id; q = q.parent) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; if (q.type === "FRAME" && isCard(q)) return true; } return false; };
+const found = names.map(nm => ms.findOne(y => y.name === nm && y.visible)).filter(Boolean);
+return found.length >= 2 && found.every(y => !wrapped(y));
+}
 function mergeSharedIslands(bundles, refRoot) {
 const out = []; let last = null;
 for (const b of bundles) { const isl = refIslandOf(refRoot, b[b.length - 1].name);
@@ -375,7 +386,8 @@ async function buildIsland(scr, a, crumb) {
       if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
       if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
       // already a card, or a stack of cards (Case page Overview tab content) → straight on grey, no wrapping island
-      if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
+      if (bundle.length === 1 && !rp && refUnboxed(a.refRoot, bundle[0])) { const box0 = bundle[0]; for (const part of vis(box0)) cards.push(part.clone()); notes.push("reference dropped the card " + box0.name + " — its parts go bare: " + vis(box0).map(p => p.name).join(", ")); try { box0.remove(); } catch (e) { notes.push("could not remove " + box0.name); } continue; }
+if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
       if (bundle.length === 1 && (rp === "split" || isCardStack(bundle[0]))) {
         // a wrapper of cards (Case page Overview tab content): its parts become separate items of the main column,
         // exactly like the designers' after-reference. Cards stay bare, a non-card part (Transactions table) gets its own island.
@@ -631,6 +643,10 @@ if (hasStroke(k) && !(sb && sb.id === v.border.id)) { repaint(k, "strokes", v.bo
 const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
+{ let rx = null; try { rx = await figma.variables.importVariableByKeyAsync("03884e014085a48cf26670632be200a02b5a160c"); } catch (e) {}   // v3.235: designers' rule "radius 12 → 16" for white cards on the grey (Checklist row); not inside islands, not tinted blocks — the Alert keeps 12
+const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; return false; };
+if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
+try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
 async function finishIsland(page, refId) {
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
@@ -678,7 +694,7 @@ async function planOne(scrId, refOverride, opts) {
 const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
   const blocks = []; let pending = [], lastIsl = null;
   for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
-    const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null);
+    const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null) || (refUnboxed(refP, g) ? "unboxed" : null);
     const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
     const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }

@@ -136,6 +136,17 @@ if (!refRoot || !("children" in g)) return null;
 const ids = g.children.filter(k => k.visible !== false).map(k => refIslandOf(refRoot, k.name));
 return ids.length && ids.every(id => id && id === ids[0]) ? ids[0] : null;
 }
+// v3.235: the designer dropped a wrapper card — our card isn't in the reference by name, but the blocks inside it sit in the
+// reference's main column on the grey, outside any island or card (Complete to-do list: .Content held the title, the alert,
+// six Checklist row cards and the button; the reference shows all of them bare) → its parts go over bare, the card goes
+function refUnboxed(refRoot, g) {
+if (!refRoot || !cardLike(g) || refPlacement(refRoot, g.name) || refIslandByKids(refRoot, g) || !("findAll" in g)) return false;
+const ms = refRoot.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms) return false;
+const names = [...new Set(g.findAll(x => x.visible !== false && x.type === "INSTANCE").map(x => x.name))];
+const wrapped = y => { for (let q = y.parent; q && q.id !== ms.id; q = q.parent) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; if (q.type === "FRAME" && isCard(q)) return true; } return false; };
+const found = names.map(nm => ms.findOne(y => y.name === nm && y.visible)).filter(Boolean);
+return found.length >= 2 && found.every(y => !wrapped(y));
+}
 function mergeSharedIslands(bundles, refRoot) {
 const out = []; let last = null;
 for (const b of bundles) { const isl = refIslandOf(refRoot, b[b.length - 1].name);
@@ -296,6 +307,7 @@ for (const bundle of bundles) {
 const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name) || (refIslandByKids(a.refRoot, g0) ? "island" : null);
 if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
 if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
+if (bundle.length === 1 && !rp && refUnboxed(a.refRoot, bundle[0])) { const box0 = bundle[0]; for (const part of vis(box0)) cards.push(part.clone()); notes.push("reference dropped the card " + box0.name + " — its parts go bare: " + vis(box0).map(p => p.name).join(", ")); try { box0.remove(); } catch (e) { notes.push("could not remove " + box0.name); } continue; }
 if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
 if (bundle.length === 1 && (rp === "split" || isCardStack(bundle[0]))) {
 const stack = bundle[0]; const flat = [];
@@ -424,7 +436,7 @@ const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = s
 const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
 const blocks = []; let pending = [], lastIsl = null;
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
-const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null);
+const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null) || (refUnboxed(refP, g) ? "unboxed" : null);
 const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
 const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
