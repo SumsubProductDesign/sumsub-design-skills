@@ -131,12 +131,37 @@ const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.pare
 if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
 try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
+// v3.236: the designer moved a sibling into a wrapper (Complete to-do list: the Alert went into the rows' wrapper, gap 8). If a reference
+// frame holds exactly our frame's children plus blocks that are our frame's unique siblings, those siblings move in, in the reference's
+// order, and our frame takes the reference frame's gap and its children's FILL widths
+async function regroupLikeReference(refRoot, page) {
+const log = []; const names = n => vis(n).map(k => k.name);
+const ourSlots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const refSlots = refRoot.findAll(n => n.type === "SLOT" && /^(Main content|Side content)$/.test(n.name));
+const ours = []; const walk = n => { if (n.type === "INSTANCE" || !("children" in n)) return; if (n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 1) ours.push(n); for (const k of n.children) walk(k); };
+for (const s of ourSlots) for (const k of s.children) walk(k);
+const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
+const nameCount = {}; for (const n of ours) nameCount[n.name] = (nameCount[n.name] || 0) + 1;
+for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;   // component instances only — auto-named frames match by accident (CM team: dozens of Frame 2709… rows)
+for (const W of refs) { const wn = names(W); if (wn.length <= bn.length) continue;
+let i = 0; const extras = []; for (const nm of wn) { if (i < bn.length && nm === bn[i]) i++; else extras.push(nm); }
+if (i !== bn.length || !extras.length) continue;
+const sibs = vis(B.parent).filter(x => x.id !== B.id); const movers = extras.map(nm => sibs.filter(x => x.name === nm));
+if (movers.some(m => m.length !== 1 || m[0].type !== "INSTANCE")) continue;
+wn.forEach((nm, idx) => { const m = movers.flat().find(x => x.name === nm); if (m) { try { B.insertChild(Math.min(idx, B.children.length), m); } catch (e) {} } });
+const rbv = W.boundVariables && W.boundVariables.itemSpacing; let v = null;
+if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
+try { B.setBoundVariable("itemSpacing", null); } catch (e) {} if (v) { try { B.setBoundVariable("itemSpacing", v); } catch (e) { B.itemSpacing = W.itemSpacing; } } else B.itemSpacing = W.itemSpacing;
+const wk = vis(W), bk = vis(B); bk.forEach((k, j) => { try { if (wk[j] && wk[j].layoutSizingHorizontal === "FILL" && k.layoutSizingHorizontal !== "FILL") k.layoutSizingHorizontal = "FILL"; } catch (e) {} });
+log.push(B.name + ": moved in " + extras.join(", ") + " like the reference " + W.name + ", gap " + Math.round(W.itemSpacing)); break; } }
+return log;
+}
 async function finishIsland(page, refId) {
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
+const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 function stretchToWidth(page, withRef) {

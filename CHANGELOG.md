@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.236.0 — 2026-10-02 (island migration: the three manual fixes from Complete to-do list)
+- **No false sandbox.** The old header kept a "You are in sandbox mode" text below its visible edge. The engine read it as an active sandbox, turned on the sandbox page and moved the whole screen 24 px down. The text now counts only if it is actually inside the header.
+- **Rows that filled their column keep filling it.** The checklist cards were fixed at the old 608 px width and stayed narrow in the new 691 px column. Blocks that spanned their parent in the original now stretch to the new width. The reference's own fixed widths still take priority.
+- **Blocks the designer moved into a group are moved too.** In the reference the alert sits in the same group as the checklist rows, 8 px apart. Ours was a separate block 16 px above them. When a reference group holds exactly our group plus a neighbouring component, that component moves in, and our group takes the reference's spacing. This is limited to components and to groups with a unique name. On the 15 accepted screens it changes nothing.
+
 ## v3.235.0 — 2026-10-02 (island migration: dropped wrapper cards are unboxed; radius 12 → 16 on the grey)
 - **A wrapper card the designers removed is removed here too.** In TM Settings / Complete to-do list everything sat in one white card: the title, an alert, six checklist cards and a button. In the reference they stand straight on the grey, and the checklist rows are cards of their own. The engine kept the white card, which would have put cards inside a card. Now, when our card isn't in the reference but its contents are on the grey outside any card or island there, its parts go over bare and the wrapper goes.
 - **Cards on the grey get radius 16.** This applies the designers' table rule "radius 12 → 16" to white cards with a border in the main column, outside islands. Tinted blocks such as alerts keep their own radius.

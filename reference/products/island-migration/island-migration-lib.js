@@ -131,7 +131,7 @@ function analyze(scr) {
       .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
         return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
   const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
-  let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) sandbox = rendered(s, scr) && s.visible; }
+  let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }   // v3.236: the flag text below the header edge is not shown (Complete to-do list: y 58 in a 56 header) — no sandbox
   const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
   return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
     report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
@@ -317,6 +317,10 @@ function stripCardChrome(c, fullW) {
 }
 async function buildIsland(scr, a, crumb) {
   const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
+// v3.236: a FIXED block that spanned its parent in the old screen (the six Checklist rows: 608 in a 608 column) keeps spanning after the move — marked here, set to FILL once the page is built
+const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
+for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && x.layoutSizingHorizontal === "FIXED" && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
+const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0); if (Math.abs(n.width - inner) <= 1) { try { n.setSharedPluginData("sumsub_island", "span", "1"); } catch (e) {} } } }
   const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
   // header regions + fallback actions from the ORIGINAL (ancestor-visible), before anything moves
   const R = headerRegions(nodes.header, scr);
@@ -484,6 +488,9 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
   }
   // 7. overlays beside the instance (its children are locked)
   try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
+{ const spans = page.findAll(n => { try { return n.getSharedPluginData("sumsub_island", "span") === "1"; } catch (e) { return false; } }); let k = 0;
+for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal === "FIXED" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
+if (k) notes.push("blocks that spanned their column in the original span it here too: " + k); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
   // 8. keep the original size
   try { page.resize(origW, origH); } catch (e) {}
@@ -648,12 +655,37 @@ const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.pare
 if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
 try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
+// v3.236: the designer moved a sibling into a wrapper (Complete to-do list: the Alert went into the rows' wrapper, gap 8). If a reference
+// frame holds exactly our frame's children plus blocks that are our frame's unique siblings, those siblings move in, in the reference's
+// order, and our frame takes the reference frame's gap and its children's FILL widths
+async function regroupLikeReference(refRoot, page) {
+const log = []; const names = n => vis(n).map(k => k.name);
+const ourSlots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const refSlots = refRoot.findAll(n => n.type === "SLOT" && /^(Main content|Side content)$/.test(n.name));
+const ours = []; const walk = n => { if (n.type === "INSTANCE" || !("children" in n)) return; if (n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 1) ours.push(n); for (const k of n.children) walk(k); };
+for (const s of ourSlots) for (const k of s.children) walk(k);
+const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
+const nameCount = {}; for (const n of ours) nameCount[n.name] = (nameCount[n.name] || 0) + 1;
+for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;   // component instances only — auto-named frames match by accident (CM team: dozens of Frame 2709… rows)
+for (const W of refs) { const wn = names(W); if (wn.length <= bn.length) continue;
+let i = 0; const extras = []; for (const nm of wn) { if (i < bn.length && nm === bn[i]) i++; else extras.push(nm); }
+if (i !== bn.length || !extras.length) continue;
+const sibs = vis(B.parent).filter(x => x.id !== B.id); const movers = extras.map(nm => sibs.filter(x => x.name === nm));
+if (movers.some(m => m.length !== 1 || m[0].type !== "INSTANCE")) continue;
+wn.forEach((nm, idx) => { const m = movers.flat().find(x => x.name === nm); if (m) { try { B.insertChild(Math.min(idx, B.children.length), m); } catch (e) {} } });
+const rbv = W.boundVariables && W.boundVariables.itemSpacing; let v = null;
+if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
+try { B.setBoundVariable("itemSpacing", null); } catch (e) {} if (v) { try { B.setBoundVariable("itemSpacing", v); } catch (e) { B.itemSpacing = W.itemSpacing; } } else B.itemSpacing = W.itemSpacing;
+const wk = vis(W), bk = vis(B); bk.forEach((k, j) => { try { if (wk[j] && wk[j].layoutSizingHorizontal === "FILL" && k.layoutSizingHorizontal !== "FILL") k.layoutSizingHorizontal = "FILL"; } catch (e) {} });
+log.push(B.name + ": moved in " + extras.join(", ") + " like the reference " + W.name + ", gap " + Math.round(W.itemSpacing)); break; } }
+return log;
+}
 async function finishIsland(page, refId) {
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
       const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-      const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
+      const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
   return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 
