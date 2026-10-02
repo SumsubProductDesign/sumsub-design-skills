@@ -283,7 +283,9 @@ if (moved) { try { moved.layoutSizingHorizontal = "FILL"; } catch (e) {} try { m
 if (nodes.left) intoAside(nodes.left, "left");
 if (nodes.right) {
 if (plan.sideContent) { const sc = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
-if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} } } }
+if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} }
+const sc2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"), mv = sc2 && sc2.children[0];   // v3.230: the old column's FIXED height (865) grew the page to 977 — the column hugs its content
+if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizingVertical !== "HUG") { const h0 = Math.round(mv.height); mv.layoutSizingVertical = "HUG"; notes.push("side column hugs its content: " + mv.name + " " + h0 + " → " + Math.round(mv.height)); } } catch (e) {} } } }
 else intoAside(nodes.right, "right");
 try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, notes); } catch (e) { notes.push("side from reference: " + e.message); }
 }

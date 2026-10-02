@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.230.0 — 2026-10-02 (island migration: the four manual fixes from the two TM Settings runs)
+- **Island contents are matched even when the reference adds a wrapper.** In the reference for Create a VASP, the designers put the blocks inside one extra `Content` frame in the island. The engine didn't match through it, so nothing inside the island was copied, and the fields kept a 24 px gap instead of 16. It now matches through one such frame.
+- **Gaps are copied for blocks that match the reference exactly.** Under a block the designer rebuilt, the engine copied only widths and colours. A block whose children are exactly the reference's now also takes its gaps. Side paddings are still left alone there.
+- **The inner card gets the island colours too.** On Let's set up, `.Content` is a wrapper with a same-size card inside. Only the wrapper got the island fill and border, and the visible card kept a raw white and the old border. Both now get them.
+- **The side column no longer stretches the page.** The old right column kept its fixed 865 px height and grew the page from 900 to 977. It now sizes to its content.
+- **Checked read-only** on both TM Settings results. On the form the island matches 40 layers instead of 2. The fields gap rule applies: 24 in the original, 16 in the reference. On the accepted team, Case Events and Blueprint screens the new gap rule changes nothing.
+
 ## v3.229.0 — 2026-10-02 (island migration: blocks that share an island in the reference share one here)
 - **Blocks that sit in one island in the reference go into one island.** In TM Settings / Create a VASP the designers put the title, the fields and the Button bar into one island. The engine wrapped each block in its own island, so the form came out as three islands. It now groups the blocks the way the reference does. `planOne` shows them as one line ending in `→ island (reference, shared)`.
 
