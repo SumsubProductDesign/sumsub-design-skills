@@ -200,6 +200,43 @@ if (v && T[i + 1].characters.trim() !== v) { try { await figma.loadFontAsync(T[i
 notes.push("side block from the reference: " + (firstText(rb) || rb.name));
 }
 }
+// v3.232: the old screen's place in the navigation is data from the original — the sidebar section and the active item carry over
+// (TM Settings: the old detached sidebar had Transactions › Settings › Travel Rule quick start active; the new Page showed Dashboard)
+const SIDEBAR_TYPE = { "dashboard": "Dashboard", "summy ai copilot": "Summy AI Copilot", "applicants": "Applicants", "integrations": "Integrations", "transactions": "Transactions monitoring", "case management": "Case management", "client lists": "Client lists", "statistics": "Statistics", "reports": "Reports", "billing": "Billing", "settings": "Settings", "tasks": "Tasks", "operator": "Operator", "review panel": "Reviews", "reviews": "Reviews", "mission control": "Mission control", "admin area": "Admin area", "dev space": "Dev space", "marketplace": "Marketplace" };
+function sidebarTrail(old) {
+if (!old || !("findAll" in old)) return null;
+const isActive = n => { try { return n.type === "INSTANCE" && n.componentProperties && n.componentProperties.State && String(n.componentProperties.State.value) === "Active"; } catch (e) { return false; } };
+const depthOf = n => { let d = 0; for (let q = n; q && q.id !== old.id; q = q.parent) d++; return d; };
+const act = old.findAll(n => n.visible !== false && isActive(n) && /Menu Item|Sections/i.test(n.name)).sort((p, q) => depthOf(q) - depthOf(p));
+if (!act.length) return null;
+const txt = n => { const t = n.type === "TEXT" ? n : n.findOne(q => q.type === "TEXT" && q.visible); return t ? t.characters.trim() : ""; };
+const trail = [txt(act[0])];
+for (let q = act[0].parent; q && q.id !== old.id; q = q.parent) if (/Sections/i.test(q.name)) { const row = q.findOne(x => /Menu Item \/ (First|Second) Level/i.test(x.name)); const t = row ? txt(row) : txt(q); if (t && t !== trail[trail.length - 1]) trail.push(t); }
+return trail.filter(Boolean);
+}
+async function carrySidebar(old, page, notes) {
+const sb = page.findOne(n => n.type === "INSTANCE" && n.name === "*Sidebar*"); if (!sb || !old) return;
+let type = null;
+try { if (old.type === "INSTANCE" && old.componentProperties && old.componentProperties.Type) type = String(old.componentProperties.Type.value); } catch (e) {}
+const trail = sidebarTrail(old) || [];
+if (!type && trail.length) { const first = trail[trail.length - 1].toLowerCase(); const key = Object.keys(SIDEBAR_TYPE).sort((a, b) => b.length - a.length).find(k => first.startsWith(k)); if (key) type = SIDEBAR_TYPE[key]; }
+if (!type) { if (trail.length) notes.push("sidebar: no DS type for " + trail[trail.length - 1]); return; }
+try { if (String(sb.componentProperties.Type.value) !== type) sb.setProperties({ Type: type }); } catch (e) { notes.push("sidebar type " + type + ": " + e.message); return; }
+const sb2 = page.findOne(n => n.type === "INSTANCE" && n.name === "*Sidebar*");
+const seconds = sb2 ? sb2.findAll(n => n.type === "INSTANCE" && /Sections \/ Second Level/.test(n.name)) : [];
+for (const t of trail.slice(0, -1)) { const hit = seconds.find(s => { try { const v = s.componentProperties["Section Name"]; return v && String(v.value).split("|").pop().trim().toLowerCase() === t.toLowerCase(); } catch (e) { return false; } });
+if (hit) { const hsn = String(hit.componentProperties["Section Name"].value); try { hit.setProperties({ State: "Active" }); } catch (e) {}
+const sb3 = page.findOne(n => n.type === "INSTANCE" && n.name === "*Sidebar*");
+const sec = sb3 ? sb3.findAll(n => n.type === "INSTANCE" && /Sections \/ Second Level/.test(n.name)).find(n => n.componentProperties["Section Name"] && String(n.componentProperties["Section Name"].value) === hsn) : null;
+let leaf = "";
+if (sec && t !== trail[0]) { const thirds = sec.findAll(n => n.type === "INSTANCE" && /Third Level/.test(n.name) && n.visible); const want = trail[0].toLowerCase();
+const tx = n => { const q = n.findOne(x => x.type === "TEXT" && x.visible); return q ? q.characters.trim().toLowerCase() : ""; };
+const own = thirds.find(n => tx(n) === want);
+for (const n of thirds) { try { n.setProperties({ State: n === own ? "Active" : "Default" }); } catch (e) {} }
+leaf = own ? " › " + trail[0] : " (\"" + trail[0] + "\" is not among the DS sidebar items — no third-level item marked active)"; }
+notes.push("sidebar from the original: " + type + " › " + t + leaf); return; } }
+notes.push("sidebar from the original: " + type);
+}
 function stripCardChrome(c, fullW) {
 const r = typeof c.cornerRadius === "number" ? c.cornerRadius : 0, pad = Math.max(c.paddingTop || 0, c.paddingLeft || 0);
 if (!hasStroke(c) || r < 8 || pad < 16 || c.width < 0.9 * fullW) return false;
@@ -342,6 +379,7 @@ for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findO
 try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
 const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
 }
+try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
 try { page.resize(origW, origH); } catch (e) {}
 try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).map(t => t.characters.trim()));

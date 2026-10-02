@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.232.0 — 2026-10-02 (island migration: the sidebar section and active item come from the original)
+- **The sidebar shows where the screen lives.** After migration every screen's sidebar pointed at Dashboard, the `Page` default. The engine now takes the section and the active item from the original screen's sidebar. In TM Settings that means Transactions monitoring with Settings active. In Case Management it means Case management.
+- **Nothing is invented.** In the TM Settings original the active item was Travel Rule quick start, a third-level item. The DS sidebar doesn't have it under Settings, so no third-level item is marked active, and the engine says so in its notes. When the original has no sidebar, nothing changes.
+- **Applied to the screens already accepted.** TM Settings ×3 now point at Transactions monitoring › Settings. Case pages, Blueprints, CM Overview and Financial data now point at Case management. TM General info, TM Related transactions and Levels Steps have no sidebar in the original and stay as they were.
+
 ## v3.231.0 — 2026-10-02 (island migration: a block renamed in the reference is found through its children)
 - **A card the reference renamed still goes into the right island.** In TM Settings / Verify your VASP our block is a white card called `.Content`. The reference holds the same two blocks in an island, inside a frame called `Content`. The engine didn't find the block by name and left it as a bare card. Now, when all of a block's children sit in one island of the reference, the block goes into an island. Its own border and padding are removed so there is no card inside the island.
 - **A single wrapper is matched to the reference's single wrapper.** The finish now pairs one wrapper on our side with one in the reference even when the names differ. That lets it copy the reference's gap (24 → 16 here).
