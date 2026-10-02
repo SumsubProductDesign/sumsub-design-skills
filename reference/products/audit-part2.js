@@ -28,6 +28,9 @@ const all = root.findAll(n => true);
 function isInsideInstance(n) {
   let p = n.parent;
   while (p && p.id !== root.id && p.type !== "PAGE") {
+    // v3.228: the content of a SLOT is OURS — on an island screen everything lives in the slots of the `Page` instance, and
+    // without this stop every token check below skipped all of it (TM Settings: raw white, border/subtle, base/* passed as clean)
+    if (p.type === "SLOT") return false;
     if (p.type === "INSTANCE") return true;
     p = p.parent;
   }

@@ -38,10 +38,10 @@ const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.lengt
   const p = []; br.forEach((b, i) => b.items.forEach((k, j) => p.push([rr[i].items[Math.min(j, rr[i].items.length - 1)], k]))); return p; };
 const otherVariant = (r, b) => { if (r.type !== "INSTANCE" || b.type !== "INSTANCE") return false;
   try { const rp = r.componentProperties || {}, bp = b.componentProperties || {}; return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
-const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? "style" : "full"]; out.push(e); if (ov) return;
-  const kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { if (!style) e[4] = "restructured"; return; }
+const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
+  const kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y)); if (!style && !deep) e[4] = "stopped";
-  const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), !deep); }); };
+  const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
 const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
 for (const a of anchors) {
@@ -51,7 +51,7 @@ for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pair
 for (const [path, rn, bn, ov, mode] of mr) {
 let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }
 if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
-if (!(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
+if (mode !== "paint" && !(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
 const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
 const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
 if (rs === "FIXED" && (inPanel || rn.width > room + 1)) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
@@ -59,13 +59,13 @@ else {
 if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
 if (rs === "FIXED") { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
 } catch (e) {}
-try { if (rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
+try { if (mode !== "paint" && rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
 if (rn[k] && bn[k] && rn[k] !== bn[k] && !(ov && mc && mc[k] === rn[k])) { bn[k] = rn[k]; applied.push(a + path + " " + (k === "gridChildHorizontalAlign" ? "cell align H" : "cell align V") + " → " + rn[k]); } } } catch (e) {}
-try { if (mode !== "style" && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
+try { if (mode !== "style" && mode !== "paint" && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
 const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
 const keys = mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
 for (const k of keys) {
-const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k];
+const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
 if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
 if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;
 let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
@@ -73,9 +73,9 @@ try { bn.setBoundVariable(k, null); } catch (e) {}
 if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
 changed.push((k === "itemSpacing" ? "gap" : k === "gridRowGap" ? "row gap" : k === "gridColumnGap" ? "column gap" : k.replace("padding", "").toLowerCase()) + " " + Math.round(rv)); }
 if (changed.length) applied.push(a + path + " spacing → " + changed.join(", ")); } } catch (e) { skipped.push(a + path + " spacing: " + e.message); }
-try { if ("topLeftRadius" in rn && "topLeftRadius" in bn) { let changed = false;
+try { if (mode !== "paint" && "topLeftRadius" in rn && "topLeftRadius" in bn) { let changed = false;
 for (const k of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) {
-const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k];
+const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
 if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
 if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;
 let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
@@ -87,7 +87,7 @@ for (const prop of ["fills", "strokes"]) { try {
 const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
 if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;
 const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
-if (rVis && rb) { const t = await resolve(rb.id), v = t && t.to;   // the reference's paint as its CURRENT variable (see varResolver)
+if (rVis && rb) { const t = await resolve(rb.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, bn, prop)) || v0) : v0;   // the reference's paint as its CURRENT variable (see varResolver)
             if (!v) { skipped.push(a + path + " " + prop + ": variable not found"); continue; }
             if (bVis && bb && bb.id === v.id) continue;
             const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
@@ -111,12 +111,23 @@ for (const k of sl.children) { try { if (k.type === "FRAME" && fillOf(k) && k.fi
 for (const r of sl.findAll(n => /(^|\/ )(Table )?Row(#\d+)?$/i.test(n.name) && isWhite(n))) { try { repaint(r, "fills", v.row); } catch (e) {} } }
 return log;
 }
+async function bareCardTokens(page) {   // §6.1 for cards standing bare on the grey and for side columns — with a reference too (v3.228: the TM Settings reference itself kept the pre-island border/subtle and a raw white)
+const v = { cardFill: await figma.variables.importVariableByKeyAsync("da81bccfef06f3de221bafbb9b5ee6a161eb9000"), border: await figma.variables.importVariableByKeyAsync("40baade65c87f4b56fd67b027ec695d0984fae39") };
+const log = [], ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+for (const k of (ms ? ms.children : [])) { if (!k.visible || k.name === "Page / Body / IslandCard" || !isCard(k)) continue;
+try { const fb = k.fills[0] && k.fills[0].boundVariables && k.fills[0].boundVariables.color, sb = k.strokes && k.strokes[0] && k.strokes[0].boundVariables && k.strokes[0].boundVariables.color;
+if (isWhite(k) && !(fb && fb.id === v.cardFill.id)) { repaint(k, "fills", v.cardFill); log.push("card " + k.name + " fill → " + v.cardFill.name); }
+if (hasStroke(k) && !(sb && sb.id === v.border.id)) { repaint(k, "strokes", v.border); log.push("card " + k.name + " stroke → " + v.border.name); } } catch (e) { log.push("card " + k.name + ": " + e.message); } }
+const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
+const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
+return log; }
 async function finishIsland(page, refId) {
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-return { from: "reference " + refId, ...(await copyVarsFromRef(ref, page, anchors)) }; } }
+const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 function stretchToWidth(page, withRef) {
@@ -190,13 +201,59 @@ function varResolver() {
   return _vr;
 }
 const paintIds = nodes => { const out = []; for (const n of nodes) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (Array.isArray(ps)) for (const p of ps) if (p.boundVariables && p.boundVariables.color) out.push(p.boundVariables.color.id); } return out; };
+// v3.228: token hygiene on OUR content (slot subtrees, island slots included; never inside other instances):
+// base/* paints → the semantic token that aliases them, raw spacing / radius → the token with the same value IN THIS FILE,
+// and three must-be-empty lists: rawPaints (unbound or unmapped base paint), rawSpacing (a value a token has, left unbound), sideWhites (a non-card
+// white block in a side column). A value no token has in this file (a 2 px gap) is design, not a token slip — tokens.noToken, informational
+const BASE_TO_SEMANTIC = {
+text: { "base/neutral/100": "1148e20b46c46ade58db9b4120fbf3ea872196fd", "base/neutral/90": "485b897d691c85b86a1ad8ebae7650f3dbcca365", "base/neutral/80": "47f41dc6d16468e6189a8784f58b12d07ebe72c3", "base/neutral/70": "678d3fc239240d7247f43296117c4d35a84592d9", "base/neutral/60": "2c094d8e57056b11ecbb2166364d4648c92d4360", "base/neutral/0": "cc87e4556ec61118c805685f92c80b214050bcd9" },
+bg: { "base/neutral/0": "567811a0cf497ac911288a2f4a75a1d89ebff75c", "base/neutral/5": "e50636958c4d5a6917b4fb1e32a7de92ded72f85", "base/neutral/10": "e7129860062f42ee2a929d1b4ccacd21133a03ee", "base/neutral/20": "1aed8505fcfaec5aacd4ac43b4eb62d8315caa0a" },
+border: { "base/neutral/20": "40baade65c87f4b56fd67b027ec695d0984fae39", "base/neutral/30": "806f4dce0b78f55df4ab1d126160091d6dd67fd2", "base/neutral/40": "3ac6f9a55d66cd4435e64ad0fa7287b40da52980", "base/neutral/50": "6618868be488e538a0d5a0002206439e45c3cfbe" } };
+const _semCache = new Map();
+async function semanticFor(name, node, prop) {
+const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg", key = BASE_TO_SEMANTIC[kind][String(name).toLowerCase()]; if (!key) return null;
+if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
+function oursOf(page) {   // our layers: slot content, down through Page / Body / IslandCard slots, never into another instance
+const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { if (n.name === "Page / Body / IslandCard") { const sl = n.findOne(q => q.type === "SLOT"); if (sl) for (const k of sl.children) walk(k, side); } return; }
+if ("children" in n) for (const k of n.children) walk(k, side); };
+for (const s of slots) for (const k of s.children) walk(k, s.name !== "Main content"); return out; }
+const SPACING_KEYS = ["3d3cc3a15da0b893bf326da6053d7a1c37f1d836", "a4dad7f0e560345e844697b529325a2eca2ff23a", "5a8e4573770ee8f921f141c1ab6c96835c3125a0", "de89b1cae49981816929db80a4e795842e7baf77", "2b3382099953af94f32cb6ffe5c7f44c74d5fed7", "7dc2647090da988c17327693bc2224e2308047a2", "fceb37ce155723145d25d273574c665a8d7d30e6", "a2e089548b83ff33c8ee5e914fa24e67b889b38c"];
+const RADIUS_KEYS = ["885152d55a536fb853461592cc3eff926e94858d", "311dc09093e9474a8b582c8fb7ccc7a628065a20", "95839af397884cd7f8fadb34a62d4763f88d68dd", "03884e014085a48cf26670632be200a02b5a160c"];
+async function tokensByValue(keys, page) { const m = new Map(); const vs = await Promise.all(keys.map(k => figma.variables.importVariableByKeyAsync(k).catch(() => null)));
+for (const v of vs) { if (!v) continue; try { const r = v.resolveForConsumer(page); if (typeof r.value === "number" && !m.has(r.value)) m.set(r.value, v); } catch (e) {} } return m; }
+async function tokenHygiene(page) {
+const ours = oursOf(page), log = [], rawPaints = [], rawSpacing = [], noToken = [], sideWhites = [];
+const hx = c => "#" + [c.r, c.g, c.b].map(v => Math.round(v * 255).toString(16).padStart(2, "0")).join("");
+const shownIn = n => { let q = n; while (q && q.type !== "SLOT") { if (q.visible === false) return false; q = q.parent; } return true; };
+for (const [n] of ours) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps) || !ps.length) continue;
+let changed = false; const next = [];
+for (const p of ps) { const b = p.boundVariables && p.boundVariables.color;
+if (p.type === "SOLID" && p.visible !== false && !b) { if (n.type !== "INSTANCE" && shownIn(n)) rawPaints.push(n.name + " " + prop + " " + hx(p.color)); next.push(p); continue; }
+const v = b ? await figma.variables.getVariableByIdAsync(b.id) : null;
+if (v && /^base\//i.test(v.name)) { const sem = await semanticFor(v.name, n, prop);
+if (sem) { const c0 = JSON.parse(JSON.stringify(p)); delete c0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(c0, "color", sem)); changed = true; log.push(v.name + " → " + sem.name); continue; }
+if (shownIn(n)) rawPaints.push(n.name + " " + prop + " " + v.name + " (no semantic mapping)"); }
+next.push(p); }
+if (changed) { try { n[prop] = next; } catch (e) {} } }
+const sp = await tokensByValue(SPACING_KEYS, page), rd = await tokensByValue(RADIUS_KEYS, page), RAW_OK = [40, 48, 64, 88];
+for (const [n] of ours) { if (n.type !== "FRAME") continue;
+if (n.layoutMode && n.layoutMode !== "NONE") for (const k of (n.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"])) {
+const val = n[k]; if (typeof val !== "number" || val === 0 || (n.boundVariables && n.boundVariables[k])) continue;
+const v = sp.get(val); if (v) { try { n.setBoundVariable(k, v); log.push(n.name + " " + k + " " + val + " → " + v.name); continue; } catch (e) {} }
+if (!RAW_OK.includes(val) && shownIn(n)) (v ? rawSpacing : noToken).push(n.name + " " + k + "=" + val); }
+for (const k of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) { const val = n[k]; if (typeof val !== "number" || val === 0 || (n.boundVariables && n.boundVariables[k])) continue;
+const v = rd.get(val); if (v) { try { n.setBoundVariable(k, v); log.push(n.name + " radius " + val + " → " + v.name); continue; } catch (e) {} }
+if (shownIn(n)) (v ? rawSpacing : noToken).push(n.name + " " + k + "=" + val); } }
+for (const [n, side] of ours) { if (!side || !shownIn(n) || n.width <= 100 || cardLike(n)) continue; if (isWhite(n)) sideWhites.push(n.name + " " + Math.round(n.width)); }
+const tally = {}; for (const l of log) { const k = l.replace(/^.*? (padding|item|grid|radius)/, "$1"); tally[k] = (tally[k] || 0) + 1; }
+return { fixed: log.length, by: Object.entries(tally).slice(0, 10).map(([k, c]) => k + " ×" + c), rawPaints: rawPaints.slice(0, 10), rawSpacing: rawSpacing.slice(0, 10), noToken: noToken.slice(0, 10), sideWhites: sideWhites.slice(0, 6) }; }
 async function rebindOrphanVars(page) {
   const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
   const log = [];
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-  const ours = []; const walk = n => { ours.push(n); if (n.type === "INSTANCE" || !("children" in n)) return; for (const k of n.children) walk(k); };
-  for (const s of slots) for (const k of s.children) walk(k);
-  await R.prefetch(paintIds(ours));
+  const ours = oursOf(page).map(e => e[0]); void slots;
+    await R.prefetch(paintIds(ours));
   for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
     let changed = false; const next = [];
     for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await R.resolve(b.id) : null;
@@ -214,6 +271,7 @@ let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
 if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
 if (part === "copy") return clean({ pageId, part, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
 let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
+let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, rawPaints: ["error: " + e.message], rawSpacing: [], sideWhites: [] }; }
 const gridIssues = stretchToWidth(page, !!refId);
 const side = fitSideColumns(page);
 const pb = page.absoluteTransform[1][2];
@@ -227,5 +285,5 @@ const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page /
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
+return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }

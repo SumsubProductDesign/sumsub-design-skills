@@ -34,6 +34,9 @@ const all = root.findAll(n => true);
 function isInsideInstance(n) {
   let p = n.parent;
   while (p && p.id !== root.id && p.type !== "PAGE") {
+    // v3.228: the content of a SLOT is OURS — on an island screen everything lives in the slots of the `Page` instance, and
+    // without this stop every token check below skipped all of it (TM Settings: raw white, border/subtle, base/* passed as clean)
+    if (p.type === "SLOT") return false;
     if (p.type === "INSTANCE") return true;
     p = p.parent;
   }
@@ -64,9 +67,14 @@ async function getStyleName(textNode) {
   } catch(e) { return null; }
 }
 const titleSuspects = [];
+// v3.228: island content (slot subtrees) has its own block headings ("Create a VASP" in a card) — there only a repeat of the page title counts
+const _hdrForTitle = root.findOne(n => n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Header*");
+const _pageTitle = String(_hdrForTitle?.componentProperties?.["Title text#3817:0"]?.value || "").trim().toLowerCase();
+const _inSlot = n => { for (let p = n.parent; p && p.id !== root.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
 for (const t of all) {
   if (t.type !== "TEXT") continue;
   if (isInsideInstance(t)) continue;  // Header's own title is fine
+  if (islandRoot && _inSlot(t) && (t.characters || "").trim().toLowerCase() !== _pageTitle) continue;
   const styleName = await getStyleName(t);
   if (!styleName || !headingStyleRe.test(styleName)) continue;
   // Skip TEXT nodes that are inside a SECTION directly (section title, allowed)
@@ -193,7 +201,8 @@ const customFrames = topLevelNodes.filter(n =>
   n.type === "FRAME" && !["Main","Content","Item List","row"].includes(n.name)
 ).length;
 const customRatio = totalStructural > 0 ? customFrames / totalStructural : 0;
-if (customRatio > 0.5 && totalStructural > 10) {
+// v3.228: an island migration in place carries the designers' own frames — they are not invented structure
+if (!(islandRoot && inPlace) && customRatio > 0.5 && totalStructural > 10) {
   issues.push(`Custom FRAME ratio ${(customRatio*100).toFixed(0)}% > 50% — likely invented structure instead of using DS components`);
 }
 
@@ -347,6 +356,28 @@ for (const [phrase, count] of Object.entries(defaultPhraseHits)) {
   issues.push(`${count} VISIBLE TEXT node(s) containing default filler "${phrase}…" — replace Alert/Toast/Modal title/description via setProperties on the component's TEXT property`);
 }
 
+// 7.61. Island paint hygiene (v3.228) — on an island screen our content (slot subtrees, not inside other instances) must have
+// every visible solid fill / stroke bound, and never to a base/* variable (map it to the semantic token). Caught on TM Settings:
+// a raw white card, a raw white Stepper in the side column and base/neutral/100 texts all passed the old audit.
+if (islandRoot) {
+  const raw = [], base = [];
+  for (const n of all) {
+    if (isInsideInstance(n) || !isVisible(n)) continue;
+    let inSlot = false; for (let p = n.parent; p && p.id !== root.id; p = p.parent) if (p.type === "SLOT") { inSlot = true; break; }
+    if (!inSlot) continue;
+    for (const prop of ["fills", "strokes"]) {
+      let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps)) continue;
+      for (const p of ps) { if (p.type !== "SOLID" || p.visible === false) continue;
+        const b = p.boundVariables && p.boundVariables.color;
+        if (!b) { if (n.type !== "INSTANCE") raw.push(`${n.name} ${prop}`); continue; }
+        let v = null; try { v = await figma.variables.getVariableByIdAsync(b.id); } catch (e) {}
+        if (v && /^base\//i.test(v.name)) base.push(`${n.name} ${prop} ${v.name}`); }
+    }
+  }
+  if (raw.length) issues.push(`7.61 island-raw-paint: ${raw.length} visible fill/stroke(s) on our island content without a variable: ${raw.slice(0, 6).join(" | ")}. Bind them (bare cards: background/secondary/normal + border/neutral/subtlest/normal; a block the reference shows without fill: clear it).`);
+  if (base.length) issues.push(`7.61 island-base-token: ${base.length} paint(s) bound to base/* on our island content: ${base.slice(0, 6).join(" | ")}. Rebind to the semantic token that aliases it (text → semantic/text/*, fill → semantic/background/*, stroke → semantic/border/*).`);
+}
+
 // 7.12. Target page — Rule #0. Root must live on a "Drafts" page unless
 // the user explicitly pointed to another page. Walks up to find the PAGE.
 {
@@ -402,6 +433,12 @@ const CANONICAL_RAW_SPACING_VALUES = [40, 48, 64, 88];
 const spacingProps = ["paddingLeft","paddingRight","paddingTop","paddingBottom","itemSpacing"];
 const radiusProps = ["topLeftRadius","topRightRadius","bottomLeftRadius","bottomRightRadius"];
 const unboundBy = {}; // aggregate by frame to avoid spam
+// v3.228: island content (inside a SLOT of the island Page) carries the designers' own values — flag only a value some spacing / radius
+// token has in this file (bindable but unbound); a value no token has (a 2 px gap) is design, not a token slip
+const inIslandSlot = n => { if (!islandRoot) return false; for (let p = n.parent; p && p.id !== root.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
+const tokenVals = new Set();
+if (islandRoot) for (const k of ["3d3cc3a15da0b893bf326da6053d7a1c37f1d836", "a4dad7f0e560345e844697b529325a2eca2ff23a", "5a8e4573770ee8f921f141c1ab6c96835c3125a0", "de89b1cae49981816929db80a4e795842e7baf77", "2b3382099953af94f32cb6ffe5c7f44c74d5fed7", "7dc2647090da988c17327693bc2224e2308047a2", "fceb37ce155723145d25d273574c665a8d7d30e6", "a2e089548b83ff33c8ee5e914fa24e67b889b38c", "885152d55a536fb853461592cc3eff926e94858d", "311dc09093e9474a8b582c8fb7ccc7a628065a20", "95839af397884cd7f8fadb34a62d4763f88d68dd", "03884e014085a48cf26670632be200a02b5a160c"]) {
+  try { const v = await figma.variables.importVariableByKeyAsync(k); const r = v.resolveForConsumer(root); if (typeof r.value === "number") tokenVals.add(r.value); } catch (e) {} }
 for (const n of all) {
   if (n.type !== "FRAME") continue;
   if (isInsideInstance(n)) continue;
@@ -414,6 +451,7 @@ for (const n of all) {
     if (!bound) {
       // v3.127: skip canonical-raw values that have no DS token
       if (CANONICAL_RAW_SPACING_VALUES.includes(val)) continue;
+      if (inIslandSlot(n) && !tokenVals.has(val)) continue;
       unboundBy[n.name] = unboundBy[n.name] || { spacing: [], radius: [] };
       unboundBy[n.name].spacing.push(`${prop}=${val}px`);
     }
@@ -424,6 +462,7 @@ for (const n of all) {
     if (typeof val !== "number" || val === 0) continue;
     const bound = n.boundVariables?.[prop];
     if (!bound) {
+      if (inIslandSlot(n) && !tokenVals.has(val)) continue;
       unboundBy[n.name] = unboundBy[n.name] || { spacing: [], radius: [] };
       unboundBy[n.name].radius.push(`${prop}=${val}px`);
     }

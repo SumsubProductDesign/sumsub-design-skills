@@ -254,7 +254,7 @@ for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); n
 mainSlot.insertChild(0, nodes.groups[0]);                               // (unused since 29.09 — every plan is Ghost)
 }
 for (const p of mph) { try { p.remove(); } catch (e) {} }
-for (const c of page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").children) { try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} }
+for (const c of page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").children) { try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
 try { page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").layoutSizingVertical = "FILL"; } catch (e) {}
 const intoAside = (node, which) => {
 const asides = page.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / Aside");
@@ -313,10 +313,10 @@ items.forEach((it, i) => { try { if (i < plan.tabs.length) { it.visible = true; 
 if (items.length < plan.tabs.length) notes.push("header shows " + items.length + " of " + plan.tabs.length + " tabs"); }
 } catch (e) { notes.push("tabs: " + e.message); }
 const acts = R.actions.length ? R.actions : carry;
-if (acts.length) { try { getHdr().setProperties({ "Show actions slot#6943:20": true }); fillSlot(/Actions slot/i, acts);
+if (acts.length) { try { getHdr().setProperties({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
 for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findOne(q => q.type === "TEXT" && q.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
 try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
-} catch (e) { notes.push("actions: " + e.message); } }
+const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
 }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
 try { page.resize(origW, origH); } catch (e) {}
@@ -339,33 +339,39 @@ const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || 
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
+function refWidth(P) {   // v3.228: the reference's own content width (TM Settings: 691 slot = Full width, not 1084)
+const d = P ? P.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default") : null; const t = d && d.componentProperties && d.componentProperties.Type ? String(d.componentProperties.Type.value) : "";
+return /^(Full width|1084 max|1920 max)$/.test(t) ? t : null; }
+function surfaceOf(refP, opts) {   // v3.228: grey / white is the designers' table decision when given ({ surface }); else the reference's look
+const refG = refP ? refIsGrey(refP) : null, tbl = opts && opts.surface ? opts.surface === "grey" : null;
+return { grey: tbl !== null ? tbl : refG, refGrey: refG, from: tbl !== null ? "table" : (refG === null ? null : "reference") }; }
 function refIsGrey(P) {
 const ms = P.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms || !ms.absoluteBoundingBox) return null; const mb = ms.absoluteBoundingBox;
 return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false && !!n.absoluteBoundingBox &&
 (() => { const c = n.fills[0].color; return c.r > 0.93 && c.r < 0.985 && Math.abs(c.r - c.b) < 0.03; })() &&
 (() => { const b = n.absoluteBoundingBox; const ix = Math.max(0, Math.min(b.x + b.width, mb.x + mb.width) - Math.max(b.x, mb.x)), iy = Math.max(0, Math.min(b.y + b.height, mb.y + mb.height) - Math.max(b.y, mb.y)); return ix * iy > 0.4 * mb.width * mb.height; })()).length > 0;
 }
-async function planOne(scrId, refOverride) {
+async function planOne(scrId, refOverride, opts) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
 let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
 const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : null);
 _idCache.clear(); const a = analyze(scr);
 let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-const whole = keepWholeCard(a, refP); const grey = refP ? refIsGrey(refP) : null; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
-const planWidth = rms && !a.nodes.table ? ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max") : a.plan.width;
+const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = sf.grey; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
+const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
 const blocks = []; let pending = [];
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
 const rp = refPlacement(refP, g.name);
 const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
 blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
-return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: grey, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
+return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
 plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
 blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
 header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
-async function migrateOne(scrId, refOverride) {
+async function migrateOne(scrId, refOverride, opts) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
 let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync(); await figma.setCurrentPageAsync(pg);
 const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : null), name = scr.name;
@@ -375,11 +381,11 @@ let refP = null;
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-if (refP && refIsGrey(refP) === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
+if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
 a.refRoot = refP; const whole = keepWholeCard(a, refP);
 if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
 const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
-if (ms && !a.nodes.table) a.plan.width = (ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max";
+if (ms && !a.nodes.table) a.plan.width = refWidth(refP) || ((ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max");
 a.W = Math.round(refP.width); a.H = Math.round(refP.height); }
 const r = await buildIsland(scr, a, null);
 return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),

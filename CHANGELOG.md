@@ -4,6 +4,16 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.228.0 — 2026-10-02 (island migration: colours and spacing on our content are checked and cleaned)
+- **The skill audit now looks at island content.** On an island screen everything sits in the slots of the `Page` instance, and the audit skipped anything inside an instance. Its colour, spacing and radius checks saw none of our layers and always came back clean. Slot content now counts as ours. New check 7.61 flags a visible fill or stroke without a variable, or one bound to a `base/*` token.
+- **Cards on the grey always get the island colours.** A card standing bare on the grey gets the `background/secondary` fill and the `border/neutral/subtlest` border, even when the designer's reference still has the old ones. TM Settings had a darker border and a plain white.
+- **White blocks the reference hides are cleared, even when the column differs.** If our side column has a block the reference doesn't, the column used to be skipped. Its other blocks are now matched by name and take the reference's fills and strokes. This removed the white behind the TM Settings stepper.
+- **`base/*` colours on our layers become semantic tokens.** Raw spacing and radius values are bound to the token with the same value in the file. A value no token has, like a 2 px gap, is listed as information, not as an error.
+- **Width comes from the reference.** The engine reads the reference's content width setting (`Full width`, `1084 max`, `1920 max`) instead of guessing it.
+- **No more stretched cards or titles stuck to the edge.** A card that filled the old row no longer stretches to the page height. A padding the designer moved into new frames is no longer copied as 0.
+- **The header's actions slot is turned on only when there is something to put in it.**
+- **Grey or white can come from the designers' table.** Pass `{ surface: "grey" }` (or `"white"`) to `planOne` and `migrateOne` when the table decides and the reference looks different.
+
 ## v3.227.0 — 2026-10-02 (island migration: a main column that is already a card stays whole)
 - **A main column that is already a card is moved whole.** In TM Settings the main column `.Content` is one white card holding the title, the fields and the Button bar. The engine split it into its children and put each in an island, so islands sat inside a card. When the main column is itself a card and the reference keeps a block of the same name bare, the engine now moves it as one card. The finish then gives it the reference's radius. `planOne` reports `wholeCard: true`.
 
