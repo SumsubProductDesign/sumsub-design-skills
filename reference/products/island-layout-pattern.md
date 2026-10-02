@@ -298,6 +298,8 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **A block the reference renamed is found through its children.** If a block isn't in the reference by name but all its children sit in one reference island, it goes into an island (its card chrome is stripped as usual). TM Settings / Verify your VASP: our card `.Content` is the reference's island › `Content` with the same two blocks. In the finish, a single wrapper on our side is paired with a single wrapper in the reference even when the names differ, so its gap is copied.
 
+**Our block takes the spacing of the reference wrapper that holds exactly its children.** When our block's children don't match the reference block's children, but one of the reference's child frames holds exactly them, the walk pairs our block with that wrapper. Submit compliance: our `Frame 2131328741` holds four `Customize setup`. The reference's holds `Content` (the same four) + `Buttons-bar`, and our gap 16 becomes the wrapper's 8.
+
 **Pairing goes through one extra frame in the reference.** When the reference wraps the blocks in one more frame than we have (TM Settings / Create a VASP: IslandCard › Slot › `Content` › blocks), the walk pairs our blocks with the wrapper's children. Without it nothing inside the island was copied: the fields kept gap 24 instead of 16.
 
 **Gaps of identical blocks are copied in style mode too.** A block whose children are exactly the reference's takes the reference's gap and grid gaps even below a rebuilt parent. Its side paddings are still never copied there.

@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.233.0 — 2026-10-02 (island migration: spacing from the reference wrapper that holds exactly our blocks)
+- **Gaps follow the reference even when the designer added a wrapper next to other blocks.** In TM Settings / Submit compliance the designers put the four `Customize setup` cards into a `Content` frame beside the button bar, 8 px apart. Ours were 16 px apart, and the engine couldn't match the levels, so the 16 stayed. When one of the reference's child frames holds exactly our block's children, our block now takes that frame's spacing.
+
 ## v3.232.0 — 2026-10-02 (island migration: the sidebar section and active item come from the original)
 - **The sidebar shows where the screen lives.** After migration every screen's sidebar pointed at Dashboard, the `Page` default. The engine now takes the section and the active item from the original screen's sidebar. In TM Settings that means Transactions monitoring with Settings active. In Case Management it means Case management.
 - **Nothing is invented.** In the TM Settings original the active item was Travel Rule quick start, a third-level item. The DS sidebar doesn't have it under Settings, so no third-level item is marked active, and the engine says so in its notes. When the original has no sidebar, nothing changes.
