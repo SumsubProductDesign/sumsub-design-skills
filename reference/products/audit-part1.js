@@ -159,16 +159,16 @@ if (sidebar) {
   const sidebarMap = [
     { kw: /applicant/,                       expected: "Applicants" },
     { kw: /integration|workflow|flow builder/, expected: "Integrations" },
-    { kw: /transaction|travel rule|vasp/,    expected: "Transaction monitoring" },
-    { kw: /aml|screening/,                   expected: "AML screening" },
+    { kw: /transaction|travel rule|vasp/,    expected: "Transactions monitoring" },   // v3.234: the DS option is "Transactions monitoring" — the old spelling flagged every TM screen
     { kw: /case management|case /,            expected: "Case management" },
     { kw: /client list/,                     expected: "Client lists" },
-    { kw: /statistic|report/,                expected: "Statistics" },
+    { kw: /statistic/,                       expected: "Statistics" },
+    { kw: /report/,                          expected: "Reports" },
     { kw: /billing/,                         expected: "Billing" },
     { kw: /setting|domain|sso|translation|customization|sdk translation/, expected: "Settings" },
     { kw: /dev ?space/,                      expected: "Dev space" },
     { kw: /task/,                             expected: "Tasks" },
-    { kw: /admin/,                            expected: "Admin" },
+    { kw: /admin/,                            expected: "Admin area" },
   ];
   let expected = null;
   for (const m of sidebarMap) if (m.kw.test(ctx)) { expected = m.expected; break; }

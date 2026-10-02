@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.234.0 — 2026-10-02 (island migration: intended overflow kept; audit sidebar names fixed)
+- **Icons that are meant to overflow are no longer squeezed.** On Submit compliance the finish narrowed three 16 px stepper icons to 10 px to fit their container. In the reference they are wider than the container too. A block that overflows its parent in the reference keeps its width now.
+- **The audit's sidebar check uses the real DS names.** It expected "Transaction monitoring", but the DS option is "Transactions monitoring", so every TM screen got a false finding. The admin expectation is now "Admin area", reports are mapped to "Reports" on their own, and the AML entry is gone because the DS sidebar has no AML type.
+
 ## v3.233.0 — 2026-10-02 (island migration: spacing from the reference wrapper that holds exactly our blocks)
 - **Gaps follow the reference even when the designer added a wrapper next to other blocks.** In TM Settings / Submit compliance the designers put the four `Customize setup` cards into a `Content` frame beside the button bar, 8 px apart. Ours were 16 px apart, and the engine couldn't match the levels, so the 16 stayed. When one of the reference's child frames holds exactly our block's children, our block now takes that frame's spacing.
 
