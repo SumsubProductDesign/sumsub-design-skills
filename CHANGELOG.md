@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.231.0 — 2026-10-02 (island migration: a block renamed in the reference is found through its children)
+- **A card the reference renamed still goes into the right island.** In TM Settings / Verify your VASP our block is a white card called `.Content`. The reference holds the same two blocks in an island, inside a frame called `Content`. The engine didn't find the block by name and left it as a bare card. Now, when all of a block's children sit in one island of the reference, the block goes into an island. Its own border and padding are removed so there is no card inside the island.
+- **A single wrapper is matched to the reference's single wrapper.** The finish now pairs one wrapper on our side with one in the reference even when the names differ. That lets it copy the reference's gap (24 → 16 here).
+
 ## v3.230.0 — 2026-10-02 (island migration: the four manual fixes from the two TM Settings runs)
 - **Island contents are matched even when the reference adds a wrapper.** In the reference for Create a VASP, the designers put the blocks inside one extra `Content` frame in the island. The engine didn't match through it, so nothing inside the island was copied, and the fields kept a 24 px gap instead of 16. It now matches through one such frame.
 - **Gaps are copied for blocks that match the reference exactly.** Under a block the designer rebuilt, the engine copied only widths and colours. A block whose children are exactly the reference's now also takes its gaps. Side paddings are still left alone there.

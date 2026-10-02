@@ -129,6 +129,13 @@ const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return nul
 for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return q.id;
 return null;
 }
+// A block missing from the reference by name whose children all sit in ONE reference island goes into an island
+// (TM Settings / Verify your VASP: our card `.Content` = the reference's island › `Content` holding the same two blocks)
+function refIslandByKids(refRoot, g) {
+if (!refRoot || !("children" in g)) return null;
+const ids = g.children.filter(k => k.visible !== false).map(k => refIslandOf(refRoot, k.name));
+return ids.length && ids.every(id => id && id === ids[0]) ? ids[0] : null;
+}
 function mergeSharedIslands(bundles, refRoot) {
 const out = []; let last = null;
 for (const b of bundles) { const isl = refIslandOf(refRoot, b[b.length - 1].name);
@@ -249,7 +256,7 @@ for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); contin
 if (pending.length) bundles.push(pending); { const mg = mergeSharedIslands(bundles, a.refRoot); if (mg.length < bundles.length) notes.push("one island for blocks that share one in the reference: " + mg.filter(b => b.length > 1).map(b => b.map(g => g.name).join(" + ")).join("; ")); bundles.length = 0; bundles.push(...mg); }
 const cards = [];
 for (const bundle of bundles) {
-const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name);
+const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name) || (refIslandByKids(a.refRoot, g0) ? "island" : null);
 if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
 if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
 if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayout(bundle[0]))) { cards.push(bundle[0]); continue; }
@@ -379,7 +386,7 @@ const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = s
 const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
 const blocks = []; let pending = [], lastIsl = null;
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
-const rp = refPlacement(refP, g.name);
+const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null);
 const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
 const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
