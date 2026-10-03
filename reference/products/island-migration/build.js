@@ -131,10 +131,13 @@ return null;
 }
 // A block missing from the reference by name whose children all sit in ONE reference island goes into an island
 // (TM Settings / Verify your VASP: our card `.Content` = the reference's island › `Content` holding the same two blocks)
-function refIslandByKids(refRoot, g) {
+function refIslandByKids(refRoot, g) {   // v3.237: through single wrappers; names that repeat in the reference (every island has a "Heading") don't vote
 if (!refRoot || !("children" in g)) return null;
-const ids = g.children.filter(k => k.visible !== false).map(k => refIslandOf(refRoot, k.name));
-return ids.length && ids.every(id => id && id === ids[0]) ? ids[0] : null;
+let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
+const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
+const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name === k.name && x.visible); if (!all.length) return null; if (all.length > 1) continue;
+let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
+return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }
 // v3.235: the designer dropped a wrapper card — our card isn't in the reference by name, but the blocks inside it sit in the
 // reference's main column on the grey, outside any island or card (Complete to-do list: .Content held the title, the alert,

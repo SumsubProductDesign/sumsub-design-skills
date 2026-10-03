@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.237.0 — 2026-10-03 (island migration: the island is found through wrappers)
+- **A section wrapped one level deeper still finds its island.** On TM Travel Rule settings, the designers put the "Travel Rule data management" section in its own island. Our copy of that section sits one wrapper deeper, and the island has a differently named frame, so the engine left it bare. The engine now looks through single wrappers and ignores names that appear everywhere, such as the section headings.
+
 ## v3.236.0 — 2026-10-02 (island migration: the three manual fixes from Complete to-do list)
 - **No false sandbox.** The old header kept a "You are in sandbox mode" text below its visible edge. The engine read it as an active sandbox, turned on the sandbox page and moved the whole screen 24 px down. The text now counts only if it is actually inside the header.
 - **Rows that filled their column keep filling it.** The checklist cards were fixed at the old 608 px width and stayed narrow in the new 691 px column. Blocks that spanned their parent in the original now stretch to the new width. The reference's own fixed widths still take priority.

@@ -306,6 +306,8 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **White cards on the grey get radius 16.** This is the designers' rule: radius 12 → 16. The finish applies it to white, stroked cards in the main column outside islands, bound to `border-radius/xl`. Tinted blocks such as `*Alert*` keep their radius.
 
+**Finding the island by children looks through single wrappers.** The search passes through up to three single-child wrapper frames. Names that repeat in the reference don't count, since every island has a `Heading`. TM Travel Rule settings: our `Frame 2085664018` › `Frame 2085664033` › Heading + `Frame 2085664034` sits in the reference's 4th island as `Content` › Heading + `Frame 2085664034`.
+
 **A block the reference renamed is found through its children.** If a block isn't in the reference by name but all its children sit in one reference island, it goes into an island (its card chrome is stripped as usual). TM Settings / Verify your VASP: our card `.Content` is the reference's island › `Content` with the same two blocks. In the finish, a single wrapper on our side is paired with a single wrapper in the reference even when the names differ, so its gap is copied.
 
 **A block that overflows its parent in the reference too keeps its width.** The finish stretches a FIXED reference block that doesn't fit our parent. It no longer does that when the block also overflows its parent in the reference: the overflow is meant. Example: the Submit compliance stepper icons, 16 wide in a 10 px room, which were squeezed to 10.
