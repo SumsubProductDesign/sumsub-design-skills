@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.241.0 — 2026-10-04 (island migration: heading sizes from the reference; token cleanup in every slot; two audit fixes)
+- **Island headings take the reference's size.** The designers use 16 px headings in islands, while the old blocks kept 18 px. When the designer had rebuilt a heading, the engine couldn't match it and left it at 18 px (TM Applicant scoring: "Risk levels", "Risk scoring matrix"). Heading texts are now matched to the reference by their text, and take its style. Re-running the finish would correct the headings on 9 of the 25 accepted test screens too.
+- **Token cleanup reaches every slot.** The audit checks the content of any slot, including slots inside components such as the slider. The engine only cleaned island slots, so values like radius 4 and gap 4 in the slider stayed unbound and the audit flagged them. The engine now cleans the same layers the audit checks. Values with no token, and white separators with no semantic colour, are listed for the designer instead of being guessed.
+- **The audit no longer crashes on frames with different corner radii.** A frame rounded on two corners made the corner check throw and stopped the first audit part. Each corner is now checked on its own, so a frame with bound right corners isn't flagged any more either.
+- **The audit's sidebar check reads the whole page title.** "Applicant scoring" is a Transaction monitoring page, but the word "applicant" made the audit expect the Applicants sidebar. Every matching keyword now counts, and "scoring" points to Transaction monitoring.
+
 ## v3.240.0 — 2026-10-04 (island migration: a renamed heading no longer blocks the island)
 - **A block finds its island even when the designer renamed its heading.** The island check matches a block's children by name in the reference. On TM Applicant scoring the slider block holds `Block Title (🔴Figma only)` and `Slider`; the reference's island holds `Body` and `Slider`. The renamed heading made the check fail, so the plan left the block bare on the grey. A heading child that isn't in the reference is now skipped, and the block goes into the island. Plans for the 16 accepted test screens are unchanged.
 

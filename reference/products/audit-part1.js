@@ -159,7 +159,7 @@ if (sidebar) {
   const sidebarMap = [
     { kw: /applicant/,                       expected: "Applicants" },
     { kw: /integration|workflow|flow builder/, expected: "Integrations" },
-    { kw: /transaction|travel rule|vasp/,    expected: "Transactions monitoring" },   // v3.234: the DS option is "Transactions monitoring" — the old spelling flagged every TM screen
+    { kw: /transaction|travel rule|vasp|scoring/, expected: "Transactions monitoring" },   // v3.234: the DS option is "Transactions monitoring" — the old spelling flagged every TM screen
     { kw: /case management|case /,            expected: "Case management" },
     { kw: /client list/,                     expected: "Client lists" },
     { kw: /statistic/,                       expected: "Statistics" },
@@ -170,8 +170,10 @@ if (sidebar) {
     { kw: /task/,                             expected: "Tasks" },
     { kw: /admin/,                            expected: "Admin area" },
   ];
-  let expected = null;
-  for (const m of sidebarMap) if (m.kw.test(ctx)) { expected = m.expected; break; }
+  // v3.241: every matching keyword counts, not only the first — "Applicant scoring" is a TM › Settings page, and the first match
+  // ("applicant") demanded Type=Applicants for a sidebar the engine had correctly carried from the original
+  const _matches = sidebarMap.filter(m => m.kw.test(ctx)).map(m => m.expected);
+  let expected = _matches.includes(sidebarType) ? sidebarType : (_matches[0] || null);
 
   if (expected && sidebarType && sidebarType !== expected) {
     issues.push(`Sidebar variant is "Type=${sidebarType}", but the page context (title "${hdrTitle}") suggests "Type=${expected}". Rebind: sidebarSet.children.find(v => v.name.includes("Type=${expected}") && v.name.includes("Collapsed=False")).createInstance().`);
@@ -215,8 +217,13 @@ for (const n of all) {
   if (n.type !== "FRAME") continue;
   if (isInsideInstance(n)) continue;
   if (n.name === "Main") continue;
-  if (n.cornerRadius > 0 && !n.boundVariables?.topLeftRadius) {
-    issues.push(`Unbound cornerRadius on ${n.name}: ${n.cornerRadius}px`);
+  // v3.241: per corner — cornerRadius is figma.mixed (a symbol) when corners differ, and `symbol > 0` threw and took the whole part
+  // down (TM Applicant scoring: slider segments 4/0/4/0); and a frame with only its right corners rounded and bound was flagged
+  // because only topLeft was checked
+  const _rk = ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"];
+  const _unboundR = _rk.filter(k => typeof n[k] === "number" && n[k] > 0 && !n.boundVariables?.[k]);
+  if (_unboundR.length) {
+    issues.push(`Unbound cornerRadius on ${n.name}: ${_unboundR.map(k => k.replace("Radius", "") + "=" + n[k]).join(", ")}px`);
   }
   if (n.fills?.[0]?.type === "SOLID" && !n.fills[0].boundVariables?.color) {
     issues.push(`Hardcoded fill on ${n.name}`);

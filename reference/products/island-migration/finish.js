@@ -172,12 +172,23 @@ for (const [s, list] of ob) { const rl = rb.get(s); if (!rl) continue; const siz
 for (const id of list.filter(n => sizeOf(n) !== sizes[0]).map(n => n.id)) { const n = await figma.getNodeByIdAsync(id); if (!n) continue;
 try { n.setProperties({ Size: sizes[0] }); log.push(n.name + " Size → " + sizes[0] + " (as in the reference)"); } catch (e) {} } } }
 return log; }
+async function headingTextStyles(refRoot, page) {
+const log = [], HR = /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i;
+const slots = r => r.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const shown = (n, top) => { for (let q = n; q && q.id !== top.id; q = q.parent) if (q.visible === false) return false; return true; };
+const refT = new Map(); for (const s of slots(refRoot)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) { const k = t.characters.trim(); if (!k) continue; if (!refT.has(k)) refT.set(k, new Set()); refT.get(k).add(typeof t.textStyleId === "string" ? t.textStyleId : ""); }
+for (const s of slots(page)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) {
+let h = null; for (let q = t.parent, d = 0; q && q.id !== s.id && d < 4; q = q.parent, d++) if (HR.test(q.name)) { h = q; break; } if (!h) continue;
+const set = refT.get(t.characters.trim()); if (!set || set.size !== 1) continue; const rid = [...set][0]; if (!rid || rid === t.textStyleId) continue;
+try { let st = await figma.getStyleByIdAsync(rid); if (st && st.remote && st.key) st = await figma.importStyleByKeyAsync(st.key); if (!st || st.id === t.textStyleId) continue;
+await figma.loadFontAsync(st.fontName); await t.setTextStyleIdAsync(st.id); log.push("heading \"" + t.characters.trim().slice(0, 30) + "\" text style → " + st.name + " (as in the reference)"); } catch (e) {} }
+return log; }
 async function finishIsland(page, refId) {
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...sz, ...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
+const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page); cr.applied.unshift(...sz, ...rg, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 function stretchToWidth(page, withRef) {
@@ -254,7 +265,8 @@ const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg
 if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
 function oursOf(page) {
 const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { if (n.name === "Page / Body / IslandCard") { const sl = n.findOne(q => q.type === "SLOT"); if (sl) for (const k of sl.children) walk(k, side); } return; }
+const nested = (q, top) => { for (let p = q.parent; p && p.id !== top.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
+const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { for (const sl of n.findAll(q => q.type === "SLOT" && !nested(q, n))) for (const k of sl.children) walk(k, side); return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
 for (const s of slots) for (const k of s.children) walk(k, s.name !== "Main content"); return out; }
 const SPACING_KEYS = ["3d3cc3a15da0b893bf326da6053d7a1c37f1d836", "a4dad7f0e560345e844697b529325a2eca2ff23a", "5a8e4573770ee8f921f141c1ab6c96835c3125a0", "de89b1cae49981816929db80a4e795842e7baf77", "2b3382099953af94f32cb6ffe5c7f44c74d5fed7", "7dc2647090da988c17327693bc2224e2308047a2", "fceb37ce155723145d25d273574c665a8d7d30e6", "a2e089548b83ff33c8ee5e914fa24e67b889b38c"];
