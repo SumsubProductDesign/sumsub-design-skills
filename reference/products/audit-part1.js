@@ -175,7 +175,12 @@ if (sidebar) {
   const _matches = sidebarMap.filter(m => m.kw.test(ctx)).map(m => m.expected);
   let expected = _matches.includes(sidebarType) ? sidebarType : (_matches[0] || null);
 
-  if (expected && sidebarType && sidebarType !== expected) {
+  // v3.242: an island screen rebuilt in place takes its sidebar section from the ORIGINAL; when the original has no sidebar, the
+  // Page keeps its default Type=Dashboard (TM Transaction / Analytics — and the designers' reference too). Nothing was carried,
+  // so it's a note to check, not a build defect.
+  if (expected && sidebarType && sidebarType !== expected && islandRoot && inPlace && sidebarType === "Dashboard") {
+    infos.push(`[info] Sidebar is the Page default "Type=Dashboard" — the original screen had no sidebar section to carry; the page context suggests "Type=${expected}". Check it with the designer.`);
+  } else if (expected && sidebarType && sidebarType !== expected) {
     issues.push(`Sidebar variant is "Type=${sidebarType}", but the page context (title "${hdrTitle}") suggests "Type=${expected}". Rebind: sidebarSet.children.find(v => v.name.includes("Type=${expected}") && v.name.includes("Collapsed=False")).createInstance().`);
   } else {
     infos.push(`[info] Sidebar variant: "${variantName}"${expected ? ` (expected Type=${expected} — matches)` : " (no context-based expectation)"}`);
@@ -374,6 +379,8 @@ if (islandRoot) {
     if (!inSlot) continue;
     for (const prop of ["fills", "strokes"]) {
       let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps)) continue;
+      // v3.242: a stroke of weight 0 draws nothing (TM Analytics: a raw #ecedef stroke at weight 0 on a text)
+      if (prop === "strokes" && (typeof n.strokeWeight === "number" ? n.strokeWeight === 0 : ["strokeTopWeight", "strokeRightWeight", "strokeBottomWeight", "strokeLeftWeight"].every(k => !n[k]))) continue;
       for (const p of ps) { if (p.type !== "SOLID" || p.visible === false) continue;
         const b = p.boundVariables && p.boundVariables.color;
         if (!b) { if (n.type !== "INSTANCE") raw.push(`${n.name} ${prop}`); continue; }
@@ -529,8 +536,10 @@ for (const md of modalsAndDrawers) {
 //   padding L/R  ∈ [24, 32]   — spacing/xl (24) to spacing/3xl (32)
 //   padding T/B  ∈ [16, 24]   — spacing/lg (16) to spacing/xl (24)
 //   itemSpacing  ∈ [8, 24]    — spacing/s (8) to spacing/xl (24)
+// v3.242: on an island screen the page content frame is the Page's own; a block inside a slot named "content" (TM Analytics: the
+// filter bar, 16/8 padding as in the reference) is not a page Content frame
 const contentFramesToAudit = all.filter(n =>
-  n.type === "FRAME" && !isInsideInstance(n) && /^(Content|BG Content|Page Content|Body)$/i.test(n.name)
+  n.type === "FRAME" && !isInsideInstance(n) && /^(Content|BG Content|Page Content|Body)$/i.test(n.name) && !(islandRoot && _inSlot(n))
 );
 for (const cf of contentFramesToAudit) {
   const lr = [cf.paddingLeft, cf.paddingRight];
@@ -602,6 +611,7 @@ for (const n of all) {
   if (n.type !== "FRAME") continue;
   if (isInsideInstance(n)) continue;
   if (!/^(Content|BG Content|Page Content)$/i.test(n.name)) continue;
+  if (islandRoot && _inSlot(n)) continue;   // v3.242: a block named "content" inside an island slot (see 7.17)
   if (n.clipsContent === false && n.children.length > 0) {
     issues.push(`Content frame "${n.name}" has clipsContent=false — this masks overflow instead of fixing it. Check if table/drawer inside is sized beyond content, and hide unused rows via row.visible=false or resize properly.`);
   }

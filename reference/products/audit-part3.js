@@ -47,6 +47,8 @@ function isVisible(n) {
 }
 
 const infos = [];
+// v3.242: an island-layout root (a live `Page` instance) owns its sidebar (257 Basic / 52 Full screen page) and its islands
+const islandRoot = root.type === "INSTANCE" && (() => { try { const m = root.mainComponent; return !!m && !!m.parent && m.parent.type === "COMPONENT_SET" && m.parent.name === "Page"; } catch (e) { return false; } })();
 const sidebar = root.findOne(n =>
   n.type === "INSTANCE" && n.mainComponent?.parent?.name === "*Sidebar*"
 );
@@ -432,7 +434,11 @@ if (productContext === "tm") {
   // Pattern 3 (Rule editor): 52px collapsed Sidebar + Header 1388 @x=52 (v3.159, audit 7.58)
   // Pattern 4 (Transaction detail): No sidebar, 1920px wide canvas
   // Pattern 5 (Txn Networks): No sidebar, 1681px wide canvas
-  if (sidebar) {
+  if (sidebar && islandRoot) {
+    // v3.242: the Page's own sidebar — 257 expanded (Basic) or 52 collapsed (Full screen page); the old TM 257/276 widths don't apply
+    const sidebarW = Math.round(sidebar.width);
+    if (sidebarW !== 257 && sidebarW !== 52) issues.push(`Island Page sidebar width is ${sidebarW}px — expected 257 (Basic) or 52 (Full screen page). See island-layout-pattern.md §1.`);
+  } else if (sidebar) {
     const sidebarW = Math.round(sidebar.width);
     if (sidebarW !== 257 && sidebarW !== 276) {
       issues.push(`TM Sidebar width is ${sidebarW}px — expected 257px (Transactions table / Pattern 1) or 276px (Settings / Pattern 2). See tm-layout-patterns.md.`);
@@ -571,6 +577,9 @@ if (productContext === "tm") {
   for (const t of tableOrgs) {
     let pL, pT;
     try { pL = t.paddingLeft; pT = t.paddingTop; } catch (e) { continue; }
+    // v3.242: inside an IslandCard the island gives the inset — the designers' references set the table's padding to 0 (TM Analytics)
+    let inIsland = false; for (let q = t.parent; q && q.id !== root.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { inIsland = true; break; }
+    if (inIsland) continue;
     if (pL === 0 && pT === 0) {
       issues.push(`7.55 table-padding-stripped: "${t.name}" (${Math.round(t.width)}w) has padding 0/0/0/0 — its internal content inset was zeroed. Canonical Txn table = 32/32/24/24, insetting the Top Toolbar + Body so rows get gutters. A fresh createInstance inherits that; 0/0/0/0 = the build explicitly zeroed it. NEVER set padding on the Txn table instance; drop it and configure rows/State only. Fix: do NOT touch paddingLeft/Right/Top/Bottom.`);
     }

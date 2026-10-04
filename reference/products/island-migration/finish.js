@@ -232,6 +232,7 @@ const w = Math.max(s.width, r + 80), h = Math.max(s.height, b + 80);
 if (w > s.width + 0.5 || h > s.height + 0.5) { s.resizeWithoutConstraints(w, h); return Math.round(w) + "×" + Math.round(h); }
 return null;
 }
+const oldAlias = n => n === "base/white/100" ? "base/neutral/0" : n.replace(/^components\/status\/(approved|rejected|pending|default)-/, (m, s) => "components/status/" + ({ approved: "green", rejected: "red", pending: "yellow", default: "grey" })[s] + "/");
 let _vr = null;
 function varResolver() {
   if (_vr) return _vr;
@@ -247,7 +248,7 @@ function varResolver() {
       const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
       if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
         if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const key = byName.get(v.name.toLowerCase()) || byName.get("components/" + v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+        else if (base) { const lo = v.name.toLowerCase(), key = byName.get(lo) || byName.get("components/" + lo) || byName.get(oldAlias(lo)); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
       return out; })()); return memo.get(id); };
     const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
     return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
@@ -264,7 +265,8 @@ async function semanticFor(name, node, prop) {
 const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg", key = BASE_TO_SEMANTIC[kind][String(name).toLowerCase()]; if (!key) return null;
 if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
 function oursOf(page) {
-const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))).concat(hdr ? hdr.findAll(n => n.type === "SLOT" && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
 const nested = (q, top) => { for (let p = q.parent; p && p.id !== top.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
 const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { for (const sl of n.findAll(q => q.type === "SLOT" && !nested(q, n))) for (const k of sl.children) walk(k, side); return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
@@ -273,11 +275,12 @@ const SPACING_KEYS = ["3d3cc3a15da0b893bf326da6053d7a1c37f1d836", "a4dad7f0e5603
 const RADIUS_KEYS = ["885152d55a536fb853461592cc3eff926e94858d", "311dc09093e9474a8b582c8fb7ccc7a628065a20", "95839af397884cd7f8fadb34a62d4763f88d68dd", "03884e014085a48cf26670632be200a02b5a160c"];
 async function tokensByValue(keys, page) { const m = new Map(); const vs = await Promise.all(keys.map(k => figma.variables.importVariableByKeyAsync(k).catch(() => null)));
 for (const v of vs) { if (!v) continue; try { const r = v.resolveForConsumer(page); if (typeof r.value === "number" && !m.has(r.value)) m.set(r.value, v); } catch (e) {} } return m; }
+const noStroke = n => typeof n.strokeWeight === "number" ? n.strokeWeight === 0 : ["strokeTopWeight", "strokeRightWeight", "strokeBottomWeight", "strokeLeftWeight"].every(k => !n[k]);
 async function tokenHygiene(page) {
 const ours = oursOf(page), log = [], rawPaints = [], rawSpacing = [], noToken = [], sideWhites = [];
 const hx = c => "#" + [c.r, c.g, c.b].map(v => Math.round(v * 255).toString(16).padStart(2, "0")).join("");
 const shownIn = n => { let q = n; while (q && q.type !== "SLOT") { if (q.visible === false) return false; q = q.parent; } return true; };
-for (const [n] of ours) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps) || !ps.length) continue;
+for (const [n] of ours) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps) || !ps.length || (prop === "strokes" && noStroke(n))) continue;
 let changed = false; const next = [];
 for (const p of ps) { const b = p.boundVariables && p.boundVariables.color;
 if (p.type === "SOLID" && p.visible !== false && !b) { if (n.type !== "INSTANCE" && shownIn(n)) rawPaints.push(n.name + " " + prop + " " + hx(p.color)); next.push(p); continue; }

@@ -296,6 +296,14 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **The sidebar section and active item come from the original.** The old screen's place in the navigation is data, so the build reads the original sidebar and sets the new `*Sidebar*` to match. If the old sidebar is a `*Sidebar*` instance, its `Type` is copied. If it is a detached frame, the engine reads the chain of the active item (Transactions and Travel Rule › Settings › Travel Rule quick start) and maps the first level to a `Type` (Transactions → Transactions monitoring). It then marks the matching second-level item Active, and the third-level item when the DS sidebar has it. An item the DS sidebar lacks is reported in `notes`, not faked. With a collapsed sidebar only the section icon shows. If the original has no sidebar, nothing changes.
 
+**Old names Base renamed.** A few names of the retired library don't exist in Base under any spelling: `Base/White/100` is Base's `base/neutral/0`, and the status tokens were named by state (`Components/status/approved-text-normal`) where Base names them by colour (`components/status/green/text-normal`). The rebind maps them through a short alias table, and the token cleanup that runs right after maps the `base/*` result to its semantic token. TM Transaction / Analytics: the filter bar's white stayed on the retired variable until this.
+
+**The header slots are ours too.** The build clones blocks into the `Page` header's Info, Additional info and Actions slots, from the original or the reference. The finish's rebind and token cleanup now cover them like the content slots. TM Analytics: the reference's `Statuses` arrived with a raw gap 4.
+
+**A "Key name" text is no key.** Old headers show the component default `Key name` in the Key area; the build used to switch the `Page` header's Key badge on with it. Like `Section name` for the breadcrumb, the default counts as no key now.
+
+**A stroke of weight 0 is not a paint.** A text with a raw stroke at weight 0 draws nothing; `rawPaints` and the skill audit's 7.61 skip it.
+
 **The sandbox flag counts only when it shows.** The old header's "You are in sandbox mode" text sets `Sandbox=Yes` only if it lies inside the header's box. Complete to-do list had the text at y 58 in a 56 px header, off screen, and the page went to Sandbox and moved everything 24 px down.
 
 **Blocks that spanned their column keep spanning.** A FIXED block whose width equalled its parent's inner width in the old screen is marked before the move and set to FILL after it. The six `Checklist row` cards stayed 608 wide in a 691 column. The reference's own FIXED widths still win in the finish.

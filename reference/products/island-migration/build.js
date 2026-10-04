@@ -11,7 +11,6 @@ const _idCache = new Map();
 const idsOf = n => { if (!n) return new Set(); if (_idCache.has(n.id)) return _idCache.get(n.id);
 const s = new Set([n.id]); if ("findAll" in n) for (const x of n.findAll(() => true)) s.add(x.id); _idCache.set(n.id, s); return s; };
 const contains = (outer, n) => !!outer && idsOf(outer).has(n.id);
-function sideBySide(n, scr) { return sideBySideList(vis(n), scr); }
 function sideBySideList(nodes, scr) {
 const k = nodes.filter(c => c.width >= 150).map(c => ({ c, b: box(c, scr) }));
 if (k.length < 2) return null;
@@ -107,7 +106,7 @@ if (!h) return { actions: [] };
 const inA = (n, re) => { let q = n.parent; while (q && q.id !== h.id) { if (re.test(q.name)) return q; q = q.parent; } return null; };
 const T = h.findAll(n => n.type === "TEXT" && n.visible && rendered(n, scr));
 const cr = T.find(t => inA(t, /Breadcrumb/i) && t.characters.trim().length > 1 && !/^Section name$/i.test(t.characters.trim()));
-const keyT = T.find(t => /^Key name$/i.test(t.name) && !inA(t, /Additional info/i));
+const keyT = T.find(t => /^Key name$/i.test(t.name) && !/^Key name$/i.test(t.characters.trim()) && !inA(t, /Additional info/i));
 const status = h.findOne(n => n.id !== h.id && /status/i.test(n.name) && n.visible && rendered(n, scr) && !inA(n, /status/i)) || null;
 const addInfo = h.findOne(n => /^Additional info$/i.test(n.name) && "children" in n && n.visible && rendered(n, scr)) || null;
 const copy = !!h.findOne(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && /Title \+ button/i.test(n.parent.name));

@@ -4,7 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
-## v3.241.0 — 2026-10-04 (island migration: heading sizes from the reference; token cleanup in every slot; two audit fixes)
+## v3.242.0 — 2026-10-04 (island migration: the fixes from TM Transaction / Analytics)
+- **The header no longer shows a "Key name" badge.** Old headers display the placeholder "Key name" where a key would go, and the migration carried it into the new header as if it were a real key. The placeholder now counts as no key, and the badge stays off.
+- **Colours from the retired library find their Base name.** A few colours were renamed in Base, so the migration couldn't find them and left them on the old values. The filter bar's white on TM Analytics is one example. The renamed white and status colours are now matched to their Base names.
+- **Blocks the migration puts into the header get the same token cleanup as the content.** A status row copied from the designer's reference kept a 4 px gap with no spacing token. Spacing and colours in the header's info, additional-info and actions rows are now bound to tokens as well.
+- **Fewer false alarms in the audit on island screens.** It no longer flags an invisible zero-width stroke as an unbound colour. It also no longer treats a block called "content" inside an island as the page's content area. It accepts the island page's collapsed 52 px sidebar, and it accepts a table with no padding inside an island, where the island provides the inset. When the original screen had no sidebar, the default Dashboard section is now reported as a note to check, not as an error.
+
+ — 2026-10-04 (island migration: heading sizes from the reference; token cleanup in every slot; two audit fixes)
 - **Island headings take the reference's size.** The designers use 16 px headings in islands, while the old blocks kept 18 px. When the designer had rebuilt a heading, the engine couldn't match it and left it at 18 px (TM Applicant scoring: "Risk levels", "Risk scoring matrix"). Heading texts are now matched to the reference by their text, and take its style. Re-running the finish would correct the headings on 9 of the 25 accepted test screens too.
 - **Token cleanup reaches every slot.** The audit checks the content of any slot, including slots inside components such as the slider. The engine only cleaned island slots, so values like radius 4 and gap 4 in the slider stayed unbound and the audit flagged them. The engine now cleans the same layers the audit checks. Values with no token, and white separators with no semantic colour, are listed for the designer instead of being guessed.
 - **The audit no longer crashes on frames with different corner radii.** A frame rounded on two corners made the corner check throw and stopped the first audit part. Each corner is now checked on its own, so a frame with bound right corners isn't flagged any more either.

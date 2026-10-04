@@ -148,7 +148,9 @@ function headerRegions(h, scr) {
   const inA = (n, re) => { let q = n.parent; while (q && q.id !== h.id) { if (re.test(q.name)) return q; q = q.parent; } return null; };
   const T = h.findAll(n => n.type === "TEXT" && n.visible && rendered(n, scr));
   const cr = T.find(t => inA(t, /Breadcrumb/i) && t.characters.trim().length > 1 && !/^Section name$/i.test(t.characters.trim()));
-  const keyT = T.find(t => /^Key name$/i.test(t.name) && !inA(t, /Additional info/i));
+  // v3.242: the component default "Key name" is a placeholder, not a key (TM Analytics: the old header showed it, the engine turned the
+  // Page header's Key badge on with it) — same as "Section name" for the breadcrumb
+  const keyT = T.find(t => /^Key name$/i.test(t.name) && !/^Key name$/i.test(t.characters.trim()) && !inA(t, /Additional info/i));
   const status = h.findOne(n => n.id !== h.id && /status/i.test(n.name) && n.visible && rendered(n, scr) && !inA(n, /status/i)) || null;
   const addInfo = h.findOne(n => /^Additional info$/i.test(n.name) && "children" in n && n.visible && rendered(n, scr)) || null;
   const copy = !!h.findOne(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && /Title \+ button/i.test(n.parent.name));
@@ -864,6 +866,10 @@ return null;
 // run, and the whole call timed out with a 520).
 // v3.238: a vanished-library variable is looked up in Base by name, then as "components/<name>" — the old library named component
 // tokens without the prefix (checkbox/text-normal = Base components/checkbox/text-normal; TM Travel Rule settings "Euro" label)
+// v3.242: names the vanished library used that Base renamed — `Base/White/100` is Base's `base/neutral/0` (TM Analytics: the filter bar's
+// white stayed bound to the vanished variable), the status tokens were named by state, Base names them by colour. The base/* result
+// is then mapped to its semantic token by tokenHygiene, which runs right after.
+const oldAlias = n => n === "base/white/100" ? "base/neutral/0" : n.replace(/^components\/status\/(approved|rejected|pending|default)-/, (m, s) => "components/status/" + ({ approved: "green", rejected: "red", pending: "yellow", default: "grey" })[s] + "/");
 let _vr = null;
 function varResolver() {
   if (_vr) return _vr;
@@ -881,7 +887,7 @@ function varResolver() {
       const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
       if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
         if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const key = byName.get(v.name.toLowerCase()) || byName.get("components/" + v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+        else if (base) { const lo = v.name.toLowerCase(), key = byName.get(lo) || byName.get("components/" + lo) || byName.get(oldAlias(lo)); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
       return out; })()); return memo.get(id); };
     const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
     return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
@@ -905,7 +911,10 @@ if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyA
 // Slider › Slot), not only IslandCard — the skill audit (7.61 / 7.16) treats every slot's content as ours, so the engine left raw
 // radius 4 / gap 4 there that the audit then flagged. Instance layers themselves stay the component's.
 function oursOf(page) {   // our layers: slot content, down through the nearest slots under every instance, never instance layers
-const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+// v3.242: the header's Info / Additional info / Actions slots hold blocks the build cloned in (from the original or the reference) —
+// ours too. TM Analytics: the reference's `Statuses` came with a raw gap 4 the audit flagged.
+const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))).concat(hdr ? hdr.findAll(n => n.type === "SLOT" && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
 const nested = (q, top) => { for (let p = q.parent; p && p.id !== top.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
 const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { for (const sl of n.findAll(q => q.type === "SLOT" && !nested(q, n))) for (const k of sl.children) walk(k, side); return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
@@ -914,11 +923,13 @@ const SPACING_KEYS = ["3d3cc3a15da0b893bf326da6053d7a1c37f1d836", "a4dad7f0e5603
 const RADIUS_KEYS = ["885152d55a536fb853461592cc3eff926e94858d", "311dc09093e9474a8b582c8fb7ccc7a628065a20", "95839af397884cd7f8fadb34a62d4763f88d68dd", "03884e014085a48cf26670632be200a02b5a160c"];
 async function tokensByValue(keys, page) { const m = new Map(); const vs = await Promise.all(keys.map(k => figma.variables.importVariableByKeyAsync(k).catch(() => null)));
 for (const v of vs) { if (!v) continue; try { const r = v.resolveForConsumer(page); if (typeof r.value === "number" && !m.has(r.value)) m.set(r.value, v); } catch (e) {} } return m; }
+// v3.242: a stroke of weight 0 draws nothing — TM Analytics: a text `Name` with a raw #ecedef stroke at weight 0 sat in rawPaints
+const noStroke = n => typeof n.strokeWeight === "number" ? n.strokeWeight === 0 : ["strokeTopWeight", "strokeRightWeight", "strokeBottomWeight", "strokeLeftWeight"].every(k => !n[k]);
 async function tokenHygiene(page) {
 const ours = oursOf(page), log = [], rawPaints = [], rawSpacing = [], noToken = [], sideWhites = [];
 const hx = c => "#" + [c.r, c.g, c.b].map(v => Math.round(v * 255).toString(16).padStart(2, "0")).join("");
 const shownIn = n => { let q = n; while (q && q.type !== "SLOT") { if (q.visible === false) return false; q = q.parent; } return true; };
-for (const [n] of ours) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps) || !ps.length) continue;
+for (const [n] of ours) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (!Array.isArray(ps) || !ps.length || (prop === "strokes" && noStroke(n))) continue;
 let changed = false; const next = [];
 for (const p of ps) { const b = p.boundVariables && p.boundVariables.color;
 if (p.type === "SOLID" && p.visible !== false && !b) { if (n.type !== "INSTANCE" && shownIn(n)) rawPaints.push(n.name + " " + prop + " " + hx(p.color)); next.push(p); continue; }
