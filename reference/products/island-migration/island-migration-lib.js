@@ -182,7 +182,7 @@ function refIslandByKids(refRoot, g) {   // v3.237: through single wrappers; nam
 if (!refRoot || !("children" in g)) return null;
 let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
 const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
-const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name === k.name && x.visible); if (!all.length) return null; if (all.length > 1) continue;
+const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name === k.name && x.visible); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
 let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
 return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }

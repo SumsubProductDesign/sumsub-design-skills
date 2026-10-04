@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.240.0 — 2026-10-04 (island migration: a renamed heading no longer blocks the island)
+- **A block finds its island even when the designer renamed its heading.** The island check matches a block's children by name in the reference. On TM Applicant scoring the slider block holds `Block Title (🔴Figma only)` and `Slider`; the reference's island holds `Body` and `Slider`. The renamed heading made the check fail, so the plan left the block bare on the grey. A heading child that isn't in the reference is now skipped, and the block goes into the island. Plans for the 16 accepted test screens are unchanged.
+
 ## v3.239.0 — 2026-10-04 (island migration: the two engine fixes from TM Tags)
 - **A blank text no longer keeps the source screen.** The old Tags screen had a text layer holding only a space, 0 px wide. The build counted it as leftover content, returned `kept: ["Text"]` and left the source in place. Texts that are empty after trimming are ignored now, and the source is removed.
 - **The finish no longer writes into the sidebar and header.** It matched the reference's blocks by name across the whole page, and a `Content` frame also lives inside the `*Sidebar*` and `*Header*`. On Tags that meant about 40 fills written inside those instances. Matching now stays inside the content slots.
