@@ -399,7 +399,7 @@ try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).ma
 const shownLow = new Set([...shown].map(t => t.toLowerCase()));
 const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !shownLow.has(k)).map(([k, v]) => k + ": " + v); if (lost.length) notes.push("header values not placed: " + lost.join(", ")); } catch (e) {}
 _idCache.clear();
-const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
+const leftover = scr.findAll(n => (n.type === "TEXT" ? n.characters.trim() !== "" : n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
 !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n) && !(nodes.scrollbars || []).some(sb => contains(sb, n)));
 if (leftover.length) {
 return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }

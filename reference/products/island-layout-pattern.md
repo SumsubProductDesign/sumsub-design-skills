@@ -360,6 +360,10 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **An old scrollbar thumb is chrome.** A `Scroll / Thumb` instance at the screen's right edge (Blueprint New blueprint: 6×380 at x=1425) is neither content nor header — the `Page` scrolls by itself. It is dropped with the old header and sidebar; before, it stayed in the source and the build ended with `kept: ["Scroll / Thumb"]`.
 
+**A blank text is not content.** An old screen can keep a text layer with nothing but a space in it, 0 px wide (TM Tags: `Text` = `" "` at the screen's root). It drew nothing, but the source check counted it, so the build ended with `kept: ["Text"]` and the source stayed. Texts that are empty after trimming no longer count.
+
+**The finish pairs blocks inside the content slots only.** The reference's blocks are looked up by name. A name like `Content` also exists inside the `*Sidebar*` and `*Header*` of both `Page` instances, so the chrome paired with the chrome and the finish wrote about 40 fills into the sidebar and header (TM Tags). The lookup now runs inside `Main content` / `Side content` / Aside `Content` only, and skips anything inside a `*Sidebar*` or `*Header*` instance. The sidebar and header stay the published `Page`'s, plus the active item from the original.
+
 **The old sidebar spans the 900 viewport.** A collapsed `*Sidebar*` is 900 tall even when the screen is taller (Case page AML: 52×900 in a 1160 frame). It is found against `0.8 × min(height, 900)`; before, it was missed, stayed in the source and the build ended with `kept: ["*Sidebar*"]`.
 
 **Chrome at every level.** The header, the header band and the tab strip are never content, however deep they sit: TM Related transactions keeps `Header / Finance`, the `*Tab Basic*` strip and the `Txn table` in one frame — the band and the tabs go to the header, the table alone is the content group. Tab items are recognised under both names, `.Tab Basic / Item` and the older `Tab / Basic / Item` (the selected tab too). A breadcrumb that is the placeholder `Section name` counts as none — the reference's is taken.

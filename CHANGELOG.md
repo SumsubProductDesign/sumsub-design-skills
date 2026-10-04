@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.239.0 — 2026-10-04 (island migration: the two engine fixes from TM Tags)
+- **A blank text no longer keeps the source screen.** The old Tags screen had a text layer holding only a space, 0 px wide. The build counted it as leftover content, returned `kept: ["Text"]` and left the source in place. Texts that are empty after trimming are ignored now, and the source is removed.
+- **The finish no longer writes into the sidebar and header.** It matched the reference's blocks by name across the whole page, and a `Content` frame also lives inside the `*Sidebar*` and `*Header*`. On Tags that meant about 40 fills written inside those instances. Matching now stays inside the content slots.
+
 ## v3.238.0 — 2026-10-04 (island migration: the five manual fixes from TM Travel Rule settings)
 - **The form keeps the reference's width when the side column is empty.** The designers' screen has a tip in a side column; the original has nothing to put there. The engine left the side column off, and the form stretched to 1135 px instead of 691. It now keeps the side column on and empty, so the main column is as wide as in the reference.
 - **Islands pair with the reference through extra wrappers.** Our copy of a section can sit one or two wrapper frames deeper than the designer's, and a `Header` frame can stand where we have a `Heading`. Then nothing inside the island was matched: section headings kept the old 32 / 12 spacing and the gaps stayed 0 / 20 instead of 12 / 8. Both now pair, and headings take the reference's top and bottom spacing.

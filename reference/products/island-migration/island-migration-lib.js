@@ -504,7 +504,7 @@ for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendC
     const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !shownLow.has(k)).map(([k, v]) => k + ": " + v); if (lost.length) notes.push("header values not placed: " + lost.join(", ")); } catch (e) {}
   // 9. PRESERVATION GUARD — the source may only go if nothing visible is left outside its old header (stack), sidebar and subheader
   _idCache.clear();                                                          // the tree changed — rebuild id sets
-  const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
+  const leftover = scr.findAll(n => (n.type === "TEXT" ? n.characters.trim() !== "" : n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
       !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n) && !(nodes.scrollbars || []).some(sb => contains(sb, n)));
   // never rename a layer (designers' rule): the source keeps its name; `kept` says what stayed in it
   if (leftover.length) {
@@ -550,9 +550,13 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y)); if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
-  const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
+  const bodySlots = root => root.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const inChrome = n => { for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE" && /^\*(Sidebar|Header)\*$/.test(p.name)) return true; return false; };
+// Blocks pair inside the content slots only: a same-named frame inside the sidebar or the header is chrome, not content.
+const inBody = (root, a) => { const sl = bodySlots(root), seen = new Set(); return (sl.length ? sl : [root]).flatMap(s => s.findAll(n => n.name === a && n.visible && !inChrome(n))).filter(n => !seen.has(n.id) && seen.add(n.id)); };
+const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
   for (const a of anchors) {
-    const R = refRoot.findAll(n => n.name === a && n.visible), B = page.findAll(n => n.name === a && n.visible);
+    const R = inBody(refRoot, a), B = inBody(page, a);
     for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
       await prefetch(paintIds(mr.map(e => e[1])));
       for (const [path, rn, bn, ov, mode] of mr) {
