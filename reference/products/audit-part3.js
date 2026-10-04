@@ -404,7 +404,11 @@ if (productContext === "flow-builder") {
   }
 }
 
-if (productContext === "applicant-page") {
+if (productContext === "applicant-page" && islandRoot) {
+  // v3.244: an island AP screen uses the Page's own *Header* (configured from the AP page header) — the designers' reference has no
+  // AP page header either; requiring it failed every migrated Applicant page (3696:135474)
+  requireInstance("Island Page header (*Header*)", n => n.mainComponent?.parent?.name === "*Header*");
+} else if (productContext === "applicant-page") {
   requireInstance(
     "AP page header",
     n => n.mainComponent?.parent?.name === "AP page header" || n.mainComponent?.name?.startsWith("Client type="),

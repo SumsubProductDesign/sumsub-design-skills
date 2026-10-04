@@ -557,11 +557,11 @@ const inChrome = n => { for (let p = n.parent; p && p.type !== "PAGE"; p = p.par
 // Blocks pair inside the content slots only: a same-named frame inside the sidebar or the header is chrome, not content.
 const inBody = (root, a) => { const sl = bodySlots(root), seen = new Set(); return (sl.length ? sl : [root]).flatMap(s => s.findAll(n => n.name === a && n.visible && !inChrome(n))).filter(n => !seen.has(n.id) && seen.add(n.id)); };
 const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
-  for (const a of anchors) {
+  const runAnchor = async a => { let gone = 0;
     const R = inBody(refRoot, a), B = inBody(page, a);
     for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
       await prefetch(paintIds(mr.map(e => e[1])));
-      for (const [path, rn, bn, ov, mode] of mr) {
+      for (const [path, rn, bn, ov, mode] of mr) { try {
         let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }   // another variant: compare with the reference's own main
         if (a === "Page / Body / IslandCard" && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;       // published internals win
         // sizing: the designers switch fixed-width blocks to FILL (or pin a column FIXED) when the content gets wider — copy it
@@ -628,8 +628,15 @@ try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.
             if (bVis && bb && bb.id === v.id) continue;
             const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
             applied.push(a + path + " " + prop + " → " + v.name); }
-          else if (!rVis && bVis && prop === "fills") { bn.fills = []; applied.push(a + path + " fills → none"); }
-        } catch (e) { skipped.push(a + path + " " + prop + ": " + e.message); } } } } }
+          else if (!rVis && bVis) { bn[prop] = []; applied.push(a + path + " " + prop + " → none"); }   // v3.244: strokes too — the reference drops the Summary's own border because the Aside draws it (else a double line)
+        } catch (e) { skipped.push(a + path + " " + prop + ": " + e.message); } } } catch (e) { gone++; } } }
+  // v3.244: pairs are collected first, and a write to a block can rebuild its sublayers — a later pair then points at a layer that is gone
+  // ("in get_rotation: The node … does not exist", AP page, twice). The pair is counted, the walk goes on, and the block is walked again
+  // with fresh layers (writes already made are no-ops then), up to 3 passes.
+  return gone; };
+  let todo = anchors;
+  for (let pass = 0; pass < 3 && todo.length; pass++) { const next = []; for (const a of todo) if (await runAnchor(a)) next.push(a); todo = next; }
+  if (todo.length) skipped.push("layers changed under the walk in " + todo.join(", ") + " — run the copy part again");
   return { applied, skipped };
 }
 // v3.230: a bare block can be a wrapper whose one child is the visible card of the same size (TM Settings / Let’s set up: `.Content` › `.Content`) — the island colours go on that card too
@@ -641,7 +648,7 @@ async function applyIslandTokens(page) {
   const ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
   // bare cards on the grey: secondary fill + subtlest border
   for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
-    try { if (isWhite(k)) repaint(k, "fills", v.cardFill); if (hasStroke(k)) repaint(k, "strokes", v.border); log.push("card " + k.name); } catch (e) { log.push("card " + k.name + ": " + e.message); } }
+    try { if (isWhite(k)) repaint(k, "fills", v.cardFill); if (hasStroke(k) && !(await statusPaint(k, "strokes"))) repaint(k, "strokes", v.border); log.push("card " + k.name); } catch (e) { log.push("card " + k.name + ": " + e.message); } }
   // side columns (Aside content / Side content): border subtlest on the column and its first bordered block
   const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   for (const s of sideSlots) for (const k of s.children) { try { if (hasStroke(k)) repaint(k, "strokes", v.border);
@@ -659,7 +666,7 @@ const log = [], ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "
 for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
 try { const fb = k.fills[0] && k.fills[0].boundVariables && k.fills[0].boundVariables.color, sb = k.strokes && k.strokes[0] && k.strokes[0].boundVariables && k.strokes[0].boundVariables.color;
 if (isWhite(k) && !(fb && fb.id === v.cardFill.id)) { repaint(k, "fills", v.cardFill); log.push("card " + k.name + " fill → " + v.cardFill.name); }
-if (hasStroke(k) && !(sb && sb.id === v.border.id)) { repaint(k, "strokes", v.border); log.push("card " + k.name + " stroke → " + v.border.name); } } catch (e) { log.push("card " + k.name + ": " + e.message); } }
+if (hasStroke(k) && !(sb && sb.id === v.border.id) && !(await statusPaint(k, "strokes"))) { repaint(k, "strokes", v.border); log.push("card " + k.name + " stroke → " + v.border.name); } } catch (e) { log.push("card " + k.name + ": " + e.message); } }
 const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
@@ -725,13 +732,43 @@ const set = refT.get(t.characters.trim()); if (!set || set.size !== 1) continue;
 try { let st = await figma.getStyleByIdAsync(rid); if (st && st.remote && st.key) st = await figma.importStyleByKeyAsync(st.key); if (!st || st.id === t.textStyleId || (!h && !HS.test(st.name))) continue;
 await figma.loadFontAsync(st.fontName); await t.setTextStyleIdAsync(st.id); log.push("heading \"" + t.characters.trim().slice(0, 30) + "\" text style → " + st.name + " (as in the reference)"); } catch (e) {} }
 return log; }
+// v3.244 (Applicant page run, 3696:135474): four class fixes, all in the finish.
+//  statusPaint — a bare card's border bound to a coloured token (AML screening: border/green/subtler in the original AND the reference)
+//    is a status, not the pre-island chrome: §6.1 recolours only neutral / raw borders.
+//  sidePanelLikeReference — when the reference's Aside hugs a FIXED column (AP: Aside HUG 380, Summary FIXED 380×748), ours does the same;
+//    the build puts the column in on FILL/FILL, which gave Aside 400, Summary 9500 tall and every main card 20 px narrower.
+//  dropHeaderPlaceholders — a header-slot block cloned from the reference that shows only a component placeholder (AP: "Name + info" =
+//    ClientNickname, while the original hides the client name) is not data — removed, like "Key name" / "Section name" in the build.
+const STATUS_PAINT = /(^|\/)(green|red|yellow|orange|purple|blue|cyan|pink|lime|volcano|geekblue|emerald|sky|teal|violet|rose|fuchsia)(\/|$)/i;
+async function statusPaint(k, prop) { try { const b = k[prop] && k[prop][0] && k[prop][0].boundVariables && k[prop][0].boundVariables.color; if (!b) return false; const v = await figma.variables.getVariableByIdAsync(b.id); return !!v && STATUS_PAINT.test(v.name); } catch (e) { return false; } }
+async function sidePanelLikeReference(refRoot, page) {
+const log = []; const asides = P => P.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / Aside");
+const colOf = a => { const s = a && a.findOne(n => n.type === "SLOT" && n.name === "Content"); const k = s ? s.children.filter(c => c.visible) : []; return k.length === 1 ? k[0] : null; };
+const R = asides(refRoot);
+for (let i = 0; i < R.length; i++) { const r = colOf(R[i]), b0 = colOf(asides(page)[i]);
+if (!r || !b0 || r.name !== b0.name || R[i].layoutSizingHorizontal !== "HUG" || r.layoutSizingHorizontal !== "FIXED") continue;
+try { const fv = r.layoutSizingVertical === "FIXED"; let b = colOf(asides(page)[i]); b.layoutSizingHorizontal = "FIXED"; if (fv) b.layoutSizingVertical = "FIXED";
+b = colOf(asides(page)[i]); b.resize(r.width, fv ? r.height : b.height);
+const a2 = asides(page)[i]; if (a2.layoutSizingHorizontal !== "HUG") a2.layoutSizingHorizontal = "HUG";
+log.push("side panel like the reference: " + r.name + " " + Math.round(r.width) + (fv ? "×" + Math.round(r.height) : "") + ", the Aside hugs it"); } catch (e) { log.push("side panel: " + e.message); } }
+return log; }
+const PLACEHOLDER_TEXT = /^(ClientNickname|Client name|Key[ _]name|Section name|Org[ _]name|Organization)$/i;
+async function dropHeaderPlaceholders(page) {
+const log = [], h = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible); if (!h) return log;
+for (const s of h.findAll(n => n.type === "SLOT" && /^(Info slot|Additional info)/i.test(n.name))) for (const k of [...s.children]) {
+if (!k.visible || !("findAll" in k)) continue; const t = k.findAll(q => q.type === "TEXT" && q.visible && q.characters.trim()).map(q => q.characters.trim());
+if (t.length && t.every(x => PLACEHOLDER_TEXT.test(x))) { const nm = k.name; try { k.remove(); log.push("header: " + nm + " removed — it only shows the placeholder \"" + t[0] + "\""); } catch (e) {} } }
+const h2 = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => n.type === "SLOT" && re.test(n.name))[0];
+if (s && !s.children.some(k => k.visible)) { try { h2.setProperties({ [prop]: false }); log.push("header: " + s.name + " empty — switched off"); } catch (e) {} } }
+return log; }
 async function finishIsland(page, refId) {
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
       const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-      const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page); cr.applied.unshift(...sz, ...rg, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
-  return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
+      const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
+  return { from: "§6.1 defaults", applied: (await applyIslandTokens(page)).concat(await dropHeaderPlaceholders(page)), skipped: [] };
 }
 
 // ─── ONE SCREEN, REFERENCE-GUIDED — TWO CALLS ───

@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.244.0 — 2026-10-04 (island migration: the fixes from Applicant page)
+- **The Applicant page side panel matches the reference.** The Summary column came out 400 wide and stretched down the whole page, so every card next to it was 20 px narrower than in the reference. When the reference's side panel hugs a fixed-size column, the migrated one now does the same: Summary 380 × 748, cards 960.
+- **No more double border on the side panel.** A border the reference removed is now removed in the migrated screen too. Before, only fills were cleared.
+- **Status colours on cards are kept.** A card's coloured border is a status, such as the green border on an approved AML screening. The migration used to repaint it in the neutral island border, and now it leaves it as it is.
+- **No placeholder text in the header.** A block copied from the reference that only shows a placeholder, such as `ClientNickname`, is removed from the header.
+- **The finish no longer stops halfway on big pages.** One layer that changed during the pass used to stop the whole pass. The pass now skips it, goes over the block again, and finishes.
+- Audit: an Applicant page on the island layout is no longer flagged for a missing `AP page header`. It uses the page's own header, like the designers' reference.
+
 ## v3.243.0 — 2026-10-04 (island migration: headings in unnamed frames get the reference's size)
 - **Headings inside unnamed frames now take the reference's size too.** The finish recognised a heading only by its parent's name (`Title`, `Heading`, `Header`). On TM Transaction / Analytics the island heading "Applicant financial history" sits in auto-named frames, so it stayed 18 px while the reference has 16, and three card titles stayed bold where the reference uses semibold. A text that already has a heading style now counts as a heading, and it takes the reference's style when that is a heading style as well. Of 27 accepted test screens, only this one and CM team change.
 
