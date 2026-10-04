@@ -11,5 +11,10 @@ for (const f of ["build.js", "finish.js"]) {
   const called = new Set([...src.matchAll(/(?<![.\w])(\w+)\s*\(/g)].map(m => m[1]));
   const missing = [...called].filter(n => helpers.has(n) && !defined.has(n));
   if (missing.length) { bad++; console.error(f + ": calls undefined helpers: " + missing.join(", ")); } else console.log(f + ": ok");
+  // v3.238: the file is pasted whole into one use_figma call, whose code limit is 50 000 characters, plus the appended
+  // `return JSON.stringify(await …)` line. build.js reached 52 007 and had to be trimmed by hand mid-run.
+  const chars = [...src].length, LIMIT = 49800;
+  if (chars > LIMIT) { bad++; console.error(f + ": " + chars + " characters — over " + LIMIT + "; it won't fit one use_figma call. Move comments to island-migration-lib.js."); }
+  else console.log(f + ": " + chars + " characters (limit " + LIMIT + ")");
 }
 process.exit(bad ? 1 : 0);

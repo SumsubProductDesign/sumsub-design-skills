@@ -348,7 +348,8 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
   // 2. layout + width (re-fetch after each variant change)
   page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
-  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent });
+  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
+if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty — the reference has one, the original has nothing for it; the main column keeps the reference's width"); } }
   // 3. main content
   const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
   const mph = [...mainSlot.children];
@@ -531,7 +532,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   const kidsOf = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
   // a heading pairs by ROLE: the designer swaps the old `Block Title (🔴Figma only)` for `Heading` (Blueprint Assignment / Deadlines, top
   // padding 16 → 0) — by name they never met and every such island stayed 16 taller
-  const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title)\b/i.test(nm) ? "⟨heading⟩" : nm;
+  const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i.test(nm) ? "⟨heading⟩" : nm;
   const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1], nm = roleOf(k.name); if (l && l.name === nm) l.items.push(k); else out.push({ name: nm, items: [k] }); } return out; };
   const runSig = n => runs(kidsOf(n)).map(r => r.name).join("|");
   const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.length !== br.length || rr.some((r, i) => r.name !== br[i].name)) return null;
@@ -544,6 +545,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
       return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
   const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
   let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }   // v3.233: the reference wraps exactly our children in one of its wrappers — Submit compliance: Frame 2131328741 › Content › 4× Customize setup; our block takes that wrapper's spacing   // v3.231: one wrapper each side, names differ (Verify your VASP: ref `Content` ↔ our `.Content`)   // v3.230: the reference wraps the blocks in one extra frame (TM Settings / Create a VASP: IslandCard › Slot › Content › blocks) — pair through it
+  if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) e[2] = bw; }   // v3.238: our side has one or two extra single wrappers (TM Travel Rule settings: Frame 2085664018 › Frame 2085664033 vs the reference's Content) — pair through them
   if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y)); if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
@@ -555,7 +557,7 @@ async function copyVarsFromRef(refRoot, page, anchors) {
       await prefetch(paintIds(mr.map(e => e[1])));
       for (const [path, rn, bn, ov, mode] of mr) {
         let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }   // another variant: compare with the reference's own main
-        if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
+        if (a === "Page / Body / IslandCard" && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;       // published internals win
         // sizing: the designers switch fixed-width blocks to FILL (or pin a column FIXED) when the content gets wider — copy it
         // …but never a FIXED width that doesn't fit where the block now sits: the published Aside is 400 and doesn't stretch, while a
         // branch reference may show the same column at 424 with no panel around it (Case page right column → 24 px overflow).
@@ -566,10 +568,11 @@ async function copyVarsFromRef(refRoot, page, anchors) {
           const rpar = rn.parent, rpRoom = rpar && typeof rpar.width === "number" ? rpar.width - (rpar.paddingLeft || 0) - (rpar.paddingRight || 0) : null, refFits = rpRoom == null || rn.width <= rpRoom + 1;   // v3.234: a block that overflows its parent in the reference too is meant that way (Submit compliance stepper icons 16 in a 10 room) — not squeezed
 if (rs === "FIXED" && (inPanel || (rn.width > room + 1 && refFits))) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
           else {
-            if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
+            const keepFill = rs === "FIXED" && bs === "FILL" && rpRoom != null && Math.abs(rn.width - rpRoom) <= 1;   // v3.238: the reference block is FIXED at exactly its parent's width — FILL already spans; switching it to FIXED was noise (Financial data heading)
+if (rs && bs && rs !== bs && !keepFill) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
             // a FIXED layer that spans its parent in the reference (FIU table row dividers: 884 in an 884 row) spans OUR parent — copying the
             // number would leave it 24 short in a wider island. Only changes that actually took are logged.
-            if (rs === "FIXED") { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
+            if (rs === "FIXED" && !keepFill) { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
         } catch (e) {}
         // paddings and gaps: the designers retune a block's inner spacing for the island layout (TM: `Customers card / Finance`,
         // heading and info padding 24 → 16) — take the reference's value, bound to its spacing variable when it has one
@@ -583,12 +586,13 @@ if (rs === "FIXED" && (inPanel || (rn.width > room + 1 && refFits))) { if (bs !=
         //  (Case page Events: an event's Info padding 12 → 0 compensates a line hidden elsewhere in the reference)
         // a GRID has no itemSpacing of its own — its gaps are gridRowGap / gridColumnGap (CM team overview: the Team / SLA grid's bottom
         // padding 16 → 0 in the reference; skipping grids left 16 px of extra grey under the row)
-        const gapOnly = mode === "style" && kidsOf(rn).length >= 2 && runSig(rn) === runSig(bn);   // v3.230: a block with exactly the reference's children takes its gaps even in style mode (Create a VASP fields: 24 → 16); never its side paddings
-try { if ((gapOnly || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
+        const gapOnly = mode === "style" && kidsOf(rn).length >= 2 && runSig(rn) === runSig(bn);
+const headPair = mode === "style" && roleOf(rn.name) === "⟨heading⟩" && roleOf(bn.name) === "⟨heading⟩";   // v3.238: a section heading takes the reference's top / bottom padding — the old 32/12 spaced sections on the full-bleed page, in an island it is 0/0 (TM Travel Rule settings)   // v3.230: a block with exactly the reference's children takes its gaps even in style mode (Create a VASP fields: 24 → 16); never its side paddings
+try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
             const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
-            const keys = gapOnly ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
+            const keys = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : gapOnly ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
             for (const k of keys) {
-              const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
+              const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
               if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own spacing, not an override
               let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
@@ -683,12 +687,28 @@ const wk = vis(W), bk = vis(B); bk.forEach((k, j) => { try { if (wk[j] && wk[j].
 log.push(B.name + ": moved in " + extras.join(", ") + " like the reference " + W.name + ", gap " + Math.round(W.itemSpacing)); break; } }
 return log;
 }
+// v3.238: a component's Size is layout, not data — the designers took *Collapsible Card* Large → Medium in TM Travel Rule settings, and a
+// different variant stops the reference walk, so nothing inside the cards was copied. Applied only when every instance of that component set in
+async function alignSizeVariants(refRoot, page) {   // the reference's slot has one Size; State, Type etc. stay data
+const log = [];
+const topIn = (n, stopId) => { for (let q = n.parent; q && q.id !== stopId; q = q.parent) { if (q.type === "SLOT") return true; if (q.type === "INSTANCE") return false; } return true; };
+const setOf = n => { try { const m = n.mainComponent; return m && m.parent && m.parent.type === "COMPONENT_SET" ? m.parent.name : null; } catch (e) { return null; } };
+const sizeOf = n => { try { const p = n.componentProperties && n.componentProperties.Size; return p && p.type === "VARIANT" ? String(p.value) : null; } catch (e) { return null; } };
+const bySet = l => { const m = new Map(); for (const n of l) { const s = setOf(n); if (!s) continue; if (!m.has(s)) m.set(s, []); m.get(s).push(n); } return m; };
+for (const nm of ["Main content", "Side content"]) {
+const B = page.findAll(n => n.type === "SLOT" && n.name === nm)[0], R = refRoot.findAll(n => n.type === "SLOT" && n.name === nm)[0]; if (!B || !R) continue;
+const rb = bySet(R.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, R.id)));
+const ob = bySet(B.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, B.id)));
+for (const [s, list] of ob) { const rl = rb.get(s); if (!rl) continue; const sizes = [...new Set(rl.map(sizeOf))]; if (sizes.length !== 1) continue;
+for (const id of list.filter(n => sizeOf(n) !== sizes[0]).map(n => n.id)) { const n = await figma.getNodeByIdAsync(id); if (!n) continue;
+try { n.setProperties({ Size: sizes[0] }); log.push(n.name + " Size → " + sizes[0] + " (as in the reference)"); } catch (e) {} } } }
+return log; }
 async function finishIsland(page, refId) {
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
       const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-      const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
+      const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...sz, ...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
   return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 
@@ -705,6 +725,9 @@ const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || 
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
+function refSideOnly(P, a) {   // v3.238: the reference shows a side column the original has nothing for (TM Travel Rule settings: a Tip) — keep the empty column so the main one keeps the reference's width (691, not 1135)
+const d = P ? P.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default") : null; const p = d && d.componentProperties ? d.componentProperties["Show side content#23483:22"] : null;
+return !!p && p.value === true && !a.nodes.right && !a.nodes.left && !a.nodes.table && a.plan.content === "◼️ Main (Ghost)"; }
 function refWidth(P) {   // v3.228: the reference's own content width (TM Settings: 691 slot = Full width, not 1084)
 const d = P ? P.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default") : null; const t = d && d.componentProperties && d.componentProperties.Type ? String(d.componentProperties.Type.value) : "";
 return /^(Full width|1084 max|1920 max)$/.test(t) ? t : null; }
@@ -735,7 +758,7 @@ const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
   if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
   return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
-    plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
+    plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : (refSideOnly(refP, a) ? "side: empty, like the reference" : "")].join(" | "),
     blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
     header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
@@ -754,9 +777,9 @@ async function migrateOne(scrId, refOverride, opts) {   // refOverride: the desi
   if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
     const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
     if (ms && !a.nodes.table) a.plan.width = refWidth(refP) || ((ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max");
-    a.W = Math.round(refP.width); a.H = Math.round(refP.height); }
+    a.W = Math.round(refP.width); a.H = Math.round(refP.height); a.plan.sideRoom = refSideOnly(refP, a); }
   const r = await buildIsland(scr, a, null);
-  return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
+  return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : (a.plan.sideRoom ? "side: empty, like the reference" : "")].join(" | "),
     kept: r.kept, notes: r.notes });
 }
 // Old screens were narrower: their cards and columns carry FIXED widths of the old layout (CM team overview: cards 362 in a
@@ -819,6 +842,8 @@ return null;
 // variable of a vanished library → the same-named Base `color` variable. Without it the finish copied the reference's orphan onto
 // our node and rebindOrphanVars rebound it straight back on every run (CM managers overview / team: 254 + 210 no-op writes per
 // run, and the whole call timed out with a 520).
+// v3.238: a vanished-library variable is looked up in Base by name, then as "components/<name>" — the old library named component
+// tokens without the prefix (checkbox/text-normal = Base components/checkbox/text-normal; TM Travel Rule settings "Euro" label)
 let _vr = null;
 function varResolver() {
   if (_vr) return _vr;
@@ -836,7 +861,7 @@ function varResolver() {
       const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
       if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
         if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const key = byName.get(v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+        else if (base) { const key = byName.get(v.name.toLowerCase()) || byName.get("components/" + v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
       return out; })()); return memo.get(id); };
     const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
     return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };

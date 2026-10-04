@@ -31,7 +31,7 @@ const SEP = " › ", applied = [], skipped = [];
 const visFill = n => n.fills && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false;
 const visStroke = n => n.strokes && n.strokes.length && n.strokes[0].type === "SOLID" && n.strokes[0].visible !== false;
 const kidsOf = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
-const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title)\b/i.test(nm) ? "⟨heading⟩" : nm;
+const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i.test(nm) ? "⟨heading⟩" : nm;
 const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1], nm = roleOf(k.name); if (l && l.name === nm) l.items.push(k); else out.push({ name: nm, items: [k] }); } return out; };
 const runSig = n => runs(kidsOf(n)).map(r => r.name).join("|");
 const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.length !== br.length || rr.some((r, i) => r.name !== br[i].name)) return null;
@@ -39,7 +39,8 @@ const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.lengt
 const otherVariant = (r, b) => { if (r.type !== "INSTANCE" || b.type !== "INSTANCE") return false;
   try { const rp = r.componentProperties || {}, bp = b.componentProperties || {}; return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
 const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
-  let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }   // v3.233: the reference wraps exactly our children in one of its wrappers — Submit compliance: Frame 2131328741 › Content › 4× Customize setup; our block takes that wrapper's spacing   // v3.231: one wrapper each side, names differ (Verify your VASP: ref `Content` ↔ our `.Content`)   // v3.230: the reference wraps the blocks in one extra frame (TM Settings / Create a VASP: IslandCard › Slot › Content › blocks) — pair through it
+  let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }
+  if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) e[2] = bw; }
   if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y)); if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
@@ -51,24 +52,26 @@ for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pair
       await prefetch(paintIds(mr.map(e => e[1])));
 for (const [path, rn, bn, ov, mode] of mr) {
 let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }
-if (a === "Page / Body / IslandCard" && (path === "·" || path === "·" + SEP + "Slot")) continue;       // published internals win
+if (a === "Page / Body / IslandCard" && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;
 if (mode !== "paint" && !(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
 const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
 const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
-const rpar = rn.parent, rpRoom = rpar && typeof rpar.width === "number" ? rpar.width - (rpar.paddingLeft || 0) - (rpar.paddingRight || 0) : null, refFits = rpRoom == null || rn.width <= rpRoom + 1;   // v3.234: a block that overflows its parent in the reference too is meant that way (Submit compliance stepper icons 16 in a 10 room) — not squeezed
+const rpar = rn.parent, rpRoom = rpar && typeof rpar.width === "number" ? rpar.width - (rpar.paddingLeft || 0) - (rpar.paddingRight || 0) : null, refFits = rpRoom == null || rn.width <= rpRoom + 1;
 if (rs === "FIXED" && (inPanel || (rn.width > room + 1 && refFits))) { if (bs !== "FILL") { try { bn.layoutSizingHorizontal = "FILL"; applied.push(a + path + " width → FILL (reference width " + Math.round(rn.width) + " doesn't fit " + Math.round(room) + ")"); } catch (e) {} } }
 else {
-if (rs && bs && rs !== bs) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
-if (rs === "FIXED") { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
+const keepFill = rs === "FIXED" && bs === "FILL" && rpRoom != null && Math.abs(rn.width - rpRoom) <= 1;
+if (rs && bs && rs !== bs && !keepFill) { bn.layoutSizingHorizontal = rs; applied.push(a + path + " width → " + rs); }
+if (rs === "FIXED" && !keepFill) { const rp = rn.parent, rroom = rp && typeof rp.width === "number" ? rp.width - (rp.paddingLeft || 0) - (rp.paddingRight || 0) : null; const spans = rroom != null && Math.abs(rn.width - rroom) <= 1 && room !== Infinity, target = spans ? room : rn.width; if (Math.abs(target - bn.width) > 1) { const w0 = bn.width; bn.resize(target, bn.height); if (Math.abs(bn.width - w0) > 0.5) applied.push(a + path + " width " + Math.round(target) + (spans ? " (spans its parent, as in the reference)" : "")); } } }
 } catch (e) {}
 try { if (mode !== "paint" && rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
 if (rn[k] && bn[k] && rn[k] !== bn[k] && !(ov && mc && mc[k] === rn[k])) { bn[k] = rn[k]; applied.push(a + path + " " + (k === "gridChildHorizontalAlign" ? "cell align H" : "cell align V") + " → " + rn[k]); } } } catch (e) {}
-const gapOnly = mode === "style" && kidsOf(rn).length >= 2 && runSig(rn) === runSig(bn);   // v3.230: a block with exactly the reference's children takes its gaps even in style mode (Create a VASP fields: 24 → 16); never its side paddings
-try { if ((gapOnly || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
+const gapOnly = mode === "style" && kidsOf(rn).length >= 2 && runSig(rn) === runSig(bn);
+const headPair = mode === "style" && roleOf(rn.name) === "⟨heading⟩" && roleOf(bn.name) === "⟨heading⟩";
+try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
 const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
-const keys = gapOnly ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
+const keys = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : gapOnly ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
 for (const k of keys) {
-const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
+const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
 if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
 if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;
 let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }
@@ -90,7 +93,7 @@ for (const prop of ["fills", "strokes"]) { try {
 const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
 if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;
 const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
-if (rVis && rb) { const t = await resolve(rb.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, bn, prop)) || v0) : v0;   // the reference's paint as its CURRENT variable (see varResolver)
+if (rVis && rb) { const t = await resolve(rb.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, bn, prop)) || v0) : v0;
             if (!v) { skipped.push(a + path + " " + prop + ": variable not found"); continue; }
             if (bVis && bb && bb.id === v.id) continue;
             const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
@@ -99,7 +102,6 @@ else if (!rVis && bVis && prop === "fills") { bn.fills = []; applied.push(a + pa
 } catch (e) { skipped.push(a + path + " " + prop + ": " + e.message); } } } } }
 return { applied, skipped };
 }
-// v3.230: a bare block can be a wrapper whose one child is the visible card of the same size (TM Settings / Let’s set up: `.Content` › `.Content`) — the island colours go on that card too
 const cardTargets = k => (!k.visible || k.name === "Page / Body / IslandCard" || !cardLike(k)) ? [] : [k, ...vis(k).filter(c => c.type !== "INSTANCE" && isCard(c) && Math.abs(c.width - k.width) < 2 && Math.abs(c.height - k.height) < 2)];
 async function applyIslandTokens(page) {
 const K = { cardFill: "da81bccfef06f3de221bafbb9b5ee6a161eb9000", border: "40baade65c87f4b56fd67b027ec695d0984fae39", row: "b651c3b1b3a1d5b4066af62493435b81f3635acb" };
@@ -116,7 +118,7 @@ for (const k of sl.children) { try { if (k.type === "FRAME" && fillOf(k) && k.fi
 for (const r of sl.findAll(n => /(^|\/ )(Table )?Row(#\d+)?$/i.test(n.name) && isWhite(n))) { try { repaint(r, "fills", v.row); } catch (e) {} } }
 return log;
 }
-async function bareCardTokens(page) {   // §6.1 for cards standing bare on the grey and for side columns — with a reference too (v3.228: the TM Settings reference itself kept the pre-island border/subtle and a raw white)
+async function bareCardTokens(page) {
 const v = { cardFill: await figma.variables.importVariableByKeyAsync("da81bccfef06f3de221bafbb9b5ee6a161eb9000"), border: await figma.variables.importVariableByKeyAsync("40baade65c87f4b56fd67b027ec695d0984fae39") };
 const log = [], ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
 for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
@@ -126,14 +128,11 @@ if (hasStroke(k) && !(sb && sb.id === v.border.id)) { repaint(k, "strokes", v.bo
 const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
-{ let rx = null; try { rx = await figma.variables.importVariableByKeyAsync("03884e014085a48cf26670632be200a02b5a160c"); } catch (e) {}   // v3.235: designers' rule "radius 12 → 16" for white cards on the grey (Checklist row); not inside islands, not tinted blocks — the Alert keeps 12
+{ let rx = null; try { rx = await figma.variables.importVariableByKeyAsync("03884e014085a48cf26670632be200a02b5a160c"); } catch (e) {}
 const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; return false; };
 if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
 try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
-// v3.236: the designer moved a sibling into a wrapper (Complete to-do list: the Alert went into the rows' wrapper, gap 8). If a reference
-// frame holds exactly our frame's children plus blocks that are our frame's unique siblings, those siblings move in, in the reference's
-// order, and our frame takes the reference frame's gap and its children's FILL widths
 async function regroupLikeReference(refRoot, page) {
 const log = []; const names = n => vis(n).map(k => k.name);
 const ourSlots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
@@ -142,7 +141,7 @@ const ours = []; const walk = n => { if (n.type === "INSTANCE" || !("children" i
 for (const s of ourSlots) for (const k of s.children) walk(k);
 const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
 const nameCount = {}; for (const n of ours) nameCount[n.name] = (nameCount[n.name] || 0) + 1;
-for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;   // component instances only — auto-named frames match by accident (CM team: dozens of Frame 2709… rows)
+for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;
 for (const W of refs) { const wn = names(W); if (wn.length <= bn.length) continue;
 let i = 0; const extras = []; for (const nm of wn) { if (i < bn.length && nm === bn[i]) i++; else extras.push(nm); }
 if (i !== bn.length || !extras.length) continue;
@@ -156,12 +155,26 @@ const wk = vis(W), bk = vis(B); bk.forEach((k, j) => { try { if (wk[j] && wk[j].
 log.push(B.name + ": moved in " + extras.join(", ") + " like the reference " + W.name + ", gap " + Math.round(W.itemSpacing)); break; } }
 return log;
 }
+async function alignSizeVariants(refRoot, page) {
+const log = [];
+const topIn = (n, stopId) => { for (let q = n.parent; q && q.id !== stopId; q = q.parent) { if (q.type === "SLOT") return true; if (q.type === "INSTANCE") return false; } return true; };
+const setOf = n => { try { const m = n.mainComponent; return m && m.parent && m.parent.type === "COMPONENT_SET" ? m.parent.name : null; } catch (e) { return null; } };
+const sizeOf = n => { try { const p = n.componentProperties && n.componentProperties.Size; return p && p.type === "VARIANT" ? String(p.value) : null; } catch (e) { return null; } };
+const bySet = l => { const m = new Map(); for (const n of l) { const s = setOf(n); if (!s) continue; if (!m.has(s)) m.set(s, []); m.get(s).push(n); } return m; };
+for (const nm of ["Main content", "Side content"]) {
+const B = page.findAll(n => n.type === "SLOT" && n.name === nm)[0], R = refRoot.findAll(n => n.type === "SLOT" && n.name === nm)[0]; if (!B || !R) continue;
+const rb = bySet(R.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, R.id)));
+const ob = bySet(B.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, B.id)));
+for (const [s, list] of ob) { const rl = rb.get(s); if (!rl) continue; const sizes = [...new Set(rl.map(sizeOf))]; if (sizes.length !== 1) continue;
+for (const id of list.filter(n => sizeOf(n) !== sizes[0]).map(n => n.id)) { const n = await figma.getNodeByIdAsync(id); if (!n) continue;
+try { n.setProperties({ Size: sizes[0] }); log.push(n.name + " Size → " + sizes[0] + " (as in the reference)"); } catch (e) {} } } }
+return log; }
 async function finishIsland(page, refId) {
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
-const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
+const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), bt = await bareCardTokens(page); cr.applied.unshift(...sz, ...rg); return { from: "reference " + refId, applied: cr.applied.concat(bt), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: await applyIslandTokens(page), skipped: [] };
 }
 function stretchToWidth(page, withRef) {
@@ -205,11 +218,6 @@ const w = Math.max(s.width, r + 80), h = Math.max(s.height, b + 80);
 if (w > s.width + 0.5 || h > s.height + 0.5) { s.resizeWithoutConstraints(w, h); return Math.round(w) + "×" + Math.round(h); }
 return null;
 }
-// One resolver for "which variable should this paint be bound to now" — shared by copyVarsFromRef and rebindOrphanVars, so the
-// reference's paint is copied as its CURRENT variable: a stale copy of a live library variable → the fresh import (same key), a
-// variable of a vanished library → the same-named Base `color` variable. Without it the finish copied the reference's orphan onto
-// our node and rebindOrphanVars rebound it straight back on every run (CM managers overview / team: 254 + 210 no-op writes per
-// run, and the whole call timed out with a 520).
 let _vr = null;
 function varResolver() {
   if (_vr) return _vr;
@@ -218,8 +226,6 @@ function varResolver() {
     const live = cols ? new Set(cols.map(c => c.key)) : null;
     const base = cols ? cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color") : null;
     const byName = new Map(); if (base) for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
-    // everything is cached as a PROMISE, so `prefetch` can resolve a whole batch at once: one importVariableByKeyAsync is ~170 ms
-    // (up to ~850), sequentially that was 50–60 imports = tens of seconds per finish; 12 in parallel take ~0.2 s
     const colKey = new Map(), byKey = new Map(), memo = new Map(), miss = new Set();
     const imp = key => { if (!byKey.has(key)) byKey.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return byKey.get(key); };
     const colOf = vc => { if (!colKey.has(vc)) colKey.set(vc, figma.variables.getVariableCollectionByIdAsync(vc).then(c => c ? c.key : null).catch(() => null)); return colKey.get(vc); };
@@ -227,7 +233,7 @@ function varResolver() {
       const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
       if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
         if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const key = byName.get(v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+        else if (base) { const key = byName.get(v.name.toLowerCase()) || byName.get("components/" + v.name.toLowerCase()); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
       return out; })()); return memo.get(id); };
     const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
     return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
@@ -235,10 +241,6 @@ function varResolver() {
   return _vr;
 }
 const paintIds = nodes => { const out = []; for (const n of nodes) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (Array.isArray(ps)) for (const p of ps) if (p.boundVariables && p.boundVariables.color) out.push(p.boundVariables.color.id); } return out; };
-// v3.228: token hygiene on OUR content (slot subtrees, island slots included; never inside other instances):
-// base/* paints → the semantic token that aliases them, raw spacing / radius → the token with the same value IN THIS FILE,
-// and three must-be-empty lists: rawPaints (unbound or unmapped base paint), rawSpacing (a value a token has, left unbound), sideWhites (a non-card
-// white block in a side column). A value no token has in this file (a 2 px gap) is design, not a token slip — tokens.noToken, informational
 const BASE_TO_SEMANTIC = {
 text: { "base/neutral/100": "1148e20b46c46ade58db9b4120fbf3ea872196fd", "base/neutral/90": "485b897d691c85b86a1ad8ebae7650f3dbcca365", "base/neutral/80": "47f41dc6d16468e6189a8784f58b12d07ebe72c3", "base/neutral/70": "678d3fc239240d7247f43296117c4d35a84592d9", "base/neutral/60": "2c094d8e57056b11ecbb2166364d4648c92d4360", "base/neutral/0": "cc87e4556ec61118c805685f92c80b214050bcd9" },
 bg: { "base/neutral/0": "567811a0cf497ac911288a2f4a75a1d89ebff75c", "base/neutral/5": "e50636958c4d5a6917b4fb1e32a7de92ded72f85", "base/neutral/10": "e7129860062f42ee2a929d1b4ccacd21133a03ee", "base/neutral/20": "1aed8505fcfaec5aacd4ac43b4eb62d8315caa0a" },
@@ -247,7 +249,7 @@ const _semCache = new Map();
 async function semanticFor(name, node, prop) {
 const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg", key = BASE_TO_SEMANTIC[kind][String(name).toLowerCase()]; if (!key) return null;
 if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
-function oursOf(page) {   // our layers: slot content, down through Page / Body / IslandCard slots, never into another instance
+function oursOf(page) {
 const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { if (n.name === "Page / Body / IslandCard") { const sl = n.findOne(q => q.type === "SLOT"); if (sl) for (const k of sl.children) walk(k, side); } return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
@@ -296,11 +298,8 @@ async function rebindOrphanVars(page) {
   const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
   return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...R.miss].slice(0, 6) };
 }
-// part: omit = everything in one call. On a big page (CM managers overview / team: ~790 reference pairs, ~13 s just to walk them)
-// the single call outruns the MCP connection ("connection lost" / 520) — then call it twice: part "copy" (copy from the
-// reference), then part "audit" (rebind colours + fixes + audit). Both are idempotent, so a dropped call is safe to repeat.
 async function finishAndAudit(pageId, refId, part) {
-const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();   // no setCurrentPageAsync: the finish creates no nodes, and switching re-renders the whole page in the app (~16 s on the big test page)
+const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
 let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
 if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
 if (part === "copy") return clean({ pageId, part, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });

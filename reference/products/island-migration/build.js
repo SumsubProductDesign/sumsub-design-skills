@@ -71,7 +71,7 @@ let groups = [];
 if (main) { if (table) { const u = unwrap(main); groups = [vis(u).find(isTableSelf) ? u : u]; }
 else { let inner = unwrap(main); let k = vis(inner).filter(x => !isChrome(x));
 if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = inner.type === "INSTANCE" ? [inner] : vis(inner).filter(x => !isChrome(x)); }
-const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];          // a layout of cards stays whole
+const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];
 else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width)) ? k : (hasChrome && k.length ? k : [inner]); } }
 const isOv = n => n.type === "INSTANCE" && /Toast|Dropdown|Modal|Drawer/i.test(n.name + " " + mainName(n));
 const hasOvAncestor = n => { let p = n.parent; while (p && p.id !== scr.id && p.type !== "PAGE") { if (isOv(p)) return true; p = p.parent; } return false; };
@@ -80,11 +80,11 @@ const hasClose = header ? !!header.findOne(n => /close/i.test(n.name) && rendere
 const fullHdr = header ? /Full Screen|Header-levels|Fullscreen|Case page header|AP page header/i.test(header.name + " " + mainName(header)) : false;
 const pageType = sbW && sbW <= 60 ? "Full screen page" : sbW >= 200 ? "Basic" : (hasClose || fullHdr ? "Full screen page" : "Basic");
 let content;
-const fitsSide = !!right && !!main && (main.width + right.width) <= 1084;   // form + column inside 1084 (KYC editor 640+380)
+const fitsSide = !!right && !!main && (main.width + right.width) <= 1084;
 if (left && right) { content = "◼️ Nav + Main + Right (Ghost)"; notes.push("left AND right column — confirm the left one is section navigation"); }
 else if (left) content = "◼️ Left + Main (Ghost)";
-else if (right && !fitsSide) content = "◼️ Main + Right (Ghost)";           // wide main + inspector column (Case page 964+424)
-else content = "◼️ Main (Ghost)";             // everything sits in islands on grey — tables and empty states too (after-refs 29.09)
+else if (right && !fitsSide) content = "◼️ Main + Right (Ghost)";
+else content = "◼️ Main (Ghost)";
 if (!header) notes.push("no header found");
 if (!main) notes.push("no main content found");
 const width = table ? (W >= 1900 ? "1920 max" : "Full width") : (content === "◼️ Main + Right (Ghost)" ? "Full width" : "1084 max");
@@ -95,7 +95,7 @@ const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Ta
 .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
 return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
 const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
-let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }   // v3.236: the flag text below the header edge is not shown (Complete to-do list: y 58 in a 56 header) — no sandbox
+let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }
 const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
 return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
 report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
@@ -121,17 +121,13 @@ const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return nul
 let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
 return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
 }
-// Blocks that sit in ONE island in the reference go into one island here (TM Settings / Create a VASP: Name, the fields and the
-// Button bar share one IslandCard in 283:31704 — wrapped one by one they became three islands)
 function refIslandOf(refRoot, name) {
 if (!refRoot) return null;
 const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
 for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return q.id;
 return null;
 }
-// A block missing from the reference by name whose children all sit in ONE reference island goes into an island
-// (TM Settings / Verify your VASP: our card `.Content` = the reference's island › `Content` holding the same two blocks)
-function refIslandByKids(refRoot, g) {   // v3.237: through single wrappers; names that repeat in the reference (every island has a "Heading") don't vote
+function refIslandByKids(refRoot, g) {
 if (!refRoot || !("children" in g)) return null;
 let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
 const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
@@ -139,9 +135,6 @@ const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name 
 let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
 return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }
-// v3.235: the designer dropped a wrapper card — our card isn't in the reference by name, but the blocks inside it sit in the
-// reference's main column on the grey, outside any island or card (Complete to-do list: .Content held the title, the alert,
-// six Checklist row cards and the button; the reference shows all of them bare) → its parts go over bare, the card goes
 function refUnboxed(refRoot, g) {
 if (!refRoot || !cardLike(g) || refPlacement(refRoot, g.name) || refIslandByKids(refRoot, g) || !("findAll" in g)) return false;
 const ms = refRoot.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if (!ms) return false;
@@ -178,12 +171,12 @@ const sectioned = padOf(refCol) === 0 && refBlocks.length >= 2 && refBlocks.ever
 if (sectioned) {
 let as = col.parent; while (as && !(as.type === "INSTANCE" && as.name === "Page / Body / Aside")) as = as.parent;
 if (as && padOf(as) > 0) { try { as.setProperties({ "Paddings": "No" }); } catch (e) { notes.push("aside paddings: " + e.message); } }
-col = page.findOne(n => n.name === colName && n.visible);                 // the variant change re-creates the subtree
+col = page.findOne(n => n.name === colName && n.visible);
 col.itemSpacing = refCol.itemSpacing || 0;
 notes.push("side column: flush sections as in the reference");
 }
 if (col.type === "INSTANCE") { notes.push("side column is a component instance — its own blocks stay as they are"); return; }
-const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
+const sectionLike = async (rb) => {
 const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
 try { w.strokes = JSON.parse(JSON.stringify(rb.strokes || [])); w.strokeAlign = rb.strokeAlign;
@@ -192,7 +185,7 @@ const bv = rb.boundVariables || {};
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) { if (!bv[k]) continue;
 try { let v = await figma.variables.getVariableByIdAsync(bv[k].id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); if (v) w.setBoundVariable(k, v); } catch (e) {} }
 return w; };
-let at = 0; const used = new Set();   // a block already matched or cloned is not matched again (the reference's Assignee section and Transaction details section share the name .Case page checklist)
+let at = 0; const used = new Set();
 for (const rb of refBlocks) {
 const ft = firstText(rb).toLowerCase(), free = k => k.visible && !used.has(k.id);
 const mine = col.children.find(k => free(k) && ft && (k.name.trim().toLowerCase() === ft || firstText(k).toLowerCase() === ft)) || col.children.find(k => free(k) && k.name === rb.name && !ft);
@@ -214,8 +207,6 @@ if (v && T[i + 1].characters.trim() !== v) { try { await figma.loadFontAsync(T[i
 notes.push("side block from the reference: " + (firstText(rb) || rb.name));
 }
 }
-// v3.232: the old screen's place in the navigation is data from the original — the sidebar section and the active item carry over
-// (TM Settings: the old detached sidebar had Transactions › Settings › Travel Rule quick start active; the new Page showed Dashboard)
 const SIDEBAR_TYPE = { "dashboard": "Dashboard", "summy ai copilot": "Summy AI Copilot", "applicants": "Applicants", "integrations": "Integrations", "transactions": "Transactions monitoring", "case management": "Case management", "client lists": "Client lists", "statistics": "Statistics", "reports": "Reports", "billing": "Billing", "settings": "Settings", "tasks": "Tasks", "operator": "Operator", "review panel": "Reviews", "reviews": "Reviews", "mission control": "Mission control", "admin area": "Admin area", "dev space": "Dev space", "marketplace": "Marketplace" };
 function sidebarTrail(old) {
 if (!old || !("findAll" in old)) return null;
@@ -260,7 +251,6 @@ c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBot
 }
 async function buildIsland(scr, a, crumb) {
 const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
-// v3.236: a FIXED block that spanned its parent in the old screen (the six Checklist rows: 608 in a 608 column) keeps spanning after the move — marked here, set to FILL once the page is built
 const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
 for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && x.layoutSizingHorizontal === "FIXED" && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
 const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0); if (Math.abs(n.width - inner) <= 1) { try { n.setSharedPluginData("sumsub_island", "span", "1"); } catch (e) {} } } }
@@ -283,15 +273,16 @@ const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.incl
 const page = variant.createInstance();
 parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
 page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
-page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent });
+page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
+if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty — the reference has one, the original has nothing for it; the main column keeps the reference's width"); } }
 const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
 const mph = [...mainSlot.children];
 if (plan.content.includes("Ghost")) {
 const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
-const wrapInIsland = nodesIn => {                                       // fill the island BEFORE it goes into the slot
+const wrapInIsland = nodesIn => {
 for (const g of nodesIn) { try { for (const c of [g, ...vis(g)]) if (stripCardChrome(c, g.width)) notes.push("no card in a card: " + g.name + " › " + c.name); } catch (e) {} }
 const ic = icComp.createInstance(); parent.appendChild(ic);
-try { ic.setProperties({ "Heading#26638:9": false }); } catch (e) {}   // the block brings its own title (Block Title / Title)
+try { ic.setProperties({ "Heading#26638:9": false }); } catch (e) {}
 const slot = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
 const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch (e) {} }
 const sl = ic.findOne(n => n.type === "SLOT" && n.name === "Slot");
@@ -299,7 +290,7 @@ for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch 
 for (const k of sl.children) { try { if (k.type === "FRAME" && k.layoutMode && k.layoutMode !== "NONE" && k.layoutSizingVertical !== "HUG") { const h0 = Math.round(k.height); k.layoutSizingVertical = "HUG"; if (Math.abs(k.height - h0) > 1) notes.push("hugs its content: " + k.name + " " + h0 + " → " + Math.round(k.height)); } } catch (e) {} }
 try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch (e) {} }
 sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.children.length > 1) sl.itemSpacing = 16; } catch (e) {}
-try { sl.layoutSizingVertical = "HUG"; } catch (e) {}                  // island ships FIXED 153 with a FILL slot — HUG both
+try { sl.layoutSizingVertical = "HUG"; } catch (e) {}
 try { ic.layoutSizingVertical = "HUG"; } catch (e) {}
 return ic; };
 const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE") top = p; return top; };
@@ -329,7 +320,7 @@ cards.push(wrapInIsland(bundle));
 cards.forEach((ic, i) => mainSlot.insertChild(i, ic));
 for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); notes.push("wrapper removed: " + wn); } catch (e) {} }
 } else if (nodes.groups[0]) {
-mainSlot.insertChild(0, nodes.groups[0]);                               // (unused since 29.09 — every plan is Ghost)
+mainSlot.insertChild(0, nodes.groups[0]);
 }
 for (const p of mph) { try { p.remove(); } catch (e) {} }
 for (const c of page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").children) { try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
@@ -341,13 +332,13 @@ if (fillOf(node)) { try { as.setProperties({ "Paddings": "No" }); } catch (e) {}
 const as2 = page.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / Aside"); const tgtAs = which === "left" ? as2[0] : as2[as2.length - 1];
 const slot = tgtAs.findOne(n => n.type === "SLOT" && n.name === "Content"); const ph = [...slot.children];
 const nid = node.id, nname = node.name; slot.insertChild(0, node); for (const p of ph) { try { p.remove(); } catch (e) {} }
-const moved = page.findOne(n => n.id === nid) || page.findOne(n => n.name === nname);          // slot insert invalidates proxies
+const moved = page.findOne(n => n.id === nid) || page.findOne(n => n.name === nname);
 if (moved) { try { moved.layoutSizingHorizontal = "FILL"; } catch (e) {} try { moved.layoutSizingVertical = "FILL"; } catch (e) { try { moved.layoutSizingVertical = "HUG"; } catch (e2) {} } } };
 if (nodes.left) intoAside(nodes.left, "left");
 if (nodes.right) {
 if (plan.sideContent) { const sc = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
 if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} }
-const sc2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"), mv = sc2 && sc2.children[0];   // v3.230: the old column's FIXED height (865) grew the page to 977 — the column hugs its content
+const sc2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"), mv = sc2 && sc2.children[0];
 if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizingVertical !== "HUG") { const h0 = Math.round(mv.height); mv.layoutSizingVertical = "HUG"; notes.push("side column hugs its content: " + mv.name + " " + h0 + " → " + Math.round(mv.height)); } } catch (e) {} } } }
 else intoAside(nodes.right, "right");
 try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, notes); } catch (e) { notes.push("side from reference: " + e.message); }
@@ -367,7 +358,7 @@ const rh = a.refRoot ? a.refRoot.findOne(n => n.type === "INSTANCE" && /^\*Heade
 const refSlot = re => rh ? rh.findAll(n => n.type === "SLOT" && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
 const refTitle = rh && rh.componentProperties["Title text#3817:0"] ? String(rh.componentProperties["Title text#3817:0"].value) : null;
 const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
-if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; getHdr().setProperties(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }   // the copy button belongs to the title it sits next to
+if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; getHdr().setProperties(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }
 const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = t.characters.trim();
 if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch (e) {} } } };
 const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
@@ -407,7 +398,7 @@ try { page.resize(origW, origH); } catch (e) {}
 try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).map(t => t.characters.trim()));
 const shownLow = new Set([...shown].map(t => t.toLowerCase()));
 const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !shownLow.has(k)).map(([k, v]) => k + ": " + v); if (lost.length) notes.push("header values not placed: " + lost.join(", ")); } catch (e) {}
-_idCache.clear();                                                          // the tree changed — rebuild id sets
+_idCache.clear();
 const leftover = scr.findAll(n => (n.type === "TEXT" || n.type === "INSTANCE") && n.visible !== false && rendered(n, scr) &&
 !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n) && !(nodes.scrollbars || []).some(sb => contains(sb, n)));
 if (leftover.length) {
@@ -415,18 +406,18 @@ return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }
 try { scr.remove(); } catch (e) {}
 return { page, kept: [], notes };
 }
-// The main column that is ALREADY a card goes over whole when the reference keeps that same block bare (TM Settings:
-// `.Content` is a white r12 card holding the title, the fields and the Button bar — split into its children it became
-// islands in a card, while the reference shows the one card, radius 16 from the reference)
 function keepWholeCard(a, refP) {
 const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || !cardLike(m)) return false;
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
-function refWidth(P) {   // v3.228: the reference's own content width (TM Settings: 691 slot = Full width, not 1084)
+function refSideOnly(P, a) {
+const d = P ? P.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default") : null; const p = d && d.componentProperties ? d.componentProperties["Show side content#23483:22"] : null;
+return !!p && p.value === true && !a.nodes.right && !a.nodes.left && !a.nodes.table && a.plan.content === "◼️ Main (Ghost)"; }
+function refWidth(P) {
 const d = P ? P.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default") : null; const t = d && d.componentProperties && d.componentProperties.Type ? String(d.componentProperties.Type.value) : "";
 return /^(Full width|1084 max|1920 max)$/.test(t) ? t : null; }
-function surfaceOf(refP, opts) {   // v3.228: grey / white is the designers' table decision when given ({ surface }); else the reference's look
+function surfaceOf(refP, opts) {
 const refG = refP ? refIsGrey(refP) : null, tbl = opts && opts.surface ? opts.surface === "grey" : null;
 return { grey: tbl !== null ? tbl : refG, refGrey: refG, from: tbl !== null ? "table" : (refG === null ? null : "reference") }; }
 function refIsGrey(P) {
@@ -452,7 +443,7 @@ const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.leng
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
 return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
-plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : ""].join(" | "),
+plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : (refSideOnly(refP, a) ? "side: empty, like the reference" : "")].join(" | "),
 blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
 header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
@@ -471,8 +462,8 @@ a.refRoot = refP; const whole = keepWholeCard(a, refP);
 if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
 const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
 if (ms && !a.nodes.table) a.plan.width = refWidth(refP) || ((ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max");
-a.W = Math.round(refP.width); a.H = Math.round(refP.height); }
+a.W = Math.round(refP.width); a.H = Math.round(refP.height); a.plan.sideRoom = refSideOnly(refP, a); }
 const r = await buildIsland(scr, a, null);
-return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : ""].join(" | "),
+return clean({ id: scrId, name: name.slice(0, 50), pageId: r.page.id, ref: refP ? refId : null, plan: [a.plan.pageType, a.plan.content, a.plan.width, a.plan.sideContent ? "side" : (a.plan.sideRoom ? "side: empty, like the reference" : "")].join(" | "),
 kept: r.kept, notes: r.notes });
 }

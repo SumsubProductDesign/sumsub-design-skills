@@ -4,6 +4,16 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.238.0 — 2026-10-04 (island migration: the five manual fixes from TM Travel Rule settings)
+- **The form keeps the reference's width when the side column is empty.** The designers' screen has a tip in a side column; the original has nothing to put there. The engine left the side column off, and the form stretched to 1135 px instead of 691. It now keeps the side column on and empty, so the main column is as wide as in the reference.
+- **Islands pair with the reference through extra wrappers.** Our copy of a section can sit one or two wrapper frames deeper than the designer's, and a `Header` frame can stand where we have a `Heading`. Then nothing inside the island was matched: section headings kept the old 32 / 12 spacing and the gaps stayed 0 / 20 instead of 12 / 8. Both now pair, and headings take the reference's top and bottom spacing.
+- **Component sizes follow the reference.** The designers switched the collapsible cards from Large to Medium. A different size used to stop the matching, so nothing inside the cards was copied either. Size is now taken from the reference when the reference uses one size for that component throughout. State and type stay as in the original.
+- **Old colour variables find their new name.** A colour from the retired library such as `checkbox/text-normal` now maps to `components/checkbox/text-normal` in Base instead of staying on the old value.
+- **A block the reference stretches across its parent stays stretched.** It is no longer switched from fill to a fixed width of the same size.
+- **The engine files fit one call again.** `build.js` had grown past the 50 000-character limit of one Figma call. Comments now live only in the commented library file, and the engine check fails if either file comes near the limit.
+
+Checked without changes on the 20 accepted island screens (TM Settings ×5, Case pages ×5, CM overviews ×3, Blueprints ×2, Levels ×2, TM Transaction, Related transactions, Financial data): none of them changes.
+
 ## v3.237.0 — 2026-10-03 (island migration: the island is found through wrappers)
 - **A section wrapped one level deeper still finds its island.** On TM Travel Rule settings, the designers put the "Travel Rule data management" section in its own island. Our copy of that section sits one wrapper deeper, and the island has a differently named frame, so the engine left it bare. The engine now looks through single wrappers and ignores names that appear everywhere, such as the section headings.
 
