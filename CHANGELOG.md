@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.243.0 — 2026-10-04 (island migration: headings in unnamed frames get the reference's size)
+- **Headings inside unnamed frames now take the reference's size too.** The finish recognised a heading only by its parent's name (`Title`, `Heading`, `Header`). On TM Transaction / Analytics the island heading "Applicant financial history" sits in auto-named frames, so it stayed 18 px while the reference has 16, and three card titles stayed bold where the reference uses semibold. A text that already has a heading style now counts as a heading, and it takes the reference's style when that is a heading style as well. Of 27 accepted test screens, only this one and CM team change.
+
 ## v3.242.0 — 2026-10-04 (island migration: the fixes from TM Transaction / Analytics)
 - **The header no longer shows a "Key name" badge.** Old headers display the placeholder "Key name" where a key would go, and the migration carried it into the new header as if it were a real key. The placeholder now counts as no key, and the badge stays off.
 - **Colours from the retired library find their Base name.** A few colours were renamed in Base, so the migration couldn't find them and left them on the old values. The filter bar's white on TM Analytics is one example. The renamed white and status colours are now matched to their Base names.

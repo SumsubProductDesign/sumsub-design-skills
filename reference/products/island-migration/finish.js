@@ -178,9 +178,9 @@ const slots = r => r.findAll(n => n.type === "SLOT" && (/^(Main content|Side con
 const shown = (n, top) => { for (let q = n; q && q.id !== top.id; q = q.parent) if (q.visible === false) return false; return true; };
 const refT = new Map(); for (const s of slots(refRoot)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) { const k = t.characters.trim(); if (!k) continue; if (!refT.has(k)) refT.set(k, new Set()); refT.get(k).add(typeof t.textStyleId === "string" ? t.textStyleId : ""); }
 for (const s of slots(page)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) {
-let h = null; for (let q = t.parent, d = 0; q && q.id !== s.id && d < 4; q = q.parent, d++) if (HR.test(q.name)) { h = q; break; } if (!h) continue;
+let h = null; for (let q = t.parent, d = 0; q && q.id !== s.id && d < 4; q = q.parent, d++) if (HR.test(q.name)) { h = q; break; } const HS = /\/h[2-6]\b/i; if (!h) { let cs = null; try { cs = typeof t.textStyleId === "string" && t.textStyleId ? await figma.getStyleByIdAsync(t.textStyleId) : null; } catch (e) {} if (!cs || !HS.test(cs.name)) continue; }
 const set = refT.get(t.characters.trim()); if (!set || set.size !== 1) continue; const rid = [...set][0]; if (!rid || rid === t.textStyleId) continue;
-try { let st = await figma.getStyleByIdAsync(rid); if (st && st.remote && st.key) st = await figma.importStyleByKeyAsync(st.key); if (!st || st.id === t.textStyleId) continue;
+try { let st = await figma.getStyleByIdAsync(rid); if (st && st.remote && st.key) st = await figma.importStyleByKeyAsync(st.key); if (!st || st.id === t.textStyleId || (!h && !HS.test(st.name))) continue;
 await figma.loadFontAsync(st.fontName); await t.setTextStyleIdAsync(st.id); log.push("heading \"" + t.characters.trim().slice(0, 30) + "\" text style → " + st.name + " (as in the reference)"); } catch (e) {} }
 return log; }
 async function finishIsland(page, refId) {
