@@ -62,6 +62,8 @@ function isCardLayout(n, depth = 0) {
   return cards >= 2; }
 // a MIXED stack — mostly cards, some plain blocks (Case page Overview tab content with a Transactions table): split it
 const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingBlock(k[0]) && k.filter(cardLike).length >= Math.ceil(k.length / 2); };
+// v3.245: a graphic (an image or shape, no children) is not a content block — it never decides the split and never goes into an island (KYC: a 643-wide screenshot of tabs).
+const isGraphic = n => /^(RECTANGLE|ELLIPSE|VECTOR|LINE|POLYGON|STAR|BOOLEAN_OPERATION)$/.test(n.type);
 
 // ─── ANALYZE: roles by position and size, never by layer names alone ───
 function analyze(scr) {
@@ -107,7 +109,7 @@ function analyze(scr) {
       // header, header band and tab strip are chrome at every level (TM Related transactions: the band and the tabs sit in the
       // same frame as the table) — never a content block; when chrome is all that surrounds one block, that block is the group
       const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];          // a layout of cards stays whole
-      else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width)) ? k : (hasChrome && k.length ? k : [inner]); } }
+      else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width || isGraphic(x)) && k.some(x => !isGraphic(x))) ? k : (hasChrome && k.length ? k : [inner]); } }
   const isOv = n => n.type === "INSTANCE" && /Toast|Dropdown|Modal|Drawer/i.test(n.name + " " + mainName(n));
   const hasOvAncestor = n => { let p = n.parent; while (p && p.id !== scr.id && p.type !== "PAGE") { if (isOv(p)) return true; p = p.parent; } return false; };
   const overlays = all.filter(n => isOv(n) && !hasOvAncestor(n) && !contains(header, n) && !contains(main, n) && !contains(left, n) && !contains(right, n));
@@ -162,9 +164,12 @@ function headerRegions(h, scr) {
 // "island" — inside a Page / Body / IslandCard; "split" — bare, but islands live inside it (a mixed wrapper);
 // "bare" — on the grey as is; null — not in the reference (fall back to the rules). Levels Steps: the titled "Steps" group
 // is bare on grey in the reference while the look-alike "Case routing" sits in an island — only the reference can tell.
+// v3.245: blocks are looked up inside the reference's content slots only — the Page itself has frames named Body / Main / Content (KYC: our Body matched the Page's own Body and was split).
+const refScope = r => { const sl = r.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))); return sl.length ? sl : [r]; };
+const refAll = (r, nm) => refScope(r).flatMap(s => s.findAll(x => x.name === nm && x.visible));
 function refPlacement(refRoot, name) {
   if (!refRoot) return null;
-  const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+  const n = refAll(refRoot, name)[0]; if (!n) return null;
   let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
   return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
 }
@@ -174,7 +179,7 @@ function refPlacement(refRoot, name) {
 // Button bar share one IslandCard in 283:31704 — wrapped one by one they became three islands)
 function refIslandOf(refRoot, name) {
 if (!refRoot) return null;
-const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+const n = refAll(refRoot, name)[0]; if (!n) return null;
 for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return q.id;
 return null;
 }
@@ -184,7 +189,7 @@ function refIslandByKids(refRoot, g) {   // v3.237: through single wrappers; nam
 if (!refRoot || !("children" in g)) return null;
 let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
 const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
-const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name === k.name && x.visible); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
+const ids = []; for (const k of kids) { const all = refAll(refRoot, k.name); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
 let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
 return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }
@@ -392,6 +397,7 @@ if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s
     const cards = [];
     for (const bundle of bundles) {
       // the reference decides first; the rules only where the block isn't in the reference
+      if (bundle.length === 1 && isGraphic(bundle[0])) { cards.push(bundle[0]); notes.push("graphic " + bundle[0].name + " stays bare"); continue; }
       const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name) || (refIslandByKids(a.refRoot, g0) ? "island" : null);
       if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
       if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
@@ -812,7 +818,7 @@ const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280
   const blocks = []; let pending = [], lastIsl = null;
   for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
     const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null) || (refUnboxed(refP, g) ? "unboxed" : null);
-    const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
+    const how = isGraphic(g) ? "bare (graphic)" : rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
     const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
   if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");

@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.245.0 — 2026-10-05 (island migration: the plan moves to plan.js, two fixes from KYC)
+- **The plan has its own file.** `planOne` now lives in `island-migration/plan.js`. `build.js` had reached its size limit, so the next fix wouldn't have fit. The build file is now 47 300 characters of 49 800.
+- **A picture no longer turns a whole column into one island.** On the KYC tab a 643-wide screenshot of tabs sits above the cards and the table. Being narrow, it stopped the split into blocks, and everything went into one island. Images and shapes with no children are now skipped when the column is split, and they stay bare on the grey.
+- **Blocks are matched to the reference inside its content area only.** KYC's table block is called `Body`, the same as a frame inside the `Page` component itself. The plan matched the wrong one and split the table into two islands. The plan and the build now look only inside the reference's content slots. Plans for the 19 accepted test screens are unchanged.
+
 ## v3.244.0 — 2026-10-04 (island migration: the fixes from Applicant page)
 - **The Applicant page side panel matches the reference.** The Summary column came out 400 wide and stretched down the whole page, so every card next to it was 20 px narrower than in the reference. When the reference's side panel hugs a fixed-size column, the migrated one now does the same: Summary 380 × 748, cards 960.
 - **No more double border on the side panel.** A border the reference removed is now removed in the migrated screen too. Before, only fills were cleared.

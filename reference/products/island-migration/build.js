@@ -1,5 +1,4 @@
 // BUILD — call 1 of 2. Paste this file into use_figma and append:  return JSON.stringify(await migrateOne("<screen node id>", "<reference node id, optional>"));
-// PLAN ONLY (read-only, run it first):  return JSON.stringify(await planOne("<screen node id>", "<reference node id, optional>"));
 const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
 while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible === false) return false; p = p.parent; } return true; };
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
@@ -38,6 +37,7 @@ for (const c of k) { if (cardLike(c)) { cards++; continue; } if (c.height <= 90)
 if (c.type === "FRAME" && isCardLayout(c, depth + 1)) { cards += 2; continue; } return false; }
 return cards >= 2; }
 const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingBlock(k[0]) && k.filter(cardLike).length >= Math.ceil(k.length / 2); };
+const isGraphic = n => /^(RECTANGLE|ELLIPSE|VECTOR|LINE|POLYGON|STAR|BOOLEAN_OPERATION)$/.test(n.type);
 function analyze(scr) {
 const W = Math.round(scr.width), H = Math.round(scr.height), notes = [];
 const all = scr.findAll(n => n.visible !== false && rendered(n, scr));
@@ -71,7 +71,7 @@ if (main) { if (table) { const u = unwrap(main); groups = [vis(u).find(isTableSe
 else { let inner = unwrap(main); let k = vis(inner).filter(x => !isChrome(x));
 if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = inner.type === "INSTANCE" ? [inner] : vis(inner).filter(x => !isChrome(x)); }
 const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];
-else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width)) ? k : (hasChrome && k.length ? k : [inner]); } }
+else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width || isGraphic(x)) && k.some(x => !isGraphic(x))) ? k : (hasChrome && k.length ? k : [inner]); } }
 const isOv = n => n.type === "INSTANCE" && /Toast|Dropdown|Modal|Drawer/i.test(n.name + " " + mainName(n));
 const hasOvAncestor = n => { let p = n.parent; while (p && p.id !== scr.id && p.type !== "PAGE") { if (isOv(p)) return true; p = p.parent; } return false; };
 const overlays = all.filter(n => isOv(n) && !hasOvAncestor(n) && !contains(header, n) && !contains(main, n) && !contains(left, n) && !contains(right, n));
@@ -114,15 +114,17 @@ const actions = h.findAll(n => n.type === "INSTANCE" && /^\*Button( AI)?\*/.test
 !!inA(n, /Actions/i) && !inA(n, /Additional info/i) && !inA(n, /\*Button/));
 return { crumb: cr ? cr.characters.trim() : null, key: keyT ? keyT.characters.trim() : null, status, addInfo, copy, actions };
 }
+const refScope = r => { const sl = r.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))); return sl.length ? sl : [r]; };
+const refAll = (r, nm) => refScope(r).flatMap(s => s.findAll(x => x.name === nm && x.visible));
 function refPlacement(refRoot, name) {
 if (!refRoot) return null;
-const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+const n = refAll(refRoot, name)[0]; if (!n) return null;
 let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
 return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
 }
 function refIslandOf(refRoot, name) {
 if (!refRoot) return null;
-const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
+const n = refAll(refRoot, name)[0]; if (!n) return null;
 for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return q.id;
 return null;
 }
@@ -130,7 +132,7 @@ function refIslandByKids(refRoot, g) {
 if (!refRoot || !("children" in g)) return null;
 let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
 const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
-const ids = []; for (const k of kids) { const all = refRoot.findAll(x => x.name === k.name && x.visible); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
+const ids = []; for (const k of kids) { const all = refAll(refRoot, k.name); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
 let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
 return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }
@@ -301,6 +303,7 @@ for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); contin
 if (pending.length) bundles.push(pending); { const mg = mergeSharedIslands(bundles, a.refRoot); if (mg.length < bundles.length) notes.push("one island for blocks that share one in the reference: " + mg.filter(b => b.length > 1).map(b => b.map(g => g.name).join(" + ")).join("; ")); bundles.length = 0; bundles.push(...mg); }
 const cards = [];
 for (const bundle of bundles) {
+if (bundle.length === 1 && isGraphic(bundle[0])) { cards.push(bundle[0]); notes.push("graphic " + bundle[0].name + " stays bare"); continue; }
 const g0 = bundle[bundle.length - 1], rp = refPlacement(a.refRoot, g0.name) || (refIslandByKids(a.refRoot, g0) ? "island" : null);
 if (rp === "bare") { for (const g of bundle) cards.push(g); notes.push("reference: " + g0.name + " bare"); continue; }
 if (rp === "island") { cards.push(wrapInIsland(bundle)); notes.push("reference: " + g0.name + " in an island"); continue; }
@@ -424,27 +427,6 @@ const ms = P.findAll(n => n.type === "SLOT" && n.name === "Main content")[0]; if
 return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false && !!n.absoluteBoundingBox &&
 (() => { const c = n.fills[0].color; return c.r > 0.93 && c.r < 0.985 && Math.abs(c.r - c.b) < 0.03; })() &&
 (() => { const b = n.absoluteBoundingBox; const ix = Math.max(0, Math.min(b.x + b.width, mb.x + mb.width) - Math.max(b.x, mb.x)), iy = Math.max(0, Math.min(b.y + b.height, mb.y + mb.height) - Math.max(b.y, mb.y)); return ix * iy > 0.4 * mb.width * mb.height; })()).length > 0;
-}
-async function planOne(scrId, refOverride, opts) {
-const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
-let pg = scr; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
-const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : null);
-_idCache.clear(); const a = analyze(scr);
-let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
-if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = sf.grey; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
-const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
-const blocks = []; let pending = [], lastIsl = null;
-for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
-const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null) || (refUnboxed(refP, g) ? "unboxed" : null);
-const how = rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
-const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
-lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
-if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
-return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
-plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : (refSideOnly(refP, a) ? "side: empty, like the reference" : "")].join(" | "),
-blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
-header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }
 async function migrateOne(scrId, refOverride, opts) {
 const scr = await figma.getNodeByIdAsync(scrId); if (!scr) return { id: scrId, missing: true };
