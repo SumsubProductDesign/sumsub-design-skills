@@ -92,10 +92,10 @@ header.findAll(n => n.type === "TEXT" && rendered(n, scr) && n.characters.trim()
 const tabSrc = [header, subheader].filter(Boolean);
 const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Tab( \/)? Basic \/ Item/i.test(n.name) && rendered(n, scr)))
 .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
-return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
-const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
+const ck = Object.keys(t.componentProperties || {}).find(k => /^Counter/.test(k)), nt = ck && t.componentProperties[ck].value === true ? t.findOne(y => y.type === "TEXT" && y.visible && y.name === "Number") : null; return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true", cnt: nt ? nt.characters : null }; }).filter(t => t.label);
+const tabs = tabPairs.map(t => t.label), tabCnt = tabPairs.map(t => t.cnt), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
 let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }
-const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
+const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabCnt, tabSelected };
 return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
 report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
 main: main ? main.name : null, left: left ? left.name : null, right: right ? right.name : null,

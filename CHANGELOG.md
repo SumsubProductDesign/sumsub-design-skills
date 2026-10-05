@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.247.0 — 2026-10-05 (island migration: the fixes from Applicant page / Overview)
+- **No card inside a card.** When the old card had an extra inner frame, the card's white fill, border and rounded corners from the reference were put on that inner frame too, so a second bordered box showed up inside the card. They now stay on the card itself.
+- **Old page margins are gone.** A content block kept the margins of the old page (24 / 32 / 64 / 32) even though the designer's reference has none. The cards came out narrower than in the reference, and the page came out taller. The reference's margins are now used, including zero.
+- **Tab counters are kept.** A number on a tab, such as Actions · 5, used to disappear in the new header. It's now carried over.
+- **The page returns to the reference's height** when its content fits again, instead of staying taller after a fix.
+
 ## v3.246.0 — 2026-10-05 (island migration: the fixes from KYC)
 - **Primary buttons in the header are black again.** Buttons copied from an old header kept colours from a library that no longer exists, so `Change applicant status` stayed the old blue. The migration now finds the matching Base colours for them: black primary, the new grey borders.
 - **Pictures keep their size.** A screenshot placed above the content used to be stretched to the full width of the page. It now stays as it was in the original.

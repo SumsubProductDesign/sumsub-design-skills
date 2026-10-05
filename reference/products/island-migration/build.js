@@ -92,10 +92,10 @@ header.findAll(n => n.type === "TEXT" && rendered(n, scr) && n.characters.trim()
 const tabSrc = [header, subheader].filter(Boolean);
 const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Tab( \/)? Basic \/ Item/i.test(n.name) && rendered(n, scr)))
 .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
-return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
-const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
+const ck = Object.keys(t.componentProperties || {}).find(k => /^Counter/.test(k)), nt = ck && t.componentProperties[ck].value === true ? t.findOne(y => y.type === "TEXT" && y.visible && y.name === "Number") : null; return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true", cnt: nt ? nt.characters : null }; }).filter(t => t.label);
+const tabs = tabPairs.map(t => t.label), tabCnt = tabPairs.map(t => t.cnt), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
 let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }
-const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
+const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabCnt, tabSelected };
 return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
 report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
 main: main ? main.name : null, left: left ? left.name : null, right: right ? right.name : null,
@@ -382,7 +382,7 @@ if (tbOf() && plan.tabs.length) {
 for (let guard = 0; guard < 12; guard++) { const ws = wsOf(); if (!ws) break; const its = ws.children.filter(n => /Tab Basic \/ Item/i.test(n.name));
 if (its.length >= plan.tabs.length) break; ws.appendChild(its[its.length - 1].clone()); }
 const items = tbOf().findAll(n => /Tab Basic \/ Item/i.test(n.name));
-items.forEach((it, i) => { try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false" }); } else it.visible = false; } catch (e) {} });
+for (let i = 0; i < items.length; i++) { const it = items[i], c = plan.tabCnt[i]; try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false", "Counter#5190:0": !!c }); const nt = c && it.findOne(y => y.type === "TEXT" && y.name === "Number"); if (nt && nt.characters !== c) { await figma.loadFontAsync(nt.fontName); nt.characters = c; } } else it.visible = false; } catch (e) {} }
 if (items.length < plan.tabs.length) notes.push("header shows " + items.length + " of " + plan.tabs.length + " tabs"); }
 } catch (e) { notes.push("tabs: " + e.message); }
 const acts0 = R.actions.length ? R.actions : carry, acts = []; { const seen = new Set(), isA = k => acts0.some(a => a.id === k.id); for (const b of acts0) { const p = b.parent; if (seen.has(p.id)) continue; seen.add(p.id); const ks = p.children.filter(k => k.visible !== false), mine = ks.filter(isA), i0 = ks.findIndex(k => k.id === mine[0].id), i1 = ks.findIndex(k => k.id === mine[mine.length - 1].id); ks.forEach((k, i) => { if (isA(k) || (i > i0 && i < i1 && /Divider/i.test(k.name))) acts.push(k); }); } }

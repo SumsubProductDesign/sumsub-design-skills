@@ -386,6 +386,14 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **Header slots are not a side column (v3.246).** The finish audit counted the header's Info, Additional info and Actions slots as side content, so white secondary buttons in the Actions slot were listed under `sideWhites`. Only `Side content` and the Aside `Content` count now.
 
+**A card keeps its own chrome when the walk passes through our wrapper (v3.247).** The reference pairing goes through one or two extra single wrappers on our side (§ above). When our outer block is a component instance or a card itself — AP Overview: our `Info Card` › `General info` against the reference's `Info Card` — the reference's fill, border, radius, padding and width stay on the outer block, and only the gaps go to the inner wrapper. Before, all of it landed on the wrapper: a white bordered card inside the card. A plain outer frame (TM Travel Rule settings) still passes everything to the inner one.
+
+**An instance whose layers differ doesn't make its parent "rebuilt" (v3.247).** When a block's children pair by name, the walk used to drop to the `stopped` mode as soon as one child's own layers differed, and `stopped` never copies side paddings or a reference 0. Two instances whose sublayers differ are the designer's newer version of the component, not new wrapper frames, so they no longer count. AP Overview: `Body` kept the old page paddings 24/32/64/32 (the reference has 0), the cards came out 1276 instead of 1340 and the page 1369 instead of 1289.
+
+**A tab's counter comes along (v3.247).** Tabs carried only the label and the selected state; a counter on the original's tab (AP Overview: Actions · 5) was lost. `Counter` and its number are now copied.
+
+**The page goes back to the reference's height (v3.247).** The finish only ever grew the page. With a reference, it now also shrinks it back to the reference's height once the content fits, so a re-run after a fix doesn't leave the page too tall.
+
 **Known gap: vanished-library colours inside instances.** The rebind works on our content and the slots, not on the layers of a component instance. On KYC the remaining pre-redesign colours (the audit's 7.56 info) are bindings to vanished libraries inside the AP organisms, the copied header buttons' icons and the `Page`'s own sidebar — not an unsynced Base library. Not fixed yet.
 
 **Reference blocks are looked up inside its content slots.** The `Page` itself has frames named `Body`, `Main`, `Content`. KYC's table block is called `Body`, matched the Page's own `Body` and was split into two islands. The plan and the build now search only `Main content`, `Side content` and the Aside `Content`, as the finish does since v3.239.0.

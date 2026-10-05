@@ -131,10 +131,10 @@ function analyze(scr) {
   const tabSrc = [header, subheader].filter(Boolean);
   const tabPairs = tabSrc.flatMap(h => h.findAll(n => n.type === "INSTANCE" && /Tab( \/)? Basic \/ Item/i.test(n.name) && rendered(n, scr)))
       .map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = t.componentProperties && t.componentProperties.Selected;
-        return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true" }; }).filter(t => t.label);
-  const tabs = tabPairs.map(t => t.label), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
+        const ck = Object.keys(t.componentProperties || {}).find(k => /^Counter/.test(k)), nt = ck && t.componentProperties[ck].value === true ? t.findOne(y => y.type === "TEXT" && y.visible && y.name === "Number") : null; return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true", cnt: nt ? nt.characters : null }; }).filter(t => t.label);
+  const tabs = tabPairs.map(t => t.label), tabCnt = tabPairs.map(t => t.cnt), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
   let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }   // v3.236: the flag text below the header edge is not shown (Complete to-do list: y 58 in a 56 header) — no sandbox
-  const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabSelected };
+  const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabCnt, tabSelected };
   return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes,
     report: { screen: scr.name, id: scr.id, size: W + "×" + H, oldSidebar: sbW || null, header: header ? header.name + " (" + header.type + ")" : null, subheader: subheader ? subheader.name : null,
       main: main ? main.name : null, left: left ? left.name : null, right: right ? right.name : null,
@@ -489,7 +489,7 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
         for (let guard = 0; guard < 12; guard++) { const ws = wsOf(); if (!ws) break; const its = ws.children.filter(n => /Tab Basic \/ Item/i.test(n.name));
           if (its.length >= plan.tabs.length) break; ws.appendChild(its[its.length - 1].clone()); }
         const items = tbOf().findAll(n => /Tab Basic \/ Item/i.test(n.name));
-        items.forEach((it, i) => { try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false" }); } else it.visible = false; } catch (e) {} });
+        for (let i = 0; i < items.length; i++) { const it = items[i], c = plan.tabCnt[i]; try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false", "Counter#5190:0": !!c }); const nt = c && it.findOne(y => y.type === "TEXT" && y.name === "Number"); if (nt && nt.characters !== c) { await figma.loadFontAsync(nt.fontName); nt.characters = c; } } else it.visible = false; } catch (e) {} }   // v3.247: a tab's counter comes along (AP Overview: Actions · 5)
         if (items.length < plan.tabs.length) notes.push("header shows " + items.length + " of " + plan.tabs.length + " tabs"); }
     } catch (e) { notes.push("tabs: " + e.message); }
 // v3.246: dividers between the original's actions come along in their place (AP: icons | Request check · Change applicant status)
@@ -562,9 +562,9 @@ async function copyVarsFromRef(refRoot, page, anchors) {
       return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
   const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
   let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }   // v3.233: the reference wraps exactly our children in one of its wrappers — Submit compliance: Frame 2131328741 › Content › 4× Customize setup; our block takes that wrapper's spacing   // v3.231: one wrapper each side, names differ (Verify your VASP: ref `Content` ↔ our `.Content`)   // v3.230: the reference wraps the blocks in one extra frame (TM Settings / Create a VASP: IslandCard › Slot › Content › blocks) — pair through it
-  if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) e[2] = bw; }   // v3.238: our side has one or two extra single wrappers (TM Travel Rule settings: Frame 2085664018 › Frame 2085664033 vs the reference's Content) — pair through them
+  if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) { if (b.type === "INSTANCE" || isCard(b)) { if (!style) out.push([path + SEP + bw.name, r, bw, false, "gaps"]); } else e[2] = bw; } }   // v3.238: our side has one or two extra single wrappers (TM Travel Rule settings: Frame 2085664018 › Frame 2085664033 vs the reference's Content) — pair through them   // v3.247: when our outer block is an instance or a card itself (AP Overview: Info Card › General info vs the reference's Info Card), its fill / stroke / radius / padding stay on it and only the gaps go to the inner wrapper — before, the card chrome landed on the wrapper: a card inside the card
   if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
-  const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y)); if (!style && !deep) e[4] = "stopped";
+  const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE"));   // v3.247: two instances whose sublayers differ (the designer's newer version of the component) don't make the block "rebuilt" — AP Overview: Body kept the old page paddings 24/32/64/32 because Info Card's inner layers differ, while the reference has 0 if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
   const bodySlots = root => root.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
@@ -583,7 +583,7 @@ const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundV
         // …but never a FIXED width that doesn't fit where the block now sits: the published Aside is 400 and doesn't stretch, while a
         // branch reference may show the same column at 424 with no panel around it (Case page right column → 24 px overflow).
         // a rotated layer's width is its length (Events connector lines, -90°: width 76 in a 16 frame) — sizing is not compared or copied
-        if (mode !== "paint" && !(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
+        if (mode !== "paint" && mode !== "gaps" && !(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
           const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
           const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
           const rpar = rn.parent, rpRoom = rpar && typeof rpar.width === "number" ? rpar.width - (rpar.paddingLeft || 0) - (rpar.paddingRight || 0) : null, refFits = rpRoom == null || rn.width <= rpRoom + 1;   // v3.234: a block that overflows its parent in the reference too is meant that way (Submit compliance stepper icons 16 in a 10 room) — not squeezed
@@ -598,7 +598,7 @@ if (rs && bs && rs !== bs && !keepFill) { bn.layoutSizingHorizontal = rs; applie
         // paddings and gaps: the designers retune a block's inner spacing for the island layout (TM: `Customers card / Finance`,
         // heading and info padding 24 → 16) — take the reference's value, bound to its spacing variable when it has one
         // a grid child's alignment in its cell (CM team overview: `Team` MIN → AUTO in the reference, with FILL)
-        try { if (mode !== "paint" && rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
+        try { if (mode !== "paint" && mode !== "gaps" && rn.parent && bn.parent && rn.parent.layoutMode === "GRID" && bn.parent.layoutMode === "GRID") for (const k of ["gridChildHorizontalAlign", "gridChildVerticalAlign"]) {
             if (rn[k] && bn[k] && rn[k] !== bn[k] && !(ov && mc && mc[k] === rn[k])) { bn[k] = rn[k]; applied.push(a + path + " " + (k === "gridChildHorizontalAlign" ? "cell align H" : "cell align V") + " → " + rn[k]); } } } catch (e) {}
         // pairing modes (CM managers overview: `Open cases`, `TR widget`, `Team` moved their side padding 16 into new wrapper frames we don't have):
         //  full — the whole subtree pairs: copy everything;  stopped — own children pair but one of them is restructured: copy only top / bottom
@@ -611,7 +611,7 @@ if (rs && bs && rs !== bs && !keepFill) { bn.layoutSizingHorizontal = rs; applie
 const headPair = mode === "style" && roleOf(rn.name) === "⟨heading⟩" && roleOf(bn.name) === "⟨heading⟩";   // v3.238: a section heading takes the reference's top / bottom padding — the old 32/12 spaced sections on the full-bleed page, in an island it is 0/0 (TM Travel Rule settings)   // v3.230: a block with exactly the reference's children takes its gaps even in style mode (Create a VASP fields: 24 → 16); never its side paddings
 try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
             const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
-            const keys = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : gapOnly ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
+            const keys = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : (gapOnly || mode === "gaps") ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
             for (const k of keys) {
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
@@ -624,7 +624,7 @@ try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.
         // corner radius: the designers round the cards up for the island layout (CM Overview for managers: `.To do`, `Team` … 12 → 16,
         // bound to border-radius/xl) while some blocks keep theirs (`Documents block old` stays 12 in every reference) — so take the
         // paired reference layer's radius, bound to its variable when it has one, instead of a blanket rule
-        try { if (mode !== "paint" && "topLeftRadius" in rn && "topLeftRadius" in bn) { let changed = false;
+        try { if (mode !== "paint" && mode !== "gaps" && "topLeftRadius" in rn && "topLeftRadius" in bn) { let changed = false;
             for (const k of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) {
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
@@ -634,7 +634,7 @@ try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.
               if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
               changed = true; }
             if (changed) applied.push(a + path + " radius → " + Math.round(rn.topLeftRadius || 0)); } } catch (e) { skipped.push(a + path + " radius: " + e.message); }
-        for (const prop of ["fills", "strokes"]) { try {
+        if (mode !== "gaps") for (const prop of ["fills", "strokes"]) { try {
           const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
           if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;   // the variant's own paint
           const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
@@ -1036,7 +1036,8 @@ let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, r
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   // FILL-height children follow the page (a side column spanning the Aside) — counting them grows the page on every run.
   const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
-  if (bottom + 20 > page.height) { try { page.resize(page.width, Math.ceil(bottom + 28)); } catch (e) {} }
+  const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null, want = Math.max(rPg ? Math.round(rPg.height) : 0, Math.ceil(bottom + 28));
+if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.resize(page.width, want); } catch (e) {} }   // v3.247: with a reference the page also shrinks back to the reference's height once the content fits again (AP Overview stayed 1369 after the Body paddings were fixed; the reference is 1289)
   let sectionFit = null; try { sectionFit = fitSection(page); } catch (e) { sectionFit = "error: " + e.message; }
   const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
   const refRoot = refId ? await figma.getNodeByIdAsync(refId) : null;
