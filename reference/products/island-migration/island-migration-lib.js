@@ -613,9 +613,11 @@ if (rs && bs && rs !== bs && !keepFill) { bn.layoutSizingHorizontal = rs; applie
 const headPair = mode === "style" && roleOf(rn.name) === "⟨heading⟩" && roleOf(bn.name) === "⟨heading⟩";   // v3.238: a section heading takes the reference's top / bottom padding — the old 32/12 spaced sections on the full-bleed page, in an island it is 0/0 (TM Travel Rule settings)   // v3.230: a block with exactly the reference's children takes its gaps even in style mode (Create a VASP fields: 24 → 16); never its side paddings
 try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.layoutMode && rn.layoutMode !== "NONE" && bn.layoutMode === rn.layoutMode) { const changed = [];
             const spKeys = rn.layoutMode === "GRID" ? ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "gridRowGap", "gridColumnGap"] : ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"];
-            const keys = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : (gapOnly || mode === "gaps") ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
+            const rootTop = path === "·" && !!bn.parent && bn.parent.type === "SLOT";
+      const keys0 = headPair ? spKeys.filter(k => k === "paddingTop" || k === "paddingBottom") : (gapOnly || mode === "gaps") ? spKeys.filter(k => !/padding/.test(k)) : mode === "full" ? spKeys : spKeys.filter(k => k === "paddingTop" || k === "paddingBottom" || (mode === "stopped" && !/padding/.test(k)));
+      const keys = rootTop ? [...new Set([...keys0, "paddingTop", "paddingRight", "paddingBottom", "paddingLeft"])] : keys0;
             for (const k of keys) {
-              const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
+              const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && !rootTop && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
               if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own spacing, not an override
               let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch (e) {} }

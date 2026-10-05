@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.249.0 — 2026-10-05 (island migration: the column's top block loses the old page margins)
+- **No old page margins on a renamed block.** On the second Applicant page Overview the designer renamed the blocks inside `Body`, so the migration couldn't pair them and kept `Body`'s old page margins of 24 / 32 / 64 / 32. The cards would have come out 64 px narrower than in the reference. The outer paddings of a block standing straight in the page's column now always come from the reference. None of the 30 accepted test screens changes.
+
 ## v3.248.0 — 2026-10-05 (island migration: a product header stays when there is no reference)
 - **The product header is kept when the screen has no designers' reference.** A designer migrated an AML screening Applicant page and the skill replaced its `AP page header` with the generic page header. Without a reference, a header that comes from a product library or the file's local components now stays: the new page's header is swapped to it, with its properties and texts. Screens with a reference still follow it.
 - **The migration copy keeps the screen's name.** The same test produced a copy named "… — island (copy, made by Claude)". A copy made for the migration now keeps the source's exact name; the "(made by Claude)" suffix is only for sections.
