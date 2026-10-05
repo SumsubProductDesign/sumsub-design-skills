@@ -109,7 +109,7 @@ const cr = T.find(t => inA(t, /Breadcrumb/i) && t.characters.trim().length > 1 &
 const keyT = T.find(t => /^Key name$/i.test(t.name) && !/^Key name$/i.test(t.characters.trim()) && !inA(t, /Additional info/i));
 const status = h.findOne(n => n.id !== h.id && /status/i.test(n.name) && n.visible && rendered(n, scr) && !inA(n, /status/i)) || null;
 const addInfo = h.findOne(n => /^Additional info$/i.test(n.name) && "children" in n && n.visible && rendered(n, scr)) || null;
-const copy = !!h.findOne(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && /Title \+ button/i.test(n.parent.name));
+const copy = !!h.findOne(n => n.type === "INSTANCE" && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && (/Title \+ button/i.test(n.parent.name) || (!n.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim()) && !!n.findOne(q => q.type === "INSTANCE" && /^(normal|small)\/copy$/.test(q.name)) && [n.parent, n.parent && n.parent.parent].some(p => p && /Title/i.test(p.name)))));
 const actions = h.findAll(n => n.type === "INSTANCE" && /^\*Button( AI)?\*/.test(n.name) && n.visible && rendered(n, scr) &&
 !!inA(n, /Actions/i) && !inA(n, /Additional info/i) && !inA(n, /\*Button/));
 return { crumb: cr ? cr.characters.trim() : null, key: keyT ? keyT.characters.trim() : null, status, addInfo, copy, actions };

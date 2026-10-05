@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.246.0 — 2026-10-05 (island migration: the fixes from KYC)
+- **Primary buttons in the header are black again.** Buttons copied from an old header kept colours from a library that no longer exists, so `Change applicant status` stayed the old blue. The migration now finds the matching Base colours for them: black primary, the new grey borders.
+- **Pictures keep their size.** A screenshot placed above the content used to be stretched to the full width of the page. It now stays as it was in the original.
+- **The header's actions look like the original's.** The divider between the icon buttons and the text buttons is kept. ID, External ID and Add tag no longer show up twice, once in the actions and once in the row under the title. The copy button next to the applicant's name is kept.
+- The migration's own audit no longer flags pictures as "not in an island", or white header buttons as side-panel blocks.
+
 ## v3.245.0 — 2026-10-05 (island migration: the plan moves to plan.js, two fixes from KYC)
 - **The plan has its own file.** `planOne` now lives in `island-migration/plan.js`. `build.js` had reached its size limit, so the next fix wouldn't have fit. The build file is now 47 300 characters of 49 800.
 - **A picture no longer turns a whole column into one island.** On the KYC tab a 643-wide screenshot of tabs sits above the cards and the table. Being narrow, it stopped the split into blocks, and everything went into one island. Images and shapes with no children are now skipped when the column is split, and they stay bare on the grey.

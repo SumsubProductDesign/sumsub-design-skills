@@ -375,6 +375,19 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **A picture is not a content block.** An image or a shape with no children (KYC: `image 1`, a 643-wide screenshot of tabs at the top of the column) no longer stops the split into blocks, and it stays bare on the grey instead of going into an island. Before, the narrow picture made the whole column one block, and that block went into one island.
 
+**A picture keeps its own size (v3.246).** Every child of `Main content` used to be set to FILL, the picture included: KYC's 643 × 51 screenshot of tabs came out 1340 × 106. Pictures now keep their size, and the finish no longer lists them under `notIsland`.
+
+**The header carries the original's actions as they stood (v3.246).** Three fixes from KYC, where the old header is an `AP page header`:
+- **Dividers come along.** A divider between the original's action buttons (icons | Request check · Change applicant status) is copied in its place. Before, only the buttons were copied. A divider left at either edge of the Actions slot is removed.
+- **An action is not repeated in the info rows.** The AP header keeps ID / External ID / Add tag in a row outside its buttons bar. With no `Actions` frame to go by, the build took them as actions, while the reference's Additional info row brought the same three. A button in the Actions slot whose label already shows in a switched-on Info or Additional info slot is removed.
+- **The copy button next to the name counts.** The AP header has an icon-only `normal/copy` button inside `Title + Tag › Name`, not in a `Title + button` frame. `Copy title` is now switched on for it too.
+
+**Old component token names are found in Base (v3.246).** The retired library named component tokens `Button/Primary/Default/background-color-normal`; Base calls the same token `components/button/primary/default/background-normal`. The rebind didn't know this, so buttons copied from an old header kept the vanished variable — `Change applicant status` stayed the pre-redesign blue `#1764ff` instead of black. The lookup now also tries `components/` + the name without `-color-`. Fills bound to `base/neutral/30` map to `semantic/background/neutral/subtle/normal`.
+
+**Header slots are not a side column (v3.246).** The finish audit counted the header's Info, Additional info and Actions slots as side content, so white secondary buttons in the Actions slot were listed under `sideWhites`. Only `Side content` and the Aside `Content` count now.
+
+**Known gap: vanished-library colours inside instances.** The rebind works on our content and the slots, not on the layers of a component instance. On KYC the remaining pre-redesign colours (the audit's 7.56 info) are bindings to vanished libraries inside the AP organisms, the copied header buttons' icons and the `Page`'s own sidebar — not an unsynced Base library. Not fixed yet.
+
 **Reference blocks are looked up inside its content slots.** The `Page` itself has frames named `Body`, `Main`, `Content`. KYC's table block is called `Body`, matched the Page's own `Body` and was split into two islands. The plan and the build now search only `Main content`, `Side content` and the Aside `Content`, as the finish does since v3.239.0.
 
 **A blank text is not content.** An old screen can keep a text layer with nothing but a space in it, 0 px wide (TM Tags: `Text` = `" "` at the screen's root). It drew nothing, but the source check counted it, so the build ended with `kept: ["Text"]` and the source stayed. Texts that are empty after trimming no longer count.
