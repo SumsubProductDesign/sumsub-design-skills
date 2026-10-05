@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.248.0 — 2026-10-05 (island migration: a product header stays when there is no reference)
+- **The product header is kept when the screen has no designers' reference.** A designer migrated an AML screening Applicant page and the skill replaced its `AP page header` with the generic page header. Without a reference, a header that comes from a product library or the file's local components now stays: the new page's header is swapped to it, with its properties and texts. Screens with a reference still follow it.
+- **The migration copy keeps the screen's name.** The same test produced a copy named "… — island (copy, made by Claude)". A copy made for the migration now keeps the source's exact name; the "(made by Claude)" suffix is only for sections.
+
 ## v3.247.0 — 2026-10-05 (island migration: the fixes from Applicant page / Overview)
 - **No card inside a card.** When the old card had an extra inner frame, the card's white fill, border and rounded corners from the reference were put on that inner frame too, so a second bordered box showed up inside the card. They now stay on the card itself.
 - **Old page margins are gone.** A content block kept the margins of the old page (24 / 32 / 64 / 32) even though the designer's reference has none. The cards came out narrower than in the reference, and the page came out taller. The reference's margins are now used, including zero.

@@ -344,11 +344,21 @@ async function rebindOrphanVars(page) {
   const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
   return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...R.miss].slice(0, 6) };
 }
+async function keepHeader(page) { const k = page.parent && "findChild" in page.parent ? page.parent.findChild(n => n.getSharedPluginData("sumsub_island", "hdrFor") === page.id) : null; if (!k) return null;
+k.visible = true; const h = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)), mc = await k.getMainComponentAsync(); let r = null;
+if (h && mc) { const hid = h.id; h.swapComponent(mc); const h2 = (await figma.getNodeByIdAsync(hid)) || page.findOne(n => n.type === "INSTANCE" && n.name === k.name); try { h2.layoutSizingHorizontal = "FILL"; } catch (e) {} await syncNode(h2.id, k, true); r = "header: " + k.name + " kept, its properties and texts copied"; }
+k.remove(); return r; }
+async function syncNode(aid, b, top) { let a = await figma.getNodeByIdAsync(aid); if (!a) return; if (!top) { try { if (a.visible !== b.visible) a.visible = b.visible; } catch (e) {} }
+if (a.type === "INSTANCE" && b.type === "INSTANCE") { const p = {}; let ap = {}, bp = {}; try { ap = a.componentProperties || {}; bp = b.componentProperties || {}; } catch (e) {} for (const [k, v] of Object.entries(bp)) if (ap[k] && ap[k].value !== v.value) p[k] = v.value; if (Object.keys(p).length) { try { a.setProperties(p); } catch (e) {} a = await figma.getNodeByIdAsync(aid); if (!a) return; } }
+if (a.type === "TEXT" && b.type === "TEXT" && a.characters !== b.characters) { try { for (const f of a.getRangeAllFontNames(0, a.characters.length)) await figma.loadFontAsync(f); a.characters = b.characters; } catch (e) {} }
+const bk = "children" in b ? b.children : [];
+for (let i = 0; i < bk.length; i++) { const pa = await figma.getNodeByIdAsync(aid), ak = pa && "children" in pa ? pa.children : []; if (i >= ak.length) break; if (ak[i].name === bk[i].name) await syncNode(ak[i].id, bk[i], false); } }
 async function finishAndAudit(pageId, refId, part) {
 const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
 let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
+let kh = null; if (part !== "audit") { try { kh = await keepHeader(page); } catch (e) { kh = "keep header: " + e.message; } }
 if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
-if (part === "copy") return clean({ pageId, part, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
+if (part === "copy") return clean({ pageId, part, header: kh || undefined, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
 let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
 let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, rawPaints: ["error: " + e.message], rawSpacing: [], sideWhites: [] }; }
 const gridIssues = stretchToWidth(page, !!refId);
@@ -365,5 +375,5 @@ const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page /
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-return clean({ pageId, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
+return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }
