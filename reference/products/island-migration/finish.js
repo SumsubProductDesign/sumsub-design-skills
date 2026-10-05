@@ -1,4 +1,5 @@
 // FINISH — call 2 of 2, a SEPARATE use_figma call. Append:  return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<ref node id or null>"));
+const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", byId = id => figma.getNodeByIdAsync(id);
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
 const _LS = new RegExp("[" + String.fromCharCode(0x2028, 0x2029, 0x85) + "]", "g");
 const clean = o => JSON.parse(JSON.stringify(o).replace(_LS, " "));
@@ -21,8 +22,8 @@ const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingB
 function refPlacement(refRoot, name) {
 if (!refRoot) return null;
 const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
-let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return "island"; q = q.parent; }
-return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === "Page / Body / IslandCard")) ? "split" : "bare";
+let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === ICN) return "island"; q = q.parent; }
+return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === ICN)) ? "split" : "bare";
 }
 const repaint = (n, prop, variable) => { const base = n[prop] && n[prop][0] ? JSON.parse(JSON.stringify(n[prop][0])) : { type: "SOLID", color: { r: 1, g: 1, b: 1 } };
 delete base.boundVariables; n[prop] = [figma.variables.setBoundVariableForPaint(base, "color", variable)]; };
@@ -47,7 +48,7 @@ const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, st
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE")); if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
-const bodySlots = root => root.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const bodySlots = root => root.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const inChrome = n => { for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE" && /^\*(Sidebar|Header)\*$/.test(p.name)) return true; return false; };
 const inBody = (root, a) => { const sl = bodySlots(root), seen = new Set(); return (sl.length ? sl : [root]).flatMap(s => s.findAll(n => n.name === a && n.visible && !inChrome(n))).filter(n => !seen.has(n.id) && seen.add(n.id)); };
 const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
@@ -57,7 +58,7 @@ for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pair
       await prefetch(paintIds(mr.map(e => e[1])));
 for (const [path, rn, bn, ov, mode] of mr) { try {
 let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }
-if (a === "Page / Body / IslandCard" && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;
+if (a === ICN && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;
 if (mode !== "paint" && mode !== "gaps" && !(rn.type === "LINE" || rn.type === "VECTOR" || Math.abs(rn.rotation || 0) > 0.5 || Math.abs(bn.rotation || 0) > 0.5)) try { const rs = rn.layoutSizingHorizontal, bs = bn.layoutSizingHorizontal, pa = bn.parent;
 const inPanel = !!pa && (pa.type === "SLOT" && (pa.name === "Side content" || (pa.name === "Content" && pa.parent && /Aside/.test(pa.parent.name))));
 const room = pa && typeof pa.width === "number" ? pa.width - (pa.paddingLeft || 0) - (pa.paddingRight || 0) : Infinity;
@@ -113,41 +114,41 @@ else if (!rVis && bVis) { bn[prop] = []; applied.push(a + path + " " + prop + " 
   if (todo.length) skipped.push("layers changed under the walk in " + todo.join(", ") + " — run the copy part again");
 return { applied, skipped };
 }
-const cardTargets = k => (!k.visible || k.name === "Page / Body / IslandCard" || !cardLike(k)) ? [] : [k, ...vis(k).filter(c => c.type !== "INSTANCE" && isCard(c) && Math.abs(c.width - k.width) < 2 && Math.abs(c.height - k.height) < 2)];
+const cardTargets = k => (!k.visible || k.name === ICN || !cardLike(k)) ? [] : [k, ...vis(k).filter(c => c.type !== "INSTANCE" && isCard(c) && Math.abs(c.width - k.width) < 2 && Math.abs(c.height - k.height) < 2)];
 async function applyIslandTokens(page) {
 const K = { cardFill: "da81bccfef06f3de221bafbb9b5ee6a161eb9000", border: "40baade65c87f4b56fd67b027ec695d0984fae39", row: "b651c3b1b3a1d5b4066af62493435b81f3635acb" };
 const v = {}; for (const [k, key] of Object.entries(K)) v[k] = await figma.variables.importVariableByKeyAsync(key);
 const log = [];
-const ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+const ms = page.findAll(n => isS(n)).find(s => s.name === "Main content");
 for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
 try { if (isWhite(k)) repaint(k, "fills", v.cardFill); if (hasStroke(k) && !(await statusPaint(k, "strokes"))) repaint(k, "strokes", v.border); log.push("card " + k.name); } catch (e) { log.push("card " + k.name + ": " + e.message); } }
-const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const sideSlots = page.findAll(n => isS(n) && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c)) : null; if (top) repaint(top, "strokes", v.border); log.push("side " + k.name); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
-for (const ic of page.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / IslandCard")) { const sl = ic.findOne(n => n.type === "SLOT"); if (!sl) continue;
+for (const ic of page.findAll(n => n.type === "INSTANCE" && n.name === ICN)) { const sl = ic.findOne(n => isS(n)); if (!sl) continue;
 for (const k of sl.children) { try { if (k.type === "FRAME" && fillOf(k) && k.findOne(x => /table/i.test(x.name))) { k.fills = []; log.push("table wrapper " + k.name + " → no fill"); } } catch (e) {} }
 for (const r of sl.findAll(n => /(^|\/ )(Table )?Row(#\d+)?$/i.test(n.name) && isWhite(n))) { try { repaint(r, "fills", v.row); } catch (e) {} } }
 return log;
 }
 async function bareCardTokens(page) {
 const v = { cardFill: await figma.variables.importVariableByKeyAsync("da81bccfef06f3de221bafbb9b5ee6a161eb9000"), border: await figma.variables.importVariableByKeyAsync("40baade65c87f4b56fd67b027ec695d0984fae39") };
-const log = [], ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+const log = [], ms = page.findAll(n => isS(n)).find(s => s.name === "Main content");
 for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
 try { const fb = k.fills[0] && k.fills[0].boundVariables && k.fills[0].boundVariables.color, sb = k.strokes && k.strokes[0] && k.strokes[0].boundVariables && k.strokes[0].boundVariables.color;
 if (isWhite(k) && !(fb && fb.id === v.cardFill.id)) { repaint(k, "fills", v.cardFill); log.push("card " + k.name + " fill → " + v.cardFill.name); }
 if (hasStroke(k) && !(sb && sb.id === v.border.id) && !(await statusPaint(k, "strokes"))) { repaint(k, "strokes", v.border); log.push("card " + k.name + " stroke → " + v.border.name); } } catch (e) { log.push("card " + k.name + ": " + e.message); } }
-const sideSlots = page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const sideSlots = page.findAll(n => isS(n) && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 for (const s of sideSlots) for (const k of s.children) { try { if (k.type === "INSTANCE") continue; if (hasStroke(k)) repaint(k, "strokes", v.border);
 const top = ("children" in k) ? k.children.find(c => c.visible && hasStroke(c) && c.type !== "INSTANCE") : null; if (top) repaint(top, "strokes", v.border); } catch (e) { log.push("side " + k.name + ": " + e.message); } }
 { let rx = null; try { rx = await figma.variables.importVariableByKeyAsync("03884e014085a48cf26670632be200a02b5a160c"); } catch (e) {}
-const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.parent) if (q.type === "INSTANCE" && q.name === "Page / Body / IslandCard") return true; return false; };
+const inIsland = n => { for (let q = n.parent; q && q.id !== page.id; q = q.parent) if (q.type === "INSTANCE" && q.name === ICN) return true; return false; };
 if (rx && ms) for (const k of ms.findAll(n => n.visible !== false && (n.type === "FRAME" || n.type === "INSTANCE") && n.cornerRadius === 12 && isWhite(n) && hasStroke(n) && !inIsland(n))) {
 try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"]) k.setBoundVariable(p, rx); log.push("card " + k.name + " radius 12 → 16"); } catch (e) {} } }
 return log; }
 async function regroupLikeReference(refRoot, page) {
 const log = []; const names = n => vis(n).map(k => k.name);
-const ourSlots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-const refSlots = refRoot.findAll(n => n.type === "SLOT" && /^(Main content|Side content)$/.test(n.name));
+const ourSlots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const refSlots = refRoot.findAll(n => isS(n) && /^(Main content|Side content)$/.test(n.name));
 const ours = []; const walk = n => { if (n.type === "INSTANCE" || !("children" in n)) return; if (n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 1) ours.push(n); for (const k of n.children) walk(k); };
 for (const s of ourSlots) for (const k of s.children) walk(k);
 const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
@@ -173,16 +174,16 @@ const setOf = n => { try { const m = n.mainComponent; return m && m.parent && m.
 const sizeOf = n => { try { const p = n.componentProperties && n.componentProperties.Size; return p && p.type === "VARIANT" ? String(p.value) : null; } catch (e) { return null; } };
 const bySet = l => { const m = new Map(); for (const n of l) { const s = setOf(n); if (!s) continue; if (!m.has(s)) m.set(s, []); m.get(s).push(n); } return m; };
 for (const nm of ["Main content", "Side content"]) {
-const B = page.findAll(n => n.type === "SLOT" && n.name === nm)[0], R = refRoot.findAll(n => n.type === "SLOT" && n.name === nm)[0]; if (!B || !R) continue;
+const B = page.findAll(n => isS(n) && n.name === nm)[0], R = refRoot.findAll(n => isS(n) && n.name === nm)[0]; if (!B || !R) continue;
 const rb = bySet(R.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, R.id)));
 const ob = bySet(B.findAll(n => n.type === "INSTANCE" && n.visible && sizeOf(n) && topIn(n, B.id)));
 for (const [s, list] of ob) { const rl = rb.get(s); if (!rl) continue; const sizes = [...new Set(rl.map(sizeOf))]; if (sizes.length !== 1) continue;
-for (const id of list.filter(n => sizeOf(n) !== sizes[0]).map(n => n.id)) { const n = await figma.getNodeByIdAsync(id); if (!n) continue;
+for (const id of list.filter(n => sizeOf(n) !== sizes[0]).map(n => n.id)) { const n = await byId(id); if (!n) continue;
 try { n.setProperties({ Size: sizes[0] }); log.push(n.name + " Size → " + sizes[0] + " (as in the reference)"); } catch (e) {} } } }
 return log; }
 async function headingTextStyles(refRoot, page) {
 const log = [], HR = /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i;
-const slots = r => r.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const slots = r => r.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const shown = (n, top) => { for (let q = n; q && q.id !== top.id; q = q.parent) if (q.visible === false) return false; return true; };
 const refT = new Map(); for (const s of slots(refRoot)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) { const k = t.characters.trim(); if (!k) continue; if (!refT.has(k)) refT.set(k, new Set()); refT.get(k).add(typeof t.textStyleId === "string" ? t.textStyleId : ""); }
 for (const s of slots(page)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) {
@@ -195,7 +196,7 @@ const STATUS_PAINT = /(^|\/)(green|red|yellow|orange|purple|blue|cyan|pink|lime|
 async function statusPaint(k, prop) { try { const b = k[prop] && k[prop][0] && k[prop][0].boundVariables && k[prop][0].boundVariables.color; if (!b) return false; const v = await figma.variables.getVariableByIdAsync(b.id); return !!v && STATUS_PAINT.test(v.name); } catch (e) { return false; } }
 async function sidePanelLikeReference(refRoot, page) {
 const log = []; const asides = P => P.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / Aside");
-const colOf = a => { const s = a && a.findOne(n => n.type === "SLOT" && n.name === "Content"); const k = s ? s.children.filter(c => c.visible) : []; return k.length === 1 ? k[0] : null; };
+const colOf = a => { const s = a && a.findOne(n => isS(n) && n.name === "Content"); const k = s ? s.children.filter(c => c.visible) : []; return k.length === 1 ? k[0] : null; };
 const R = asides(refRoot);
 for (let i = 0; i < R.length; i++) { const r = colOf(R[i]), b0 = colOf(asides(page)[i]);
 if (!r || !b0 || r.name !== b0.name || R[i].layoutSizingHorizontal !== "HUG" || r.layoutSizingHorizontal !== "FIXED") continue;
@@ -207,18 +208,18 @@ return log; }
 const PLACEHOLDER_TEXT = /^(ClientNickname|Client name|Key[ _]name|Section name|Org[ _]name|Organization)$/i;
 async function dropHeaderPlaceholders(page) {
 const log = [], h = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible); if (!h) return log;
-for (const s of h.findAll(n => n.type === "SLOT" && /^(Info slot|Additional info)/i.test(n.name))) for (const k of [...s.children]) {
+for (const s of h.findAll(n => isS(n) && /^(Info slot|Additional info)/i.test(n.name))) for (const k of [...s.children]) {
 if (!k.visible || !("findAll" in k)) continue; const t = k.findAll(q => q.type === "TEXT" && q.visible && q.characters.trim()).map(q => q.characters.trim());
 if (t.length && t.every(x => PLACEHOLDER_TEXT.test(x))) { const nm = k.name; try { k.remove(); log.push("header: " + nm + " removed — it only shows the placeholder \"" + t[0] + "\""); } catch (e) {} } }
 const h2 = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
-for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => n.type === "SLOT" && re.test(n.name))[0];
+for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => isS(n) && re.test(n.name))[0];
 if (s && !s.children.some(k => k.visible)) { try { h2.setProperties({ [prop]: false }); log.push("header: " + s.name + " empty — switched off"); } catch (e) {} } }
 return log; }
 async function finishIsland(page, refId) {
-if (refId) { const ref = await figma.getNodeByIdAsync(refId);
+if (refId) { const ref = await byId(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
-const content = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== "Page / Body / IslandCard").map(n => n.name))].concat(["Page / Body / IslandCard"]);
+const content = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== ICN).map(n => n.name))].concat([ICN]);
 const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: (await applyIslandTokens(page)).concat(await dropHeaderPlaceholders(page)), skipped: [] };
 }
@@ -244,7 +245,7 @@ return out;
 function fitSideColumns(page) {
 const fit = [], inside = [];
 const rendered = (n, stop) => { let q = n; while (q && q.id !== stop.id) { if (q.visible === false) return false; q = q.parent; } return true; };
-for (const s of page.findAll(n => n.type === "SLOT" && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))))) {
+for (const s of page.findAll(n => isS(n) && (n.name === "Side content" || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))))) {
 const inner = s.width - (s.paddingLeft || 0) - (s.paddingRight || 0);
 for (const k of s.children.filter(c => c.visible)) {
 if (k.width - inner > 1) { const w0 = Math.round(k.width);
@@ -297,7 +298,7 @@ const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg
 if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
 function oursOf(page) {
 const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
-const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))).concat(hdr ? hdr.findAll(n => n.type === "SLOT" && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
+const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))).concat(hdr ? hdr.findAll(n => isS(n) && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
 const nested = (q, top) => { for (let p = q.parent; p && p.id !== top.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
 const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { for (const sl of n.findAll(q => q.type === "SLOT" && !nested(q, n))) for (const k of sl.children) walk(k, side); return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
@@ -336,7 +337,7 @@ return { fixed: log.length, by: Object.entries(tally).slice(0, 10).map(([k, c]) 
 async function rebindOrphanVars(page) {
   const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
   const log = [];
-  const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+  const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   const ours = oursOf(page).map(e => e[0]); void slots;
     await R.prefetch(paintIds(ours));
   for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
@@ -349,39 +350,48 @@ async function rebindOrphanVars(page) {
 }
 async function keepHeader(page) { const k = page.parent && "findChild" in page.parent ? page.parent.findChild(n => n.getSharedPluginData("sumsub_island", "hdrFor") === page.id) : null; if (!k) return null;
 k.visible = true; const h = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)), mc = await k.getMainComponentAsync(); let r = null;
-if (h && mc) { const hid = h.id; h.swapComponent(mc); const h2 = (await figma.getNodeByIdAsync(hid)) || page.findOne(n => n.type === "INSTANCE" && n.name === k.name); try { h2.layoutSizingHorizontal = "FILL"; } catch (e) {} await syncNode(h2.id, k, true); r = "header: " + k.name + " kept, its properties and texts copied"; }
+if (h && mc) { const hid = h.id; h.swapComponent(mc); const h2 = (await byId(hid)) || page.findOne(n => n.type === "INSTANCE" && n.name === k.name); try { h2.layoutSizingHorizontal = "FILL"; } catch (e) {} await syncNode(h2.id, k, true); r = "header: " + k.name + " kept, its properties and texts copied"; }
 k.remove(); return r; }
-async function syncNode(aid, b, top) { let a = await figma.getNodeByIdAsync(aid); if (!a) return; if (!top) { try { if (a.visible !== b.visible) a.visible = b.visible; } catch (e) {} }
-if (a.type === "INSTANCE" && b.type === "INSTANCE") { const p = {}; let ap = {}, bp = {}; try { ap = a.componentProperties || {}; bp = b.componentProperties || {}; } catch (e) {} for (const [k, v] of Object.entries(bp)) if (ap[k] && ap[k].value !== v.value) p[k] = v.value; if (Object.keys(p).length) { try { a.setProperties(p); } catch (e) {} a = await figma.getNodeByIdAsync(aid); if (!a) return; } }
+async function refHeader(page, refId) { const rp = refId ? await byId(refId) : null, h = page.findOne(n => n.type === "INSTANCE" && n.name === "*Header*" && n.visible);
+const rw = rp && rp.findOne(n => n.type === "INSTANCE" && n.visible && n.name !== "*Header*" && n.children.some(k => k.type === "INSTANCE" && k.name === "*Header*"));
+if (!rw || !h || h.parent.type === "INSTANCE") return null; const m = await rw.getMainComponentAsync(); if (!m) return null;
+const k = h.clone(); page.parent.appendChild(k); k.x = page.x - 3000; const top = (n, r) => { for (let q = n.parent; q && q.id !== r.id; q = q.parent) if (q.type === "SLOT") return false; return true; };
+try { const hid = h.id; h.swapComponent(m); const w = await byId(hid); try { w.layoutSizingHorizontal = "FILL"; } catch (e) {}
+const iid = w.findOne(n => n.type === "INSTANCE" && n.name === "*Header*").id; await syncNode(iid, k, true); const inner = await byId(iid);
+for (const s of k.findAll(n => isS(n) && top(n, k))) { const t = inner.findAll(n => isS(n) && n.name === s.name && top(n, inner))[0]; if (!t) continue;
+for (const q of [...t.children]) q.remove(); for (const q of s.children) { const c = q.clone(); t.appendChild(c); for (const d of ["layoutSizingHorizontal", "layoutSizingVertical"]) { try { c[d] = q[d]; } catch (e) {} } } }
+return "header: " + rw.name + " as in the reference, our content moved in"; } finally { k.remove(); } }
+async function syncNode(aid, b, top) { let a = await byId(aid); if (!a) return; if (!top) { try { if (a.visible !== b.visible) a.visible = b.visible; } catch (e) {} }
+if (a.type === "INSTANCE" && b.type === "INSTANCE") { const p = {}; let ap = {}, bp = {}; try { ap = a.componentProperties || {}; bp = b.componentProperties || {}; } catch (e) {} for (const [k, v] of Object.entries(bp)) if (ap[k] && ap[k].value !== v.value) p[k] = v.value; if (Object.keys(p).length) { try { a.setProperties(p); } catch (e) {} a = await byId(aid); if (!a) return; } }
 if (a.type === "TEXT" && b.type === "TEXT" && a.characters !== b.characters) { try { for (const f of a.getRangeAllFontNames(0, a.characters.length)) await figma.loadFontAsync(f); a.characters = b.characters; } catch (e) {} }
 const bk = "children" in b ? b.children : [];
-for (let i = 0; i < bk.length; i++) { const pa = await figma.getNodeByIdAsync(aid), ak = pa && "children" in pa ? pa.children : []; if (i >= ak.length) break; if (ak[i].name === bk[i].name) await syncNode(ak[i].id, bk[i], false); } }
+for (let i = 0; i < bk.length; i++) { const pa = await byId(aid), ak = pa && "children" in pa ? pa.children : []; if (i >= ak.length) break; if (ak[i].name === bk[i].name) await syncNode(ak[i].id, bk[i], false); } }
 async function finishAndAudit(pageId, refId, part) {
-const page = await figma.getNodeByIdAsync(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
+const page = await byId(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();
 let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
-let kh = null; if (part !== "audit") { try { kh = await keepHeader(page); } catch (e) { kh = "keep header: " + e.message; } }
+let kh = null; if (part !== "audit") { try { kh = await keepHeader(page) || await refHeader(page, refId); } catch (e) { kh = "keep header: " + e.message; } }
 if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
-if (part === "copy") return clean({ pageId, part, header: kh || undefined, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
+if (part === "copy" || (!part && /as in the reference/.test(kh || ""))) return clean({ pageId, part: "copy", header: kh || undefined, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
 let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
 let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, rawPaints: ["error: " + e.message], rawSpacing: [], sideWhites: [] }; }
 const gridIssues = stretchToWidth(page, !!refId);
 const side = fitSideColumns(page);
 const pb = page.absoluteTransform[1][2];
-const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
-const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null;
+const rpg = refId ? await byId(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null;
 const oh = Number(page.getSharedPluginData("sumsub_island", "origH")) || 0, rh = rPg ? Math.round(rPg.height) : 0;
 const want = Math.max(oh && rh ? Math.min(oh, rh) : rh, Math.ceil(bottom + 28));
 if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.resize(page.width, want); } catch (e) {} }
 let sectionFit = null; try { sectionFit = fitSection(page); } catch (e) { sectionFit = "error: " + e.message; }
-const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
-const refRoot = refId ? await figma.getNodeByIdAsync(refId) : null;
-const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page / Body / IslandCard" && !isGraphic(k) && !cardLike(k) && !isCardLayout(k) && !["bare", "split"].includes(refPlacement(refRoot, k.name))).map(k => k.name) : ["no main slot"];
+const ms2 = page.findAll(n => isS(n)).find(s => s.name === "Main content");
+const refRoot = refId ? await byId(refId) : null;
+const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== ICN && !isGraphic(k) && !cardLike(k) && !isCardLayout(k) && !["bare", "split"].includes(refPlacement(refRoot, k.name))).map(k => k.name) : ["no main slot"];
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name);
   const inI = n => { for (let q = n.parent; q && q.id !== s.id; q = q.parent) { if (q.type === "SLOT") return false; if (q.type === "INSTANCE") return true; } return false; }, sh = n => { for (let q = n; q && q.id !== s.id; q = q.parent) if (q.visible === false) return false; return true; };
   for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }
   return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
-const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
+const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === ICN ? "ISL[" + ((k.findOne(n => isS(n)) || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
 return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }

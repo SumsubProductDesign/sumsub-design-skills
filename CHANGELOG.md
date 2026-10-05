@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.254.0 — 2026-10-05 (island migration: the reference's header component)
+- **The page header is the reference's component.** All 12 Applicant page references use `AP page header`: a product wrapper with the usual page header inside. The migration left the bare `*Header*`: it looked the same, but it was a different component, against the "the reference decides" rule. The finish now swaps the header to the reference's wrapper and moves the migrated content into it: properties, texts, status, actions, info row and tabs. The 7 Applicant page screens accepted before were switched the same way, and their header content is unchanged. Other products' references have no wrapper, so nothing changes for them.
+- **On those screens the finish takes two calls.** After the swap, the finish returns once the copy from the reference is done, and the audit runs as its own call (`next` in the result). In one call the audit hit a dead layer of the old header.
+- **Internal:** `finish.js` uses three short names so the new step fits the call size limit. Expanded back, the file is identical to the previous version.
+
 ## v3.253.0 — 2026-10-05 (island migration: the country flag in the header)
 - **The country flag next to the applicant name is carried.** When the original header shows an element that the new header has as an on/off option — on Applicant page screens, the flag next to the name — the migration turns it on and keeps the original's country. Before, it was lost on every Applicant page screen. Other products are not affected: a check of all 41 test screens found the flag on the 12 Applicant page screens only.
 - **Internal:** shorter log messages in `build.js` to make room (49 670 of 49 800 characters).
