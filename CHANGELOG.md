@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.252.0 — 2026-10-05 (island migration: page height from the original)
+- **No empty grey band at the bottom.** When the designer's reference is taller only because of its own content, such as a card they expanded that the original keeps collapsed, the migrated page no longer takes the reference's height. It stays the original's height, or grows if the content needs more. Applicant page / Actions came out 1155 tall for content ending at 413; it is now 900, like the original. Screens migrated earlier are not affected.
+
 ## v3.251.0 — 2026-10-05 (island migration: room in the build engine)
 - **Internal: the build engine is shorter.** `build.js` had reached 49 793 of its 49 800-character limit. Repeated slot, instance and header lookups now share three small helpers, so it is 49 440 characters, which leaves room for the next fixes. Behaviour is unchanged: a fresh build of Overview #2 matches the accepted result.
 

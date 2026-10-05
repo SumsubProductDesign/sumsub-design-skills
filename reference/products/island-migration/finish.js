@@ -369,7 +369,9 @@ const side = fitSideColumns(page);
 const pb = page.absoluteTransform[1][2];
 const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
 const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
-const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null, want = Math.max(rPg ? Math.round(rPg.height) : 0, Math.ceil(bottom + 28));
+const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null;
+const oh = Number(page.getSharedPluginData("sumsub_island", "origH")) || 0, rh = rPg ? Math.round(rPg.height) : 0;
+const want = Math.max(oh && rh ? Math.min(oh, rh) : rh, Math.ceil(bottom + 28));
 if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.resize(page.width, want); } catch (e) {} }
 let sectionFit = null; try { sectionFit = fitSection(page); } catch (e) { sectionFit = "error: " + e.message; }
 const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");

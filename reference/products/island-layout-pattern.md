@@ -394,6 +394,8 @@ The engine lives in `${CLAUDE_PLUGIN_ROOT}/reference/products/island-migration/`
 
 **The page goes back to the reference's height (v3.247).** The finish only ever grew the page. With a reference, it now also shrinks it back to the reference's height once the content fits, so a re-run after a fix doesn't leave the page too tall.
 
+**The original's height is the floor, not the reference's (v3.252).** The build records the original screen's height on the new page (`sharedPluginData sumsub_island/origH`), and the finish sizes the page to `max(min(original height, reference height), content bottom + 28)`. A reference can be taller only because of its own content: on AP Actions the designer expanded a card with a screenshot that the original keeps collapsed, and the page came out 1155 tall for content ending at 413 (the original is 900). Pages migrated before v3.252 carry no recorded height and keep the old rule (the reference's height as the floor); on the 31 accepted screens the result is unchanged. Measuring the reference's own bottom margin was tried and dropped: slot children that fill vertically make the reference's content bottom 0–188, and TM Travel Rule settings would have grown to 4158.
+
 **Known gap: vanished-library colours inside instances.** The rebind works on our content and the slots, not on the layers of a component instance. On KYC the remaining pre-redesign colours (the audit's 7.56 info) are bindings to vanished libraries inside the AP organisms, the copied header buttons' icons and the `Page`'s own sidebar — not an unsynced Base library. Not fixed yet.
 
 **Reference blocks are looked up inside its content slots.** The `Page` itself has frames named `Body`, `Main`, `Content`. KYC's table block is called `Body`, matched the Page's own `Body` and was split into two islands. The plan and the build now search only `Main content`, `Side content` and the Aside `Content`, as the finish does since v3.239.0.
@@ -446,7 +448,7 @@ Two API facts this relies on: a hidden instance exposes no sublayers (its `child
 
 **Validated 2026-09-29** on the New Layout test page (`gzKyS6BzWDlmBMLJspM7WP`, page `3234:38`): Case / Overview `3236:64403` (mixed wrapper split, Transactions in an island, header regions, 6 tabs), CM managers overview general / team / blueprints `3256:63838` · `3259:64158` · `3261:64392` (layout of cards bare, `Full screen page` + `Full width` from the reference, 28 / 197 / 89 variables copied). The team, blueprints and general screens exposed the fixed-width defect (§7.10) — fixed by copying the reference's sizing.
 
-**Page height.** With a reference the page takes the reference's size, then grows if the moved content is taller. Without one it keeps the original size.
+**Page height.** With a reference the page takes the reference's size during the build; the finish then sets it to the original's height (capped by the reference's), or taller if the moved content needs it (v3.252). Without a reference it keeps the original size.
 
 ---
 

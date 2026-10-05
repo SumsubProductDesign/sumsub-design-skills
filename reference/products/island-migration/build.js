@@ -270,6 +270,7 @@ const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b7
 const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
 const page = variant.createInstance(); const slotOf = nm => page.findAll(n => n.type === "SLOT").find(s => s.name === nm); const instOf = nm => page.findOne(n => n.type === "INSTANCE" && n.name === nm);
 parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
+try { page.setSharedPluginData("sumsub_island", "origH", String(Math.round(scr.height))); } catch (e) {}
 instOf("Page / Body").setProperties({ "Content": plan.content });
 instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
 if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }

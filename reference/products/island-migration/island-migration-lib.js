@@ -354,6 +354,8 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
   const page = variant.createInstance(); const slotOf = nm => page.findAll(n => n.type === "SLOT").find(s => s.name === nm); const instOf = nm => page.findOne(n => n.type === "INSTANCE" && n.name === nm);
   parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
+  // v3.252: the original's height, for the finish — a reference taller only because of its own content must not stretch the page (AP Actions: 1155 for content to 413, the original is 900)
+  try { page.setSharedPluginData("sumsub_island", "origH", String(Math.round(scr.height))); } catch (e) {}
   // 2. layout + width (re-fetch after each variant change)
   instOf("Page / Body").setProperties({ "Content": plan.content });
   instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
@@ -1052,7 +1054,12 @@ let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, r
   const slots = page.findAll(n => n.type === "SLOT" && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
   // FILL-height children follow the page (a side column spanning the Aside) — counting them grows the page on every run.
   const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
-  const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null, want = Math.max(rPg ? Math.round(rPg.height) : 0, Math.ceil(bottom + 28));
+  const rpg = refId ? await figma.getNodeByIdAsync(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null;
+const oh = Number(page.getSharedPluginData("sumsub_island", "origH")) || 0, rh = rPg ? Math.round(rPg.height) : 0;
+const want = Math.max(oh && rh ? Math.min(oh, rh) : rh, Math.ceil(bottom + 28));
+  // v3.252: with a reference the floor is the original's height, capped by the reference's — not the reference's height alone. Measuring the reference's own
+  // bottom margin was tried and dropped: slot children that FILL vertically give a reference "bottom" of 0–188 (TM Travel Rule settings would grow to 4158).
+  // The reference's height alone is not the floor: AP Actions — the designer expanded a card the original has collapsed, the page came out 1155 for content to 413.
 if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.resize(page.width, want); } catch (e) {} }   // v3.247: with a reference the page also shrinks back to the reference's height once the content fits again (AP Overview stayed 1369 after the Body paddings were fixed; the reference is 1289)
   let sectionFit = null; try { sectionFit = fitSection(page); } catch (e) { sectionFit = "error: " + e.message; }
   const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
