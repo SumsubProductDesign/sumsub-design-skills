@@ -80,7 +80,7 @@ const fullHdr = header ? /Full Screen|Header-levels|Fullscreen|Case page header|
 const pageType = sbW && sbW <= 60 ? "Full screen page" : sbW >= 200 ? "Basic" : (hasClose || fullHdr ? "Full screen page" : "Basic");
 let content;
 const fitsSide = !!right && !!main && (main.width + right.width) <= 1084;
-if (left && right) { content = "◼️ Nav + Main + Right (Ghost)"; notes.push("left AND right column — confirm the left one is section navigation"); }
+if (left && right) { content = "◼️ Nav + Main + Right (Ghost)"; notes.push("left AND right column — is the left one navigation?"); }
 else if (left) content = "◼️ Left + Main (Ghost)";
 else if (right && !fitsSide) content = "◼️ Main + Right (Ghost)";
 else content = "◼️ Main (Ghost)";

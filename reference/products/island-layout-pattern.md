@@ -188,6 +188,8 @@ items.forEach((it, i) => { if (i < tabs.length) { it.setProperties({ "Label text
 
 **Action buttons — carry the original's, exactly.** From the old header's action group (parent named `Buttons` / `Buttons Bar`) take the **ancestor-visible** buttons: text actions (`Create level`, `Save`, `Run level`) **and** the icon-only ⋮ kebab (`Content=Icon Only, Type=Secondary`). Skip the AI (icon Primary) and help (icon Tertiary) buttons — the `Page` header has its own. Then `Show actions slot#6943:20 = true`, clone each into the `Actions slot`, set `clone.visible = true` (clones arrive hidden), and remove the slot's default placeholder `Button`.
 
+**Header elements the original shows are switched on (v3.253).** When the original header renders an instance whose name is a BOOLEAN of the `Page` header (on AP screens: the country `Flag` next to the applicant name), the build turns that property on and copies the instance's variants from the original (`Country`). Only what renders in the original counts; the reference's values are not data. AP Actions: the flag was lost on every Applicant page screen migrated before v3.253 — the button check passed, only a diff of the header's boolean properties showed it. A dry run over the 41 source screens: the rule fires on the 12 Applicant page screens only, and only for `Flag`.
+
 🔴 **Never flip the OLD header's `Version` Old→New.** That was a trick from before `Page` was published. The old applicant-context header surfaces junk when flipped (ClientNickname, ID, Suspicious, a default `Button`), and that junk is what made past runs abandon the instance and hand-build. It does not exist on the `Page`'s own header.
 
 ---

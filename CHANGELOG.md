@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.253.0 — 2026-10-05 (island migration: the country flag in the header)
+- **The country flag next to the applicant name is carried.** When the original header shows an element that the new header has as an on/off option — on Applicant page screens, the flag next to the name — the migration turns it on and keeps the original's country. Before, it was lost on every Applicant page screen. Other products are not affected: a check of all 41 test screens found the flag on the 12 Applicant page screens only.
+- **Internal:** shorter log messages in `build.js` to make room (49 670 of 49 800 characters).
+
 ## v3.252.0 — 2026-10-05 (island migration: page height from the original)
 - **No empty grey band at the bottom.** When the designer's reference is taller only because of its own content, such as a card they expanded that the original keeps collapsed, the migrated page no longer takes the reference's height. It stays the original's height, or grows if the content needs more. Applicant page / Actions came out 1155 tall for content ending at 413; it is now 900, like the original. Screens migrated earlier are not affected.
 

@@ -118,7 +118,7 @@ function analyze(scr) {
   const pageType = sbW && sbW <= 60 ? "Full screen page" : sbW >= 200 ? "Basic" : (hasClose || fullHdr ? "Full screen page" : "Basic");
   let content;
   const fitsSide = !!right && !!main && (main.width + right.width) <= 1084;   // form + column inside 1084 (KYC editor 640+380)
-  if (left && right) { content = "◼️ Nav + Main + Right (Ghost)"; notes.push("left AND right column — confirm the left one is section navigation"); }
+  if (left && right) { content = "◼️ Nav + Main + Right (Ghost)"; notes.push("left AND right column — is the left one navigation?"); }
   else if (left) content = "◼️ Left + Main (Ghost)";
   else if (right && !fitsSide) content = "◼️ Main + Right (Ghost)";           // wide main + inspector column (Case page 964+424)
   else content = "◼️ Main (Ghost)";             // everything sits in islands on grey — tables and empty states too (after-refs 29.09)
@@ -247,7 +247,7 @@ async function sideFromReference(page, refRoot, colName, labelValue, notes) {
   }
   // a column that is a component instance (CM: `Case page right column`) carries the component's own blocks — nothing can be
   // inserted into it, and walking its re-created sublayers after the Aside variant change throws on stale ids (Case page AML run)
-  if (col.type === "INSTANCE") { notes.push("side column is a component instance — its own blocks stay as they are"); return; }
+  if (col.type === "INSTANCE") { notes.push("side column is an instance — kept as is"); return; }
   const sectionLike = async (rb) => {                                           // an empty frame with the reference section's layout and paint
     const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
     for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
@@ -315,7 +315,7 @@ if (sec && t !== trail[0]) { const thirds = sec.findAll(n => n.type === "INSTANC
 const tx = n => { const q = n.findOne(x => x.type === "TEXT" && x.visible); return q ? q.characters.trim().toLowerCase() : ""; };
 const own = thirds.find(n => tx(n) === want);
 for (const n of thirds) { try { n.setProperties({ State: n === own ? "Active" : "Default" }); } catch (e) {} }
-leaf = own ? " › " + trail[0] : " (\"" + trail[0] + "\" is not among the DS sidebar items — no third-level item marked active)"; }
+leaf = own ? " › " + trail[0] : " (\"" + trail[0] + "\" is not a DS sidebar item)"; }
 notes.push("sidebar from the original: " + type + " › " + t + leaf); return; } }
 notes.push("sidebar from the original: " + type);
 }
@@ -359,7 +359,7 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   // 2. layout + width (re-fetch after each variant change)
   instOf("Page / Body").setProperties({ "Content": plan.content });
   instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
+if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference"); } }
   // 3. main content
   const mainSlot = slotOf("Main content");
   const mph = [...mainSlot.children];
@@ -393,10 +393,10 @@ if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q o
     const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE") top = p; return top; };
     const wrappers = new Map();
     nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); });
-    if (wrappers.size) notes.push("groups inside instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
+    if (wrappers.size) notes.push("groups in instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
     const bundles = []; let pending = [];
     for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); continue; } bundles.push([...pending, g]); pending = []; }
-    if (pending.length) bundles.push(pending); { const mg = mergeSharedIslands(bundles, a.refRoot); if (mg.length < bundles.length) notes.push("one island for blocks that share one in the reference: " + mg.filter(b => b.length > 1).map(b => b.map(g => g.name).join(" + ")).join("; ")); bundles.length = 0; bundles.push(...mg); }
+    if (pending.length) bundles.push(pending); { const mg = mergeSharedIslands(bundles, a.refRoot); if (mg.length < bundles.length) notes.push("shared island (reference): " + mg.filter(b => b.length > 1).map(b => b.map(g => g.name).join(" + ")).join("; ")); bundles.length = 0; bundles.push(...mg); }
     const cards = [];
     for (const bundle of bundles) {
       // the reference decides first; the rules only where the block isn't in the reference
@@ -416,7 +416,7 @@ if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayou
           if (pp === "bare" || (pp !== "island" && (cardLike(part) || isCardLayout(part)))) { cards.push(c); continue; }
           flat.push(part.name); cards.push(wrapInIsland([c])); }
         if (flat.length) notes.push("split " + stack.name + " into parts; islands added for: " + flat.join(", "));
-        try { stack.remove(); } catch (e) { notes.push("could not remove the original " + stack.name + " — guard will keep the source"); }
+        try { stack.remove(); } catch (e) { notes.push("could not remove " + stack.name + " — guard will keep the source"); }
         continue; }
       cards.push(wrapInIsland(bundle));
     }
@@ -427,7 +427,7 @@ if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayou
   }
   for (const p of mph) { try { p.remove(); } catch (e) {} }
 // v3.246: a picture keeps its own size — KYC `image 1` (643×51 screenshot) was stretched to 1340×106
-  for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
+  for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content: " + c.name); } } catch (e) {} }
   try { slotOf("Main content").layoutSizingVertical = "FILL"; } catch (e) {}
   // 4–5. side columns → Aside. A column that brings its own background (an organism: Case page right column) gets an Aside
   // WITHOUT paddings and fills it; a bare list (section navigation) keeps the padded Aside.
@@ -455,14 +455,22 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
   const fillSlot = (re, sources) => { const s = hslot(re); if (!s) { notes.push("header has no slot " + re); return; } const ph = [...s.children];
     sources.forEach((o, i) => { const c = o.clone(); s.insertChild(i, c); try { c.visible = true; } catch (e) {} }); for (const q of ph) { try { q.remove(); } catch (e) {} } };
   const keepHdr = !a.refRoot && hdr0 && hdr0.type === "INSTANCE" && !/^\*Header\*/.test(mainName(hdr0));
-  if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); notes.push("header: the original's " + mainName(hdr0) + " is kept (no reference) — the finish swaps it in"); }
+  if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); notes.push("header: the original's " + mainName(hdr0) + " is kept (no reference)"); }
   else if (getHdr()) {
     try { hset({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
         "Show Info slot#6985:0": !!R.status, "Show additional info slot#6943:18": !!R.addInfo }); } catch (e) { notes.push("header props: " + e.message); }
     if (R.key) { try { hset({ "↪ Key Name#6943:13": R.key }); } catch (e) {} }
+    // v3.253: a header element the original SHOWS and the Page header exposes as a BOOLEAN of the same name (AP Actions: the
+    // country `Flag` next to the name — the engine left `Flag#…` false) is switched on, and its variants (Country) copied
+    // from the original. Only instances that render in the original — the reference's values are not data.
+    { const hp = getHdr().componentProperties;
+      for (const k in hp) { const b = k.split("#")[0], o = hp[k].type === "BOOLEAN" && !hp[k].value && hdr0.findOne(n => n.type === "INSTANCE" && n.name === b && rendered(n, scr)); if (!o) continue;
+        try { hset({ [k]: true }); const t = getHdr().findOne(n => n.type === "INSTANCE" && n.name === b), p = {}, oc = o.componentProperties;
+          for (const q in oc) if (oc[q].type === "VARIANT" && t.componentProperties[q]) p[q] = oc[q].value;
+          t.setProperties(p); notes.push("header " + b + " from the original"); } catch (e) {} } }
     const bc = getHdr().findOne(n => n.type === "INSTANCE" && /Breadcrumb/i.test(n.name)); const crumbText = R.crumb || crumb || refCrumb(a.refRoot);
     if (bc && crumbText) { try { bc.setProperties({ "Name#6638:5": crumbText }); } catch (e) {} }
-    else if (bc) { try { hset({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
+    else if (bc) { try { hset({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb — hidden"); } catch (e) {} }
     const rh = a.refRoot ? a.refRoot.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible) : null;
     const refSlot = re => rh ? rh.findAll(n => n.type === "SLOT" && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
     // the reference's title counts only when it re-uses the original's data (TM: "Transfer: - 250,000.00 USD" ⊃ "250,000.00");
@@ -484,7 +492,7 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
         notes.push("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { notes.push("ref info: " + e.message); } }
     else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { notes.push("status: " + e.message); } }
     if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
-        const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); notes.push("additional info row from the reference, ID from the original"); } catch (e) { notes.push("ref additional info: " + e.message); } }
+        const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); notes.push("additional info from the reference"); } catch (e) { notes.push("ref additional info: " + e.message); } }
     else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { notes.push("additional info: " + e.message); } }
     // tabs — items live in the Tab Basic "Items wrapper" slot; clone one in when the original had more tabs than the header ships
     try { const tbOf = () => getHdr().findOne(n => /^\*Tab Basic\*/.test(n.name));
@@ -503,19 +511,19 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
 // v3.246: an action already shown in the Info / Additional info rows is not repeated — the AP header keeps ID / External ID / Add tag
 // in a row outside its Buttons bar, `carry` took them as actions while the reference's Additional info row brought them too
 { const hp = getHdr().componentProperties, taken = new Set(); for (const [re, pr] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => q.type === "TEXT" && q.visible && q.characters.trim())) taken.add(t.characters.trim()); }
-for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim()), l = t ? t.characters.trim() : ""; if (l && taken.has(l)) { notes.push("action \"" + l + "\" is already in the header's info rows — not repeated"); c.remove(); } } catch (e) {} } }
+for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim()), l = t ? t.characters.trim() : ""; if (l && taken.has(l)) { notes.push("action \"" + l + "\" already in the info rows"); c.remove(); } } catch (e) {} } }
         // the published header brings its own Summy AI and help icons outside the Actions slot; the old header kept them inside its Actions
         // row, so they were copied twice (Case page AML / Financial data). An icon-only copy whose icon the header already shows goes.
-        try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
+        try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — copy removed"); c.remove(); } } catch (e) {} } } catch (e) {}
 // v3.246: no divider at the edges of the Actions slot after removals
       { const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => s.children.filter(k => k.visible); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
-const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
+const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); notes.push("actions slot empty — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
   }
   // 7. overlays beside the instance (its children are locked)
   try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
 { const spans = page.findAll(n => { try { return n.getSharedPluginData("sumsub_island", "span") === "1"; } catch (e) { return false; } }); let k = 0;
 for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal !== "FILL" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
-if (k) notes.push("blocks that spanned their column still span it: " + k); }
+if (k) notes.push("spanning blocks kept: " + k); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
   // 8. keep the original size
   try { page.resize(origW, origH); } catch (e) {}
@@ -853,7 +861,7 @@ async function migrateOne(scrId, refOverride, opts) {   // refOverride: the desi
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-  if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — the screen stays on the white layout, outside the grey + islands migration", ref: refId };
+  if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — the screen stays on the white layout", ref: refId };
   a.refRoot = refP; const whole = keepWholeCard(a, refP);
   if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
     const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
