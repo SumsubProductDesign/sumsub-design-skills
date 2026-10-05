@@ -352,14 +352,14 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   // 1. Page instance
   const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
   const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
-  const page = variant.createInstance();
+  const page = variant.createInstance(); const slotOf = nm => page.findAll(n => n.type === "SLOT").find(s => s.name === nm); const instOf = nm => page.findOne(n => n.type === "INSTANCE" && n.name === nm);
   parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
   // 2. layout + width (re-fetch after each variant change)
-  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
-  page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
+  instOf("Page / Body").setProperties({ "Content": plan.content });
+  instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
+if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
   // 3. main content
-  const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+  const mainSlot = slotOf("Main content");
   const mph = [...mainSlot.children];
   if (plan.content.includes("Ghost")) {
     const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
@@ -425,8 +425,8 @@ if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayou
   }
   for (const p of mph) { try { p.remove(); } catch (e) {} }
 // v3.246: a picture keeps its own size — KYC `image 1` (643×51 screenshot) was stretched to 1340×106
-  for (const c of page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
-  try { page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").layoutSizingVertical = "FILL"; } catch (e) {}
+  for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
+  try { slotOf("Main content").layoutSizingVertical = "FILL"; } catch (e) {}
   // 4–5. side columns → Aside. A column that brings its own background (an organism: Case page right column) gets an Aside
   // WITHOUT paddings and fills it; a bare list (section navigation) keeps the padded Aside.
   const intoAside = (node, which) => {
@@ -440,38 +440,38 @@ if (bundle.length === 1 && rp !== "split" && (cardLike(bundle[0]) || isCardLayou
     if (moved) { try { moved.layoutSizingHorizontal = "FILL"; } catch (e) {} try { moved.layoutSizingVertical = "FILL"; } catch (e) { try { moved.layoutSizingVertical = "HUG"; } catch (e2) {} } } };
   if (nodes.left) intoAside(nodes.left, "left");
   if (nodes.right) {
-    if (plan.sideContent) { const sc = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
+    if (plan.sideContent) { const sc = slotOf("Side content");
       if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} }
-const sc2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"), mv = sc2 && sc2.children[0];   // v3.230: the old column's FIXED height (865) grew the page to 977 — the column hugs its content
+const sc2 = slotOf("Side content"), mv = sc2 && sc2.children[0];   // v3.230: the old column's FIXED height (865) grew the page to 977 — the column hugs its content
 if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizingVertical !== "HUG") { const h0 = Math.round(mv.height); mv.layoutSizingVertical = "HUG"; notes.push("side column hugs its content: " + mv.name + " " + h0 + " → " + Math.round(mv.height)); } } catch (e) {} } } }
     else intoAside(nodes.right, "right");
     try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, notes); } catch (e) { notes.push("side from reference: " + e.message); }
   }
   // 6. header — the Page's OWN header, filled region by region from the original
-  const getHdr = () => page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+  const getHdr = () => page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible); const hset = p => getHdr().setProperties(p);
   const hslot = re => { const h = getHdr(); return h && h.findAll(n => n.type === "SLOT").find(s => re.test(s.name)); };
   const fillSlot = (re, sources) => { const s = hslot(re); if (!s) { notes.push("header has no slot " + re); return; } const ph = [...s.children];
     sources.forEach((o, i) => { const c = o.clone(); s.insertChild(i, c); try { c.visible = true; } catch (e) {} }); for (const q of ph) { try { q.remove(); } catch (e) {} } };
   const keepHdr = !a.refRoot && hdr0 && hdr0.type === "INSTANCE" && !/^\*Header\*/.test(mainName(hdr0));
   if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); notes.push("header: the original's " + mainName(hdr0) + " is kept (no reference) — the finish swaps it in"); }
   else if (getHdr()) {
-    try { getHdr().setProperties({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
+    try { hset({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
         "Show Info slot#6985:0": !!R.status, "Show additional info slot#6943:18": !!R.addInfo }); } catch (e) { notes.push("header props: " + e.message); }
-    if (R.key) { try { getHdr().setProperties({ "↪ Key Name#6943:13": R.key }); } catch (e) {} }
+    if (R.key) { try { hset({ "↪ Key Name#6943:13": R.key }); } catch (e) {} }
     const bc = getHdr().findOne(n => n.type === "INSTANCE" && /Breadcrumb/i.test(n.name)); const crumbText = R.crumb || crumb || refCrumb(a.refRoot);
     if (bc && crumbText) { try { bc.setProperties({ "Name#6638:5": crumbText }); } catch (e) {} }
-    else if (bc) { try { getHdr().setProperties({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
+    else if (bc) { try { hset({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
     const rh = a.refRoot ? a.refRoot.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible) : null;
     const refSlot = re => rh ? rh.findAll(n => n.type === "SLOT" && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
     // the reference's title counts only when it re-uses the original's data (TM: "Transfer: - 250,000.00 USD" ⊃ "250,000.00");
     // a placeholder title (Case refs: "SSO Login") shares nothing with the original and is ignored
     const refTitle = rh && rh.componentProperties["Title text#3817:0"] ? String(rh.componentProperties["Title text#3817:0"].value) : null;
     const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
-    if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; getHdr().setProperties(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }   // the copy button belongs to the title it sits next to
+    if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; hset(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }   // the copy button belongs to the title it sits next to
     const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = t.characters.trim();
         if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch (e) {} } } };
     const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
-    if (rInfo) { try { getHdr().setProperties({ "Show Info slot#6985:0": true });
+    if (rInfo) { try { hset({ "Show Info slot#6985:0": true });
         // the reference's row, but the ORIGINAL's data: a status with another label → the original status goes in; the counter gets the original score
         const stT = R.status ? (R.status.type === "TEXT" ? R.status : R.status.findOne(q => q.type === "TEXT" && q.visible)) : null, stLbl = stT ? stT.characters.trim() : null;
         const src = rInfo.children.filter(k => k.visible).map(k => { const t = k.findOne ? k.findOne(q => q.type === "TEXT" && q.visible) : null;
@@ -481,7 +481,7 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
         if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = c.findOne(q => q.type === "TEXT" && q.visible); if (t && t.characters.trim() !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch (e) {} } }
         notes.push("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { notes.push("ref info: " + e.message); } }
     else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { notes.push("status: " + e.message); } }
-    if (rAdd) { try { getHdr().setProperties({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
+    if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
         const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); notes.push("additional info row from the reference, ID from the original"); } catch (e) { notes.push("ref additional info: " + e.message); } }
     else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { notes.push("additional info: " + e.message); } }
     // tabs — items live in the Tab Basic "Items wrapper" slot; clone one in when the original had more tabs than the header ships
@@ -496,7 +496,7 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
     } catch (e) { notes.push("tabs: " + e.message); }
 // v3.246: dividers between the original's actions come along in their place (AP: icons | Request check · Change applicant status)
     const acts0 = R.actions.length ? R.actions : carry, acts = []; { const seen = new Set(), isA = k => acts0.some(a => a.id === k.id); for (const b of acts0) { const p = b.parent; if (seen.has(p.id)) continue; seen.add(p.id); const ks = p.children.filter(k => k.visible !== false), mine = ks.filter(isA), i0 = ks.findIndex(k => k.id === mine[0].id), i1 = ks.findIndex(k => k.id === mine[mine.length - 1].id); ks.forEach((k, i) => { if (isA(k) || (i > i0 && i < i1 && /Divider/i.test(k.name))) acts.push(k); }); } }
-    if (acts.length) { try { getHdr().setProperties({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
+    if (acts.length) { try { hset({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { hset({ "Show actions slot#6943:20": false }); notes.push("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
         for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findOne(q => q.type === "TEXT" && q.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
 // v3.246: an action already shown in the Info / Additional info rows is not repeated — the AP header keeps ID / External ID / Add tag
 // in a row outside its Buttons bar, `carry` took them as actions while the reference's Additional info row brought them too
@@ -507,7 +507,7 @@ for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOn
         try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
 // v3.246: no divider at the edges of the Actions slot after removals
       { const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => s.children.filter(k => k.visible); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
-const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
+const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
   }
   // 7. overlays beside the instance (its children are locked)
   try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
@@ -665,7 +665,7 @@ async function applyIslandTokens(page) {
   const K = { cardFill: "da81bccfef06f3de221bafbb9b5ee6a161eb9000", border: "40baade65c87f4b56fd67b027ec695d0984fae39", row: "b651c3b1b3a1d5b4066af62493435b81f3635acb" };
   const v = {}; for (const [k, key] of Object.entries(K)) v[k] = await figma.variables.importVariableByKeyAsync(key);
   const log = [];
-  const ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+  const ms = slotOf("Main content");
   // bare cards on the grey: secondary fill + subtlest border
   for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
     try { if (isWhite(k)) repaint(k, "fills", v.cardFill); if (hasStroke(k) && !(await statusPaint(k, "strokes"))) repaint(k, "strokes", v.border); log.push("card " + k.name); } catch (e) { log.push("card " + k.name + ": " + e.message); } }
@@ -682,7 +682,7 @@ async function applyIslandTokens(page) {
 // after buildIsland: reference first, §6.1 defaults otherwise. refId comes from the copy's name "… (ref <nodeId>)".
 async function bareCardTokens(page) {   // §6.1 for cards standing bare on the grey and for side columns — with a reference too (v3.228: the TM Settings reference itself kept the pre-island border/subtle and a raw white)
 const v = { cardFill: await figma.variables.importVariableByKeyAsync("da81bccfef06f3de221bafbb9b5ee6a161eb9000"), border: await figma.variables.importVariableByKeyAsync("40baade65c87f4b56fd67b027ec695d0984fae39") };
-const log = [], ms = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+const log = [], ms = slotOf("Main content");
 for (const k0 of (ms ? ms.children : [])) for (const k of cardTargets(k0)) {
 try { const fb = k.fills[0] && k.fills[0].boundVariables && k.fills[0].boundVariables.color, sb = k.strokes && k.strokes[0] && k.strokes[0].boundVariables && k.strokes[0].boundVariables.color;
 if (isWhite(k) && !(fb && fb.id === v.cardFill.id)) { repaint(k, "fills", v.cardFill); log.push("card " + k.name + " fill → " + v.cardFill.name); }

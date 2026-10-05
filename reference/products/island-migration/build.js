@@ -268,12 +268,12 @@ const inActions = /Buttons/i.test(b.parent ? b.parent.name : "");
 if ((lbl.length > 1 && !/^Button$/i.test(lbl) && (inActions || !/close|back/i.test(b.name))) || (inActions && /Icon Only/i.test(vn) && /Type=Secondary/i.test(vn))) carry.push(b); }
 const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
 const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
-const page = variant.createInstance();
+const page = variant.createInstance(); const slotOf = nm => page.findAll(n => n.type === "SLOT").find(s => s.name === nm); const instOf = nm => page.findOne(n => n.type === "INSTANCE" && n.name === nm);
 parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
-page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
-page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
-const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
+instOf("Page / Body").setProperties({ "Content": plan.content });
+instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
+if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
+const mainSlot = slotOf("Main content");
 const mph = [...mainSlot.children];
 if (plan.content.includes("Ghost")) {
 const icComp = await figma.importComponentByKeyAsync("3595d612ef3d886a2dd9a4744add8b74f4ac9606");
@@ -322,8 +322,8 @@ for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); n
 mainSlot.insertChild(0, nodes.groups[0]);
 }
 for (const p of mph) { try { p.remove(); } catch (e) {} }
-for (const c of page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
-try { page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content").layoutSizingVertical = "FILL"; } catch (e) {}
+for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch (e) {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; notes.push("hugs its content (an old row's grow became vertical FILL): " + c.name); } } catch (e) {} }
+try { slotOf("Main content").layoutSizingVertical = "FILL"; } catch (e) {}
 const intoAside = (node, which) => {
 const asides = page.findAll(n => n.type === "INSTANCE" && n.name === "Page / Body / Aside");
 const as = which === "left" ? asides[0] : asides[asides.length - 1]; if (!as) { notes.push("no Aside for " + which + " column"); return; }
@@ -335,35 +335,35 @@ const moved = page.findOne(n => n.id === nid) || page.findOne(n => n.name === nn
 if (moved) { try { moved.layoutSizingHorizontal = "FILL"; } catch (e) {} try { moved.layoutSizingVertical = "FILL"; } catch (e) { try { moved.layoutSizingVertical = "HUG"; } catch (e2) {} } } };
 if (nodes.left) intoAside(nodes.left, "left");
 if (nodes.right) {
-if (plan.sideContent) { const sc = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content");
+if (plan.sideContent) { const sc = slotOf("Side content");
 if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch (e) {} }
-const sc2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"), mv = sc2 && sc2.children[0];
+const sc2 = slotOf("Side content"), mv = sc2 && sc2.children[0];
 if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizingVertical !== "HUG") { const h0 = Math.round(mv.height); mv.layoutSizingVertical = "HUG"; notes.push("side column hugs its content: " + mv.name + " " + h0 + " → " + Math.round(mv.height)); } } catch (e) {} } } }
 else intoAside(nodes.right, "right");
 try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, notes); } catch (e) { notes.push("side from reference: " + e.message); }
 }
-const getHdr = () => page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
+const getHdr = () => page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible); const hset = p => getHdr().setProperties(p);
 const hslot = re => { const h = getHdr(); return h && h.findAll(n => n.type === "SLOT").find(s => re.test(s.name)); };
 const fillSlot = (re, sources) => { const s = hslot(re); if (!s) { notes.push("header has no slot " + re); return; } const ph = [...s.children];
 sources.forEach((o, i) => { const c = o.clone(); s.insertChild(i, c); try { c.visible = true; } catch (e) {} }); for (const q of ph) { try { q.remove(); } catch (e) {} } };
 const keepHdr = !a.refRoot && hdr0 && hdr0.type === "INSTANCE" && !/^\*Header\*/.test(mainName(hdr0));
 if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); notes.push("header: the original's " + mainName(hdr0) + " is kept (no reference) — the finish swaps it in"); }
 else if (getHdr()) {
-try { getHdr().setProperties({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
+try { hset({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
 "Show Info slot#6985:0": !!R.status, "Show additional info slot#6943:18": !!R.addInfo }); } catch (e) { notes.push("header props: " + e.message); }
-if (R.key) { try { getHdr().setProperties({ "↪ Key Name#6943:13": R.key }); } catch (e) {} }
+if (R.key) { try { hset({ "↪ Key Name#6943:13": R.key }); } catch (e) {} }
 const bc = getHdr().findOne(n => n.type === "INSTANCE" && /Breadcrumb/i.test(n.name)); const crumbText = R.crumb || crumb || refCrumb(a.refRoot);
 if (bc && crumbText) { try { bc.setProperties({ "Name#6638:5": crumbText }); } catch (e) {} }
-else if (bc) { try { getHdr().setProperties({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
+else if (bc) { try { hset({ "Breadcrumbs#6913:0": false }); notes.push("no breadcrumb in the original or the reference — hidden"); } catch (e) {} }
 const rh = a.refRoot ? a.refRoot.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible) : null;
 const refSlot = re => rh ? rh.findAll(n => n.type === "SLOT" && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
 const refTitle = rh && rh.componentProperties["Title text#3817:0"] ? String(rh.componentProperties["Title text#3817:0"].value) : null;
 const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
-if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; getHdr().setProperties(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }
+if (refTitle && reuses(refTitle)) { try { const rc = rh.componentProperties["Copy title#6943:15"]; hset(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); notes.push("title from the reference: " + refTitle); } catch (e) {} }
 const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = t.characters.trim();
 if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch (e) {} } } };
 const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
-if (rInfo) { try { getHdr().setProperties({ "Show Info slot#6985:0": true });
+if (rInfo) { try { hset({ "Show Info slot#6985:0": true });
 const stT = R.status ? (R.status.type === "TEXT" ? R.status : R.status.findOne(q => q.type === "TEXT" && q.visible)) : null, stLbl = stT ? stT.characters.trim() : null;
 const src = rInfo.children.filter(k => k.visible).map(k => { const t = k.findOne ? k.findOne(q => q.type === "TEXT" && q.visible) : null;
 return (/Status/i.test(k.name) && stLbl && t && t.characters.trim() !== stLbl) ? R.status : k; });
@@ -372,7 +372,7 @@ const sc = labelValue["score"]; const s1 = hslot(/^Info slot/i);
 if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = c.findOne(q => q.type === "TEXT" && q.visible); if (t && t.characters.trim() !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch (e) {} } }
 notes.push("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { notes.push("ref info: " + e.message); } }
 else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { notes.push("status: " + e.message); } }
-if (rAdd) { try { getHdr().setProperties({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
+if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
 const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); notes.push("additional info row from the reference, ID from the original"); } catch (e) { notes.push("ref additional info: " + e.message); } }
 else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { notes.push("additional info: " + e.message); } }
 try { const tbOf = () => getHdr().findOne(n => /^\*Tab Basic\*/.test(n.name));
@@ -385,13 +385,13 @@ for (let i = 0; i < items.length; i++) { const it = items[i], c = plan.tabCnt[i]
 if (items.length < plan.tabs.length) notes.push("header shows " + items.length + " of " + plan.tabs.length + " tabs"); }
 } catch (e) { notes.push("tabs: " + e.message); }
 const acts0 = R.actions.length ? R.actions : carry, acts = []; { const seen = new Set(), isA = k => acts0.some(a => a.id === k.id); for (const b of acts0) { const p = b.parent; if (seen.has(p.id)) continue; seen.add(p.id); const ks = p.children.filter(k => k.visible !== false), mine = ks.filter(isA), i0 = ks.findIndex(k => k.id === mine[0].id), i1 = ks.findIndex(k => k.id === mine[mine.length - 1].id); ks.forEach((k, i) => { if (isA(k) || (i > i0 && i < i1 && /Divider/i.test(k.name))) acts.push(k); }); } }
-if (acts.length) { try { getHdr().setProperties({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
+if (acts.length) { try { hset({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { hset({ "Show actions slot#6943:20": false }); notes.push("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
 for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findOne(q => q.type === "TEXT" && q.visible); if (tt && /^Button$/i.test(tt.characters.trim())) c.remove(); } catch (e) {} }
 { const hp = getHdr().componentProperties, taken = new Set(); for (const [re, pr] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => q.type === "TEXT" && q.visible && q.characters.trim())) taken.add(t.characters.trim()); }
 for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim()), l = t ? t.characters.trim() : ""; if (l && taken.has(l)) { notes.push("action \"" + l + "\" is already in the header's info rows — not repeated"); c.remove(); } } catch (e) {} } }
 try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => n.type === "INSTANCE" && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && q.characters.trim())) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { notes.push("the header has its own " + ic.name + " — the copied one removed"); c.remove(); } } catch (e) {} } } catch (e) {}
 { const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => s.children.filter(k => k.visible); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
-const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { getHdr().setProperties({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
+const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); notes.push("actions slot empty after removing the header's own icons — left off"); } } } catch (e) { notes.push("actions: " + e.message); } }
 }
 try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
 { const spans = page.findAll(n => { try { return n.getSharedPluginData("sumsub_island", "span") === "1"; } catch (e) { return false; } }); let k = 0;

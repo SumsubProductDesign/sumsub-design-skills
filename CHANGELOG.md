@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.251.0 — 2026-10-05 (island migration: room in the build engine)
+- **Internal: the build engine is shorter.** `build.js` had reached 49 793 of its 49 800-character limit. Repeated slot, instance and header lookups now share three small helpers, so it is 49 440 characters, which leaves room for the next fixes. Behaviour is unchanged: a fresh build of Overview #2 matches the accepted result.
+
 ## v3.250.0 — 2026-10-05 (island migration: the fixes from Applicant page / Overview #2)
 - **A content column under the header is found.** On the second Applicant page Overview the old `Body` starts 13 px above the screen top, behind the header, so the migration missed it and lost the applicant info card. A column that starts under the header now counts, and a plain column that the reference keeps bare moves over whole.
 - **Wrappers fill the new width.** A wrapper sized to its content that spanned its column in the old screen kept its old 1377 px width in a 1340 px column. Such wrappers are now stretched like fixed-width blocks.
