@@ -42,7 +42,8 @@ const otherVariant = (r, b) => { if (r.type !== "INSTANCE" || b.type !== "INSTAN
 const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
   let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }
   if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) { if (b.type === "INSTANCE" || isCard(b)) { if (!style) out.push([path + SEP + bw.name, r, bw, false, "gaps"]); } else e[2] = bw; } }
-  if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
+  if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint");
+    if (path === "·" && rk.length === bk.length) bk.forEach((m, i) => { const x = rk[i]; if (x.name !== m.name && !rk.some(y => y.name === m.name) && !bk.some(y => y.name === x.name) && x.type === m.type && cardLike(x) === cardLike(m)) walk(x, m, path + SEP + m.name, "paint"); }); return; }
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE")); if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
@@ -152,7 +153,7 @@ for (const s of ourSlots) for (const k of s.children) walk(k);
 const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
 const nameCount = {}; for (const n of ours) nameCount[n.name] = (nameCount[n.name] || 0) + 1;
 for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;
-for (const W of refs) { const wn = names(W); if (wn.length <= bn.length) continue;
+for (const W of refs) { const wn = names(W); if (wn.length <= bn.length || W.layoutMode !== B.layoutMode) continue;
 let i = 0; const extras = []; for (const nm of wn) { if (i < bn.length && nm === bn[i]) i++; else extras.push(nm); }
 if (i !== bn.length || !extras.length) continue;
 const sibs = vis(B.parent).filter(x => x.id !== B.id); const movers = extras.map(nm => sibs.filter(x => x.name === nm));
@@ -375,7 +376,10 @@ const ms2 = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main cont
 const refRoot = refId ? await figma.getNodeByIdAsync(refId) : null;
 const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page / Body / IslandCard" && !isGraphic(k) && !cardLike(k) && !isCardLayout(k) && !["bare", "split"].includes(refPlacement(refRoot, k.name))).map(k => k.name) : ["no main slot"];
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
-(k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
+(k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name);
+  const inI = n => { for (let q = n.parent; q && q.id !== s.id; q = q.parent) { if (q.type === "SLOT") return false; if (q.type === "INSTANCE") return true; } return false; }, sh = n => { for (let q = n; q && q.id !== s.id; q = q.parent) if (q.visible === false) return false; return true; };
+  for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }
+  return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
 return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }

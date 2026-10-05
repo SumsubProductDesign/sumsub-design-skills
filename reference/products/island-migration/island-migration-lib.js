@@ -91,7 +91,7 @@ function analyze(scr) {
   const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n) || scrollbars.some(sb => contains(sb, n));
   // columns may be direct children of the screen with no shared wrapper (Case page: left column + right column)
   let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
-  if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
+  if (!cols) container = all.filter(n => { const b = box(n, scr); return (b.y >= hdrH - 2 || (header && b.y + b.h >= (H + hdrH) / 2 && vis(n).length && !contains(n, header))) && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&   // v3.250: a column that starts under the header still counts (AP Overview #2: Body at y −13 under the 125 px AP page header lost its Info Card)
       !isChrome(n) && "children" in n; }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
   // the header may sit INSIDE the content frame (Levels: Header-levels is a child of Content) — ignore chrome when looking for columns
   for (let g = 0; !cols && container && g < 6; g++) { cols = sideBySideList(vis(container).filter(c => !isChrome(c)), scr); if (cols) break; const k = vis(container).filter(c => !isChrome(c));
@@ -330,7 +330,7 @@ async function buildIsland(scr, a, crumb) {
   const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
 // v3.236: a FIXED block that spanned its parent in the old screen (the six Checklist rows: 608 in a 608 column) keeps spanning after the move — marked here, set to FILL once the page is built
 const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
-for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && x.layoutSizingHorizontal === "FIXED" && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
+for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && (x.layoutSizingHorizontal === "FIXED" || (x.layoutSizingHorizontal === "HUG" && x.type === "FRAME" && x.layoutMode !== "NONE")) && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {   // v3.250: a HUG wrapper that spanned its column spans it too (Overview #2: Frame 270989963 stayed 1377 in a 1340 column)
 const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0); if (Math.abs(n.width - inner) <= 1) { try { n.setSharedPluginData("sumsub_island", "span", "1"); } catch (e) {} } } }
   const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
   // header regions + fallback actions from the ORIGINAL (ancestor-visible), before anything moves
@@ -357,7 +357,7 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   // 2. layout + width (re-fetch after each variant change)
   page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
   page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty — the reference has one, the original has nothing for it; the main column keeps the reference's width"); } }
+if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
   // 3. main content
   const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
   const mph = [...mainSlot.children];
@@ -512,8 +512,8 @@ const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visi
   // 7. overlays beside the instance (its children are locked)
   try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
 { const spans = page.findAll(n => { try { return n.getSharedPluginData("sumsub_island", "span") === "1"; } catch (e) { return false; } }); let k = 0;
-for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal === "FIXED" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
-if (k) notes.push("blocks that spanned their column in the original span it here too: " + k); }
+for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal !== "FILL" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
+if (k) notes.push("blocks that spanned their column still span it: " + k); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
   // 8. keep the original size
   try { page.resize(origW, origH); } catch (e) {}
@@ -565,7 +565,8 @@ async function copyVarsFromRef(refRoot, page, anchors) {
   const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
   let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }   // v3.233: the reference wraps exactly our children in one of its wrappers — Submit compliance: Frame 2131328741 › Content › 4× Customize setup; our block takes that wrapper's spacing   // v3.231: one wrapper each side, names differ (Verify your VASP: ref `Content` ↔ our `.Content`)   // v3.230: the reference wraps the blocks in one extra frame (TM Settings / Create a VASP: IslandCard › Slot › Content › blocks) — pair through it
   if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) { if (b.type === "INSTANCE" || isCard(b)) { if (!style) out.push([path + SEP + bw.name, r, bw, false, "gaps"]); } else e[2] = bw; } }   // v3.238: our side has one or two extra single wrappers (TM Travel Rule settings: Frame 2085664018 › Frame 2085664033 vs the reference's Content) — pair through them   // v3.247: when our outer block is an instance or a card itself (AP Overview: Info Card › General info vs the reference's Info Card), its fill / stroke / radius / padding stay on it and only the gaps go to the inner wrapper — before, the card chrome landed on the wrapper: a card inside the card
-  if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint"); return; }
+  if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint");
+    if (path === "·" && rk.length === bk.length) bk.forEach((m, i) => { const x = rk[i]; if (x.name !== m.name && !rk.some(y => y.name === m.name) && !bk.some(y => y.name === x.name) && x.type === m.type && cardLike(x) === cardLike(m)) walk(x, m, path + SEP + m.name, "paint"); }); return; }   // v3.250: at a column's top block, children the designer renamed pair by position — same type, both cards or both not — paints only (Overview #2: Info Card border, Header without fill); deeper, auto-named frames would pair by accident (CM blueprints)
   const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE"));   // v3.247: two instances whose sublayers differ (the designer's newer version of the component) don't make the block "rebuilt" — AP Overview: Body kept the old page paddings 24/32/64/32 because Info Card's inner layers differ, while the reference has 0 if (!style && !deep) e[4] = "stopped";
   const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
   walk(rRoot, bRoot, "·", false); return out; };
@@ -706,7 +707,7 @@ for (const s of ourSlots) for (const k of s.children) walk(k);
 const refs = refSlots.flatMap(s => s.findAll(n => n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 2));
 const nameCount = {}; for (const n of ours) nameCount[n.name] = (nameCount[n.name] || 0) + 1;
 for (const B of ours) { const bn = names(B); if (!B.parent || nameCount[B.name] > 1 || !vis(B).every(k => k.type === "INSTANCE") || refs.some(W => names(W).join("|") === bn.join("|"))) continue;   // component instances only — auto-named frames match by accident (CM team: dozens of Frame 2709… rows)
-for (const W of refs) { const wn = names(W); if (wn.length <= bn.length) continue;
+for (const W of refs) { const wn = names(W); if (wn.length <= bn.length || W.layoutMode !== B.layoutMode) continue;   // v3.250: never into a frame of another direction (Overview #2: Header moved into the horizontal Cards, beside the Empty State)
 let i = 0; const extras = []; for (const nm of wn) { if (i < bn.length && nm === bn[i]) i++; else extras.push(nm); }
 if (i !== bn.length || !extras.length) continue;
 const sibs = vis(B.parent).filter(x => x.id !== B.id); const movers = extras.map(nm => sibs.filter(x => x.name === nm));
@@ -799,7 +800,7 @@ async function finishIsland(page, refId) {
 // `.Content` is a white r12 card holding the title, the fields and the Button bar — split into its children it became
 // islands in a card, while the reference shows the one card, radius 16 from the reference)
 function keepWholeCard(a, refP) {
-const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || !cardLike(m)) return false;
+const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2) return false; const rb = refP && refAll(refP, m.name)[0]; if (!cardLike(m) && !(rb && rb.parent.type === "SLOT")) return false;   // v3.250: a plain column whose same-named block stands bare at the top of the reference's slot goes over whole (AP Overview #2, Levels Steps: Body)
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
@@ -850,7 +851,7 @@ async function migrateOne(scrId, refOverride, opts) {   // refOverride: the desi
   if (refId) { const ref = await figma.getNodeByIdAsync(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-  if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
+  if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — the screen stays on the white layout, outside the grey + islands migration", ref: refId };
   a.refRoot = refP; const whole = keepWholeCard(a, refP);
   if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
     const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];
@@ -1059,7 +1060,10 @@ if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.r
   // v3.246: a picture standing bare (the plan puts it there) is not reported as outside an island
   const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== "Page / Body / IslandCard" && !isGraphic(k) && !cardLike(k) && !isCardLayout(k) && !["bare", "split"].includes(refPlacement(refRoot, k.name))).map(k => k.name) : ["no main slot"];
   const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
-      (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name); return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
+      (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name);
+  const inI = n => { for (let q = n.parent; q && q.id !== s.id; q = q.parent) { if (q.type === "SLOT") return false; if (q.type === "INSTANCE") return true; } return false; }, sh = n => { for (let q = n; q && q.id !== s.id; q = q.parent) if (q.visible === false) return false; return true; };
+  for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }   // v3.250: overflow looks inside each block too (Overview #2: a 1377 wrapper in a 1340 column; KYC: a 1376 heading in a 1308 island)
+  return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
   const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === "Page / Body / IslandCard" ? "ISL[" + ((k.findOne(n => n.type === "SLOT") || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
   return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }

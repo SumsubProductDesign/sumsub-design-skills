@@ -56,7 +56,7 @@ const subheader = all.filter(n => { const b = box(n, scr); return !contains(head
 const scrollbars = all.filter(n => n.type === "INSTANCE" && /Scroll \/ Thumb/i.test(n.name + " " + mainName(n)));
 const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n) || scrollbars.some(sb => contains(sb, n));
 let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
-if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
+if (!cols) container = all.filter(n => { const b = box(n, scr); return (b.y >= hdrH - 2 || (header && b.y + b.h >= (H + hdrH) / 2 && vis(n).length && !contains(n, header))) && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
 !isChrome(n) && "children" in n; }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
 for (let g = 0; !cols && container && g < 6; g++) { cols = sideBySideList(vis(container).filter(c => !isChrome(c)), scr); if (cols) break; const k = vis(container).filter(c => !isChrome(c));
 if (k.length === 1 && "children" in k[0] && !isTableNode(k[0])) container = k[0]; else break; }
@@ -250,7 +250,7 @@ c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBot
 async function buildIsland(scr, a, crumb) {
 const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [];
 const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
-for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && x.layoutSizingHorizontal === "FIXED" && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
+for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && (x.layoutSizingHorizontal === "FIXED" || (x.layoutSizingHorizontal === "HUG" && x.type === "FRAME" && x.layoutMode !== "NONE")) && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
 const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0); if (Math.abs(n.width - inner) <= 1) { try { n.setSharedPluginData("sumsub_island", "span", "1"); } catch (e) {} } } }
 const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
 const R = headerRegions(nodes.header, scr);
@@ -272,7 +272,7 @@ const page = variant.createInstance();
 parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
 page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body").setProperties({ "Content": plan.content });
 page.findOne(n => n.type === "INSTANCE" && n.name === "Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty — the reference has one, the original has nothing for it; the main column keeps the reference's width"); } }
+if (plan.sideRoom) { const sr = page.findAll(n => n.type === "SLOT").find(s => s.name === "Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch (e) {} } notes.push("side column left empty, like the reference (the original has nothing for it)"); } }
 const mainSlot = page.findAll(n => n.type === "SLOT").find(s => s.name === "Main content");
 const mph = [...mainSlot.children];
 if (plan.content.includes("Ghost")) {
@@ -395,8 +395,8 @@ const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visi
 }
 try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { notes.push("sidebar: " + e.message); }
 { const spans = page.findAll(n => { try { return n.getSharedPluginData("sumsub_island", "span") === "1"; } catch (e) { return false; } }); let k = 0;
-for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal === "FIXED" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
-if (k) notes.push("blocks that spanned their column in the original span it here too: " + k); }
+for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""); if (n.layoutSizingHorizontal !== "FILL" && n.parent && n.parent.layoutMode === "VERTICAL") { n.layoutSizingHorizontal = "FILL"; k++; } } catch (e) {} }
+if (k) notes.push("blocks that spanned their column still span it: " + k); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch (e) {} }
 try { page.resize(origW, origH); } catch (e) {}
 try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).map(t => t.characters.trim()));
@@ -411,7 +411,7 @@ try { scr.remove(); } catch (e) {}
 return { page, kept: [], notes };
 }
 function keepWholeCard(a, refP) {
-const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || !cardLike(m)) return false;
+const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2) return false; const rb = refP && refAll(refP, m.name)[0]; if (!cardLike(m) && !(rb && rb.parent.type === "SLOT")) return false;
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
@@ -440,7 +440,7 @@ let refP = null;
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
 refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — this screen stays on the white layout and is not part of the grey + islands migration", ref: refId };
+if (refP && surfaceOf(refP, opts).grey === false) return { id: scrId, name, stopped: "the reference is WHITE — the screen stays on the white layout, outside the grey + islands migration", ref: refId };
 a.refRoot = refP; const whole = keepWholeCard(a, refP);
 if (refP) { const t = refP.componentProperties.Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
 const ms = refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0];

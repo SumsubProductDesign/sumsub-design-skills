@@ -56,7 +56,7 @@ const subheader = all.filter(n => { const b = box(n, scr); return !contains(head
 const scrollbars = all.filter(n => n.type === "INSTANCE" && /Scroll \/ Thumb/i.test(n.name + " " + mainName(n)));
 const isChrome = n => contains(header, n) || contains(header2, n) || contains(sidebar, n) || contains(subheader, n) || scrollbars.some(sb => contains(sb, n));
 let cols = sideBySideList(vis(scr).filter(c => !isChrome(c)), scr), container = cols ? scr : null;
-if (!cols) container = all.filter(n => { const b = box(n, scr); return b.y >= hdrH - 2 && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
+if (!cols) container = all.filter(n => { const b = box(n, scr); return (b.y >= hdrH - 2 || (header && b.y + b.h >= (H + hdrH) / 2 && vis(n).length && !contains(n, header))) && b.x >= sbW - 2 && b.w >= 0.5 * (W - sbW) && b.h >= 0.25 * (H - hdrH) &&
 !isChrome(n) && "children" in n; }).sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
 for (let g = 0; !cols && container && g < 6; g++) { cols = sideBySideList(vis(container).filter(c => !isChrome(c)), scr); if (cols) break; const k = vis(container).filter(c => !isChrome(c));
 if (k.length === 1 && "children" in k[0] && !isTableNode(k[0])) container = k[0]; else break; }
@@ -159,7 +159,7 @@ const t = bc.findAll(n => n.type === "TEXT" && n.visible).map(n => n.characters.
 return t && !/^Section name$/i.test(t) ? t : null;
 }
 function keepWholeCard(a, refP) {
-const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2 || !cardLike(m)) return false;
+const m = a.nodes.main; if (!m || a.nodes.table || a.nodes.groups.length < 2) return false; const rb = refP && refAll(refP, m.name)[0]; if (!cardLike(m) && !(rb && rb.parent.type === "SLOT")) return false;
 if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }

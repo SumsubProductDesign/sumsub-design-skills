@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.250.0 — 2026-10-05 (island migration: the fixes from Applicant page / Overview #2)
+- **A content column under the header is found.** On the second Applicant page Overview the old `Body` starts 13 px above the screen top, behind the header, so the migration missed it and lost the applicant info card. A column that starts under the header now counts, and a plain column that the reference keeps bare moves over whole.
+- **Wrappers fill the new width.** A wrapper sized to its content that spanned its column in the old screen kept its old 1377 px width in a 1340 px column. Such wrappers are now stretched like fixed-width blocks.
+- **No header beside the content.** Regrouping no longer moves a block into a frame that runs in another direction; the section header had landed next to the empty state instead of above it.
+- **Renamed blocks get the reference's colours.** When the designer renamed the blocks at the top of a column, they now pair with the reference by position (same type, both cards or both not): the info card takes the reference's border and the section header loses its white fill.
+- **The finish audit sees overflow inside blocks.** A layer that sticks out of the page's column is reported even when it sits inside a block. Regression: 41 source screens and 30 accepted results — the plan changes only on Overview #2 and Levels Steps (now as in the reference), the pairing only on Overview #2.
+
 ## v3.249.0 — 2026-10-05 (island migration: the column's top block loses the old page margins)
 - **No old page margins on a renamed block.** On the second Applicant page Overview the designer renamed the blocks inside `Body`, so the migration couldn't pair them and kept `Body`'s old page margins of 24 / 32 / 64 / 32. The cards would have come out 64 px narrower than in the reference. The outer paddings of a block standing straight in the page's column now always come from the reference. None of the 30 accepted test screens changes.
 
