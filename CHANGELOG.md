@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.269.0 — 2026-10-06 (island migration: the plan shows the instance kept whole)
+- **`planOne` follows the v3.268 rule.** Before, the plan listed the parts (`Block Title` + `Table`) while the build moved the whole `Configurations` instance, so checking the plan against the reference looked like a mismatch. Now the plan shows one block: `Configurations → bare (white), instance kept whole (reference)`. Found by the skill on the ID document settings re-run.
+- Internal: in `island-migration-lib.js` the `planOne` side-block line sat behind a `//` comment on the same line; it is on its own line again.
+
 ## v3.268.0 — 2026-10-06 (island migration: keep the reference's instance whole; audit 7.62 fixed)
 - **An instance stays whole when the reference keeps it.** If the original's content sits inside a component instance and the reference has an instance of the same component in its content, the engine moves the instance as it is instead of cloning its parts out and removing it. Levels › ID document settings: `Configurations` stays one instance, as in the reference, instead of a loose `Block Title` + `Table`. Note: `instance kept whole, as in the reference`.
 - **Audit 7.62 (renamed `Page`)** — the check added in v3.266 read the issue list before it existed and shared its number with the Table column check (7.60). It now runs after the list is created, under its own number.
