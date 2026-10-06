@@ -185,17 +185,17 @@ const m = /ref\s+(\d+:\d+)/.exec(scr.name), refId = refOverride || (m ? m[1] : n
 _idCache.clear(); const a = analyze(scr);
 let refP = null; if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync(); refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => n.type === "INSTANCE" && n.name === "Page"); } }
-const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = sf.grey; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
+const whole = keepWholeCard(a, refP); const sf = surfaceOf(refP, opts), grey = sf.grey, wh = !!opts && opts.surface === "white"; const rms = refP ? refP.findAll(n => n.type === "SLOT" && n.name === "Main content")[0] : null;
 const planWidth = rms && !a.nodes.table ? (refWidth(refP) || ((rms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max")) : a.plan.width;
 const blocks = []; let pending = [], lastIsl = null;
 for (const g of a.nodes.groups) { if (isHeadingBlock(g)) { pending.push(g.name); continue; }
 const rp = refPlacement(refP, g.name) || (refIslandByKids(refP, g) ? "island" : null) || (refUnboxed(refP, g) ? "unboxed" : null);
-const how = isGraphic(g) ? "bare (graphic)" : rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
+const how = wh ? "bare (white)" : isGraphic(g) ? "bare (graphic)" : rp ? rp + " (reference)" : (cardLike(g) || isCardLayout(g)) ? "bare (rule)" : isCardStack(g) ? "split (rule)" : "island (rule)";
 const isl = refIslandOf(refP, g.name); if (isl && isl === lastIsl && blocks.length && !pending.length) { blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/ → island \(reference(, shared)?\)$/, " + " + g.name + " → island (reference, shared)"); lastIsl = isl; continue; }
 lastIsl = isl; blocks.push([...pending, g.name].join(" + ") + " → " + how); pending = []; }
 if (pending.length) blocks.push(pending.join(" + ") + " → island (rule)");
-return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false ? "STOP: white reference" : (a.confident ? "build" : "STOP: not confident"),
-plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, a.plan.content, planWidth, a.plan.sideContent ? "side" : (refSideOnly(refP, a) ? "side: empty, like the reference" : "")].join(" | "),
+return clean({ id: scrId, name: scr.name, confident: a.confident, notes: a.notes, ref: refId, refGrey: sf.refGrey, surface: sf.from ? (grey ? "grey" : "white") + " (" + sf.from + ")" : null, verdict: grey === false && !wh ? "STOP: white reference — run with { surface: \"white\" }" : (a.confident ? (wh ? "build (white)" : "build") : "STOP: not confident"),
+plan: [refP && refP.componentProperties.Type ? refP.componentProperties.Type.value : a.plan.pageType, wh ? (a.nodes.left ? "◻️ Nav + Main (Default)" : "◻️ Main (Default)") : a.plan.content, planWidth, a.plan.sideContent ? "side" : (refSideOnly(refP, a) ? "side: empty, like the reference" : "")].join(" | "),
 blocks, wholeCard: whole || undefined, crumb: headerRegions(a.nodes.header, scr).crumb || refCrumb(refP) || null, left: a.nodes.left && a.nodes.left.name, right: a.nodes.right && a.nodes.right.name, tabs: a.plan.tabs, title: a.plan.title,
 header2: a.nodes.header2 && a.nodes.header2.name, subheader: a.nodes.subheader && a.nodes.subheader.name });
 }

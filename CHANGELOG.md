@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.261.0 — 2026-10-06 (island migration: white screens)
+- **Old screens marked "Apply white" now migrate too.** The designers' table marks some screens white instead of grey + islands (Levels / Configurations). Pass `{ surface: "white" }` and the engine puts the screen on the new `Page` with one white body: `◻️ Main (Default)`, or `◻️ Nav + Main (Default)` when the original has a left navigation. There are no islands; the blocks stand bare in the body, and the header, tabs, actions and the finish work as on grey screens.
+- **The left navigation becomes the section navigation.** The original's nav items become `Section navigation` items with the same labels and the same item selected, and the search field is on when the original has one. Levels / Configurations: after the finish the page matches the reference, with the 640-wide `Configurations` block and 9 nav items, Fraud prevention selected.
+- **Room in the build engine.** `build.js` uses a few short helpers (`isI`, `isS`, `ICN`, `CP`, `CT`, `N`, optional `catch {}`). Expanded back, the file is identical to the previous version, so grey screens are unaffected. 49 590 of 49 800 characters.
+
 ## v3.260.0 — 2026-10-06 (island migration: the header wrapper's colours from the reference)
 - **The Applicant page header has the reference's border.** The designers give the `AP page header` a bottom border in `semantic/border/neutral/subtlest/normal` (#e5e7eb). After the migration it kept the component's own border, an outdated `base/neutral/30` (#e1e5ea), on all 8 Applicant page screens. The finish now takes the fill and border of the header wrapper from the reference as well. A repeat `copy` call fixes screens migrated earlier; the 8 test screens are already fixed.
 - **Audit 7.59 knows `*Status Select*`.** A status shown in a `*Status Select*` pill (Payment methods: "Approved") was reported as a bare status word in a table cell.
