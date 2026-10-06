@@ -453,6 +453,8 @@ const sl = () => page.findAll(n => isS(n) && n.name === "Items" && /1st level/.t
 if (!its.length || !sl() || !l2().length) { N("nav: not filled from the original"); return; }
 while (l2().length < its.length) sl().appendChild(l2()[0].clone());
 l2().forEach((k, i) => { if (i >= its.length) { k.visible = false; return; } const cn = Object.keys(CP(k)).find(q => /^Category name/.test(q)); try { k.setProperties({ [cn]: tx(its[i]), Selected: on(its[i]) ? "Yes" : "No" }); } catch {} });
+// v3.264: a label that wraps to two lines (the DS item is FIXED 32) — the item hugs it, as the designers do
+l2().forEach(k => { if (k.visible && k.children.some(c => c.height > k.height + 1)) try { k.layoutSizingVertical = "HUG"; N("nav: " + tx(k) + " wraps — the item hugs it"); } catch {} });
 N("nav from the original: " + its.length + " items"); };
 if (nodes.left) { if (plan.white) navFrom(nodes.left); else intoAside(nodes.left, "left"); }
   if (nodes.right) {

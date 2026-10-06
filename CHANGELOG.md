@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.264.0 — 2026-10-06 (island migration: long navigation labels)
+- **White layout: a navigation item whose label wraps grows with it.** The navigation item in the design system is fixed at 32 px. A long label from the original («Sandbox mode for verification testing») wraps to two lines, and the item now hugs it (56 px), as in the designers' reference. Before, the second line spilled over the next item. Found on the first white test (Levels / Configurations), the only difference from the reference.
+
 ## v3.263.0 — 2026-10-06 (island migration: heights bound to a variable)
 - **A height the reference binds to a variable now carries over.** When a layer in the designers' reference has its height (or min/max height) bound to a variable, the finish binds the matching layer of the result to the same variable. On AP Devices empty the empty state was 400 high (from the original) instead of 360 (`dimension/45` in the reference), so the island was 40 px taller; this was the one manual fix of that run. Heights the reference leaves free still follow the content.
 - Internal: one helper imports a reference variable for spacing, radius and height.
