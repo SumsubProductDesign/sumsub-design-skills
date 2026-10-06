@@ -9,7 +9,32 @@ NAME, TITLE = "blueprints", "Blueprints"
 WORK = os.path.join(TOOLS, f"work-{NAME}-{THEME}"); os.makedirs(WORK, exist_ok=True)
 svg = prep_svg(os.path.join(TOOLS, "src-blueprints.svg" if THEME == "light" else "src-blueprints-dark.svg"), WORK)
 svg = ds_remap(svg, THEME)
-open(os.path.join(WORK, "ref.svg"), "w").write(svg)            # the original look, for check_final.py (05.10: was missing, ref went stale)
+# --- "Case includes": every row starts as a skeleton and turns into its label (06.10 design review: "nice to have: all
+# case includes turn from skeleton into content; add Risk overview and Verification summary to the existing ones").
+# Rows 1–2 keep their labels and get a bar for the skeleton phase; rows 3–4 (bars in the source) get labels in the same
+# style, baseline 8.05 below the bar's top as in rows 1–2. The final frame shows four labels; the Assets static still has
+# two bars there.
+ROWF = {"row1": "Frame 2147238809", "row2": "Frame 2147238810", "row3": "Frame 2147238813", "row4": "Frame 2147238814"}
+LAB = {"row1": "Label_3", "row2": "Label_4", "row3": "lab_row3", "row4": "lab_row4"}
+NEW_LAB = {"row3": ("Frame 2147238812", "Risk overview"), "row4": ("Frame 2147238812_2", "Verification summary")}
+LBL_FILL = re.search(r'id="Label_3"[^>]*?fill="(#[0-9A-Fa-f]{6})"', svg).group(1)
+SK_FILL = re.search(r'<rect[^>]*fill="(#[0-9A-Fa-f]{6})"', svg[svg.index('id="Frame 2147238812"'):]).group(1)
+LBL_BASE = {"row1": 228.579, "row2": 246.579}
+LBL_W = dict(zip(("row1", "row2"), (round((m["left"] + m["right"]) / 10) * 10 for m in
+                                    text_metrics([("Payment methods", 400, 10, 0.2), ("Financial transactions", 400, 10, 0.2)]))))
+def case_rows(s, final):
+    for r, (bar, text) in NEW_LAB.items():
+        i, j = group_span(s, bar); y = float(re.search(r'<rect[^>]* y="([\d.]+)"', s[i:j]).group(1))
+        lab = (f'<text id="{LAB[r]}" fill="{LBL_FILL}" style="white-space: pre" xml:space="preserve" font-family="Geist" font-size="10" '
+               f'letter-spacing="0.2px"><tspan x="309" y="{y + 8.05:.3f}">{text}</tspan></text>')
+        s = s[:i] + ("" if final else s[i:j].replace("<rect", f'<rect id="sk_{r}"', 1)) + lab + s[j:]
+    if not final:
+        for r in ("row1", "row2"):
+            k = s.index(f'id="{LAB[r]}"'); k = s.rfind("<", 0, k)
+            s = s[:k] + f'<rect id="sk_{r}" x="309" y="{LBL_BASE[r] - 8.05:.3f}" width="{LBL_W[r]}" height="8" rx="4" fill="{SK_FILL}"/>\n' + s[k:]
+    return s
+open(os.path.join(WORK, "ref.svg"), "w").write(case_rows(svg, final=True))   # the final look, for check_final.py
+svg = case_rows(svg, final=False)
 
 # --- structure ---
 svg = wrap(svg, '<foreignObject x="268', '<g id="Case creation source_2"', "cardBp")      # blueprint card + its glass
@@ -74,7 +99,14 @@ i = svg.index('<path id="arc"')
 svg = svg[:i] + tpl["pillS"] + "\n</g>\n" + svg[i:]
 for k in ORDER:   # bounce wrapper: knocks a card off the arrow independently of its own and the wheel's motion
     i, j = group_span(svg, k); svg = svg[:i] + f'<g id="b_{k}">' + svg[i:j] + '</g>' + svg[j:]
-M = measure(svg, ["arc", "arrow", "cardBp", "cardCase", "alert", "check", "tagAml", "tagKyc", "tagHit", "pillS", "row1", "row2", "row3", "row4"] + list(TICKS))
+# "Suspicious activity" rides one regular step behind Screening hit (the mean of the other two steps) instead of its final
+# 15° gap, and drops back to its place only during the last move, as it reaches the arrow (06.10 design review: "it lags
+# behind the others — keep the same spacing and let them part later"). A wrapper rotating about the wheel centre.
+DELTA = (W[0] - W[2]) / 2
+OFF0 = -((W[2] - W[3]) - DELTA)                     # negative = towards Screening hit (up the wheel)
+i, j = group_span(svg, "b_pillS"); svg = svg[:i] + '<g id="o_pillS">' + svg[i:j] + '</g>' + svg[j:]
+M = measure(svg, ["arc", "arrow", "cardBp", "cardCase", "alert", "check", "tagAml", "tagKyc", "tagHit", "pillS", "row1", "row2", "row3", "row4"]
+            + list(TICKS) + [f"sk_{r}" for r in ROWF] + list(LAB.values()))
 bx, by, bw, bh = M["cardBp"]; sx, sy, sw, sh = M["pillS"]
 
 # --- timeline, seconds ---
@@ -113,7 +145,7 @@ COLOR = {k: [] for k in ORDER}                                             # k: 
 for j, (a, b) in enumerate(STEPS):
     leave, arrive = FOCUS[j], FOCUS[j + 1]
     ax_, ay_, aw_, ah_ = M[arrive]                                          # (M has the pill too; M0 only the tags)
-    arc_px = math.radians(abs(W[j + 1] - W[j])) * math.hypot(ax_ + aw_ / 2 - CX, ay_ + ah_ / 2 - CY)   # slot length at the arriving card
+    arc_px = math.radians(abs(W[j + 1] - W[j]) - (abs(OFF0) if arrive == "pillS" else 0)) * math.hypot(ax_ + aw_ / 2 - CX, ay_ + ah_ / 2 - CY)   # slot length at the arriving card
     u_land = first_u(1 - 1 / arc_px)                                       # visually under the arrow: within 1 px
     t_land = a + u_land * (b - a)                                          # fully active the moment it sits under the arrow
     COLOR[leave].append((a, a + F_COL, 1, 0)); COLOR[arrive].append((t_land - F_COL, t_land, 0, 1))
@@ -127,7 +159,8 @@ def color_keys(k, val):   # [(pct, value, ease)]: active from the start for the 
     return fr
 t_check = t_open + 0.38
 t_rows = {f"row{n}": t_open + 0.44 + (n - 1) * 0.08 for n in range(1, 5)}
-T = t_rows["row4"] + MV.D_ROW
+t_res = {f"row{n}": t_rows["row1"] + 0.30 + (n - 1) * 0.14 for n in range(1, 5)}   # skeleton → label, top to bottom
+T = max(t_rows["row4"] + MV.D_ROW, t_res["row4"] + MV.D_NUDGE)
 pc = lambda t: round(t / T * 100, 3)
 OPEN_EASE = APPEAR                           # the folder opens without a bounce (it starts from rest; the bounce is the roulette stop's)
 
@@ -179,6 +212,15 @@ K.rule("#cardBp", f"transform-box:view-box;transform-origin:{bx:.2f}px {by:.2f}p
 move("check", t_check, MV.D_GLYPH, MV.GLYPH_T, ease=APPEAR, fade=MV.F_GLYPH)
 for k, t in t_tick.items(): move(k, t, MV.D_MARK, MV.MARK_T, ease=APPEAR, fade=MV.F_MARK)
 for k, t in t_rows.items(): move(k, t, MV.D_ROW, MV.ROW_T, fade=MV.F_ROW)
+for r, t in t_res.items():   # the bar goes as its label slides in (the motion language's nudge)
+    K.kf("skf_" + r, [(0, "opacity:1", None), (pc(t), "opacity:1", E), (pc(t + MV.F_NUDGE), "opacity:0", None)])
+    K.rule("#sk_" + r, f"animation:skf_{r} {K.dur}")
+    a0 = f"opacity:0;transform:{MV.NUDGE_T}"
+    K.kf("lab_" + r, [(0, a0, None), (pc(t), a0, E), (pc(t + MV.F_NUDGE), "opacity:1", None), (pc(t + MV.D_NUDGE), "opacity:1;transform:none", None)])
+    K.rule(f'[id="{LAB[r]}"]', f"animation:lab_{r} {K.dur}")
+K.kf("o_pillS", [(0, f"transform:rotate({OFF0:.3f}deg)", None), (pc(STEPS[-1][0]), f"transform:rotate({OFF0:.3f}deg)", STEP_EASE),
+                 (pc(STEPS[-1][1]), "transform:none", None)])
+K.rule("#o_pillS", f"transform-box:view-box;transform-origin:{CX:.2f}px {CY:.2f}px;animation:o_pillS {K.dur}")
 suffix = "" if THEME == "light" else "-dark"
 n = page(os.path.join(ROOT, NAME + suffix + ".html"), TITLE + ("" if THEME == "light" else " · Dark"),
          f"Promo illustration, plays once ({K.T:.1f} s) and freezes on the original frame. The blueprint cards step along the arc like a roulette; 'Suspicious activity' reaches the arrow and opens into the blueprint folder.",
@@ -199,7 +241,9 @@ def render(k, pad, hide=()):
     geo[k] = crop(f"{WORK}/{k}.png", x - pad, y - pad, w + 2 * pad, h + 2 * pad)
 render("cardCase", 20, hide=["alert"]); render("alert", 3)
 render("cardBp", 20, hide=["check"] + ROWS); render("check", 3)
-for k in ROWS: render(k, 3)
+for k in ROWS:
+    render(k, 3, hide=[f"sk_{k}", LAB[k]])          # the check icon
+    render(f"sk_{k}", 2); render(LAB[k], 3)          # its skeleton bar and its label
 for k in TICKS: render(k, 3)
 full = svg   # render the cards at full opacity; their brightness is animated per layer
 for k in ORDER: full = re.sub(r'(<g id="%s") opacity="[\d.]+"' % k, r'\1', full, count=1)
@@ -228,7 +272,18 @@ def anim_layer(k, t, d, dx=0, dy=0, s0=100, origin=None, ease=E, fade=None):
                        s=AN([(0, [s0, s0, 100], None), (pc(t), [s0, s0, 100], ease), (pc(t + d), [100, 100, 100], None)]),
                        o=AN([(0, [0], None), (pc(t), [0], ease), (pc(t + (fade or d)), [100], None)])), refId=k)
 # layers, top first
-for k in ROWS[::-1]: anim_layer(k, t_rows[k], MV.D_ROW, dy=MV.ROW, fade=MV.F_ROW)
+for k in ROWS[::-1]:   # a precomp per row: the row joins as a whole, then its bar goes and its label slides in
+    MAIN = L.layers; L.layers = []
+    X, Y, w, h = img(LAB[k]); r_ = t_res[k]
+    L.layer(2, "label", L.ks(p=AN([(0, [X + MV.NUDGE * S, Y, 0], None), (pc(r_), [X + MV.NUDGE * S, Y, 0], E), (pc(r_ + MV.D_NUDGE), [X, Y, 0], None)]),
+                             o=AN([(0, [0], None), (pc(r_), [0], E), (pc(r_ + MV.F_NUDGE), [100], None)])), refId=LAB[k])
+    X, Y, w, h = img(f"sk_{k}")
+    L.layer(2, "skeleton", L.ks(p=(X, Y), o=AN([(0, [100], None), (pc(r_), [100], E), (pc(r_ + MV.F_NUDGE), [0], None)])), refId=f"sk_{k}")
+    X, Y, w, h = img(k); L.layer(2, "icon", L.ks(p=(X, Y)), refId=k)
+    INNER = L.layers; L.layers = MAIN
+    t_ = t_rows[k]; z = [0, 0, 0]; d0 = [0, MV.ROW * S, 0]
+    L.precomp(k + "Comp", INNER, L.ks(p=AN([(0, d0, None), (pc(t_), d0, E), (pc(t_ + MV.D_ROW), z, None)]),
+                                      o=AN([(0, [0], None), (pc(t_), [0], E), (pc(t_ + MV.F_ROW), [100], None)])))
 anim_layer("check", t_check, MV.D_GLYPH, s0=MV.GLYPH * 100, ease=APPEAR, fade=MV.F_GLYPH)
 for k, t in t_tick.items(): anim_layer(k, t, MV.D_MARK, s0=MV.MARK * 100, ease=APPEAR, fade=MV.F_MARK)   # above the cards, as in the SVG
 # the four cards: rotation around the wheel centre by (stop angle) through eased moves, brightness by distance to the arrow
@@ -240,6 +295,7 @@ def stepped_l(values, first=None):
     return fr
 WHEEL_IND = 900
 BOUNCE_IND = {k: 910 + i for i, k in enumerate(BOUNCE)}
+OFFSET_IND = 920
 for idx, k in reversed(list(enumerate(ORDER))):
     X, Y, w, h = img(k); cx, cy = X + w / 2, Y + h / 2                          # image centre = card centre (2x)
     ops = [focus_op(idx, st) * 100 for st in range(4)]
@@ -263,7 +319,9 @@ L.layer(3, "wheel", L.ks(a=(CX * S, CY * S), p=(CX * S, CY * S), r=AN(stepped_l(
 for k, (b, w) in BOUNCE.items():   # null in wheel space: rest at the origin, knocked by knock_vec(w)
     vx, vy = knock_vec(w); z = [0, 0, 0]; kv = [vx * S, vy * S, 0]
     L.layer(3, f"bounce {k}", L.ks(a=(0, 0), p=AN([(0, z, None), (pc(b - 0.06), z, KNOCK_IN), (pc(b), kv, KNOCK_OUT), (pc(b + 0.14), z, None)])),
-            ind_fixed=BOUNCE_IND[k], parent=WHEEL_IND)
+            ind_fixed=BOUNCE_IND[k], parent=OFFSET_IND if k == "pillS" else WHEEL_IND)
+L.layer(3, "pill offset", L.ks(a=(CX * S, CY * S), p=(CX * S, CY * S),
+        r=AN([(0, [OFF0], None), (pc(STEPS[-1][0]), [OFF0], STEP_EASE), (pc(STEPS[-1][1]), [0], None)])), ind_fixed=OFFSET_IND, parent=WHEEL_IND)
 X, Y, w, h = img("cardBp")
 p_from, p_to = [(sx + OFFB) * S, sy * S, 0], [bx * S, by * S, 0]
 L.layer(2, "cardBp", L.ks(a=(bx * S - X, by * S - Y), p=AN([(0, p_from, None), (pc(t_open), p_from, OPEN_EASE), (pc(t_open + D_OPEN), p_to, None)]),

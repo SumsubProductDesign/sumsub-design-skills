@@ -47,7 +47,8 @@ path. Swapping to the original layer happens only where they match pixel for pix
 frame). The same backwards: an element that comes out of the background starts as the background one.
 
 **B6. A focus change is explicit.** If a feed shows a previous item before the final one, make the
-previous one clearly different (another face / name / score colour) and show where it goes: it
+previous one clearly different (another face / name / score colour — and no shared surname: two "… Chen" in a row
+were noticed) and show where it goes: it
 collapses into the shape of a feed row, moves into the feed, shrinks to the rows' scale and fades.
 
 **B7. Dependents wait for their anchor.** A mark on an empty spot, or a dot on a card that is still
@@ -93,6 +94,19 @@ the shape is at least two radii tall along the whole way.
 60 fps. Give it a soft trail of ~2.5 frames of travel and a soft front of ~1 frame (smoothstep), and
 do not hurry it.
 
+**B15. Things that travel together keep their spacing.** Cards riding one wheel or track keep the same step between
+them until the story separates them; then they part with the move that needs it (a card that rode 15° behind
+neighbours spaced 9° apart read as "lagging" — it now keeps the step and drops back only as it reaches the pointer).
+
+**B16. A marker sliding along a track starts softly and keeps its shape while it moves.** It is already in view, so a
+spring that is at full speed in the first frame reads as a twitch; slide it with a soft start and a long landing. Its
+tooltip changes size only once it has stopped (within 0.5 px) — widening while it still moves sends one edge backwards
+against the motion, which reads as jerky.
+
+**B17. When review asks to change content, the final frame changes on purpose.** Keep the layout (pick a replacement
+with the same ink width, set labels in the source's exact text style), write the new final look to `ref.svg` so the
+checks compare against it, and tell the user that the static illustration in the source file is now out of date.
+
 ## C. Look
 
 **C1. Current DS colours.** Many source illustrations predate the dashboard redesign (blue primary,
@@ -131,6 +145,7 @@ for the Assets set). Only the player's Page view rounds its slot, the way the pr
 | Row joining a list from below | rise 6 px, 0.65 s, fade 0.38 s |
 | Stagger between siblings | 0.05–0.08 s |
 | Colour change (text turning active / grey) | one fade (0.4 s), ease-in-out |
+| Marker sliding along a scale / track | soft start `(.45, 0, .25, 1)`, ~0.7 s |
 
 Ease: `E` (critically damped spring: moves at once, long soft landing) for moves; `APPEAR` (= `E`, no
 bounce) for anything that merely appears; `OVERSHOOT` only for a stop after momentum (a roulette
@@ -152,6 +167,9 @@ Reviewers describe symptoms; map them to the rule before changing code.
 | "appears a little late / early" | C4 — use the visual moment (1 px), not the formal end |
 | "the tick/dot appears before the card is there" | B7 |
 | "the arrow shouldn't bounce" | B8 |
+| "it lags behind the others" | B15 |
+| "moves a little jerkily" | B16 — soft start, no shape change while moving; trace it per frame |
+| "same names / surnames" | B6 / B17 |
 | "the skeleton shouldn't exist / should load step by step" | B9 / B10 |
 | "corners look wrong", "two frames on top of each other" | B12 / B13 — and check the Lottie, not the HTML |
 | "blue toggle" / "old colour" | C1 |

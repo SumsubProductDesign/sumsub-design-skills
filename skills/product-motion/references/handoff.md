@@ -47,12 +47,13 @@ Fill `contact`; `preview_url` only if the previews are hosted somewhere the deve
 Once the developer has the full bundle, send **only what changed**:
 
 ```bash
-python3 tools/export_handoff.py --only blueprints            # or --only a,b
+python3 tools/export_handoff.py --only blueprints --changes changes.md     # or --only a,b
 ```
 
 writes `handoff/<label>-update-<date>/` + `.zip` with those files and a short README: which files it
-replaces, that size, behaviour and the last frame are unchanged. Give the user a one-paragraph
-message for the developer in their language, for example:
+replaces, **what changed** (the bullets from `changes.md`, one per illustration, in plain words), and that size,
+behaviour and corners are the same. If a last frame changed on purpose (rules B17), say so in the bullets. Give the
+user a one-paragraph message for the developer in their language, for example:
 
 > Update for Blueprints: replace these four files from the bundle (`lottie/blueprints-light.json`,
 > `lottie/blueprints-dark.json`, `svg/blueprints-light.svg`, `svg/blueprints-dark.svg`). Only the

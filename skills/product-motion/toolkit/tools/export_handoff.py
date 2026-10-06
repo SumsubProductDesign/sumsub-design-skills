@@ -9,6 +9,7 @@ import os, re, json, shutil, datetime, zipfile, sys, argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from motionlib import ROOT, REDUCED_FADE, PLAY_WHEN_SEEN
 ap = argparse.ArgumentParser(); ap.add_argument("--only", default=""); ap.add_argument("--label", default=None)
+ap.add_argument("--changes", default="", help="update bundles: a Markdown file with the 'What changed' bullets")
 args = ap.parse_args()
 ONLY = [x for x in args.only.split(",") if x]
 CFG = json.load(open(os.path.join(ROOT, "handoff.json"))) if os.path.exists(os.path.join(ROOT, "handoff.json")) else {}
@@ -145,6 +146,7 @@ static = [t for t, (b, _, _) in FIGMA.items() if not b]
 files = "\n".join(f"- `lottie/{b}-{th}.json`, `svg/{b}-{th}.svg`" for _, b, _ in ITEMS for th in ("light", "dark"))
 preview = (f"Compare with the preview: {PREVIEW}." if PREVIEW else "Compare with the preview you got from the designer.")
 contact = f"\n\nQuestions — {CONTACT}." if CONTACT else ""
+CHANGES = ("What changed:\n\n" + open(args.changes).read().strip() + "\n\n") if args.changes else ""
 if ONLY:
     readme = f"""# {TITLE} — update ({date})
 
@@ -152,8 +154,7 @@ Replaces these files from the full bundle you already have; everything else in i
 
 {files}
 
-Same size ({W1} × {H1} at 1×), same behaviour, the last frame is still the static illustration and the corners are still
-square — no changes on your side beyond swapping the files.
+{CHANGES}Same size ({W1} × {H1} at 1×), same behaviour, square corners — no changes on your side beyond swapping the files.
 
 | Illustration | Theme | Duration | Lottie | SVG |
 |---|---|---|---|---|

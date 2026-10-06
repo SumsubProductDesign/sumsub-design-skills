@@ -112,14 +112,19 @@ def time_at(e, target):
 MV = motion(NAME)                               # the common motion language (motionlib.LANG)
 t_card, D_CARD = 0.05, MV.D_ARRIVE
 T_F = [0.8, 1.25]                               # factors resolve one by one…
-D_PTR = 0.4                                     # …and the marker moves on by their score
+D_PTR = 0.55                                    # …and the marker moves on by their score
+# the marker slides along the scale with a soft start: it is already in view, and the spring E (full speed in the first
+# frame) read as a twitch at each of its two moves (06.10 design review: "the risk level moves a little jerkily")
+SLIDE = (.45, 0, .25, 1)
 SCORES = [18, 38, 48]
 t_mk, D_POP = T_F[0] + 0.05, MV.D_POP              # the first: the marker comes in with its tooltip
 # into the medium zone, in two beats (not all at once): the tooltip turns orange as the marker crosses 32, then — the
 # colour settled — it widens into "Medium risk"; the last factor (and the marker's next move) waits until it has
-t_cross = T_F[1] + 0.05 + D_PTR * time_at(E, (S_CROSS - SCORES[0]) / (SCORES[1] - SCORES[0]))
+t_cross = T_F[1] + 0.05 + D_PTR * time_at(SLIDE, (S_CROSS - SCORES[0]) / (SCORES[1] - SCORES[0]))
 D_COL = 0.12
-t_w, D_W = t_cross + D_COL, 0.28
+# the tooltip widens once the marker has stopped (within 0.5 px): widening while it still moves sent the pill's left edge
+# backwards against the motion for a few frames
+t_w, D_W = max(t_cross + D_COL, T_F[1] + 0.05 + D_PTR * time_at(SLIDE, 1 - 0.5 / abs(xs(SCORES[1]) - xs(SCORES[0])))), 0.28
 T_F.append(max(1.7, t_w + D_W))
 MOVES = [(SCORES[i - 1], SCORES[i], T_F[i] + 0.05) for i in (1, 2)]
 t_conn, D_CONN = MOVES[-1][2] + D_PTR + 0.2, 0.35    # the link to the step it triggers, once the score has settled
@@ -134,7 +139,7 @@ NP = max(1, round((T - t_p0) * TEMPO[NAME] / 0.9)); PP = (T - t_p0) / NP
 # the count: each value shows from the moment the marker reaches it (the last one as it lands)
 TK = {}
 for s0, s1, ts in MOVES:
-    for t, v in count_ticks(s0, s1, ts, D_PTR, E, TEMPO[NAME]): TK[v] = t      # ≤15 updates/s (readable)
+    for t, v in count_ticks(s0, s1, ts, D_PTR, SLIDE, TEMPO[NAME]): TK[v] = t      # ≤15 updates/s (readable)
 # the label swaps with a direction (as the TM total does): the old word leaves upwards, the new one comes up from below a
 # beat later — never an empty pill (it used to stand blank ~0.1 s), never two words on top of each other
 SWAP_DY, D_SWAP, F_OUT, F_IN = 5, 0.18, 0.08, 0.12     # the old word is (almost) gone by the time the new one shows
@@ -167,7 +172,7 @@ for (c, tg, _), t in zip(FAC, T_F):
     move(tg, t + 0.05, MV.D_POP, MV.POP_T, ease=APPEAR, fade=MV.F_POP)
 # the marker: pops in at 18, then rides on by each factor's score
 mk = [(0, f"transform:translateX({DX(SCORES[0]):.3f}px)", None)]
-for s0, s1, ts in MOVES: mk += [(pc(ts), mk[-1][1], E), (pc(ts + D_PTR), f"transform:translateX({DX(s1):.3f}px)", None)]
+for s0, s1, ts in MOVES: mk += [(pc(ts), mk[-1][1], SLIDE), (pc(ts + D_PTR), f"transform:translateX({DX(s1):.3f}px)", None)]
 K.kf("mkT", mk); K.rule("#mkT", f"animation:mkT {K.dur}")
 move("mkP", t_mk, D_POP, MV.POP_T, origin=f"{PX:.3f}px {PY:.3f}px", box="view-box", ease=APPEAR, fade=MV.F_POP)
 fade("ptrG", t_cross - D_COL / 2, D_COL, 1, 0, static=0)
@@ -290,7 +295,7 @@ for ind, dx in ((HL, DW / 2), (HR, -DW / 2)):
     L.layer(3, "half", L.ks(p=keyed([dx * S, 0, 0], [0, 0, 0], t_w, D_W)), ind_fixed=ind)
 MKL = L.layers; L.layers = []
 mp = [(0, [(PX + DX(SCORES[0])) * S, PY * S, 0], None)]
-for s0, s1, ts in MOVES: mp += [(pc(ts), mp[-1][1], E), (pc(ts + D_PTR), [(PX + DX(s1)) * S, PY * S, 0], None)]
+for s0, s1, ts in MOVES: mp += [(pc(ts), mp[-1][1], SLIDE), (pc(ts + D_PTR), [(PX + DX(s1)) * S, PY * S, 0], None)]
 L.precomp("mkComp", MKL, L.ks(a=(PX * S, PY * S), p=AN(mp), s=keyed([MV.POP * 100, MV.POP * 100, 100], [100, 100, 100], t_mk, D_POP, APPEAR),
           o=keyed([0], [100], t_mk, MV.F_POP, APPEAR)))
 for (c, tg, _), t in reversed(list(zip(FAC, T_F))):
