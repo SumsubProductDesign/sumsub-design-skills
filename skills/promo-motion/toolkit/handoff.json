@@ -1,0 +1,213 @@
+{
+  "title": "Dashboard promo illustrations — motion",
+  "label": "promo-motion",
+  "assets_file": "yrG0gZDkCgEClKq8ZtGeyc",
+  "component_prefix": "Illustrations / Promo / ",
+  "size_1x": [
+    494,
+    354
+  ],
+  "corner_radius": 16,
+  "preview_url": "",
+  "contact": "",
+  "components": {
+    "AML screening": [
+      "aml",
+      [
+        "24378:96864",
+        "b3921390d824c5d7b00bbd9e95d348abeebed790"
+      ],
+      [
+        "24378:97250",
+        "090ca969b01f654b840a5856068a5360e34f904c"
+      ]
+    ],
+    "AML Rules": [
+      "aml-rules",
+      [
+        "24378:97561",
+        "0fdd356036ae45a345678611e0601104df928b26"
+      ],
+      [
+        "24378:98425",
+        "37d95c00aa2ee9fcd344629baa233d4017303aee"
+      ]
+    ],
+    "Applicant scoring": [
+      "applicant-scoring",
+      [
+        "25746:82078",
+        "8cee7b58c1f780370585386b46c8c04e3897bdd9"
+      ],
+      [
+        "25746:82077",
+        "7c42f0f94fb561cbc8d7ff5464c3dda33c263957"
+      ]
+    ],
+    "Blueprints": [
+      "blueprints",
+      [
+        "24378:94067",
+        "d67bca442abac172d5d12dad92eae3b5302c9bb2"
+      ],
+      [
+        "24378:94110",
+        "ca74afbb6a78fa129c2db4c1ebda8d00bdf058e5"
+      ]
+    ],
+    "CM": [
+      "case-management",
+      [
+        "24378:93926",
+        "e539afdee7ae79787484ea875bfbc6192736fd36"
+      ],
+      [
+        "24378:93996",
+        "3b40d4e0e72bf3107231514e4c1bc6030b85a436"
+      ]
+    ],
+    "DI": [
+      "device-intelligence",
+      [
+        "24378:80603",
+        "b66a219ac7e860bb8ecc0b1a422755af36925493"
+      ],
+      [
+        "24378:87264",
+        "226e7994b0d8f5ab98a6c606a447eb51b9ad9853"
+      ]
+    ],
+    "Fraud prevention": [
+      "fraud-prevention",
+      [
+        "26007:97510",
+        "4dca3c4d8e6bf3343a63fa5fc3bdc05f9459cd84"
+      ],
+      [
+        "26007:97511",
+        "ab6add55a4435af69afbbee7fb7d2782e4794b19"
+      ]
+    ],
+    "Fraud radar": [
+      "fraud-radar",
+      [
+        "26007:96188",
+        "d6667925b5bb4d40526f1736d689293313a0ece5"
+      ],
+      [
+        "26018:71668",
+        "1a5e68a74b658c4dd18d8f0927a535f573659cb5"
+      ]
+    ],
+    "KYB": [
+      "kyb",
+      [
+        "24378:94524",
+        "032fc10904631f5d26fb08a0eabd046f40d1f522"
+      ],
+      [
+        "24378:94656",
+        "5e4794d1758363b82968cba7d2409191297f6d9d"
+      ]
+    ],
+    "Networks": [
+      "networks",
+      [
+        "24378:99437",
+        "d1f1caf7aa9478aebf98072ef29cdc66bfa11214"
+      ],
+      [
+        "24378:99675",
+        "4f2030a54e6c5dbcc8e772b107180371c6fb5c99"
+      ]
+    ],
+    "Non-Doc": [
+      "non-doc",
+      [
+        "24378:94154",
+        "2a15f5d0d7a11a9892a2acf39b8f62fd5ac3a8fa"
+      ],
+      [
+        "24378:94282",
+        "10cc152c65d0b88fbfa324cfd261a6e6a5c09260"
+      ]
+    ],
+    "Questionnaire": [
+      "questionnaire",
+      [
+        "24378:94411",
+        "988e35de4be2e0226acd58d9fc155177304c3a9e"
+      ],
+      [
+        "24378:94467",
+        "78255bcd4c96c4818c86ef618eb1f7b86c8f532b"
+      ]
+    ],
+    "Reusable KYC": [
+      "reusable-kyc",
+      [
+        "24378:79845",
+        "e24f0f3655c7389edf5aa06703f8697f85fa766c"
+      ],
+      [
+        "24378:80144",
+        "7386d712a3ae0824970a5c45e5605300d215e696"
+      ]
+    ],
+    "TM": [
+      "tm",
+      [
+        "24378:94789",
+        "e167019ea3d5daf8f52639859aaf59263cb9cfbd"
+      ],
+      [
+        "24378:95826",
+        "d004eb9ed65dfecafcb58a1f190a0bd5f1169c41"
+      ]
+    ],
+    "TR": [
+      "travel-rule",
+      [
+        "26007:95015",
+        "dd7b4092a9cae5d8a05d109623808c9ea2cc3539"
+      ],
+      [
+        "26007:95008",
+        "e832c40be7605d9aac06af93c93c35d0616c05cb"
+      ]
+    ],
+    "WFB": [
+      "wfb",
+      [
+        "24378:80444",
+        "18ef869a787e17bcdd64f321b0a56173f746be7b"
+      ],
+      [
+        "24378:80523",
+        "b60ff96bbd4d53239fabf3e81692e71fedb8850b"
+      ]
+    ],
+    "Partners": [
+      null,
+      [
+        "24378:99914",
+        "c9517076b5e7409bd06c73f2bdebed81ea316c45"
+      ],
+      [
+        "24378:100005",
+        "7578d64c7a8bbf9dc51359f59a35807f5dab5548"
+      ]
+    ],
+    "Workflow Run": [
+      null,
+      [
+        "24378:99290",
+        "c63642cc8e26cf58a845d2dac325961883c1ae7a"
+      ],
+      [
+        "24378:99363",
+        "47a9e38e446e876f2fe6f91b78b288feed5b1b19"
+      ]
+    ]
+  }
+}

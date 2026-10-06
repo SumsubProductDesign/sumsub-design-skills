@@ -4,6 +4,13 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.255.0 — 2026-10-06 (new skill: promo-motion)
+- **New skill `/sumsub-design:promo-motion`.** Turns a static illustration into a short animation that plays once when it is seen and stops on the original picture, delivered as Lottie and as an animated SVG in light and dark. It is the method behind the 16 animated Assets promo illustrations: the same story rules, the same motion language (how a card arrives, a tag pops, a row joins), current design-system colours, square corners for the product to round.
+- **Same checks for everyone.** Every change is checked in both themes: the last frame against the original, the HTML against the Lottie at every moment that changes, the layer order, and close-ups of shape changes.
+- **A local player.** Shows each animation alone and inside a dashboard page, the way it will look in the product.
+- **Handoff for developers.** The skill builds the bundle with a README that tells the developer what replaces what, and after that an update package with only the changed files.
+- Needs Python 3 and Chrome (or another Chromium browser) on your machine; nothing else to install.
+
 ## v3.254.0 — 2026-10-05 (island migration: the reference's header component)
 - **The page header is the reference's component.** All 12 Applicant page references use `AP page header`: a product wrapper with the usual page header inside. The migration left the bare `*Header*`: it looked the same, but it was a different component, against the "the reference decides" rule. The finish now swaps the header to the reference's wrapper and moves the migrated content into it: properties, texts, status, actions, info row and tabs. The 7 Applicant page screens accepted before were switched the same way, and their header content is unchanged. Other products' references have no wrapper, so nothing changes for them.
 - **On those screens the finish takes two calls.** After the swap, the finish returns once the copy from the reference is done, and the audit runs as its own call (`next` in the result). In one call the audit hit a dead layer of the old header.

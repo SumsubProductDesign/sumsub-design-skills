@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lottie Player</title>
+<link href="vendor/geist.css" rel="stylesheet">
+<script src="vendor/lottie.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --fg:#030712; --sub:#4a5565; --muted:#6a7282;
+  --line:#e5e7eb; --line-strong:#d1d5dc; --hover:#f3f4f6; --active:#e5e7eb;
+  --primary:#030712; --on-primary:#ffffff; --accent:#2563eb;
+  --sb:#d1d5dc; --sbh:#b4bac4;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1a1b1c; --panel:#202123; --fg:#f7f7f7; --sub:#c8cbcd; --muted:#a2a6a9;
+  --line:#2c2e31; --line-strong:#3d4045; --hover:#26282a; --active:#2f3134;
+  --primary:#f7f7f7; --on-primary:#030712; --accent:#4c7ef0;
+  --sb:#35383c; --sbh:#393c40;
+}}
+:root[data-theme="dark"]{
+  --bg:#1a1b1c; --panel:#202123; --fg:#f7f7f7; --sub:#c8cbcd; --muted:#a2a6a9;
+  --line:#2c2e31; --line-strong:#3d4045; --hover:#26282a; --active:#2f3134;
+  --primary:#f7f7f7; --on-primary:#030712; --accent:#4c7ef0;
+  --sb:#35383c; --sbh:#393c40;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/20px Geist,system-ui,sans-serif;display:flex;overflow:hidden}
+button,select,input{font:inherit;color:inherit}
+.mono{font-family:"Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* sidebar */
+aside{width:280px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;position:relative}
+.brand{padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand h1{font-size:16px;line-height:24px;font-weight:600;margin:0}
+.search{margin:0 12px 8px;position:relative}
+.search input{width:100%;height:32px;border:1px solid var(--line-strong);border-radius:8px;background:transparent;padding:0 10px;outline:none}
+.search input:focus{border-color:var(--accent)}
+.list{flex:1;overflow:auto;padding:4px 8px 8px;min-height:0;scrollbar-width:none}
+.list::-webkit-scrollbar{display:none}
+/* custom scrollbar (DS Scroll / Thumb): fades in on hover/scroll, widens on hover, draggable */
+.sb-thumb{position:absolute;right:2px;width:6px;border-radius:12px;background-color:var(--sb);opacity:0;pointer-events:none;z-index:2;
+  transition:opacity .3s ease,width .15s ease,background-color .15s ease}
+.sb-on>.sb-thumb{opacity:1;pointer-events:auto;transition:opacity .15s ease,width .15s ease,background-color .15s ease}
+.sb-thumb:hover,.sb-thumb.drag{width:8px;background-color:var(--sbh)}
+@media (prefers-reduced-motion:reduce){.sb-thumb{transition:none}}
+.group{font-size:12px;line-height:16px;color:var(--muted);padding:12px 8px 4px;font-weight:500}
+.item{width:100%;display:flex;align-items:center;gap:8px;padding:8px;border:0;border-radius:8px;background:transparent;text-align:left;cursor:pointer}
+.item:hover{background:var(--hover)}
+.item.on{background:var(--active)}
+.item .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .sz{font-size:12px;color:var(--muted);flex:none}
+.item .x{flex:none;width:20px;height:20px;border:0;background:transparent;border-radius:4px;color:var(--muted);cursor:pointer;display:none}
+.item:hover .x{display:block}
+.empty{color:var(--muted);padding:8px;font-size:13px}
+.drop-hint{margin:8px 12px 12px;border:1px dashed var(--line-strong);border-radius:8px;padding:12px;color:var(--muted);font-size:13px;text-align:center;cursor:pointer}
+.drop-hint:hover{border-color:var(--muted);color:var(--sub)}
+
+/* main */
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.top .title{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;flex:none}
+.seg button{border:0;background:transparent;height:30px;padding:0 10px;cursor:pointer;color:var(--sub)}
+.seg button+button{border-left:1px solid var(--line-strong)}
+.seg button.on{background:var(--active);color:var(--fg)}
+.swatch{width:14px;height:14px;border-radius:4px;display:inline-block;vertical-align:-2px;border:1px solid var(--line-strong)}
+
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;position:relative}
+.canvas{background:var(--stage-bg,#f3f4f6);border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.canvas.checker{background:repeating-conic-gradient(#e5e7eb 0 25%,#fff 0 50%) 0 0/16px 16px}
+#anim{width:100%;height:100%}
+.placeholder{color:var(--muted);text-align:center}
+.dragging::after{content:"Drop .json or .lottie";position:fixed;inset:12px;border:2px dashed var(--accent);border-radius:12px;background:color-mix(in srgb,var(--bg) 85%,transparent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;color:var(--accent);z-index:10;pointer-events:none}
+
+/* transport */
+.transport{flex:none;background:var(--panel);border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.scrub{display:flex;align-items:center;gap:12px}
+.scrub input{flex:1;accent-color:var(--primary)}
+.time{font-size:12px;color:var(--sub);min-width:150px;text-align:right}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{height:32px;min-width:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line-strong);background:transparent;cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary);min-width:88px}
+.btn.on{background:var(--active)}
+.btn svg{width:16px;height:16px;flex:none}
+.sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+label.ctl{display:inline-flex;align-items:center;gap:6px;color:var(--sub);font-size:13px}
+select{height:32px;border:1px solid var(--line-strong);border-radius:8px;background:var(--panel);padding:0 8px}
+.spacer{flex:1}
+.info{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.info b{color:var(--sub);font-weight:500}
+kbd{font-family:"Geist Mono",monospace;font-size:11px;border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;color:var(--sub)}
+@media (max-width:760px){aside{display:none}.time{min-width:0}}
+
+/* page view: the illustration inside the dashboard promo page (built by tools/build_page.py) */
+.pagewrap{display:none;position:relative;flex:none;margin:auto;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.pagescale{position:absolute;left:0;top:0;transform-origin:0 0}
+.pagescale .pg{width:100%;height:100%;min-width:0}
+body.view-page .pagewrap{display:block}
+body.view-page .stage{overflow:hidden}
+body.view-page #bgSeg{display:none}
+body.view-page .canvas{background:transparent!important;border-radius:0}
+#fullBtn{display:none}
+body.view-page #fullBtn{display:inline-flex}
+
+/* full screen: only the page; the file list slides in after the pointer rests on the left edge for 500 ms */
+body.full .top,body.full .transport{display:none}
+body.full .stage{padding:0}
+body.full .pagewrap{border-radius:0;box-shadow:none}
+body.full aside{position:fixed;left:0;top:0;bottom:0;z-index:20;display:flex;transform:translateX(-100%);visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,visibility 0s linear .28s}
+body.full.peek aside{transform:none;visibility:visible;box-shadow:0 16px 48px rgba(3,7,18,.24);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,visibility 0s}
+.edge{display:none;position:fixed;left:0;top:0;bottom:0;width:8px;z-index:19}
+body.full .edge{display:block}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,8px);background:var(--primary);color:var(--on-primary);
+  padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;z-index:30;transition:opacity .25s ease,transform .25s ease}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+/* full screen playback island (bottom right): shows while the pointer moves, hides after 2.5 s of rest */
+.fctl{display:none;position:fixed;right:24px;bottom:24px;z-index:25;gap:4px;padding:4px;border-radius:12px;background:var(--panel);
+  box-shadow:0 0 0 1px var(--line-strong),0 8px 24px rgba(3,7,18,.18);opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease}
+body.full .fctl{display:flex}
+body.full.ctl-on .fctl{opacity:1;transform:none;pointer-events:auto}
+.fbtn{width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--fg);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.fbtn:hover{background:var(--hover)}
+.fbtn:active{background:var(--active)}
+.fbtn svg{width:16px;height:16px}
+@media (prefers-reduced-motion:reduce){body.full aside,.toast,.fctl{transition:none}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <h1>Lottie Player</h1>
+    <button class="btn" id="themeBtn" title="Toggle UI theme" aria-label="Toggle UI theme">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11" /><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg>
+    </button>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="Filter animations" autocomplete="off"></div>
+  <div class="list" id="list"></div>
+  <div class="drop-hint" id="pick">Drop files here or click to open<br><span style="font-size:12px">.json · .lottie</span></div>
+  <input type="file" id="file" accept=".json,.lottie,application/json" multiple hidden>
+</aside>
+
+<div class="edge" id="edge"></div>
+<div class="toast" id="toast"></div>
+<div class="fctl" id="fctl" role="toolbar" aria-label="Playback">
+  <button class="fbtn" id="fPlay" title="Play (Space)" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg></button>
+  <button class="fbtn" id="fRestart" title="Restart (R)" aria-label="Restart"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"/><path d="M2.5 2.5v3h3"/></svg></button>
+</div>
+<main>
+  <div class="top">
+    <div class="title" id="title">No animation</div>
+    <div class="seg" id="viewSeg" title="View (P)">
+      <button data-view="anim" class="on">Animation</button>
+      <button data-view="page">Page</button>
+    </div>
+    <button class="btn" id="fullBtn" title="Full screen (F) — hover the left edge to pick another animation, Esc to exit">Full screen</button>
+    <div class="seg" id="bgSeg" title="Stage background">
+      <button data-bg="#f3f4f6" class="on"><span class="swatch" style="background:#f3f4f6"></span></button>
+      <button data-bg="#ffffff"><span class="swatch" style="background:#fff"></span></button>
+      <button data-bg="#26282a"><span class="swatch" style="background:#26282a"></span></button>
+      <button data-bg="checker"><span class="swatch" style="background:repeating-conic-gradient(#d1d5dc 0 25%,#fff 0 50%) 0 0/7px 7px"></span></button>
+    </div>
+    <div class="seg" id="sizeSeg" title="Preview size">
+      <button data-size="fit" class="on">Fit</button>
+      <button data-size="1">1×</button>
+      <button data-size="0.5">½×</button>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="pagewrap" id="pagewrap"><div class="pagescale" id="pagescale"></div></div>
+    <div class="canvas" id="canvas"><div id="anim"></div><div class="placeholder" id="ph">Pick an animation on the left<br>or drop a .json / .lottie file</div></div>
+  </div>
+
+  <div class="transport">
+    <div class="scrub">
+      <input type="range" id="scrub" min="0" max="0" step="1" value="0" aria-label="Frame">
+      <div class="time mono" id="time">0 / 0 · 0.00 s</div>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg><span>Play</span></button>
+      <button class="btn" id="restart" title="Restart (R)" aria-label="Restart"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"/><path d="M2.5 2.5v3h3"/></svg></button>
+      <button class="btn" id="prev" title="Previous frame (←)" aria-label="Previous frame"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h1.5v10H3zM13 3v10L6 8z"/></svg></button>
+      <button class="btn" id="next" title="Next frame (→)" aria-label="Next frame"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 3H13v10h-1.5zM3 3v10l7-5z"/></svg></button>
+      <div class="sep"></div>
+      <button class="btn on" id="loop" title="Loop (L)">Loop</button>
+      <label class="ctl">Speed
+        <select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>1.5</option><option>2</option></select>
+      </label>
+      <label class="ctl">Renderer
+        <select id="renderer"><option value="svg" selected>SVG</option><option value="canvas">Canvas</option></select>
+      </label>
+      <div class="spacer"></div>
+      <span style="font-size:12px;color:var(--muted)"><kbd>Space</kbd> play · <kbd>←</kbd><kbd>→</kbd> frame · <kbd>R</kbd> restart · <kbd>L</kbd> loop · <kbd>P</kbd> page · <kbd>F</kbd> full screen</span>
+    </div>
+    <div class="info" id="info"></div>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('lp:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('lp:' + k, JSON.stringify(v)); } catch {} }
+};
+
+const state = {
+  server: [],          // [{name,url,size}]
+  local: [],           // [{name,size,data}] dropped files, session only
+  current: null,       // {key,name,size,data}
+  anim: null,
+  loop: store.get('loop.v2', false),   // product behaviour: play once on page load, then freeze on the last (original) frame
+  speed: store.get('speed', 1),
+  renderer: store.get('renderer', 'svg'),
+  bg: store.get('bg', '#f3f4f6'),
+  size: store.get('size', 'fit'),
+  view: new URLSearchParams(location.search).get('view') || 'page',   // opens on the page view; ?view=anim for the bare animation
+  page: null,                         // #pg element once page.html is loaded
+};
+
+const fmtKB = b => b >= 1048576 ? (b / 1048576).toFixed(2) + ' MB' : Math.round(b / 1024) + ' KB';
+
+/* ---------- theme ---------- */
+const theme = store.get('theme', null);
+if (theme) document.documentElement.dataset.theme = theme;
+$('#themeBtn').onclick = () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  store.set('theme', document.documentElement.dataset.theme);
+};
+
+/* ---------- list ---------- */
+async function loadServerList() {
+  try {
+    const r = await fetch('/api/list', { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    state.server = await r.json();
+  } catch { state.server = null; }
+  renderList();
+}
+
+function renderList() {
+  const q = $('#q').value.trim().toLowerCase();
+  const list = $('#list'); list.innerHTML = '';
+  const section = (title, items, kind) => {
+    const g = document.createElement('div'); g.className = 'group'; g.textContent = title; list.appendChild(g);
+    const shown = items.filter(i => i.name.toLowerCase().includes(q));
+    if (!shown.length) {
+      const e = document.createElement('div'); e.className = 'empty';
+      e.textContent = items.length ? 'No matches' : (kind === 'server' ? 'Put .json / .lottie files into promo-motion/lottie' : 'Nothing dropped yet');
+      list.appendChild(e); return;
+    }
+    shown.forEach(i => {
+      const key = kind + ':' + i.name;
+      const b = document.createElement('button');
+      b.className = 'item' + (state.current?.key === key ? ' on' : '');
+      b.innerHTML = `<span class="nm"></span><span class="sz mono">${fmtKB(i.size)}</span>`;
+      b.querySelector('.nm').textContent = i.name.replace(/\.(json|lottie)$/, '');
+      b.title = i.name;
+      b.onclick = () => kind === 'server' ? openServer(i) : openData(key, i.name, i.size, i.data);
+      if (kind === 'local') {
+        const x = document.createElement('span'); x.className = 'x'; x.textContent = '×'; x.title = 'Remove';
+        x.onclick = ev => { ev.stopPropagation(); state.local = state.local.filter(l => l !== i); renderList(); };
+        b.appendChild(x);
+      }
+      list.appendChild(b);
+    });
+  };
+  if (state.server === null) {
+    const e = document.createElement('div'); e.className = 'empty';
+    e.innerHTML = 'Folder list is unavailable — start the player with <b>Lottie Player.command</b>. Dropping files still works.';
+    list.appendChild(e);
+  } else section('promo-motion/lottie', state.server, 'server');
+  section('Dropped files', state.local, 'local');
+}
+$('#q').oninput = renderList;
+
+/* ---------- loading ---------- */
+async function parseFile(name, buf) {
+  if (name.endsWith('.lottie')) return fromDotLottie(buf);
+  return JSON.parse(new TextDecoder().decode(buf));
+}
+
+// .lottie = zip with manifest.json, animations/*.json, images/*. Inline images as data URIs for lottie-web.
+async function fromDotLottie(buf) {
+  const zip = await JSZip.loadAsync(buf);
+  let animPath;
+  const mf = zip.file('manifest.json');
+  if (mf) {
+    const m = JSON.parse(await mf.async('string'));
+    const id = m.activeAnimationId || m.animations?.[0]?.id;
+    if (id) animPath = Object.keys(zip.files).find(p => p.match(new RegExp(`^(a/|animations/)${id}\\.json$`)));
+  }
+  animPath ||= Object.keys(zip.files).find(p => /^(a|animations)\/.+\.json$/.test(p));
+  if (!animPath) throw new Error('No animation JSON inside .lottie');
+  const data = JSON.parse(await zip.file(animPath).async('string'));
+  for (const a of data.assets || []) {
+    if (!a.p || a.e === 1 || a.p.startsWith('data:')) continue;
+    const f = zip.file(Object.keys(zip.files).find(p => p.endsWith('/' + a.p)) || '');
+    if (!f) continue;
+    const ext = a.p.split('.').pop().toLowerCase();
+    const mime = ext === 'svg' ? 'image/svg+xml' : ext === 'jpg' ? 'image/jpeg' : 'image/' + ext;
+    a.p = `data:${mime};base64,` + await f.async('base64'); a.u = ''; a.e = 1;
+  }
+  return data;
+}
+
+async function openServer(i) {
+  try {
+    const r = await fetch(i.url, { cache: 'no-store' });
+    const buf = await r.arrayBuffer();
+    openData('server:' + i.name, i.name, buf.byteLength, await parseFile(i.name, buf));
+    store.set('last', i.name);
+  } catch (e) { showError(i.name, e); }
+}
+
+async function addFiles(files) {
+  let first;
+  for (const f of files) {
+    if (!/\.(json|lottie)$/i.test(f.name)) continue;
+    try {
+      const data = await parseFile(f.name.toLowerCase(), await f.arrayBuffer());
+      const entry = { name: f.name, size: f.size, data };
+      state.local = state.local.filter(l => l.name !== f.name).concat(entry);
+      first ||= entry;
+    } catch (e) { showError(f.name, e); }
+  }
+  renderList();
+  if (first) openData('local:' + first.name, first.name, first.size, first.data);
+}
+
+function showError(name, e) {
+  $('#title').textContent = name + ' — failed to load';
+  $('#ph').style.display = ''; $('#ph').textContent = String(e && e.message || e);
+}
+
+/* ---------- playback ---------- */
+function openData(key, name, size, data) {
+  const wasPlaying = state.anim ? !state.anim.isPaused : true;
+  state.current = { key, name, size, data };
+  // themed pairs: show *-dark on a dark stage and *-light on the page grey
+  if (/-dark\.(json|lottie)$/i.test(name)) setBg('#26282a'); else if (/-light\.(json|lottie)$/i.test(name)) setBg('#f3f4f6');
+  state.anim?.destroy();
+  $('#anim').innerHTML = '';
+  $('#ph').style.display = 'none';
+  $('#title').textContent = data.nm ? `${name.replace(/\.(json|lottie)$/, '')} · ${data.nm}` : name;
+  state.anim = lottie.loadAnimation({
+    container: $('#anim'), renderer: state.renderer, loop: state.loop, autoplay: wasPlaying || state.view === 'page',  // page view = opening the page: it plays
+    animationData: structuredClone(data),
+    rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: false }
+  });
+  state.anim.setSpeed(state.speed);
+  state.anim.addEventListener('enterFrame', syncTime);
+  state.anim.addEventListener('complete', syncPlay);
+  state.anim.addEventListener('DOMLoaded', () => { layout(); syncTime(); });
+  const frames = Math.round(data.op - data.ip);
+  $('#scrub').max = Math.max(0, frames - 1);
+  const imgs = (data.assets || []).filter(a => a.p).length;
+  $('#info').innerHTML = [
+    ['Size', `${data.w}×${data.h}`], ['FPS', data.fr], ['Duration', (frames / data.fr).toFixed(2) + ' s'],
+    ['Frames', frames], ['Layers', (data.layers || []).length], ['Images', imgs], ['File', fmtKB(size)],
+    ['Lottie', data.v || '—']
+  ].map(([k, v]) => `<span>${k} <b class="mono">${v}</b></span>`).join('');
+  pageSync(); layout(); syncPlay(); renderList();
+}
+
+function syncTime() {
+  const a = state.anim; if (!a) return;
+  const f = Math.floor(a.currentFrame), total = Math.round(a.totalFrames);
+  $('#scrub').value = f;
+  $('#time').textContent = `${f} / ${total} · ${(a.currentFrame / a.frameRate).toFixed(2)} s`;
+}
+function syncPlay() {
+  const playing = state.anim && !state.anim.isPaused;
+  $('#play span').textContent = playing ? 'Pause' : 'Play';
+  $('#play svg').innerHTML = playing ? '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>' : '<path d="M4 2.5v11l9-5.5z"/>';
+  $('#fPlay svg').innerHTML = $('#play svg').innerHTML;
+  $('#fPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  $('#fPlay').title = (playing ? 'Pause' : 'Play') + ' (Space)';
+}
+function togglePlay() {
+  const a = state.anim; if (!a) return;
+  if (a.isPaused) { if (!state.loop && a.currentFrame >= a.totalFrames - 1) a.goToAndPlay(0, true); else a.play(); }
+  else a.pause();
+  syncPlay();
+}
+function step(d) {
+  const a = state.anim; if (!a) return;
+  const f = Math.min(Math.max(Math.round(a.currentFrame) + d, 0), Math.round(a.totalFrames) - 1);
+  a.goToAndStop(f, true); syncTime(); syncPlay();
+}
+$('#play').onclick = togglePlay;
+$('#restart').onclick = () => { state.anim?.goToAndPlay(0, true); syncPlay(); };
+$('#prev').onclick = () => step(-1);
+$('#next').onclick = () => step(1);
+$('#scrub').oninput = e => { state.anim?.goToAndStop(+e.target.value, true); syncTime(); syncPlay(); };
+$('#loop').onclick = () => {
+  state.loop = !state.loop; store.set('loop.v2', state.loop);
+  $('#loop').classList.toggle('on', state.loop);
+  if (state.anim) state.anim.loop = state.loop;
+};
+$('#speed').onchange = e => { state.speed = +e.target.value; store.set('speed', state.speed); state.anim?.setSpeed(state.speed); };
+$('#renderer').onchange = e => {
+  state.renderer = e.target.value; store.set('renderer', state.renderer);
+  if (state.current) { const c = state.current, f = state.anim.currentFrame, p = state.anim.isPaused;
+    openData(c.key, c.name, c.size, c.data); p ? state.anim.goToAndStop(f, true) : state.anim.goToAndPlay(f, true); syncPlay(); }
+};
+
+/* ---------- stage ---------- */
+function setBg(bg) {
+  state.bg = bg; store.set('bg', bg);
+  const c = $('#canvas');
+  c.classList.toggle('checker', bg === 'checker');
+  c.style.setProperty('--stage-bg', bg === 'checker' ? 'transparent' : bg);
+  document.querySelectorAll('#bgSeg button').forEach(b => b.classList.toggle('on', b.dataset.bg === bg));
+}
+function layout() {
+  const c = $('#canvas'), st = $('#stage'), d = state.current?.data;
+  document.querySelectorAll('#sizeSeg button').forEach(b => b.classList.toggle('on', b.dataset.size === state.size));
+  if (state.view === 'page' && state.page) {
+    // the page fills the stage: fluid width, its own scroll areas take the height. Fit = the 1440 design width scaled
+    // down to the stage, 1× / ½× = real size / zoomed out; never narrower than the page's minimum layout width.
+    const pad = document.body.classList.contains('full') ? 0 : 48;
+    const W = st.clientWidth - pad, H = st.clientHeight - pad, MIN = 900;
+    let k = state.size === 'fit' ? Math.min(1, W / 1440) : +state.size;
+    k = Math.min(k, W / MIN);
+    $('#pagewrap').style.width = W + 'px'; $('#pagewrap').style.height = H + 'px';
+    Object.assign($('#pagescale').style, { width: W / k + 'px', height: H / k + 'px', transform: `scale(${k})` });
+    c.style.width = '100%'; c.style.height = '100%';
+    state.anim?.resize(); return;
+  }
+  if (!d) { c.style.width = '480px'; c.style.height = '320px'; return; }
+  let w = d.w, h = d.h;
+  // promo illustrations are exported at 2x — "1×" means the size they are shown at in the product
+  const retina = w >= 900 ? 2 : 1;
+  if (state.size === 'fit') {
+    const k = Math.min((st.clientWidth - 48) / w, (st.clientHeight - 48) / h);
+    w *= k; h *= k;
+  } else { w = w / retina * +state.size; h = h / retina * +state.size; }
+  c.style.width = Math.round(w) + 'px'; c.style.height = Math.round(h) + 'px';
+  state.anim?.resize();
+}
+document.querySelectorAll('#bgSeg button').forEach(b => b.onclick = () => setBg(b.dataset.bg));
+document.querySelectorAll('#sizeSeg button').forEach(b => b.onclick = () => { state.size = b.dataset.size; store.set('size', state.size); layout(); });
+addEventListener('resize', layout);
+
+/* ---------- custom scrollbar for the file list ---------- */
+function customScroll(sc) {
+  const host = sc.parentElement, th = document.createElement('div'), INSET = 4, MIN = 32;
+  th.className = 'sb-thumb'; th.setAttribute('aria-hidden', 'true'); host.appendChild(th);
+  let hover = false, drag = null, hideT;
+  const place = () => {
+    const h = sc.clientHeight, H = sc.scrollHeight;
+    th.style.display = H > h + 2 ? '' : 'none';
+    if (H <= h + 2) return;
+    const track = h - 2 * INSET, t = Math.max(MIN, track * h / H);
+    th.style.height = t + 'px';
+    th.style.top = sc.offsetTop + INSET + (track - t) * sc.scrollTop / (H - h) + 'px';
+  };
+  const show = () => {
+    host.classList.add('sb-on'); clearTimeout(hideT);
+    if (!hover && !drag) hideT = setTimeout(() => host.classList.remove('sb-on'), 1000);
+  };
+  sc.addEventListener('scroll', () => { place(); show(); }, { passive: true });
+  host.addEventListener('pointerenter', () => { hover = true; place(); show(); });
+  host.addEventListener('pointerleave', () => { hover = false; show(); });
+  th.addEventListener('pointerdown', e => {
+    e.preventDefault(); th.setPointerCapture(e.pointerId);
+    drag = { y: e.clientY, top: sc.scrollTop }; th.classList.add('drag'); show();
+  });
+  th.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const h = sc.clientHeight, track = h - 2 * INSET;
+    sc.scrollTop = drag.top + (e.clientY - drag.y) * (sc.scrollHeight - h) / (track - th.offsetHeight);
+  });
+  const end = () => { if (!drag) return; drag = null; th.classList.remove('drag'); show(); };
+  th.addEventListener('pointerup', end); th.addEventListener('pointercancel', end);
+  new ResizeObserver(place).observe(sc);
+  new MutationObserver(place).observe(sc, { childList: true });   // the list re-renders every few seconds
+  place();
+}
+customScroll($('#list'));
+
+/* ---------- page view ---------- */
+async function loadPage() {
+  if (state.page) return state.page;
+  const r = await fetch('page.html', { cache: 'no-store' });
+  const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+  document.head.appendChild(doc.getElementById('pg-style'));
+  const pg = document.adoptNode(doc.getElementById('pg'));
+  $('#pagescale').appendChild(pg);
+  const rt = doc.getElementById('pg-runtime');   // page behaviour (custom sidebar scrollbar)
+  if (rt) { new Function(rt.textContent)(); window.pgInit?.(pg); }
+  return state.page = pg;
+}
+function pageSync() {
+  const name = state.current?.name || '';
+  if (state.page) state.page.dataset.theme = /-dark\.(json|lottie)$/i.test(name) ? 'dark' : 'light';
+}
+async function setView(v) {
+  state.view = v; store.set('view', v);
+  document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  if (v === 'page') {
+    try { await loadPage(); } catch (e) { state.view = 'anim'; showError('page.html', e); return setView('anim'); }
+    $('#illus-slot').appendChild($('#canvas'));
+    state.anim?.goToAndPlay(0, true);  // like opening the page in the product
+  } else $('#stage').appendChild($('#canvas'));
+  document.body.classList.toggle('view-page', state.view === 'page');
+  pageSync(); layout(); syncPlay();
+}
+document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => setView(b.dataset.view));
+
+/* ---------- full screen ---------- */
+let peekT, toastT;
+function toast(text) {
+  const t = $('#toast'); t.textContent = text; t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600);
+}
+async function setFull(on) {
+  if (on && state.view !== 'page') await setView('page');
+  document.body.classList.toggle('full', on);
+  document.body.classList.remove('peek');
+  if (on) {
+    document.documentElement.requestFullscreen?.().catch(() => {});   // full window if the browser refuses
+    toast('Hold the pointer on the left edge to pick an animation · Esc to exit');
+    ctlShow();
+  } else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  requestAnimationFrame(layout);
+}
+$('#fullBtn').onclick = () => setFull(true);
+// playback island: appears on pointer movement, stays while hovered, hides after 2.5 s of rest
+let ctlT;
+function ctlShow() {
+  if (!document.body.classList.contains('full')) return;
+  document.body.classList.add('ctl-on'); clearTimeout(ctlT);
+  if (!$('#fctl').matches(':hover')) ctlT = setTimeout(() => document.body.classList.remove('ctl-on'), 2500);
+}
+addEventListener('pointermove', ctlShow);
+$('#fctl').addEventListener('pointerleave', ctlShow);
+$('#fPlay').onclick = e => { togglePlay(); e.currentTarget.blur(); ctlShow(); };   // blur: Space must not re-click it
+$('#fRestart').onclick = e => { $('#restart').click(); e.currentTarget.blur(); ctlShow(); };
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && document.body.classList.contains('full')) setFull(false);
+  else requestAnimationFrame(layout);
+});
+// the list opens only after the pointer has rested on the edge for 500 ms, and closes once the pointer leaves it
+$('#edge').addEventListener('pointerenter', () => { clearTimeout(peekT); peekT = setTimeout(() => document.body.classList.add('peek'), 500); });
+$('#edge').addEventListener('pointerleave', () => clearTimeout(peekT));
+document.querySelector('aside').addEventListener('pointerleave', e => {
+  if (document.body.classList.contains('full') && e.clientX > 0) document.body.classList.remove('peek');
+});
+
+/* ---------- files ---------- */
+$('#pick').onclick = () => $('#file').click();
+$('#file').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); if (++dragDepth === 1) document.body.classList.add('dragging'); });
+addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging'); addFiles([...e.dataTransfer.files]); });
+
+/* ---------- keys ---------- */
+addEventListener('keydown', e => {
+  if (e.target.matches('input[type=search],select')) return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); step(e.shiftKey ? -10 : -1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); step(e.shiftKey ? 10 : 1); }
+  else if (e.key === 'r' || e.key === 'R') $('#restart').click();
+  else if (e.key === 'l' || e.key === 'L') $('#loop').click();
+  else if (e.key === 'p' || e.key === 'P') setView(state.view === 'page' ? 'anim' : 'page');
+  else if (e.key === 'f' || e.key === 'F') setFull(!document.body.classList.contains('full'));
+  else if (e.key === 'Escape' && document.body.classList.contains('full') && !document.fullscreenElement) setFull(false);
+});
+
+/* ---------- init ---------- */
+$('#loop').classList.toggle('on', state.loop);
+$('#speed').value = String(state.speed);
+$('#renderer').value = state.renderer;
+setBg(state.bg); layout();
+if (state.view === 'page') setView('page');
+if (new URLSearchParams(location.search).get('full') === '1') setFull(true);   // ?full=1: open straight into full screen
+loadServerList().then(() => {
+  const last = new URLSearchParams(location.search).get('anim') || store.get('last', null);   // ?anim=<file>.json
+  const pick = (state.server || []).find(i => i.name === last) || (state.server || [])[0];
+  if (pick) openServer(pick);
+});
+// pick up new files exported into the folder while the player is open
+setInterval(() => { if (!document.hidden && state.server !== null) loadServerList(); }, 4000);
+</script>
+</body>
+</html>
