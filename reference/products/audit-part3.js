@@ -681,7 +681,8 @@ if (productContext === "tm") {
     // is it inside a Table Row/cell, and NOT inside a *Status* instance?
     let p = t.parent, inCell = false, inStatus = false;
     while (p && p.id !== root.id) {
-      if (/\*Status\*/.test(mcParentName(p))) { inStatus = true; break; }
+      // v3.260: *Status Select* is a status pill too (AP Payment methods: "Approved" in .Payment method status › *Status Select*)
+      if (/\*Status( Select)?\*/.test(mcParentName(p))) { inStatus = true; break; }
       if (/Table Row|Cell Content|Cell/i.test(p.name||"")) inCell = true;
       p = p.parent;
     }

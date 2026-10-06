@@ -5,6 +5,8 @@ const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
 const box = (n, ref) => { const a = n.absoluteTransform, r = ref.absoluteTransform; return { x: Math.round(a[0][2] - r[0][2]), y: Math.round(a[1][2] - r[1][2]), w: Math.round(n.width), h: Math.round(n.height) }; };
 // v3.254: short names that keep finish.js under the use_figma limit.
+// v3.260: finish.js also writes isB(n) for the body-slot test isS(n) && (Main content | Side content | Aside › Content), drops
+// line indentation and leaves out unwrapSingle / isCardStack, which only plan.js and build.js call.
 const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", byId = id => figma.getNodeByIdAsync(id);
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
 // Figma keeps Shift+Enter as U+2028; a returned string with it cuts the MCP response ("Failed to parse SSE message … EOF while
@@ -794,12 +796,22 @@ const h2 = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)
 for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => isS(n) && re.test(n.name))[0];
 if (s && !s.children.some(k => k.visible)) { try { h2.setProperties({ [prop]: false }); log.push("header: " + s.name + " empty — switched off"); } catch (e) {} } }
 return log; }
+// v3.260: the paints of the header WRAPPER itself (AP page header) come from the reference too. The designers override the
+// wrapper's bottom border to semantic/border/neutral/subtlest/normal; ours kept the master's stale base/neutral/30 (#e1e5ea) on all
+// 8 Applicant page screens — copyVarsFromRef walks only the body slots, refHeader only swaps. Root of the wrapper only: its one
+// child is the *Header*, whose content is ours. A paint the reference doesn't bind is left alone.
+async function hdrWrapPaints(page, refId) { const isW = n => n.type === "INSTANCE" && n.visible && n.name !== "*Header*" && n.children.some(k => k.name === "*Header*"), rp = await byId(refId), rw = rp && rp.findOne(isW), w = page.findOne(isW), out = [];
+if (!rw || !w || rw.name !== w.name) return out; const { resolve } = await varResolver();
+for (const p of ["fills", "strokes"]) { const r = rw[p][0], b = r && r.visible !== false && r.boundVariables && r.boundVariables.color, o = w[p][0]; if (!b) continue;
+const t = await resolve(b.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, w, p)) || v0) : v0; if (!v || (o && o.boundVariables && o.boundVariables.color && o.boundVariables.color.id === v.id)) continue;
+const c = JSON.parse(JSON.stringify(r)); delete c.boundVariables; w[p] = [figma.variables.setBoundVariableForPaint(c, "color", v)]; out.push("header " + p + " → " + v.name); }
+return out; }
 async function finishIsland(page, refId) {
   if (refId) { const ref = await byId(refId);
     if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
       const content = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
       const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== ICN).map(n => n.name))].concat([ICN]);
-      const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
+      const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), hw = await hdrWrapPaints(page, refId), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs, ...hw); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
   return { from: "§6.1 defaults", applied: (await applyIslandTokens(page)).concat(await dropHeaderPlaceholders(page)), skipped: [] };
 }
 
@@ -1026,8 +1038,7 @@ return { fixed: log.length, by: Object.entries(tally).slice(0, 10).map(([k, c]) 
 async function rebindOrphanVars(page) {
   const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
   const log = [];
-  const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-  const ours = oursOf(page).map(e => e[0]); void slots;
+  const ours = oursOf(page).map(e => e[0]);
   await R.prefetch(paintIds(ours));
   for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
     let changed = false; const next = [];

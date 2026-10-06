@@ -1,10 +1,9 @@
 // FINISH — call 2 of 2, a SEPARATE use_figma call. Append:  return JSON.stringify(await finishAndAudit("<pageId from call 1>", "<ref node id or null>"));
-const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", byId = id => figma.getNodeByIdAsync(id);
+const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", byId = id => figma.getNodeByIdAsync(id), isB = n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)));
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
 const _LS = new RegExp("[" + String.fromCharCode(0x2028, 0x2029, 0x85) + "]", "g");
 const clean = o => JSON.parse(JSON.stringify(o).replace(_LS, " "));
 const isHeadingBlock = n => /title|heading|header/i.test(n.name) && n.height <= 90;
-const unwrapSingle = n => { let c = n; while (c && c.type !== "INSTANCE" && vis(c).length === 1 && "children" in vis(c)[0]) c = vis(c)[0]; return c; };
 const fillOf = n => (n && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false) ? n.fills[0].color : null;
 const hasStroke = n => !!(n.strokes && n.strokes !== figma.mixed && n.strokes.some(s => s.visible !== false)) && (typeof n.strokeWeight !== "number" || n.strokeWeight > 0);
 const isWhite = n => { const c = fillOf(n); return !!c && c.r > 0.97 && c.g > 0.97 && c.b > 0.97; };
@@ -18,7 +17,6 @@ for (const c of k) { if (cardLike(c)) { cards++; continue; } if (c.height <= 90)
 if (c.type === "FRAME" && isCardLayout(c, depth + 1)) { cards += 2; continue; } return false; }
 return cards >= 2; }
 const isGraphic = n => /^(RECTANGLE|ELLIPSE|VECTOR|LINE|POLYGON|STAR|BOOLEAN_OPERATION)$/.test(n.type);
-const isCardStack = n => { const k = vis(n); return k.length >= 2 && !isHeadingBlock(k[0]) && k.filter(cardLike).length >= Math.ceil(k.length / 2); };
 function refPlacement(refRoot, name) {
 if (!refRoot) return null;
 const n = refRoot.findOne(x => x.name === name && x.visible); if (!n) return null;
@@ -29,7 +27,7 @@ const repaint = (n, prop, variable) => { const base = n[prop] && n[prop][0] ? JS
 delete base.boundVariables; n[prop] = [figma.variables.setBoundVariableForPaint(base, "color", variable)]; };
 async function copyVarsFromRef(refRoot, page, anchors) {
 const SEP = " › ", applied = [], skipped = [];
-  const { resolve, prefetch } = await varResolver();
+const { resolve, prefetch } = await varResolver();
 const visFill = n => n.fills && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false;
 const visStroke = n => n.strokes && n.strokes.length && n.strokes[0].type === "SOLID" && n.strokes[0].visible !== false;
 const kidsOf = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
@@ -37,25 +35,25 @@ const roleOf = nm => /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i.test
 const runs = list => { const out = []; for (const k of list) { const l = out[out.length - 1], nm = roleOf(k.name); if (l && l.name === nm) l.items.push(k); else out.push({ name: nm, items: [k] }); } return out; };
 const runSig = n => runs(kidsOf(n)).map(r => r.name).join("|");
 const matchKids = (rk, bk) => { const rr = runs(rk), br = runs(bk); if (rr.length !== br.length || rr.some((r, i) => r.name !== br[i].name)) return null;
-  const p = []; br.forEach((b, i) => b.items.forEach((k, j) => p.push([rr[i].items[Math.min(j, rr[i].items.length - 1)], k]))); return p; };
+const p = []; br.forEach((b, i) => b.items.forEach((k, j) => p.push([rr[i].items[Math.min(j, rr[i].items.length - 1)], k]))); return p; };
 const otherVariant = (r, b) => { if (r.type !== "INSTANCE" || b.type !== "INSTANCE") return false;
-  try { const rp = r.componentProperties || {}, bp = b.componentProperties || {}; return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
+try { const rp = r.componentProperties || {}, bp = b.componentProperties || {}; return Object.keys(rp).some(k => rp[k].type === "VARIANT" && bp[k] && bp[k].type === "VARIANT" && rp[k].value !== bp[k].value); } catch (e) { return false; } };
 const pairsOf = (rRoot, bRoot) => { const out = []; const walk = (r, b, path, style) => { const ov = otherVariant(r, b); const e = [path, r, b, ov, style ? (style === "paint" ? "paint" : "style") : "full"]; out.push(e); if (ov) return;
-  let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }
-  if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) { if (b.type === "INSTANCE" || isCard(b)) { if (!style) out.push([path + SEP + bw.name, r, bw, false, "gaps"]); } else e[2] = bw; } }
-  if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint");
-    if (path === "·" && rk.length === bk.length) bk.forEach((m, i) => { const x = rk[i]; if (x.name !== m.name && !rk.some(y => y.name === m.name) && !bk.some(y => y.name === x.name) && x.type === m.type && cardLike(x) === cardLike(m)) walk(x, m, path + SEP + m.name, "paint"); }); return; }
-  const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE")); if (!style && !deep) e[4] = "stopped";
-  const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
-  walk(rRoot, bRoot, "·", false); return out; };
-const bodySlots = root => root.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+let kids = matchKids(kidsOf(r), kidsOf(b)); if (!kids) { const r1 = kidsOf(r); if (r1.length === 1 && r1[0].type === "FRAME" && kidsOf(b).length > 1) kids = matchKids(kidsOf(r1[0]), kidsOf(b)); if (!kids) { const b1 = kidsOf(b); if (r1.length === 1 && b1.length === 1 && r1[0].type === "FRAME" && b1[0].type === "FRAME") kids = [[r1[0], b1[0]]]; } if (!kids && kidsOf(b).length > 1) { const w = kidsOf(r).find(x => x.type === "FRAME" && matchKids(kidsOf(x), kidsOf(b))); if (w) { kids = matchKids(kidsOf(w), kidsOf(b)); e[1] = w; } } }
+if (!kids) { let bw = b; for (let d = 0; d < 2 && !kids; d++) { const b1 = kidsOf(bw); if (b1.length !== 1 || b1[0].type !== "FRAME" || kidsOf(r).length < 2) break; bw = b1[0]; kids = matchKids(kidsOf(r), kidsOf(bw)); } if (kids) { if (b.type === "INSTANCE" || isCard(b)) { if (!style) out.push([path + SEP + bw.name, r, bw, false, "gaps"]); } else e[2] = bw; } }
+if (!kids) { if (!style) e[4] = "restructured"; const rk = kidsOf(r), bk = kidsOf(b), once = (l, nm) => l.filter(x => x.name === nm).length === 1; for (const m of bk) if (once(bk, m.name) && once(rk, m.name)) walk(rk.find(x => x.name === m.name), m, path + SEP + m.name, "paint");
+if (path === "·" && rk.length === bk.length) bk.forEach((m, i) => { const x = rk[i]; if (x.name !== m.name && !rk.some(y => y.name === m.name) && !bk.some(y => y.name === x.name) && x.type === m.type && cardLike(x) === cardLike(m)) walk(x, m, path + SEP + m.name, "paint"); }); return; }
+const deep = !style && !kids.some(([x, y]) => runSig(x) !== runSig(y) && !(x.type === "INSTANCE" && y.type === "INSTANCE")); if (!style && !deep) e[4] = "stopped";
+const cnt = {}; kids.forEach(([k, m]) => { cnt[m.name] = (cnt[m.name] || 0) + 1; walk(k, m, path + SEP + m.name + (cnt[m.name] > 1 ? "#" + cnt[m.name] : ""), style === "paint" ? "paint" : !deep); }); };
+walk(rRoot, bRoot, "·", false); return out; };
+const bodySlots = root => root.findAll(n => isB(n));
 const inChrome = n => { for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE" && /^\*(Sidebar|Header)\*$/.test(p.name)) return true; return false; };
 const inBody = (root, a) => { const sl = bodySlots(root), seen = new Set(); return (sl.length ? sl : [root]).flatMap(s => s.findAll(n => n.name === a && n.visible && !inChrome(n))).filter(n => !seen.has(n.id) && seen.add(n.id)); };
 const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
 const runAnchor = async a => { let gone = 0;
 const R = inBody(refRoot, a), B = inBody(page, a);
 for (let i = 0; i < Math.min(R.length, B.length); i++) { let mr; try { mr = pairsOf(R[i], B[i]); } catch (e) { skipped.push(a + ": walk failed " + e.message); continue; }
-      await prefetch(paintIds(mr.map(e => e[1])));
+await prefetch(paintIds(mr.map(e => e[1])));
 for (const [path, rn, bn, ov, mode] of mr) { try {
 let mc = null; if (ov) { try { mc = await rn.getMainComponentAsync(); } catch (e) {} }
 if (a === ICN && (path === "·" || (path === "·" + SEP + "Slot" && bn.type === "SLOT"))) continue;
@@ -102,16 +100,16 @@ const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fi
 if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;
 const rb = rn.boundVariables && rn.boundVariables[prop] && rn.boundVariables[prop][0], bb = bn.boundVariables && bn.boundVariables[prop] && bn.boundVariables[prop][0];
 if (rVis && rb) { const t = await resolve(rb.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, bn, prop)) || v0) : v0;
-            if (!v) { skipped.push(a + path + " " + prop + ": variable not found"); continue; }
-            if (bVis && bb && bb.id === v.id) continue;
-            const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
-            applied.push(a + path + " " + prop + " → " + v.name); }
+if (!v) { skipped.push(a + path + " " + prop + ": variable not found"); continue; }
+if (bVis && bb && bb.id === v.id) continue;
+const base = JSON.parse(JSON.stringify(rn[prop][0])); delete base.boundVariables; bn[prop] = [figma.variables.setBoundVariableForPaint(base, "color", v)];
+applied.push(a + path + " " + prop + " → " + v.name); }
 else if (!rVis && bVis) { bn[prop] = []; applied.push(a + path + " " + prop + " → none"); }
 } catch (e) { skipped.push(a + path + " " + prop + ": " + e.message); } } } catch (e) { gone++; } } }
-  return gone; };
-  let todo = anchors;
-  for (let pass = 0; pass < 3 && todo.length; pass++) { const next = []; for (const a of todo) if (await runAnchor(a)) next.push(a); todo = next; }
-  if (todo.length) skipped.push("layers changed under the walk in " + todo.join(", ") + " — run the copy part again");
+return gone; };
+let todo = anchors;
+for (let pass = 0; pass < 3 && todo.length; pass++) { const next = []; for (const a of todo) if (await runAnchor(a)) next.push(a); todo = next; }
+if (todo.length) skipped.push("layers changed under the walk in " + todo.join(", ") + " — run the copy part again");
 return { applied, skipped };
 }
 const cardTargets = k => (!k.visible || k.name === ICN || !cardLike(k)) ? [] : [k, ...vis(k).filter(c => c.type !== "INSTANCE" && isCard(c) && Math.abs(c.width - k.width) < 2 && Math.abs(c.height - k.height) < 2)];
@@ -147,7 +145,7 @@ try { for (const p of ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "b
 return log; }
 async function regroupLikeReference(refRoot, page) {
 const log = []; const names = n => vis(n).map(k => k.name);
-const ourSlots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const ourSlots = page.findAll(n => isB(n));
 const refSlots = refRoot.findAll(n => isS(n) && /^(Main content|Side content)$/.test(n.name));
 const ours = []; const walk = n => { if (n.type === "INSTANCE" || !("children" in n)) return; if (n.type === "FRAME" && n.layoutMode && n.layoutMode !== "NONE" && vis(n).length >= 1) ours.push(n); for (const k of n.children) walk(k); };
 for (const s of ourSlots) for (const k of s.children) walk(k);
@@ -183,7 +181,7 @@ try { n.setProperties({ Size: sizes[0] }); log.push(n.name + " Size → " + size
 return log; }
 async function headingTextStyles(refRoot, page) {
 const log = [], HR = /^(Block Title|Body \/ Title|Heading|Title|Header)\b/i;
-const slots = r => r.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const slots = r => r.findAll(n => isB(n));
 const shown = (n, top) => { for (let q = n; q && q.id !== top.id; q = q.parent) if (q.visible === false) return false; return true; };
 const refT = new Map(); for (const s of slots(refRoot)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) { const k = t.characters.trim(); if (!k) continue; if (!refT.has(k)) refT.set(k, new Set()); refT.get(k).add(typeof t.textStyleId === "string" ? t.textStyleId : ""); }
 for (const s of slots(page)) for (const t of s.findAll(n => n.type === "TEXT" && shown(n, s))) {
@@ -215,12 +213,18 @@ const h2 = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)
 for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => isS(n) && re.test(n.name))[0];
 if (s && !s.children.some(k => k.visible)) { try { h2.setProperties({ [prop]: false }); log.push("header: " + s.name + " empty — switched off"); } catch (e) {} } }
 return log; }
+async function hdrWrapPaints(page, refId) { const isW = n => n.type === "INSTANCE" && n.visible && n.name !== "*Header*" && n.children.some(k => k.name === "*Header*"), rp = await byId(refId), rw = rp && rp.findOne(isW), w = page.findOne(isW), out = [];
+if (!rw || !w || rw.name !== w.name) return out; const { resolve } = await varResolver();
+for (const p of ["fills", "strokes"]) { const r = rw[p][0], b = r && r.visible !== false && r.boundVariables && r.boundVariables.color, o = w[p][0]; if (!b) continue;
+const t = await resolve(b.id), v0 = t && t.to, v = v0 && /^base\//i.test(v0.name) ? ((await semanticFor(v0.name, w, p)) || v0) : v0; if (!v || (o && o.boundVariables && o.boundVariables.color && o.boundVariables.color.id === v.id)) continue;
+const c = JSON.parse(JSON.stringify(r)); delete c.boundVariables; w[p] = [figma.variables.setBoundVariableForPaint(c, "color", v)]; out.push("header " + p + " → " + v.name); }
+return out; }
 async function finishIsland(page, refId) {
 if (refId) { const ref = await byId(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
-const content = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const content = page.findAll(n => isB(n));
 const anchors = [...new Set(content.flatMap(s => s.children).filter(n => n.name !== ICN).map(n => n.name))].concat([ICN]);
-const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
+const sz = await alignSizeVariants(ref, page); const rg = await regroupLikeReference(ref, page); const cr = await copyVarsFromRef(ref, page, anchors), sp = await sidePanelLikeReference(ref, page), hs = await headingTextStyles(ref, page), hw = await hdrWrapPaints(page, refId), bt = await bareCardTokens(page), ph = await dropHeaderPlaceholders(page); cr.applied.unshift(...sz, ...rg, ...sp, ...hs, ...hw); return { from: "reference " + refId, applied: cr.applied.concat(bt, ph), skipped: cr.skipped }; } }
 return { from: "§6.1 defaults", applied: (await applyIslandTokens(page)).concat(await dropHeaderPlaceholders(page)), skipped: [] };
 }
 function stretchToWidth(page, withRef) {
@@ -267,25 +271,25 @@ return null;
 const oldAlias = n => n === "base/white/100" ? "base/neutral/0" : n.replace(/^components\/status\/(approved|rejected|pending|default)-/, (m, s) => "components/status/" + ({ approved: "green", rejected: "red", pending: "yellow", default: "grey" })[s] + "/");
 let _vr = null;
 function varResolver() {
-  if (_vr) return _vr;
-  _vr = (async () => {
-    let cols = null; try { cols = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync(); } catch (e) {}
-    const live = cols ? new Set(cols.map(c => c.key)) : null;
-    const base = cols ? cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color") : null;
-    const byName = new Map(); if (base) for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
-    const colKey = new Map(), byKey = new Map(), memo = new Map(), miss = new Set();
-    const imp = key => { if (!byKey.has(key)) byKey.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return byKey.get(key); };
-    const colOf = vc => { if (!colKey.has(vc)) colKey.set(vc, figma.variables.getVariableCollectionByIdAsync(vc).then(c => c ? c.key : null).catch(() => null)); return colKey.get(vc); };
-    const resolve = id => { if (!memo.has(id)) memo.set(id, (async () => {
-      const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
-      if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
-        if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
-        else if (base) { const lo = v.name.toLowerCase(), key = byName.get(lo) || byName.get("components/" + lo) || byName.get(oldAlias(lo)) || byName.get("components/" + lo.replace(/-color-/g, "-")); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
-      return out; })()); return memo.get(id); };
-    const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
-    return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
-  })();
-  return _vr;
+if (_vr) return _vr;
+_vr = (async () => {
+let cols = null; try { cols = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync(); } catch (e) {}
+const live = cols ? new Set(cols.map(c => c.key)) : null;
+const base = cols ? cols.find(c => /Base components/i.test(c.libraryName) && c.name === "color") : null;
+const byName = new Map(); if (base) for (const v of await figma.teamLibrary.getVariablesInLibraryCollectionAsync(base.key)) byName.set(v.name.toLowerCase(), v.key);
+const colKey = new Map(), byKey = new Map(), memo = new Map(), miss = new Set();
+const imp = key => { if (!byKey.has(key)) byKey.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return byKey.get(key); };
+const colOf = vc => { if (!colKey.has(vc)) colKey.set(vc, figma.variables.getVariableCollectionByIdAsync(vc).then(c => c ? c.key : null).catch(() => null)); return colKey.get(vc); };
+const resolve = id => { if (!memo.has(id)) memo.set(id, (async () => {
+const v = await figma.variables.getVariableByIdAsync(id); let out = v ? { to: v, kind: "same", from: v.name } : null;
+if (v && v.remote && v.key) { const ck = await colOf(v.variableCollectionId);
+if (!live || !ck || live.has(ck)) { const fr = await imp(v.key); if (fr && fr.id !== v.id) out = { to: fr, kind: "stale", from: v.name }; }
+else if (base) { const lo = v.name.toLowerCase(), key = byName.get(lo) || byName.get("components/" + lo) || byName.get(oldAlias(lo)) || byName.get("components/" + lo.replace(/-color-/g, "-")); const b = key ? await imp(key) : null; if (b) out = { to: b, kind: "orphan", from: v.name }; else miss.add(v.name); } }
+return out; })()); return memo.get(id); };
+const prefetch = ids => Promise.all([...new Set(ids.filter(Boolean))].map(resolve));
+return { resolve, prefetch, miss, err: !cols ? "no library access" : !base ? "Base color collection not available" : null };
+})();
+return _vr;
 }
 const paintIds = nodes => { const out = []; for (const n of nodes) for (const prop of ["fills", "strokes"]) { let ps; try { ps = n[prop]; } catch (e) { continue; } if (Array.isArray(ps)) for (const p of ps) if (p.boundVariables && p.boundVariables.color) out.push(p.boundVariables.color.id); } return out; };
 const BASE_TO_SEMANTIC = {
@@ -298,7 +302,7 @@ const kind = prop === "strokes" ? "border" : node.type === "TEXT" ? "text" : "bg
 if (!_semCache.has(key)) _semCache.set(key, figma.variables.importVariableByKeyAsync(key).catch(() => null)); return _semCache.get(key); }
 function oursOf(page) {
 const hdr = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name) && n.visible);
-const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name)))).concat(hdr ? hdr.findAll(n => isS(n) && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
+const slots = page.findAll(n => isB(n)).concat(hdr ? hdr.findAll(n => isS(n) && /^(Info slot|Additional info|Actions slot)/i.test(n.name)) : []);
 const nested = (q, top) => { for (let p = q.parent; p && p.id !== top.id; p = p.parent) if (p.type === "SLOT") return true; return false; };
 const out = []; const walk = (n, side) => { out.push([n, side]); if (n.type === "INSTANCE") { for (const sl of n.findAll(q => q.type === "SLOT" && !nested(q, n))) for (const k of sl.children) walk(k, side); return; }
 if ("children" in n) for (const k of n.children) walk(k, side); };
@@ -335,18 +339,17 @@ for (const [n, side] of ours) { if (!side || !shownIn(n) || n.width <= 100 || ca
 const tally = {}; for (const l of log) { const k = l.replace(/^.*? (padding|item|grid|radius)/, "$1"); tally[k] = (tally[k] || 0) + 1; }
 return { fixed: log.length, by: Object.entries(tally).slice(0, 10).map(([k, c]) => k + " ×" + c), rawPaints: rawPaints.slice(0, 10), rawSpacing: rawSpacing.slice(0, 10), noToken: noToken.slice(0, 10), sideWhites: sideWhites.slice(0, 6) }; }
 async function rebindOrphanVars(page) {
-  const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
-  const log = [];
-  const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
-  const ours = oursOf(page).map(e => e[0]); void slots;
-    await R.prefetch(paintIds(ours));
-  for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
-    let changed = false; const next = [];
-    for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await R.resolve(b.id) : null;
-      if (!t || t.kind === "same") { next.push(p); continue; } const base0 = JSON.parse(JSON.stringify(p)); delete base0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(base0, "color", t.to)); changed = true; log.push(t.from + (t.kind === "stale" ? " (stale copy)" : "") + " → " + t.to.name); }
-    if (changed) { try { n[prop] = next; } catch (e) {} } }
-  const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
-  return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...R.miss].slice(0, 6) };
+const R = await varResolver(); if (R.err) return { rebound: 0, missing: [R.err] };
+const log = [];
+const ours = oursOf(page).map(e => e[0]);
+await R.prefetch(paintIds(ours));
+for (const n of ours) for (const prop of ["fills", "strokes"]) { let paints; try { paints = n[prop]; } catch (e) { continue; } if (!Array.isArray(paints) || !paints.length) continue;
+let changed = false; const next = [];
+for (const p of paints) { const b = p.boundVariables && p.boundVariables.color; const t = b ? await R.resolve(b.id) : null;
+if (!t || t.kind === "same") { next.push(p); continue; } const base0 = JSON.parse(JSON.stringify(p)); delete base0.boundVariables; next.push(figma.variables.setBoundVariableForPaint(base0, "color", t.to)); changed = true; log.push(t.from + (t.kind === "stale" ? " (stale copy)" : "") + " → " + t.to.name); }
+if (changed) { try { n[prop] = next; } catch (e) {} } }
+const tally = {}; for (const l of log) tally[l] = (tally[l] || 0) + 1;
+return { rebound: log.length, by: Object.entries(tally).slice(0, 12).map(([k, c]) => k + " ×" + c), missing: [...R.miss].slice(0, 6) };
 }
 async function keepHeader(page) { const k = page.parent && "findChild" in page.parent ? page.parent.findChild(n => n.getSharedPluginData("sumsub_island", "hdrFor") === page.id) : null; if (!k) return null;
 k.visible = true; const h = page.findOne(n => n.type === "INSTANCE" && /^\*Header\*/.test(n.name)), mc = await k.getMainComponentAsync(); let r = null;
@@ -377,7 +380,7 @@ let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, r
 const gridIssues = stretchToWidth(page, !!refId);
 const side = fitSideColumns(page);
 const pb = page.absoluteTransform[1][2];
-const slots = page.findAll(n => isS(n) && (/^(Main content|Side content)$/.test(n.name) || (n.name === "Content" && n.parent && /Aside/.test(n.parent.name))));
+const slots = page.findAll(n => isB(n));
 const bottom = Math.max(0, ...slots.flatMap(s => s.children.filter(k => k.visible && k.layoutSizingVertical !== "FILL").map(k => k.absoluteTransform[1][2] - pb + k.height)));
 const rpg = refId ? await byId(refId) : null, rPg = rpg ? (rpg.type === "INSTANCE" && rpg.name === "Page" ? rpg : rpg.findOne(n => n.type === "INSTANCE" && n.name === "Page")) : null;
 const oh = Number(page.getSharedPluginData("sumsub_island", "origH")) || 0, rh = rPg ? Math.round(rPg.height) : 0;
@@ -389,9 +392,9 @@ const refRoot = refId ? await byId(refId) : null;
 const notIsland = ms2 ? ms2.children.filter(k => k.visible && k.name !== ICN && !isGraphic(k) && !cardLike(k) && !isCardLayout(k) && !["bare", "split"].includes(refPlacement(refRoot, k.name))).map(k => k.name) : ["no main slot"];
 const overflow = slots.map(s => { const sb = s.absoluteBoundingBox; const o = s.children.filter(k => k.visible && k.absoluteBoundingBox &&
 (k.absoluteBoundingBox.x + k.absoluteBoundingBox.width > sb.x + sb.width + 1)).map(k => k.name);
-  const inI = n => { for (let q = n.parent; q && q.id !== s.id; q = q.parent) { if (q.type === "SLOT") return false; if (q.type === "INSTANCE") return true; } return false; }, sh = n => { for (let q = n; q && q.id !== s.id; q = q.parent) if (q.visible === false) return false; return true; };
-  for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }
-  return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
+const inI = n => { for (let q = n.parent; q && q.id !== s.id; q = q.parent) { if (q.type === "SLOT") return false; if (q.type === "INSTANCE") return true; } return false; }, sh = n => { for (let q = n; q && q.id !== s.id; q = q.parent) if (q.visible === false) return false; return true; };
+for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }
+return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
 const items = ms2 ? ms2.children.filter(k => k.visible).map(k => k.name === ICN ? "ISL[" + ((k.findOne(n => isS(n)) || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
 return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }

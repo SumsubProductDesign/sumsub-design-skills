@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.260.0 — 2026-10-06 (island migration: the header wrapper's colours from the reference)
+- **The Applicant page header has the reference's border.** The designers give the `AP page header` a bottom border in `semantic/border/neutral/subtlest/normal` (#e5e7eb). After the migration it kept the component's own border, an outdated `base/neutral/30` (#e1e5ea), on all 8 Applicant page screens. The finish now takes the fill and border of the header wrapper from the reference as well. A repeat `copy` call fixes screens migrated earlier; the 8 test screens are already fixed.
+- **Audit 7.59 knows `*Status Select*`.** A status shown in a `*Status Select*` pill (Payment methods: "Approved") was reported as a bare status word in a table cell.
+- **Internal:** `finish.js` writes `isB(n)` for the body-slot test, has no line indentation and leaves out two helpers it never called, to make room (49 310 of 49 800 characters).
+
 ## v3.259.0 — 2026-10-06 (MSDK screens in the WebSDK skill)
 - **Mobile SDK screens are built by `websdk-mockup`, and now it knows them.** For MSDK (the native app) the SDK team's requests land in the WebSDK skill, not the Dashboard one. `websdk-mockup` now says that MSDK screens use the `Mobile SDK / UI Kit` library and the system font throughout: SF Pro Text / SF Pro Display on iOS, Roboto on Android. Manrope stays for WebSDK web screens only. The skill's description mentions MSDK, so the right skill picks these requests up.
 - **The missing-font fix moved into the WebSDK skill.** `fixMissingFonts` (from v3.258) now lives in `websdk-mockup` itself and runs on every MSDK instance before it is placed: a missing `SF Pro Text` / `SF Pro Display` becomes `SF Pro` in the same style. `sumsub-mockup` keeps a copy for the odd MSDK component in a Dashboard build, and its description is back to Dashboard screens only.
