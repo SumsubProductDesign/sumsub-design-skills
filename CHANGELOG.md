@@ -4,6 +4,14 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.262.0 — 2026-10-06 (product-motion: lessons from the latest review)
+- **Three new rules in `/sumsub-design:product-motion`.**
+  - Things that travel together keep their spacing until the story separates them, so no card looks like it lags behind.
+  - A marker sliding along a track starts softly and its tooltip changes size only once it has stopped, so it doesn't look jerky.
+  - When a review asks to change content (for example a repeated surname), the final frame changes on purpose: the layout is kept, the checks compare against the new look, and you are told that the static illustration in the source file is now out of date.
+- **Update packages say what changed.** `export_handoff.py --only … --changes changes.md` puts your notes in the README for the developer, and it no longer claims the last frame is the same when it isn't.
+- **Examples refreshed:** Blueprints (equal spacing on the wheel, list rows turning from skeletons into labels) and Applicant scoring (a smooth marker).
+
 ## v3.261.0 — 2026-10-06 (island migration: white screens)
 - **Old screens marked "Apply white" now migrate too.** The designers' table marks some screens white instead of grey + islands (Levels / Configurations). Pass `{ surface: "white" }` and the engine puts the screen on the new `Page` with one white body: `◻️ Main (Default)`, or `◻️ Nav + Main (Default)` when the original has a left navigation. There are no islands; the blocks stand bare in the body, and the header, tabs, actions and the finish work as on grey screens.
 - **The left navigation becomes the section navigation.** The original's nav items become `Section navigation` items with the same labels and the same item selected, and the search field is on when the original has one. Levels / Configurations: after the finish the page matches the reference, with the 640-wide `Configurations` block and 9 nav items, Fraud prevention selected.
