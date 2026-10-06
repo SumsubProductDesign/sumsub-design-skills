@@ -4,7 +4,11 @@
 // writes its text to <outdir>/<prefix>.jsx for grepping, and curls every asset
 // it references into <outdir>/icons/. Asset traffic costs no tokens.
 const fs = require('fs'), path = require('path'), {execSync} = require('child_process');
-const [file, prefix = '', outdir = '_work/figma-ref'] = process.argv.slice(2);
+// the default outdir is the project's _work/figma-ref, found by walking up from the cwd to the folder that
+// holds _work: run from inside _work/figma-ref it used to create _work/figma-ref/_work/figma-ref/
+let root = process.cwd(); while (!fs.existsSync(path.join(root, '_work')) && path.dirname(root) !== root) root = path.dirname(root);
+if (!fs.existsSync(path.join(root, '_work'))) root = process.cwd();
+const [file, prefix = '', outdir = path.join(root, '_work/figma-ref')] = process.argv.slice(2);
 if (!file) { console.error('usage: grab.js <persisted.json> <prefix> [outdir]'); process.exit(1); }
 const j = JSON.parse(fs.readFileSync(file, 'utf8'));
 const txt = (Array.isArray(j) ? j.map(x => x.text) : [j.text || JSON.stringify(j)]).join('\n=====\n');

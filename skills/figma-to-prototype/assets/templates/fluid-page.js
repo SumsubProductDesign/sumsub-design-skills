@@ -3,6 +3,7 @@
 // frame's, and the island's own gutter on both sides.
 //
 //   render({frameWidth, gap, gutter, primary: {width, min}, aside: {width}}, primaryHtml, asideHtml)
+//   shellMinWidth(spec, shellOrigin, canvasWidth) → the shell's "minWidth" for that floor (below)
 //
 // The three numbers that come from the frame are frameWidth (the content block's
 // width where the frame draws it), primary.width and aside.width. The one number
@@ -36,4 +37,18 @@ function render(spec, primaryHtml, asideHtml) {
   return {css: css(s), html};
 }
 
-module.exports = {render};
+// shellMinWidth(spec, origin, canvasWidth) — the window width under which the page must scroll instead of
+// shrinking further: the slot's left edge + the page at its floor (two gutters, the primary column's min, the
+// gap, the aside) + the island's inset on the right. Put it in the shell config as "minWidth". The floor and
+// the shell's minimum are one number seen from two sides; set only the floor and, below the shell's own
+// minimum, the island clips the aside instead of the window scrolling (2026-10-06: floor 534, the content cut
+// at 1280, until minWidth was raised by hand to 1314 — what this returns for that page).
+//   origin: the shell's contentOrigin (shell.js prints it) at a fixed canvas of canvasWidth
+function shellMinWidth(spec, origin, canvasWidth) {
+  const s = Object.assign({gap: 64, gutter: 32}, spec);
+  const min = (spec.primary && spec.primary.min != null) ? spec.primary.min : 480, aside = (spec.aside && spec.aside.width != null) ? spec.aside.width : 380;
+  const rightInset = canvasWidth - origin.x - origin.w;
+  return Math.ceil(origin.x + 2 * s.gutter + min + s.gap + aside + rightInset);
+}
+
+module.exports = {render, shellMinWidth};

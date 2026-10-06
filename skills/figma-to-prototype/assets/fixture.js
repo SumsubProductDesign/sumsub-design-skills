@@ -35,7 +35,7 @@ const body = `<div class="fx">
     ${C.card({size: 'large', color: 'yellow', title: 'Coloured card', body: inner})}
   </main></div>`;
 page = page.replace(/(<div id="content-slot"[^>]*>)(<\/div>)/, (m, o) => o + body + '</div>');
-page = page.replace('</head>', `<style>${C.css}
+page = page.replace('</head>', () => `<style>${C.css}
 .fx{display:flex;align-items:flex-start;gap:24px;padding:16px}
 .fx-side{flex:0 0 320px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
 .fx-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:16px}

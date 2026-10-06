@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// crop.js <reference.png> <prototype.png> <x> <y> <w> <h> [zoom] [bx] [by] [out.png]
+// crop.js <reference.png> <prototype.png> <x> <y> <w> <h> [zoom] [bx by] [out.png]
 // Stacked comparison: reference above, prototype below, same crop, zoomed.
 // bx/by let the second image be cropped at a different origin (different canvas offsets).
 const {execSync} = require('child_process'), fs = require('fs'), path = require('path'), os = require('os');
@@ -7,8 +7,12 @@ const {CHROME} = require(path.join(__dirname, '_chrome.cjs'));
 // default output goes next to the other renders when the project layout exists,
 // so a comparison does not end up beside the deliverable
 const defOut = fs.existsSync('_work/shots') ? '_work/shots/compare.png' : 'compare.png';
-const [a, b, x, y, w, h, z = 1, bx = x, by = y, out = defOut] = process.argv.slice(2);
-const usage = 'usage: crop.js <ref.png> <proto.png> <x> <y> <w> <h> [zoom] [bx] [by] [out.png]';
+let args = process.argv.slice(2);
+// the common call is `… <zoom> out.png` — an eighth argument that is a .png is the output, and
+// bx/by default to x/y. Passing `0 0` as bx/by is not "omit": it crops the prototype from 0,0
+if (args.length === 8 && /\.png$/i.test(args[7])) args = [...args.slice(0, 7), args[2], args[3], args[7]];
+const [a, b, x, y, w, h, z = 1, bx = x, by = y, out = defOut] = args;
+const usage = 'usage: crop.js <ref.png> <proto.png> <x> <y> <w> <h> [zoom] [bx by] [out.png]   (bx by: the prototype\'s origin for the same crop — pass x y again, not 0 0, unless the canvases are offset)';
 if (!b) { console.error(usage); process.exit(1); }
 // out is the TENTH argument. Passed as the eighth it lands in bx, the second pane is offset by
 // NaN, and the comparison comes out as two labels over nothing — written to the default path,
@@ -16,7 +20,7 @@ if (!b) { console.error(usage); process.exit(1); }
 for (const [name, v] of [['x', x], ['y', y], ['w', w], ['h', h], ['zoom', z], ['bx', bx], ['by', by]]) {
   if (!Number.isFinite(Number(v))) {
     console.error(`crop.js: ${name} is "${v}", not a number.\n${usage}\n` +
-      (String(v).endsWith('.png') ? '       an output path goes LAST, after bx and by — or omit both: crop.js … <zoom> <x> <y> <out.png>' : ''));
+      (String(v).endsWith('.png') ? '       an output path goes LAST: crop.js … <zoom> <out.png>, or crop.js … <zoom> <bx> <by> <out.png>' : ''));
     process.exit(1);
   }
 }

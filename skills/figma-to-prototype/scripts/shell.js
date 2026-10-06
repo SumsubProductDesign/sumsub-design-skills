@@ -16,7 +16,8 @@
 //              "tabs": ["Tab_1", {"label": "Tab_2", "tag": "Beta"}], "activeTab": "Tab_1",   // either layout; a tab may carry a Tag Colorful
 //              "actions": ["Request check"]},         // fullscreen: secondary buttons left of the AI button
 //     "minWidth": 1440,                    // viewport canvas only: below this the page scrolls sideways (pinned content = the frame's width)
-//     "sidebar": "expanded",               // basic: "collapsed" = the 52 rail with an Expand row, header unchanged
+//     "sidebar": "expanded",               // basic: "collapsed" = the 52 rail with an Expand row, header unchanged;
+//                                          // {"plate": "<png>", "width": 256}: the frame's own sidebar, baked (below)
 //     "production": true,                  // basic: the Production toggle state
 //     "menu": { "active": ["Integrations", "Global settings", "AML screening"],
 //               "expanded": [],            // extra groups to open besides the active path (basic)
@@ -26,7 +27,8 @@
 //               "override": null },        // a full items array instead of menu.json (tests)
 //   The active path must exist in the rendered menu; otherwise shell.js stops with the reason
 //   (hidden item → name it in items; new leaf → children; frame outdated → the product's item).
-//     "hover": true }                      // the product's hover on menu items
+//     "hover": true,                       // the product's hover on menu items
+//     "scroll": true }                     // fixed canvas: the island scrolls content taller than it (viewport: always)
 //
 // Output: a full HTML page whose #content-slot is where the prototype's content
 // goes (absolutely positioned children; origin printed as JSON), or with
@@ -36,6 +38,7 @@
 // "frame": {"fileKey", "nodeId", "width", "height"} — where the shell's state was read from; shellgate.sh
 //   takes the frame size from it, the ledger line quotes it.
 const fs = require('fs'), path = require('path');
+const {uniq} = require(path.join(__dirname, '_svg.cjs'));
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const cfgPath = args.find(a => !a.startsWith('--') && a.endsWith('.json'));
@@ -45,12 +48,28 @@ const FRAGMENT = args.includes('--fragment');
 const C = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
 const LAYOUT = C.layout === 'fullscreen' ? 'fullscreen' : 'basic';
 const COLLAPSED = LAYOUT === 'basic' && C.sidebar === 'collapsed';   // the product's Collapse state: rail + basic header
+// "sidebar": {"plate": "frame-sidebar@2x.png", "width": 256} — the frame's own sidebar, baked: the answer when the
+// shell gate's ASK came back "the frame's chrome" (the menu differs on purpose, or is newer than menu.json). The
+// plate is the sidebar cut from the frame's 2x export; the island and the slot start at its width, so nothing is
+// shifted by hand — the 2026-10-02 Device list moved its island from 264 to 256 itself. The path is relative to the
+// config file; the menu config is not used
+const PLATE = C.sidebar && typeof C.sidebar === 'object' && C.sidebar.plate ? C.sidebar : null;
+if (PLATE) {
+  const pf = path.resolve(path.dirname(cfgPath), PLATE.plate);
+  if (!fs.existsSync(pf)) { console.error('shell.js: sidebar plate not found: ' + pf); process.exit(1); }
+  if (!(PLATE.width > 0)) { console.error('shell.js: sidebar.width is the plate\'s width in canvas px (the 2x export shown at half)'); process.exit(1); }
+  PLATE.src = 'data:image/' + (/\.webp$/i.test(pf) ? 'webp' : 'png') + ';base64,' + fs.readFileSync(pf).toString('base64');
+}
 // canvas: {"width": 1920, "height": 1080} for a fixed prototype canvas, or "viewport" for a
 // shell that fills the window and follows a resize — the sidebar keeps its width, the island
 // and the content slot take the rest (what the product does; its minimum is 640px of island)
 const canvasOpt = opt('--canvas', null);
 if (canvasOpt) { const [w, h] = canvasOpt.split('x').map(Number); if (w && h) C.canvas = {width: w, height: h}; }
 const VIEWPORT = C.canvas === 'viewport';
+// "scroll": true — a fixed canvas whose content is taller than the island scrolls it, as the viewport
+// canvas always does. A list page taller than the island was clipped at 788 on a 900 canvas, and the
+// 2026-10-02 run added overflow-y by hand
+const SCROLL = VIEWPORT || C.scroll === true;
 const canvas = VIEWPORT ? {width: 1920, height: 1080} : Object.assign({width: 1920, height: 1080}, C.canvas);
 const page = Object.assign({title: 'Page title', keyName: 'Key name', section: 'Section name', tabs: [], activeTab: null, actions: []}, C.page);
 const menuCfg = Object.assign({active: [], expanded: [], items: null, children: null, override: null}, C.menu);
@@ -73,11 +92,19 @@ const icon = (name) => {
       const fill = (at.match(/\sfill="[^"]*"/) || [''])[0];
       return `<svg ${vb}${fill} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:100%">`;
     });
+  // ids unique per copy: the header's AI sparkle carries a gradient, and a second copy (a hidden
+  // state, a second button) would reference the first — blank if that one is display:none (_svg.cjs)
+  const u = uniq(svg);
   const g = INSETS[name];
-  if (!g) return svg;
-  return `<span style="position:relative;display:block;width:100%;height:100%"><span style="position:absolute;left:${g.left / 24 * 100}%;top:${g.top / 24 * 100}%;width:${g.width / 24 * 100}%;height:${g.height / 24 * 100}%">${svg}</span></span>`;
+  if (!g) return u;
+  return `<span style="position:relative;display:block;width:100%;height:100%"><span style="position:absolute;left:${g.left / 24 * 100}%;top:${g.top / 24 * 100}%;width:${g.width / 24 * 100}%;height:${g.height / 24 * 100}%">${u}</span></span>`;
 };
 const fontB64 = fs.readFileSync(path.join(ASSETS, 'geist-variable.woff2')).toString('base64');
+// Geist Mono is the product's mono family (--font-family-mono: document numbers, ids, code). Without
+// it every mono text fell back to SF Mono or Menlo: other widths, other digits, and on 2026-10-02 the
+// worst zone of the OCR run (the Number field, 6%). Embedded on every page, ~95 KB as base64, because
+// the shell cannot know whether the content will need it, and a silent fallback is the defect
+const monoB64 = fs.readFileSync(path.join(ASSETS, 'geist-mono-variable.woff2')).toString('base64');
 const menu = menuCfg.override || JSON.parse(fs.readFileSync(path.join(ASSETS, 'menu.json'), 'utf8')).items;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
@@ -97,15 +124,18 @@ if (menuCfg.children) for (const k of Object.keys(menuCfg.children)) if (!items.
 const isActiveLeaf = (p) => p.length === active.length && p.every((l, i) => l === active[i]);
 const onActivePath = (p) => p.every((l, i) => l === active[i]);
 const hasChildren = n => Array.isArray(n.children) && n.children.length > 0;
-if (active.length) {                              // the active path must resolve — a silent miss renders nothing active
+if (active.length && !PLATE) {   // a baked sidebar has no menu to resolve                              // the active path must resolve — a silent miss renders nothing active
   let level = items, where = [];
   for (const label of active) {
     const node = level.find(n => n.label === label);
     if (!node) {
       const inFile = menu.find(n => n.label === label);
-      const why = inFile && inFile.hidden ? `"${label}" is hidden in menu.json — name it in menu.items to show it`
+      // every branch is a question for the person first: the 2026-10-02 run followed "name it in
+      // menu.items" without asking, the sidebar then differed from the frame, and the user saw it
+      // only on the published link
+      const why = inFile && inFile.hidden ? `"${label}" is hidden in menu.json. ASK the user before showing it (name it in menu.items) — the product hides it for a reason, and the frame may draw a newer menu: references/shell.md § When the frame's menu disagrees with the shell`
         : where.length === 0 ? `"${label}" is not a top-level item in menu.json`
-        : `"${label}" is not under ${where.join(' → ')} in menu.json — a leaf the design adds on purpose goes into menu.children; an outdated frame means: use the product's item and note it in the ledger`;
+        : `"${label}" is not under ${where.join(' → ')} in menu.json. ASK the user: a leaf the design adds on purpose goes into menu.children; an outdated frame means the product's item and a ledger line`;
       console.error(`shell.js: active path not found: ${why}`); process.exit(2);
     }
     where.push(label); level = node.children || [];
@@ -203,7 +233,7 @@ const headerBasic = () => `
   <div class="hleft">${backControl()}<span class="title">${esc(page.title)}</span><span class="kn">${esc(page.keyName)}</span>${pageTag()}</div>
   <div class="actions">
     <div class="search"><span class="ic16">${icon('header-search')}</span><span class="ph">Search anything here</span><span class="keys"><span class="k">⌘</span><span class="k">K</span></span></div>
-    <div class="ai"><span class="ic16">${icon('header-ai-sparkle')}</span></div>
+    <div class="sh-ai"><span class="ic16">${icon('header-ai-sparkle')}</span></div>
     <div class="nav">
       <div class="action">
         <div class="toggle${C.production === false ? ' off' : ''}"><span class="sw"><span class="hd"></span></span><span class="tl">Production</span></div>
@@ -253,7 +283,7 @@ const headerFullscreen = () => `
   <div class="frow">
     <div class="finfo">${page.section ? `<span class="crumb">${esc(page.section)}</span><span class="crumb">/</span>` : ''}<span class="title">${esc(page.title)}</span><span class="kn">${esc(page.keyName)}</span></div>
     <div class="factions">
-      <div class="grp">${(page.actions || []).map(fbtn).join('')}<button type="button" class="ai" aria-label="Summy AI"><span class="ic16">${icon('header-ai-sparkle')}</span></button></div>
+      <div class="grp">${(page.actions || []).map(fbtn).join('')}<button type="button" class="sh-ai" aria-label="Summy AI"><span class="ic16">${icon('header-ai-sparkle')}</span></button></div>
       <button type="button" class="ibtn" aria-label="Help"><span class="ic16">${icon('header-question')}</span></button>
     </div>
   </div>
@@ -270,7 +300,7 @@ const GAP = ISLAND ? 8 : 0, PAD = ISLAND ? 20 : 0, TOPPAD = ISLAND ? 20 : 8, SUB
 // which is what the product's Applicant page shows: the ID chips and Add tag under the title
 const INFO = [].concat((C.page && C.page.info) || []).filter(Boolean);
 const HEADER = (C.layout === 'fullscreen' && INFO.length) ? 84 : 56;
-const SIDE = LAYOUT === 'basic' && !COLLAPSED ? 264 : 52;   // expanded: 256 of content + the 8px scrollbar gutter, always reserved (the product's width; the Figma component is 257)
+const SIDE = PLATE ? PLATE.width : LAYOUT === 'basic' && !COLLAPSED ? 264 : 52;   // expanded: 256 of content + the 8px scrollbar gutter, always reserved (the product's width; the Figma component is 257)
 const TOP = HEADER + (tabs.length ? SUB : 0);   // both layouts: the subheader adds 41 when tabs are given
 const origin = VIEWPORT
   ? {x: SIDE + PAD, y: GAP + TOP + TOPPAD, w: null, h: null, note: 'viewport canvas: width and height follow the window'}
@@ -278,6 +308,7 @@ const origin = VIEWPORT
 
 const css = `
 @font-face{font-family:"Geist";font-style:normal;font-weight:100 900;font-display:block;src:url(data:font/woff2;base64,${fontB64}) format("woff2-variations")}
+@font-face{font-family:"Geist Mono";font-style:normal;font-weight:100 900;font-display:block;src:url(data:font/woff2;base64,${monoB64}) format("woff2-variations")}
 /* the type is declared on the PAGE, not only on .sh-root: anything a prototype anchors to the viewport —
    a toast, a modal, a drawer — sits next to the root and would otherwise fall back to Times (found on the
    AML run, 2026-09-18). A fixed canvas is centred in a wider window, as Step 4's contract requires. */
@@ -367,7 +398,7 @@ ${ISLAND ? `.sh-body::after{content:"";position:absolute;inset:0;border-radius:1
 .sh-header .ph{flex:1;min-width:0;color:#586073;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sh-header .keys{display:flex;gap:2px;flex:none}
 .sh-header .k{min-width:20px;padding:2px 4px;background:#e5e7eb;border-radius:8px;font-size:12px;line-height:16px;font-weight:500;color:#1e2939;text-align:center}
-.ai{display:block;width:32px;height:32px;padding:8px;box-shadow:inset 0 0 0 1px #e9d5ff;border-radius:8px;background:linear-gradient(90.17deg,#e0e7ff 0%,#f3e8ff 100%)}
+.sh-ai{display:block;width:32px;height:32px;padding:8px;box-shadow:inset 0 0 0 1px #e9d5ff;border-radius:8px;background:linear-gradient(90.17deg,#e0e7ff 0%,#f3e8ff 100%)}
 .sh-header .nav{display:flex;align-items:center;gap:16px}
 .sh-header .action{display:flex;align-items:center;gap:8px}
 .sh-header .toggle{display:flex;align-items:center;gap:8px;height:24px;width:106px}  /* Figma: 28 switch + 8 + 70 label; fixed so text rounding cannot move the cluster */
@@ -379,8 +410,8 @@ ${ISLAND ? `.sh-body::after{content:"";position:absolute;inset:0;border-radius:1
 .sh-header .btns{display:flex;align-items:center}
 .ibtn{display:block;padding:8px;border-radius:8px;border:0;background:none;cursor:pointer;color:inherit}
 .sh-fheader .ibtn:hover{background:#f3f4f6}
-.sh-fheader .ai{border:0;cursor:pointer;padding:8px}
-.sh-fheader .ibtn:focus-visible,.sh-fheader .ai:focus-visible{outline:none;box-shadow:0 0 0 1px #fff,0 0 0 3px #60a5fa}
+.sh-fheader .sh-ai{border:0;cursor:pointer;padding:8px}
+.sh-fheader .ibtn:focus-visible,.sh-fheader .sh-ai:focus-visible{outline:none;box-shadow:0 0 0 1px #fff,0 0 0 3px #60a5fa}
 .sh-header .userpic{position:relative;width:32px;height:32px;border-radius:100px;background:#edeff2;overflow:hidden}
 .sh-header .u1{position:absolute;left:15.63%;right:15.63%;bottom:25%;height:11.636px}
 .sh-header .u2{position:absolute;left:26.67%;right:26.67%;bottom:calc(25% + 11.64px);height:4.364px}
@@ -435,11 +466,12 @@ ${ISLAND ? `.sh-body::after{content:"";position:absolute;inset:0;border-radius:1
 .sh-sub .tag{display:block;padding:2px 8px;border-radius:8px;background:#dbeafe;box-shadow:inset 0 0 0 1px #bfdbfe;font-size:12px;line-height:16px;font-weight:500;color:#1e40af}  /* Tag Colorful, Blue, Small: stroke inside */
 .sh-sub .tab.sel{color:#1e2939;box-shadow:inset 0 -2px 0 #030712}
 ${hover ? `.sh-sub .tab{cursor:pointer}` : ''}
-.sh-content{flex:1;min-height:0;position:relative;padding:${TOPPAD}px ${PAD}px ${PAD}px${VIEWPORT ? ';overflow-y:auto' : ''}}
-#content-slot{position:relative;width:100%;${VIEWPORT ? 'min-height:100%' : 'height:100%'}}  /* viewport: the slot grows with elastic content and the island scrolls it, as the product does */
+.sh-content{flex:1;min-height:0;position:relative;padding:${TOPPAD}px ${PAD}px ${PAD}px${SCROLL ? ';overflow-y:auto' : ''}}
+#content-slot{position:relative;width:100%;${SCROLL ? 'min-height:100%' : 'height:100%'}}  /* viewport: the slot grows with elastic content and the island scrolls it, as the product does */
 `;
 
-const markup = `<div class="sh-root sh-${LAYOUT}" id="shell">${LAYOUT === 'fullscreen' ? sidebarRail() : COLLAPSED ? sidebarCollapsed() : sidebarBasic()}
+const sidebarPlate = () => `<div class="sh-side sh-side-plate"><img src="${PLATE.src}" alt="" style="display:block;width:${PLATE.width}px;height:auto"></div>`;
+const markup = `<div class="sh-root sh-${LAYOUT}" id="shell">${PLATE ? sidebarPlate() : LAYOUT === 'fullscreen' ? sidebarRail() : COLLAPSED ? sidebarCollapsed() : sidebarBasic()}
 <div class="sh-island"><div class="sh-body">${LAYOUT === 'basic' ? headerBasic() : headerFullscreen()}
 <div class="sh-content"><div id="content-slot" data-origin='${JSON.stringify(origin)}'></div></div>
 </div></div>
@@ -452,5 +484,5 @@ const out = FRAGMENT ? `<style>${css}</style>\n${markup}` :
 `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${esc(page.title)}</title>
 <style>html,body{margin:0;background:#f3f4f6}${VIEWPORT ? 'html,body{height:100%;overflow:hidden' + (ISLAND ? '' : ';overflow-x:auto') + '}' : ''}${css}</style></head><body>${markup}</body></html>`;
 const outPath = opt('--out', null);
-if (outPath) { fs.writeFileSync(outPath, out); console.log(JSON.stringify({out: outPath, bytes: out.length, layout: LAYOUT, sidebarState: COLLAPSED ? "collapsed" : "expanded", contentOrigin: origin, sidebar: SIDE, header: TOP, canvas: VIEWPORT ? "viewport" : canvas, items: items.length, activeIndex: items.findIndex(i => i.label === active[0]), frame: C.frame || null})); }
+if (outPath) { fs.mkdirSync(path.dirname(path.resolve(outPath)), {recursive: true}); fs.writeFileSync(outPath, out); console.log(JSON.stringify({out: outPath, bytes: out.length, layout: LAYOUT, sidebarState: COLLAPSED ? "collapsed" : "expanded", contentOrigin: origin, sidebar: SIDE, header: TOP, canvas: VIEWPORT ? "viewport" : canvas, items: items.length, activeIndex: items.findIndex(i => i.label === active[0]), frame: C.frame || null})); }
 else process.stdout.write(out);

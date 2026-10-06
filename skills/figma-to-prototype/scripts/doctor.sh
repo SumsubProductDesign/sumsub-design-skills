@@ -67,7 +67,17 @@ fi
 
 if [ "$1" = "--vercel" ]; then
   . "$DIR/_vercel.sh"
-  if WHO=$(vc_require_auth 2>&1); then pass "vercel: logged in as $WHO"
+  # npx runs the Vercel CLI out of npm's cache; a cache with files owned by root (an earlier
+  # `sudo npm …`) makes every npx call die on EACCES before it gets to the login question. The
+  # 2026-10-02 run met it as a blocked publish and a whoami that hung; the fix needs sudo, so it
+  # is printed for the person to run, never run here
+  NPMC="$(npm config get cache 2>/dev/null || echo "$HOME/.npm")"; ME="${DOCTOR_UID:-$(id -u)}"
+  ROOTED="$( [ -d "$NPMC" ] && find "$NPMC" -maxdepth 3 ! -user "$ME" -print -quit 2>/dev/null )"
+  if [ "$VC" != "vercel" ] && [ -n "$ROOTED" ]; then
+    warn "vercel: npm's cache ($NPMC) holds files you do not own (e.g. $ROOTED) — npx cannot run the Vercel CLI"
+    echo "        without it:  Step 9 on Vercel only — the prototype is still built, and an artifact (artifact-page.js) still publishes"
+    echo "        fix:         sudo chown -R $(id -u):$(id -g) \"$NPMC\"   (yours to run: it needs your password)"
+  elif WHO=$(vc_require_auth 2>&1); then pass "vercel: logged in as $WHO"
   else
     warn "vercel: $WHO"
     echo "        without it:  Step 9 only — the prototype is still built and handed over as a file"

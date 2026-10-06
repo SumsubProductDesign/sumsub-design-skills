@@ -6,11 +6,20 @@
 > centred run, any run in an implicit box, and every comparison against an
 > exported SVG needs the baseline arithmetic below, and the offset is always
 > measured, never computed. Inside a scaled instance, divide the design
-> context's font size by the instance scale first (`figma-mcp.md`).
+> context's font size by the instance scale first (`figma-mcp.md` § Double scaling inside scaled instances).
 
 Text is where a pixel-exact prototype is won or lost. Boxes are easy — the
 export gives you x/y/w/h and you write it down. Text gives you a *pen origin*
 and a *baseline*, and CSS gives you neither.
+
+## Contents
+
+- Position a run by pen origin and baseline
+- Measure the baseline offset, never compute it
+- Ink metrics: `measureText`, not `getBBox`
+- Live vs outlined exports diverge measurably
+- Centred runs: a fixed `left` encodes the old string
+- Fonts
 
 ## Position a run by pen origin and baseline
 
@@ -149,6 +158,14 @@ the substitution.
 
 Load with `display=block` rather than `swap`. A fallback face rendered for even
 one frame is a face you might accidentally measure.
+
+`document.fonts.check()` is not a load check. In headless Chrome it answered
+`true` while the Google Fonts stylesheet had not loaded at all, and every
+measurement that followed was of the fallback face — the double-scaled sizes of
+2026-09-24 hid behind that `true` for a whole cycle. Embed the family as a
+data-URI (the shell does this for Geist; the project's `_work/fonts/` for the
+rest, latin subsets from Google Fonts) so there is nothing to wait for, and
+prove the face with an ink box against the reference, never with the API.
 
 The baseline offsets you measure belong to the font build on the measuring
 machine. A locally installed family and the Google Fonts build of the same

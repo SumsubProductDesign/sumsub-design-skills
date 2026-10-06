@@ -31,7 +31,10 @@ starting, move the previous run's folder out of that parent with one rename
 and check `ls` afterwards; only then create the new folder. Never delete the
 previous run to make room — rename it. The person running the check knows the
 checklist; the agent must not see it, so the first message contains the brief
-itself, never a reference to this file.
+itself, never a reference to this file. The brief invokes the bare
+`/figma-to-prototype`: with the plugin installed, `/sumsub-design:figma-to-prototype`
+resolves to the plugin's copy, and the dev copy under `.claude/skills/` is never read
+(run 11 went that way).
 
 Steer only by answering the agent's own questions with the answers in §2.
 
@@ -83,7 +86,7 @@ that is a finding (§3, first row) — answer anyway and note it.
 | purpose | moderated interview with a client |
 | tasks | the three steps in the brief, as written |
 | reference canvas | "you decide from the frames and tell me why" — see §3 on what a good answer is. Row 23: the 1920 frames in front of 1440 screens are the case the canvas row names, so an elastic mode must at least be offered |
-| adaptivity | fixed, no scaling |
+| adaptivity | no scaling of the whole page. If the agent offers the elastic form for the 1920 frames (row 23), take it; "fixed" here predates row 23 and contradicted it |
 | one file or a folder | one file |
 | hover policy | the default table from SKILL.md, unchanged |
 | shell | the default dashboard shell. The AML frames carry the previous shell (276px two-column sidebar), so the gate must report a large difference and the agent must still choose the default without being told twice |
@@ -92,6 +95,8 @@ that is a finding (§3, first row) — answer anyway and note it.
 | accuracy threshold | the AML frames are the previous generation, so the gates are the verdict (landmarks, per-band residuals ≤1px) and each design-system difference is a ledger line. Where the frame and the components agree — the content, the layout, the baked plates — ≤3% per frame and ≤2% per text-free zone still hold |
 | fonts | "whatever the file says; tell me if it is not available" |
 | which frame is canonical for a shared area that differs | frame 2 |
+| Save changes with an empty Search profile ID | it saves and shows the toast — frame 2 draws the button enabled with the field empty (row 6: enabled once anything changed) |
+| how the toast closes | it stays until its × (row 7) |
 | publish? | no |
 
 ## 3. What the run must do
@@ -109,15 +114,15 @@ that sentence; do not add a new rule.
 | 5 | For each task names the control that answers it and confirms it is interactive — in particular the input accepts **any typed value**, not only the design's sample id | Step 1, second rule |
 | 6 | Treats state as computed, not copied: Save changes is disabled at rest, enabled once something changed, disabled again after saving; the radio swap replaces the Warning types block with the input and moves everything below it up | Step 6 "Verbatim for chrome, computed for state" |
 | 7 | The toast appears on Save, sits where frame 3 has it, closes on ×, and does not animate | Step 6, interaction-plumbing.md |
-| 8 | Runs the verification and reports numbers: zone diff per frame against the Figma PNG within the threshold; regression diff against the previous accepted render at 0.00% on untouched zones | Step 7 |
-| 9 | Probes the real path end to end in a fresh process: click radio → type → click Save → assert toast and disabled button; clicks a scenery element and asserts nothing changed | verification.md "Pick the method before you start measuring" |
+| 8 | Runs the verification and reports numbers: zone diff per frame against the Figma PNG within the threshold; regression diff against the previous accepted render at 0.00% on untouched zones; `statecheck.sh --texts`, scoped to each live zone, finds every string of its design context | Step 7 |
+| 9 | Probes the real path end to end in a fresh process: click radio → type → click Save → assert toast and disabled button; clicks a scenery element and asserts nothing changed; and runs `statecheck.sh --hits` in each state the path passes through (page, the open menu, the toast) with 0 BLOCKED — a probe's `click()` reaching a handler is not evidence that a person can reach it | verification.md "Pick the method before you start measuring" |
 | 10 | Says every hover needs one human look; does not claim to have verified it | Step 7 |
 | 11 | Delivers `<name>.html` (one self-contained file), `deviations.md`, `handoff.md` with the interaction inventory and the measured baseline table, `_work/run-log.md` filled in as the run went, and `_work/` in the documented layout | Step 8, "Before you start" |
 | 12 | Lists its decisions in the final response (what is inert, what was approximated, which frame won a divergence) | "Asking versus deciding" |
 | 13 | Does not publish; offers it in one line at the end, at most | Step 9, publishing.md |
 | 14 | Total tokens for the run within 1.5× of the last accepted run's figure (§4) | intro budget |
 | 15 | Baked plates are 2x: one `download_assets` export of the frame at `defaultScale: 2`, cut with `cut.js`, and the probe asserts `naturalWidth === 2 × clientWidth` on each. On a retina display the plates must be indistinguishable from the markup | Step 5, baking.md |
-| 15a | Nothing that carries state is baked, and a baked panel meets both conditions of the exception: no task touches it, nothing inside changes under a click. The trade-off is in the ledger, with what rebuilding it would cost | Step 5, baking.md § What to bake, what not to |
+| 15a | Nothing that carries state is baked, and a baked panel meets both conditions of the exception: no task touches it, nothing inside changes under a click. A plate plan is in the ledger before anything is cut: per plate, the live controls on top and whether a task could change their labels, number or order. The trade-off is in the ledger, with what rebuilding it would cost | Step 5, baking.md § What to bake, what not to |
 | 16 | Runs the shell gate before extracting content: renders the default shell in the frame's state (Integrations → Global settings → AML screening active), diffs the frame's sidebar and header against it, reports the numbers, uses the default shell, and does **not** bake the frame's sidebar or header. Content sits in an anchor at the slot origin; `handoff.md` records the shell version and the gate result | Step 0 parameters, Step 2, Step 4, shell.md |
 | 17 | Builds the live controls from `assets/components/controls.js` where a component exists — the radios, the profile-ID field, the Save button and the toast — rather than hand-writing their CSS; reads the state it needs from the component, not from the mockup's silence; and puts each disagreement with the design (the mockup's field is radius 4 `#c4cad4` against the product's 8 `#d1d5dc`) in the ledger instead of asking. `handoff.md` names the components used and anything hand-built | Step 3, components/VERSION.md |
 | 18 | The built prototype's controls carry their own state (rule 4): every radio in the tested form picks within its own group, every checkbox toggles, each field takes focus from a click anywhere in its box and its value can be selected, and a select with items opens its menu and closes on Escape. Checked in the delivered file, not in a component demo | Step 3, rule 4, components/VERSION.md |
@@ -125,8 +130,11 @@ that sentence; do not add a new rule.
 | 20 | The header's back control and any status pill come from the shell's `page.back` and `page.tag`, and the content sits in the slot through the generator. The built file is never edited to add them | Step 3, shell.md |
 | 22 | **The pre-flight version check matches the install.** Score whichever case the run is in. *Standalone* (the skill is a folder under `~/.claude/skills/`, no plugin root to resolve): the check must skip in silence — a WebFetch, a version banner or a question about updating at the top of the session is a fail, it would meet every colleague who installed the skill without the plugin. *Inside the `sumsub-design` plugin* (the shipping case since v3.204.0, plugin root populated): the check must run and follow the same STOP rules as the sibling skills — silence there is the fail | SKILL.md, Pre-flight |
 | 23 | **Offers an elastic content mode**, because the frames are 1920 and the respondents' screens are 1440 — the case the canvas row names. The page is a form beside a card, so *elastic form* (`fluid-page.js`) is the mode that fits; *fluid shell, pinned content* is a defensible second answer only if it is offered beside the elastic one and its cost is named. Silently pinning the content, as run 5 did before the row existed, is a fail | Step 0 parameters, canvas |
-| 24 | **The run log is written as the run goes, not assembled at the end**, and section 6 — where the skill was wrong — is filled in with something real: a correction made by hand, a claim it could not support, a place it was slow. An empty section 6 after a run that needed corrections is a fail. It is offered once and sent nowhere | Step 8, `assets/run-log-template.md` |
+| 24 | **The run log is written as the run goes, not assembled at the end**, and section 6 — where the skill was wrong — is filled in with something real: a correction made by hand, a claim it could not support, a place it was slow. An empty section 6 after a run that needed corrections is a fail. It is offered once and sent nowhere. It is started by the skill in Step 0, not left to the person; §5 is the output of `runstats.cjs`, not "not measured"; every §6 entry carries *found by* and *cost*; and §8 holds the requester's own line or "not said" | Step 0 *Open the run log*, Step 8, `assets/run-log-template.md` |
 | 21 | The delivered file works from the keyboard: Tab reaches every live control, Space or Enter acts on it, Escape closes an open menu, and each field's label is a `<label for>` that a screen reader announces. Checked in the file, with the components' `script` in place | components/VERSION.md § Accessible by construction |
+| 25 | **Invents no domain data.** The Step 0 message lists every value the tasks need that no frame draws (a select's other options, what Save leads to beyond the toast), or says there is none; nothing on that list is filled in without an answer, and anything the person said to make up is a `placeholder` ledger line and a row in the handoff's § Placeholders. A behaviour the brief names but no frame draws is described in one line and confirmed before it is built | Step 0 *data and rules the frames do not show*, *behaviour the brief names but no frame draws*, rule 3 |
+| 26 | **A logic demo is checked against its rule table.** When the outcome is computed from the user's input, the Step 0 message asks for the rules as a table; the rows are `_work/rules.json`, `rulecheck.cjs` passes every row before delivery, and the handoff's § Rules carries its `--markdown` table. Walks written from memory instead of the table are a fail | Step 0 *Demo to the team*, *data and rules*; Step 7 *A rule is checked as its table* |
+| 27 | **An unmoderated test is built for a respondent alone.** When the purpose is Wynde / Maze / Lyssna: nothing opens a second tab (a mock site is a route), the test bar and the outcome screen come from `test-scaffold.js` in the first build, the outcome screen says what to do next with a text fallback and no browser-dependent button, shortcuts are words, no code is given to the respondent, and the handoff's § For the platform records a rehearsal through the platform | Step 0 *Unmoderated test*, `references/unmoderated.md` |
 
 Then the human half, fifteen minutes, as the moderator would: walk the three
 tasks in a browser. Anything a respondent would notice — a dead click inside
@@ -159,8 +167,8 @@ frame's rail + section panel is a ledger line by decision, not an error.
 |---|---|---|---|---|---|---|
 | zone diff, frame 1 (whole) | 0.34% | 0.01% | not comparable — the shell replaces the frame's navigation; every measured element lands at 0.0px after the uniform shell offset (Δx −10, Δy +5) | not re-measured; the frames are the previous generation, so the gates are the verdict (Step 0, accuracy threshold) | content block **0.19%**, plates 0.01–0.07% | content zone **2.69%**; blockgate on the form column: offset 0,0, 28 bands, worst residual 4px |
 | zone diff, frame 2 (whole) | 0.47% | 0.01% | as above; residue is text run width, 1–2px, worst 6px on a 35-character string | as above | content block **0.40%**, the field 0.00% | content zone **1.66%**; second column 16 bands, worst residual 2px |
-| zone diff, frame 3 | 2.78% (2.20% realigned to Body x=276) | toast zone only, 0.06% — frame 3 is used as the toast specimen, the rest of it drifts +2.5px | as above | toast 1.49% | content zone 4.74%; the aside plate **0.07%** |
-| text-free zones | 0.00% except the toast, 1.43% | worst 0.27%, white text on the dark button | not re-measured | not re-measured; the ink boxes of the radios and of Save matched the frame pixel for pixel | not re-measured; the gates are the verdict against an older frame |
+| zone diff, frame 3 | 2.78% (2.20% realigned to Body x=276) | toast zone only, 0.06% — frame 3 is used as the toast specimen, the rest of it drifts +2.5px | as above | as above | toast 1.49% | content zone 4.74%; the aside plate **0.07%** |
+| text-free zones | 0.00% except the toast, 1.43% | worst 0.27%, white text on the dark button | not re-measured | not re-measured | not re-measured; the ink boxes of the radios and of Save matched the frame pixel for pixel | not re-measured; the gates are the verdict against an older frame |
 | live controls built | 4 the tasks need + 12 extra | 4 + the toast's × | **4 + the toast's ×** | **4 + the toast's ×, and every one of them carries its own state by default** (rule 4) | **4 + the toast's ×** | **4 + the toast's ×** |
 | hovers | 18 | 0 | **the shell's menu hover only** (Step 0 default since 41104ba); none invented inside the tested area | the shell's menu hover only | the shell's menu hover only | the shell's menu hover only |
 | baked plates | 1x | **2x**, asserted per plate | 2x | 2x | 2x, four of them, asserted per plate | 2x, asserted |
@@ -169,16 +177,8 @@ frame's rail + section panel is a ledger line by decision, not an error.
 | new tokens (output + cache write) | not recorded | not recorded | not recorded | 571k over 145 requests; the 22.5M total is cumulative cache reads, not a bill | 667k over 230 requests | 669k over 186 requests |
 | tool calls | ≈104 | 104 | 89, of which 52 Bash and 4 in the browser pane | **83**, of which 52 Bash, 11 Read, 13 Figma, 3 Write | **118**, of which 81 Bash, 19 Figma, 14 Read | **106**, of which 75 Bash, 15 Read, 13 Figma |
 | wall time after Step 0 | ≈40 min | ≈28 min | **≈2 h 20 min** — the regression of that run; see below | **≈17 min** (20.5 end to end, 3.3 of it waiting for the human's answers) | **≈27 min** end to end, including the human's answers | **≈30 min** end to end — most of the excess spent bisecting a silent `statecheck` failure, see below |
-| checklist | 13 of 14; row 4 partial | 14 of 15; row 1 fails | **13 of 15**; row 1 passes (two questions before any extraction, the 1920 frame warned about), rows on Step 0 defaults fail: two of five recommendations pulled against a written default — bake the frame's chrome instead of the shell, and "menu hover gives false expectations" — and a later question proposed rebuilding the frame's rail + section panel | 18 of 21; row 1 partial (never asked the purpose — the brief implied it), row 3 partial (the cross-frame divergence was found and recorded, not raised as a question), row 2 partial (the height difference was noticed but the canvas question asked only about width) | **not scored as a controlled run** — see below. Of what can be judged: the elastic canvas offered (row 23), the version check silent in a standalone install (row 22), the run log written as it went with a real section 6 (row 24) |
-| human walk | tasks passed; 3 defects: hovers on the untested menu, extra markup, soft 1x plates | tasks passed, no defects | **tasks passed; 2 defects, both in the shell asset, not in the run's judgment**: the toast rendered in Times (the shell declared its type only on `.sh-root`, and a viewport-anchored element sits next to it) and the fixed canvas hugged the left edge of a wider window (no `margin:0 auto`, against Step 4's contract). Both fixed in `shell.js`; the prototype was corrected by rerunning its generator | **tasks passed; 2 defects, both holes in the skill rather than in the run's judgment**: Save kept the default cursor and greyed its label on hover, and the content could not follow the window. Both fixed here (4ef8973); the prototype was regenerated and re-probed, regression 0.00% | **tasks passed, no defects reported by the designer** |
-
-> ⚠️ **Four rows of the table above are short a cell and their values read under the wrong run**
-> (`zone diff, frame 3`, `text-free zones`, `checklist`, `human walk` — six cells against the
-> header's seven). Cross-checking the prose: the two Save/cursor defects and commit `4ef8973` belong
-> to **run 5**, and "not scored as a controlled run" to **run 6**, yet both sit one column to the
-> left. Left as-is rather than reconstructed — these are measured values and only the author knows
-> which run each belongs to. **@eugene-durov: please repair the four rows.** Everything outside the
-> table is unaffected; the per-run prose below is the reliable source meanwhile.
+| checklist | 13 of 14; row 4 partial | 14 of 15; row 1 fails | **13 of 15**; row 1 passes (two questions before any extraction, the 1920 frame warned about), rows on Step 0 defaults fail: two of five recommendations pulled against a written default — bake the frame's chrome instead of the shell, and "menu hover gives false expectations" — and a later question proposed rebuilding the frame's rail + section panel | not scored row by row: the record of run 4 is the designer's walk and the transcript's numbers | 18 of 21; row 1 partial (never asked the purpose — the brief implied it), row 3 partial (the cross-frame divergence was found and recorded, not raised as a question), row 2 partial (the height difference was noticed but the canvas question asked only about width) | **not scored as a controlled run** — see below. Of what can be judged: the elastic canvas offered (row 23), the version check silent in a standalone install (row 22), the run log written as it went with a real section 6 (row 24) |
+| human walk | tasks passed; 3 defects: hovers on the untested menu, extra markup, soft 1x plates | tasks passed, no defects | **tasks passed; 2 defects, both in the shell asset, not in the run's judgment**: the toast rendered in Times (the shell declared its type only on `.sh-root`, and a viewport-anchored element sits next to it) and the fixed canvas hugged the left edge of a wider window (no `margin:0 auto`, against Step 4's contract). Both fixed in `shell.js`; the prototype was corrected by rerunning its generator | **tasks passed, no defects** — walked by the designer; the accepted baseline | **tasks passed; 2 defects, both holes in the skill rather than in the run's judgment**: Save kept the default cursor and greyed its label on hover, and the content could not follow the window. Both fixed here (4ef8973); the prototype was regenerated and re-probed, regression 0.00% | **tasks passed, no defects reported by the designer** |
 
 **Run 6, 2026-09-21 — a good build, not a valid check, and seven findings.**
 
@@ -300,6 +300,83 @@ Step 0 now lets the parameter table wait for `get_metadata` while the two
 questions still come first, and tells the agent to recommend the option closest
 to the mockup (three of four recommendations in run 2 pulled the other way).
 A third run is due only after a material change to SKILL.md; its bar is run 2.
+
+The four rows that were a cell short — frame 3, text-free zones, checklist, human walk — were
+missing run 4's cell since the day it was recorded, so runs 5 and 6 read under the wrong column;
+filled from the run-4 commit (6e63ae9: walked, no defects; nothing re-measured; no row-by-row score).
+
+### Run 8, 2026-10-06 — the plugin's version, not the dev one
+
+Run in a folder without the dev copy, so `/figma-to-prototype` resolved to the
+plugin (3.259, whose figma-to-prototype is the 2026-09-21 skill). Not a test of
+the dev tree; kept as that version's numbers, read with `runstats.cjs`:
+
+| | |
+|---|---|
+| wall, the agent's | 21 min |
+| tool calls | 84 |
+| Figma calls | 14 — screenshot 6, metadata 4, design context 3, download_assets 1 |
+| context peak | 258k |
+| Step 0 | four questions in one block; elastic form offered and recommended (row 23 pass); purpose not asked (assumed moderated); the 1163 vs 900 heights not raised (row 2 fail — it then diffed against a 900 canvas and the form's bottom was clipped); the frame's different menu ledgered rather than asked |
+| its own log's findings | scanline.sh died on a wrong call; no recipe for blockgate's block from a shell generator, and its own overwrote the deliverable; the slot's 20 below the header unstated; the floor and the shell's minWidth unrelated; no titleIcon on checkbox; the toast at the frame's y over the tabs — all fixed in the dev tree the same day |
+
+### Run 9, 2026-10-06 — the dev tree at f1ae583
+
+The first run on the dev copy (`.claude/skills/` of the run folder; archived as `_eval-archive/run9-aml-comply-advantage`). Step 0 still asked in
+text: the `AskUserQuestion` rule (8c2d2b6) came after the copy was taken.
+
+| | |
+|---|---|
+| wall, the agent's | 14 min (19 end to end, 5 the person's) |
+| tool calls | 102 |
+| Figma calls | 14 — screenshot 6, metadata 5, design context 3; nothing baked, no export |
+| context peak | 287k; new tokens 700k (1.23× run 4, row 14 passes) |
+| passed | 1, 4–8, 10–13, 16–20, 24, 25; 23 after the answer (below) |
+| partial | **2** the 1163 vs 900 heights not raised — moot with a viewport canvas, and the row should say so; **3** frame 3's 5px shift found from metadata and ledgered, not zone-diffed; **9** no scenery click in the probe; **22** the version check skipped with one line of explanation, not in silence; **23** the canvas row asked before the frames were read, so it offered *fixed* with a warning — the person delegated it, and the agent picked elastic form with its floor measured |
+| human walk | tasks passed, no defects |
+| asked that it should have decided | the toast's width (component 476 against the frame's 452) — a disagreement with the design, a ledger line by row 17 |
+| its own log's findings | fluidcheck said "clipped none" while a label wrapped (e7ac4c3); shellgate printed ASK for a shell Step 0 had settled (f91139c); its own gen.js repeated the --block trap the skeleton already avoids |
+
+### Run 10, 2026-10-06 — the dev tree at a810c01, native questions
+
+| | |
+|---|---|
+| wall, the agent's | 15 min (21 end to end, 6 of it the person's on the forms — `runstats` charged those to the agent until this run) |
+| tool calls | 91 |
+| Figma calls | 13 — metadata 6, screenshot 3, design context 3, one 2x export for the card plate |
+| context peak | 294k; new tokens 714k (1.25× run 4, row 14 passes) |
+| Step 0 | every question a form: purpose before any Figma call, parameters after metadata and screenshots (rows 1, 23 pass; the toast now recommended as drawn, until ×). **Nine forms**, three of them for parameters with a default (shell, the form's other controls, hovers), two with an option that only said "type it in Other", one offering to bake the form — fixed in SKILL.md Step 0 the same day |
+| passed | 1, 4–8, 10–13, 14, 16–19, 23–25; 15/15a (the card: no task touches it, nothing in it changes; 2x asserted here, not in its probe) |
+| partial | **3** frames 2–3 cut for blockgate, never zone-diffed against frame 1 before extraction (as in run 9); **9** no scenery click, `--hits` at rest only (0 BLOCKED in the toast state too, checked after); **15** the probe does not assert `naturalWidth`; the frame's extra menu items raised at the end, not as the shell.md question |
+| its own log's findings | `gen-list.skeleton.js` resolved `_work/` from `__dirname` while SKILL.md puts the generator at `_work/gen/gen.js` — both runs added a ROOT by hand (fixed); the toast first placed at the frame's raw y, caught on the 1440 render; blockgate's first band merged card and form until the reference was re-cut to the render's frame |
+| human walk | tasks passed, no defects (archived as `_eval-archive/run10-aml-comply-advantage`) |
+
+### Run 11, 2026-10-06 — the designer's own brief, on the plugin again
+
+A questionnaire editor's AI translation: three frames, three states, automatic transitions, an
+exhaustive brief (skeleton geometry, `inert`, `aria-busy`, a reset key). The brief named
+`/sumsub-design:figma-to-prototype`, so the plugin's 3.265.0 copy ran — an older SKILL.md with text
+questions and no model check — and the dev copy in the folder was never read. Not a test of the dev
+tree; the build itself was walked by the designer and passed. Kept for its findings, all fixed the same
+day: the shell's bare `.ai` class restyled any page element called `ai`; `grab.js` nested
+`_work/figma-ref` when run from inside it; `statecheck.sh --rects-of` beside `--probe` printed
+nothing; the library had no skeleton (`skeleton()` added, the product's `SnsSkeletonBlock`); rule 5
+forbade the pulse the brief asked for (its one exception written in). 15 min, 97 tool calls, 11
+Figma, 350k peak. Step 0 asked nothing: the brief had answered it — now the written rule.
+
+### Run 12, 2026-10-06 — the dev tree at 8109d36, Step 0 after the form rules
+
+| | |
+|---|---|
+| wall, the agent's | 14 min (31 end to end; 18 of them the person's, on two forms) |
+| tool calls | 96 |
+| Figma calls | 19 — metadata 9 (four of them nested instances of the radio groups), screenshot 6, design context 4 |
+| context peak | 283k; new tokens 695k (1.22× run 4, row 14 passes) |
+| Step 0 | **five forms**: purpose, then canvas, the empty ID, the toast, the select without options — every one a question with no default and no frame answer; shell, hovers, the form's other controls decided and said. Toast recommended as drawn. Not asked: the entrances outside the task (the other tabs, the card's links) — decided as inert with hover and said in the final message (row 4 partial) |
+| passed | 1, 5–8, 10–13, 14, 16–19, 23–25; 15 moot (nothing baked) |
+| partial | 3 (as before), 4 (above), 9 (no scenery click in the probe) |
+| its own log's findings | `runstats.cjs` could not find the transcript from the project subfolder (the session's cwd is the parent) — fixed, with `modelcheck.cjs`; Step 3 said `controls.js --api` without its path — fixed; `shellgate.sh` printed ASK, not OLDER, for the AML frame — the header probe sat at x = 268, inside the frame's section panel, and took its grey for the island gap — moved to the header's right end, fixed |
+| human walk | not yet |
 
 ## 5. Reading a failed run
 

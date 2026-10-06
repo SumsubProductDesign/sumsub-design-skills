@@ -5,6 +5,12 @@
 //   node scripts/serve.cjs                 -> serves the folder ABOVE the script
 //                                             (for a copy living in <project>/scripts/)
 //   PORT=9001 ENTRY=proto.html ...         -> other port, explicit entry file
+//   SPA=1 node scripts/serve.cjs           -> a History-API prototype: a path with no file
+//                                             extension (/s1, /registry/ch) is served the entry,
+//                                             so a deep link or a reload does not 404. A path
+//                                             WITH an extension still 404s when the file is
+//                                             missing — a typo in an asset name must not come
+//                                             back as the page. Vercel: publish.sh --spa
 //
 // Two deliberate choices:
 //   * Cache-Control: no-store, so a plain reload always shows the new build.
@@ -27,6 +33,7 @@ const ROOT = process.env.ROOT
   : path.join(__dirname, '..');
 const PORT = Number(process.env.PORT || 8788);
 const ENTRY = process.env.ENTRY || findEntry();
+const SPA = !!process.env.SPA && process.env.SPA !== '0';
 
 function findEntry() {
   const hit = fs.readdirSync(ROOT).filter(f => /\.html$/i.test(f))
@@ -52,6 +59,15 @@ http.createServer((req, res) => {
   }
   fs.readFile(file, (err, buf) => {
     if (err) {
+      // a route, not a file: in SPA mode the page itself answers, and its router reads the URL
+      if (SPA && !path.extname(rel) && req.headers.accept && req.headers.accept.includes('text/html')) {
+        fs.readFile(path.join(ROOT, ENTRY), (e2, page) => {
+          if (e2) { res.writeHead(404, {'Content-Type': 'text/plain'}).end('not found: ' + ENTRY); return; }
+          res.writeHead(200, {'Content-Type': TYPES['.html'], 'Cache-Control': 'no-store'});
+          res.end(page);
+        });
+        return;
+      }
       res.writeHead(404, {'Content-Type': 'text/plain'}).end('not found: ' + rel);
       return;
     }
@@ -63,5 +79,5 @@ http.createServer((req, res) => {
   });
 }).listen(PORT, () => {
   console.log('prototype on http://localhost:' + PORT + '  (root ' + ROOT +
-              ', entry ' + ENTRY + ')');
+              ', entry ' + ENTRY + (SPA ? ', SPA: every route serves the entry' : '') + ')');
 });

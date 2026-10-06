@@ -4,6 +4,16 @@ Every entry here actually happened. Scan it when something behaves
 inexplicably — the answer is often a line in this list rather than a bug in your
 logic.
 
+## Contents
+
+- Figma MCP
+- Figma → CSS rendering
+- Generator
+- Runtime
+- Measurement
+- Environment
+- Editing the skill's own scripts
+
 ## Figma MCP
 
 | Symptom | Cause | Fix |
@@ -40,6 +50,7 @@ logic.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| A counter, a preview or a script stops working after injection, with no error | `String.prototype.replace` with a **string** replacement reads `$$`, `$&`, `$1` inside the injected text — a `$$` in the script became `$` | Function replacers everywhere a page is assembled: `page.replace(anchor, (m, open) => open + html)`. Cost half a day's hunting on 2026-09-24 |
 | A style silently ignored | A helper appends `px` to **numbers**, so `opacity: 0.3` becomes `opacity: 0.3px` | Pass unitless values as strings: `'0.3'` |
 | Regex grabs the wrong attribute | `[^>]*?d="` matches the `d` in `id="Shape_19"` | Require the boundary: `\sd="` |
 | Path parser crashes on an icon | Only uppercase path commands handled; icons use relative `m/l/h/v/c` | Handle both cases; self-test with `M10 10H30V20H10V10Z` **and** `m10 10h20v10h-20v-10z` |
@@ -56,7 +67,10 @@ logic.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Click on a label does nothing | Text nodes are siblings painted above the clickable div | Transparent hit layer, emitted last |
+| An icon with a gradient renders blank, but only after a second copy was added | SVG resolves `url(#id)` document-wide; the first copy sits in `display:none` and every reference goes to it | Ids unique per insertion — `scripts/_svg.cjs` `uniq()`; `ICON()`, `shell.js` and the skeleton's `svg()` already do it |
+| A tooltip inside a scrolling drawer is cut at the drawer's edge | `overflow` clips descendants | A fixed host at page level, outside the clipping box — `references/interaction-plumbing.md` § Canvas-level hosts |
+| A card's or drawer's header has no top frame, every number passed | the header's background paints over an inset-shadow frame; 1px of `#d1d5dc` on `#f3f4f6` is under the zone diff's threshold | `statecheck.sh --frames` on every framed container; the library's `card()` draws its frame as an overlay above the header |
+| Click on a label does nothing | Text nodes are siblings painted above the clickable div | Transparent hit layer, emitted last. `statecheck.sh --hits auto` finds every one: `BLOCKED by div.t "label"` |
 | Popup closes the instant you press it | Drag start repaints; a bubble-phase listener sees the detached node and reads it as an outside press | One listener on **capture** phase |
 | Drag throws on every mouse move | Popup vanished mid-drag; `querySelector` returns `null` | Null-guard inside the move handler |
 | Popup lands in the wrong place | Positioned in canvas coordinates without the panel's scroll offset | Scroll viewport with a negatively-offset inner anchor |
@@ -74,6 +88,7 @@ logic.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| A probe's `innerHeight`, a `100vh` box or a bottom-anchored bar is 87px short of the screenshot | with `--dump-dom` Chrome lays the page out in a viewport shorter than `--window-size` by a toolbar it never draws; the screenshot in the same run is full-size | `statecheck.sh` grows the DOM pass by the measured delta (`chrome_dom_delta` in `_chrome.sh`) and takes pixels from a probe-free pass. A DOM-side height read any other way — a hand-rolled `--dump-dom` — is 87 short |
 | Colour assertion fails on identical colours | Browser normalises `#1873DF` → `rgb(24, 115, 223)` | Compare normalised to normalised (`P.rgb()`) |
 | Exact float comparison fails | `87.09848` re-serialises as `87.0985` | Compare with a tolerance, never `===` |
 | Text ink measurements are all wrong | `getBBox`/`getBoundingClientRect` give the layout box, not ink | Canvas `measureText` → `actualBoundingBox*` |
@@ -95,7 +110,7 @@ logic.
 | A fix appears not to work | The page was cached | Serve with `Cache-Control: no-store` |
 | Screenshot too coarse to judge | The panel returns a downscaled image | `transform: scale()` + scroll, then screenshot |
 | a reference crop taken from the frame render diffs a few per cent against a correct build, hottest right on the control | the frame draws things the component does not: a `Cursor` instance over the hovered control, an annotation, a neighbouring cell's tooltip | mask those regions out rather than loosening the threshold: diff the zones around them instead of the whole crop. A loosened threshold hides the next real defect |
-| `fluidcheck.sh` says `ok` while the page really is wider than the window | the overflow can live on `body`, not on `documentElement`: a shell that hides the document's scrollbars so its island can scroll puts it there | it now reads the larger of the two. Fixed 2026-09-21; before that an elastic page below its floor looked fine and was clipping |
+| `fluidcheck.sh` says `ok` while the page really is wider than the window | the overflow can live on `body`, not on `documentElement`: a shell that hides the document's scrollbars so its island can scroll puts it there | it reads the larger of the two; an elastic page below its floor that looks fine and clips is the symptom of reading only one |
 | A zone diff reports 0.00% while a whole panel changed colour | the default threshold is 60, and grey `#f3f4f6` to cream `#fffbeb` is a sum of 30 | `TH=6 zonediff.sh …` for a self-render that must be identical; the default is for comparing against a Figma render, where anti-aliasing needs the room |
 | A tightened threshold has no effect and the run reports clean | `zonediff.sh` takes `TH` from the ENVIRONMENT; a 5th positional was silently ignored | it now refuses a 5th argument and prints the right form. Cost two wrong measurements on 2026-09-21 before the render was checked another way |
 
@@ -103,6 +118,12 @@ logic.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `statecheck.sh --probe "…$('id')…"` printed `probe :` and nothing else, for a whole session | inside double quotes the shell runs `$('id')` as a command substitution before the page sees the script; what is left does not parse | `--probe-file` / `--js-file` for anything with `$`, backticks or quotes. A probe that does not parse prints `ERROR: the script does not parse` and exits 3 |
+| `echo ====` fails in zsh with `==== not found` | zsh expands a word that starts with `=` as `=command` (its path) | Quote it — `echo "===="` — or start separator lines with a letter. Three rounds of "not found" on 2026-09-24 before anyone read the message |
+| A `grep -n` filtered by line number returns nothing, silently | the number pattern was written for two digits and drops every three-digit line | `sed -n 'a,bp'` on the file, or `awk -F: '$1>=a && $1<b'` |
+| `doctor.sh --vercel` says "logged in as <something odd>" and the deploy then fails | the account was read as the last line of `whoami`, and another tool's hint line came last | the answer must look like an account, one word; `whoami said: …` is printed when it does not |
+| `publish.sh` warns of a login wall, but the link opens fine | the alias answered 307 — the prototype's own `/` → `/s1` redirect | redirects are followed now; a hop that stays on the alias's host is routing |
+| Every route of a History-API prototype 404s on Vercel | `cleanUrls: true` next to a rewrite to `/index.html`, or the rewrite lost when `vercel.json` was overwritten | `publish.sh --spa`; it drops `cleanUrls` and merges the payload's own config |
 | `python3 -m http.server` fails on `os.getcwd` | Sandbox restriction | Use `scripts/serve.cjs` |
 | A crop of the top of a tall image shows its middle | macOS `sips -c` crops from the centre, and `--cropOffset` shifts relative to the centre, not the top-left | Crop with `scripts/crop.js`; keep `sips` for resizing whole images |
 | Server 404s everything after a folder move | A `.claude/launch.json` entry (desktop app) still points at the old path | Update it; keep script paths relative to `__file__`/`__dirname` |

@@ -14,6 +14,14 @@ const {CHROME} = require(path.join(__dirname, '_chrome.cjs'));
 const [file, outdir, w = 1440, h = 900, views = ''] = process.argv.slice(2);
 if (!file || !outdir) { console.error('usage: shoot.js <file.html> <outdir> [w] [h] [#a,#b]'); process.exit(1); }
 fs.mkdirSync(outdir, {recursive: true});
+// Chrome will not open a window narrower than 500: a smaller --window-size is clamped, the page
+// lays out at 500, and the screenshot is still cropped to the width you asked for. A block that
+// centres itself then sits (500 − width) / 2 to the right of where you think it is, and nothing
+// in the PNG says so — run 7 lost a cycle to a 400-wide block landing at 50 (2026-09-21).
+if (Number(w) < 500) {
+  console.error(`shoot: ${w} is below Chrome's 500px minimum window — the page will lay out at 500.`);
+  console.error('       A standalone block must be left-aligned (#app{margin:0}) or every x is off by ' + Math.round((500 - Number(w)) / 2) + '.');
+}
 const list = views ? views.split(',') : [''];
 const LIMIT = Number(process.env.SHOOT_PARALLEL || 4);
 

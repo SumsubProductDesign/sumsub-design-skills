@@ -20,9 +20,7 @@ were used only for visual confirmation and for deliberately baked zones.
 | `<deliverable>.html` | the prototype. The only artifact |
 | `_work/figma-ref/*.jsx` | raw design-context responses — the authority on styles and text |
 | `_work/figma-ref/icons/` | assets exported from Figma, verbatim |
-| `_work/gen/data.py` | extraction results |
-| `_work/gen/template.html` | **all markup, CSS and JS. Edit here, not the built file** |
-| `_work/gen/build.py` | injects data into the template |
+| `_work/gen/gen.js` | **data, markup, CSS and JS. Edit here, not the built file**; `node _work/gen/gen.js` rebuilds (export-path builds: `data.py` / `template.html` / `build.py` in the same roles) |
 | `_work/baseline/*.png` | last accepted render per screen — the regression reference |
 | (skill) `scripts/serve.cjs` | local server: `ROOT=. node <skill>/scripts/serve.cjs` |
 
@@ -104,6 +102,26 @@ Three groups, because rule 4 splits them:
   session, not during it;
 * **inert by design** — a picture, and correct as one.
 
+### Rules — a logic demo only
+
+The rule table the person gave, as `rulecheck.cjs _work/rules.json --markdown`
+prints it: case, what the user does, the outcome, and this build's result. It is
+what the team is being shown, so it is read before the demo, like the
+placeholders below; a FAIL row is not demoed. Drop the heading when the prototype
+computes nothing.
+
+### Placeholders — made up, not the product's
+
+Every option list, field set, rule or message that neither a frame nor the
+requester gave, and that the requester agreed could be made up (Step 0, *data and
+rules the frames do not show*). One row each: what it is, where it shows, what was
+used, who can give the real one. **Read this list out before a demo**: the
+audience otherwise takes a placeholder for a decision. Empty when nothing was made
+up — say "none", do not drop the heading.
+
+| what | where it shows | what the prototype uses | who has the real one |
+|---|---|---|---|
+
 ## 7. Known deviations from the design
 
 Numbered, each with the Figma value, the produced value, and the reason. This
@@ -125,6 +143,14 @@ what cannot be verified automatically (hover, and anything else).
 
 The ones specific to this project, with the symptom first — that is how the
 reader will meet them.
+
+## 10a. For the platform — an unmoderated test only
+
+The entry URL per scenario; what the test bar says; what the outcome screen tells
+the respondent (and that it never depends on the browser closing the tab); the
+events the analysis reads from `window.__events`; and the rehearsal's result —
+who ran a task through the platform's own recording tab, on which date, and what
+the recording showed. Drop the heading for a moderated build.
 
 ## 11. Published URL
 

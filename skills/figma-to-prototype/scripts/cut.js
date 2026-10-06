@@ -24,5 +24,7 @@ for (let j = 0; j < H; j++) {
     px[d] = im.data[s]; px[d + 1] = im.data[s + 1]; px[d + 2] = im.data[s + 2]; px[d + 3] = im.data[s + 3];
   }
 }
+// the output's folder is created: a first plate into _work/plates/ died on ENOENT (2026-10-02)
+fs.mkdirSync(path.dirname(path.resolve(out)), {recursive: true});
 fs.writeFileSync(out, encode(W, H, px));
 console.log(`${out}: ${W}x${H} from ${X},${Y}`);

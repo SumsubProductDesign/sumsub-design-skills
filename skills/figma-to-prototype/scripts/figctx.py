@@ -14,7 +14,20 @@ nothing else:
             and missing the wrapper (traps.md, Figma → CSS); the marker is there so it is read first
   assets    every `const imgX = "https://…"` — with --assets DIR each is downloaded to DIR/imgX.svg
   --split NAME   texts and img consts per repeated component (e.g. --split "Table Row") — the row data
+  --texts        every text string of the context, one per line, in order, each once — the file
+                 `statecheck.sh --texts` checks the built page against. A design context is pulled
+                 for live zones only, so every string in it must be on the page; a baked zone has
+                 none to check, and its text is the plate's
   --grep REGEX   only lines matching (plus their assets)
+
+Two checks run on every call, because both bit a real run (2026-09-28) and neither shows in the outline:
+  UNDEFINED     an `src={imgX}` with no `const imgX = "https://…"`: the response was cut before the
+                constants, and the leaf has to be pulled on its own — the list printed is the list of
+                get_design_context calls to make (9 of them on that run, found one at a time)
+  NAME MISMATCH (with --assets) the SVG's own first id — Figma's layer path, "normal/Filled/Danger" —
+                does not match the constant's name: the big response returned the component's default
+                glyph where the frame overrides it (an attachment icon came back as search, a log icon
+                as star). Only a crop found those; this finds them before the crop
   --depth N      cut the outline at that depth
 
 Accepts the raw JSX or the JSON array the tool result file holds. Never read that file chunk by chunk."""
@@ -33,7 +46,27 @@ assets_dir, split, depth_cap, grep = opt('--assets'), opt('--split'), opt('--dep
 depth_cap = int(depth_cap) if depth_cap else None
 pat = re.compile(grep) if grep else None
 
-assets = dict(re.findall(r'const (\w+) = "(https://[^"]+)"', src))
+assets = dict(re.findall(r'const (\w+) = "(https?://[^"]+)"', src))
+# the constants Figma writes are imgCamelCase; `src={image}` is a component's own prop, not a lost asset
+undefined = sorted(k for k in set(re.findall(r'src=\{(img[A-Z]\w*)\}', src)) if k not in assets)
+if undefined:
+    print(f'UNDEFINED: {len(undefined)} asset(s) referenced but never defined — the response was truncated before '
+          f'their constants; call get_design_context on those leaves: {", ".join(undefined)}')
+norm = lambda t: re.sub(r'[^a-z0-9]', '', re.sub(r'\d+$', '', t).lower())
+if '--texts' in args:
+    import html
+    seen, out = set(), []
+    # the text of an element is what sits between a tag's end and the next tag: plain, or a JSX
+    # string expression {"…"} / {`…`}; whitespace is collapsed, entities decoded
+    for m in re.finditer(r'>([^<>]*?)<', src):
+        raw = m.group(1)
+        for expr in re.findall(r'\{\s*(?:"((?:[^"\\]|\\.)*)"|`([^`]*)`)\s*\}', raw):
+            raw = raw.replace('{"' + expr[0] + '"}', expr[0]) if expr[0] else raw.replace('{`' + expr[1] + '`}', expr[1])
+        if '{' in raw or '}' in raw: continue        # code, not text
+        t = re.sub(r'\s+', ' ', html.unescape(raw).replace('\u00a0', ' ')).strip()
+        if t and t not in seen:
+            seen.add(t); out.append(t)
+    print('\n'.join(out)); sys.exit(0)
 if assets_dir:
     # The file is named after the const, and const names are unique only INSIDE one design
     # context. Two contexts from the same frame gave imgNormalId twice — an id glyph in the
@@ -46,7 +79,7 @@ if assets_dir:
     mpath = os.path.join(assets_dir, '_assets.json')
     # file -> URL, not const -> file: a const can mean two different assets, a file cannot
     manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}   # later runs add to it
-    clashes = []
+    clashes = []; mismatches = []
     for k, u in assets.items():
         name = k
         prev = os.path.join(assets_dir, k + '.svg')
@@ -73,8 +106,20 @@ if assets_dir:
                 name = k + '-' + u.rsplit('/', 1)[-1][:8]
                 clashes.append((k, name))
         seen.setdefault(k, u)
-        subprocess.run(['curl', '-sL', '-o', os.path.join(assets_dir, name + '.svg'), u])
+        out_file = os.path.join(assets_dir, name + '.svg')
+        subprocess.run(['curl', '-sL', '-o', out_file, u])
         manifest[name] = u
+        # the file's own first id is Figma's layer path; a constant named for one layer whose file
+        # draws another is an override the big response dropped
+        try:
+            head = open(out_file, encoding='utf-8', errors='replace').read(2000)
+            fid = re.search(r'\sid="([^"]+)"', head)
+            if fid and '<svg' in head:
+                a, b = norm(k[3:] if k.startswith('img') else k), norm(fid.group(1))
+                if b and a and b not in a and a not in b:
+                    mismatches.append((k, fid.group(1)))
+        except OSError:
+            pass
     with open(os.path.join(assets_dir, '_assets.json'), 'w') as fh:
         json.dump(manifest, fh, indent=1, sort_keys=True)
     print(f'assets: {len(assets)} downloaded to {assets_dir}')
@@ -82,6 +127,9 @@ if assets_dir:
         print(f'  CLASH {k} already taken by another asset -> saved as {name}.svg')
     if clashes:
         print('  (const names repeat between design contexts; _assets.json maps file -> URL)')
+    for k, fid in mismatches:
+        print(f'  NAME MISMATCH {k}: the file draws "{fid}" — an override the frame makes that the response lost? '
+              f'get_design_context on that leaf, and compare with the screenshot')
 else:
     for k, u in assets.items(): print('asset', k, u)
 
@@ -95,7 +143,9 @@ def outline(seg, cap=None):
             depth -= 1; del placed[depth:]; continue
         name = re.search(r'data-name="([^"]+)"', attrs)
         cls = re.search(r'className=\{?"([^"]*)"', attrs) or re.search(r'className=\{`([^`]*)`', attrs)
-        toks = re.sub(r'var\(--[^,]+,([^)]+)\)', r'\1', ' '.join(KEEP.findall(cls.group(1)))) if cls else ''
+        # Tailwind escapes a slash inside a class (w-[calc(100%\/3)], var(--neutral\/10,…)); the outline
+        # prints it plain, so a reader's own regex over it need not allow both (2026-10-02)
+        toks = re.sub(r'var\(--[^,]+,([^)]+)\)', r'\1', ' '.join(KEEP.findall(cls.group(1))).replace('\\/', '/')) if cls else ''
         own = PLACE.findall(cls.group(1)) if cls else []
         img = re.search(r'src=\{(\w+)\}', attrs)
         after = seg[m.end():m.end() + 300]; t = re.match(r'\s*([^<{]+?)\s*<', after)

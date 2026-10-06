@@ -4,6 +4,30 @@ The prototype will be extended — another panel, another screen, another contro
 — usually by a different session with none of your context. These are the
 choices that made that cheap on a real project, and the one that didn't.
 
+## Contents
+
+- One canvas, absolute children, export coordinates
+- Build the shared area once
+- Panel registry
+- One value, several write paths
+- Shared state is seeded outside the panels
+- One primitive per control family, not per control
+- Resolve reference chains on read
+- Turning a constant into a variable: keep the default provable
+- Verbatim for chrome, computed for state
+- State lifecycle
+- Two or three controls, one state: setting versus view
+- Generator, not hand-written HTML
+- Icons
+- Scale-only adaptivity
+- Edits to a built file must be able to fail
+- The state and re-render map — write it down once
+- One increment, one session: the files are the memory
+- What an increment costs
+- The method behind the steps
+- Step 3 in full — set up a generator, not a hand-written file
+- Step 4 in full — the coordinate contract
+
 ## One canvas, absolute children, export coordinates
 
 The contract itself — `#app` at the frame's size, every child absolutely
@@ -14,7 +38,7 @@ block is anchored at the shell's slot origin by the same subtraction. What must
 not happen is the two mixing inside one block, half absolute coordinates and
 half flow, because then no value in the code corresponds to anything. Everything a generator writes is then a literal export coordinate. This is the
 foundation: the moment a value in the code stops corresponding to a value in the
-export, every check in `verification.md` becomes guesswork.
+export, every check in Step 7 becomes guesswork.
 
 One consequence to keep in mind from the start: **everything this method writes
 is an inline style, and an inline style outranks any stylesheet rule.** So a
@@ -212,8 +236,15 @@ three rules apply to it.
 
 ## Generator, not hand-written HTML
 
-Keep a small pipeline: extract from the SVGs into data, inject into a template,
-write one self-contained file.
+Keep a small pipeline: the extraction results as data, the page as code that
+consumes them, one self-contained file written at the end.
+
+On the MCP path that is **one Node script**, `_work/gen/gen.js` — data literals
+at the top with the node id beside each, then CSS, markup and page script,
+rendered through `scripts/shell.js`, `assets/components/controls.js` and the
+templates, which are Node modules; `assets/templates/gen-list.skeleton.js` is
+the starting copy. On the export path, where nothing Node-side is needed, the
+Python trio does the same job:
 
 ```
 _work/gen/
@@ -287,7 +318,15 @@ if (i < 0) { console.error('ANCHOR NOT FOUND'); process.exit(1); }
 ```
 
 And after every injection, assert that the key definitions (`<script`, the
-icon table, each top-level builder) occur exactly once.
+icon table, each top-level builder) occur exactly once — and that every icon
+the page uses is defined: an edit script wiped icon definitions twice through a
+comment on the same line (2026-09-28), and the page rendered with holes.
+
+**Publish only after the edit has asserted.** `edit; build; publish` published
+an unchanged file once: the anchor did not match, the script printed its error
+and carried on. Chain with `&&` so a failed step stops the rest, and make the
+edit step exit non-zero on a missed anchor; a publish is outward-facing and the
+thing it must never do is go out quietly with the previous build.
 
 ## The state and re-render map — write it down once
 
@@ -313,6 +352,30 @@ The last row is the one that catches bugs rather than saving time: a counter
 wired to the typed-hex path but not to the popup drag is a defect that looks
 like working code in every screenshot.
 
+## One increment, one session: the files are the memory
+
+A session that builds a prototype and then takes every later round in the same
+window runs out of context and is summarised — six times across one person's
+builds in two weeks, eight compactions and a 967k peak in one of them. Each
+summary loses the details the files were written to hold, and the next round
+starts by re-deriving them. The remedy is already in the layout: `gen.js` is the
+build, `<project>/deviations.md` the decisions, `<project>/handoff.md` the map,
+`_work/run-log.md` the record. When all four are current, nothing the session remembers is needed.
+
+So: **when an increment is delivered and its files are current, the next
+increment starts a new session.** The new session opens `<project>/handoff.md`
+first (§5 Architecture and §6 the inventory say where everything is and what is
+inert on purpose), then `<project>/deviations.md`, then the generator; it does not read the
+previous session. Say so at the delivery: "the next increment is a new session;
+`<project>/handoff.md` is where it starts." A round that is one sentence — move a label,
+fix a colour — stays in the current session; a new screen, a new scenario, a
+publish round does not.
+
+The sign that the boundary was missed is the summary itself: a session that is
+"being continued from a previous conversation" has already paid for the
+context twice. When it happens, finish the increment, bring the files up to
+date, and stop.
+
 ## What an increment costs
 
 Measured against a finished three-screen prototype, so use them for estimating:
@@ -331,3 +394,148 @@ session. The panel registry is what makes the first row cheap: adding one `PANEL
 made an already-drawn menu item live, with no other change. An interactive
 control costs about a third more than a static panel, and the extra is not
 extraction — it is measuring states that do not exist in the Figma tree.
+
+## The method behind the steps
+
+A prototype that a person will sit in front of during a moderated test, that
+must be indistinguishable from the design, and that a different session will
+extend next week. Three consequences shape everything below:
+
+* **Everything traces to a value some tool returned.** Not to an image, not to
+  a memory of how the product looks. Every coordinate, hex, radius, font size
+  and path can be pointed at its source. That traceability is the whole method
+  — it is what makes "is this right?" a question with an answer. There are two
+  sources, and they do not overlap:
+  * **the design system owns its controls.** A field, a button, a radio, a tag,
+    a menu, the shell: their sizes, colours and states come from the product's
+    Storybook through `assets/components/controls.js` and
+    `assets/shell/dashboard/`, both recorded with the date they were read.
+    Frames drift behind the product and mockups are drawn at different times;
+    the component is what ships today.
+  * **the frame owns everything else.** What is on the screen and where: the
+    text, the layout, the data, the icons, which state each control is in, what
+    the illustration is. Read as data through the Figma MCP server.
+  * **where they disagree, the component wins and the ledger records it** — the
+    mockup's radius 4 against the product's 8, its blue radio against the black
+    one. That is a line in `<project>/deviations.md`, not a question, unless the design
+    changes the control **on purpose**, which is a question with a crop.
+* **Screenshots and PNGs are for visual confirmation only.** Never measure from
+  them, except where a whole zone is deliberately *baked* from one (Step 5).
+* **Nothing is invented.** If an element is not in the design, it does not exist
+  in the prototype. The same holds for what the product *knows*: option lists,
+  field sets, rules, limits, messages — if neither a frame nor the person gave
+  it, it is a question, not a guess (Step 0, *data and rules*).
+
+If the user wants a nice-looking approximation quickly, this is the wrong skill
+— say so, and build it the ordinary way.
+
+Budget: the first build of a shell plus two or three screens is roughly
+**about 200k tokens of growth on a 78k start** (system prompt, tools and SKILL.md are the
+start), and every later increment about a quarter of that.
+`references/architecture.md` has the per-increment table. A run heading far
+past that is reading what it did not need: scenery it should have baked, or a
+control the design system already ships and Step 2's split should have taken
+off the list.
+
+**Screens are cheaper in batches.** The setup dominates: the shell and its gate,
+the extraction pass, the generator, the verification harness. A second and third
+screen inside the same run reuse all of it, while the same screens split across
+sessions pay for it again — the Figma design team measured the same shape on
+their side, six screens costing about what one does. So build every screen a
+task list already names in one run; "build what the next session tests" is about
+**scope**, not about splitting a settled scope into separate sessions.
+
+## Step 3 in full — set up a generator, not a hand-written file
+
+```
+_work/gen/gen.js         one Node script: the data (extraction results, verbatim), the CSS,
+                         the markup and the page script, rendered through the shell and the
+                         library and written as the single deliverable — `node _work/gen/gen.js`
+```
+
+The skeleton `assets/templates/gen-list.skeleton.js` is one, ready to copy: the shell,
+the controls and the templates are Node modules and the generator calls them. Data at the
+top as literals with the node id beside each value, so it still traces to a Figma call; a
+build that outgrows one file splits the data to `data.js` and keeps `gen.js` as the
+assembler. (The export path's Python trio — `data.py`, `template.html`, `build.py` — is
+still right when the source is SVG exports.)
+
+**Any script that edits a built file aborts when its anchor is missing and asserts that
+key definitions appear exactly once** (§ Edits to a built file must be able to fail: a
+doubled document once passed the pixel diff). Paths relative to `__dirname`, project
+paths off the project root. Serve with `scripts/serve.cjs` (`Cache-Control: no-store`)
+from the project folder with `ROOT=.`; in the Claude desktop app register it in
+`.claude/launch.json` so the preview pane starts it.
+
+**A live control has a component.** `assets/components/controls.js` renders the design
+system's controls with every state the product ships, read from its Storybook. The mockup
+gives the text, the width and the state it draws; a disagreement with the component is a
+ledger line or a question, as for the shell. `node "$SKILL/assets/components/controls.js"
+--api` lists the components, `--api <name>` prints one header, `--doc <name>` its section
+of `VERSION.md` — the source and the whole VERSION.md are never read.
+
+**A block the window is too short for has a template.** `assets/templates/fit-height.js`
+scales it from its top centre by `(host height − reserve) / height`, capped at 1: the top
+edge and the centre stay, only the bottom gives way, what sits under it (an actions bar) is
+the reserve. Width has `fluid-page.js`; this is the other axis.
+
+**A list or table page has a template and a recipe.** `assets/templates/list-table.js` renders toolbar, header, rows and footer as DOM boxes that follow the shell's slot; the generator feeds it the column rules and the cells' markup, nothing else. The recipe, five moves:
+
+1. screenshot of the frame (the shell's state, the table's shape); `get_metadata` only for the table's node id;
+2. `get_design_context` of the **table node**, never the page — it lands in a file anyway; read it with `scripts/figctx.py <file> --depth 4` (outline with the auto-layout tokens), `--split "Table Row"` (every row's strings and icons) and `--assets _work/assets` (the SVGs);
+3. column rules from the tokens: `w-[248px] shrink-0` → `{width: 248}`, `flex-[1_0_0] min-w-[200px]` → `{flex: 1, min: 200}`, a column present in rows but not in the header → `hideInHeader: true`;
+4. copy `assets/templates/gen-list.skeleton.js` to `gen.js`, fill data, spec and cell styles;
+5. verify: `node gen.js --canvas WxH` at the frame's size, then ink boxes of a header label, a first-row text and the right-most control against the frame, each shifted by the slot offset (slot origin minus the frame's content origin). Flexible columns share the island's extra width — at 1440 the island is 9px wider than a 1440 frame's, so right-hand columns sit 4–9px right of the frame: expected, not a miss.
+
+The fluid modes: `references/shell.md` § Content in a fluid shell.
+
+## Step 4 in full — the coordinate contract
+
+**Absolute children, Figma coordinates.**
+
+```css
+#app { position:relative; width:1440px; height:900px; overflow:hidden;
+       margin:0 auto; }                    /* auto, not flex: never clips */
+#app div, #app img, #app svg, #app input { position:absolute; }
+```
+
+**A block narrower than 500 is left-aligned, `margin:0`.** Chrome will not open a
+window under 500px: a smaller `--window-size` is clamped, the page lays out at
+500, and the screenshot is still cropped to the width you asked for. A centred
+400-wide block therefore sits at 50 and every coordinate you measure is off by
+that, with nothing in the PNG to say so. `shoot.js` warns, and the contract for a
+standalone block — one without the shell — is `margin:0`.
+
+Flex only inside a leaf component (a button's icon + label). `get_metadata`
+gives `x`/`y` relative to the **parent**, at sub-pixel precision — keep the
+sub-pixels.
+
+**CSS insets absolutely-positioned children by the border width; Figma does
+not.** This bites every bordered box, card, input and device frame:
+
+```js
+const BB = (x,y,w,h,bw,css,inner) =>
+  box(x,y,w,h,css, box(-bw,-bw,w,h,'', inner));   // offset layer cancels it
+```
+
+**Figma paints a container's bottom stroke on its last pixel row** — `top + h −
+1`, where CSS `border-bottom` sits at `top + h`.
+
+**Fill and radius first, stroke last, on top of the content.**
+
+**A clipped zone keeps page coordinates via an offset layer**, so code never
+recomputes anything:
+
+```js
+box(352,56,688,844,'overflow:hidden', box(-352,-56,1440,900,'', content))
+```
+
+**Content inside the default shell lives in a zero-size anchor at the shell's
+content-slot origin** (`#content-slot`, `data-origin`), and the generator
+writes frame coordinates minus the frame's own content origin. The frame's
+sidebar may be 276 wide and the shell's 264; one anchor absorbs that, and a
+shell update moves nothing else. `references/shell.md` § Content in the shell's coordinates.
+
+**Text** goes in a box, but if you position runs by baseline — and you must,
+wherever a run is centred or the box is implicit — the baseline offset is
+*measured*, after fonts load, never computed. `references/text-and-type.md` § Measure the baseline offset, never compute it.

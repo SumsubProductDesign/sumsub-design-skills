@@ -54,7 +54,8 @@ respondent can click into it and select the value — the thing a hand-built `<s
 takes away. `buttons:` also works on an ordinary field. Each button is 24 square, radius 8, `#f3f4f6` on
 hover and `#e5e7eb` while pressed.
 
-The label takes `optional: true` for the 12/16 `(optional)` and `titleIcon:` for the question mark, and
+The label takes `optional: true` for the 12/16 `(optional)` and `titleIcon:` for the question mark (radio and
+checkbox take the same `titleIcon:`, 4 after their label, 16, `#6a7282` — the field's own geometry), and
 `error:` with `errorIcon:` renders the design system's red caption (14/24 `#dc2626`, the glyph 4px down)
 in place of the hint.
 
@@ -141,7 +142,9 @@ not a layer name someone typed, so it is the reliable key — match on it before
 | `*Button*`, `Table Row / Cell Button`, `Node / Button` | `button()` — read type from the fill: dark `#030712` is primary, white with a 1px border secondary, no fill tertiary, blue label plain |
 | `*Checkbox*`, `*CheckboxGroup*` | `checkbox()`, stacked with `group()` |
 | `*RadioGroup*`, `Radio` | `radio()`, stacked with `group()` |
-| `*Select* / Field`, `.Select / Field Inline` | `select()` — the trigger; an open menu is the prototype's own |
+| `*Select* / Field` | `select()` — the trigger; an open menu is the prototype's own |
+| `.Select / Field Inline` | `selectInline()` — icon, value and chevron on the bare page, no box |
+| `*Textarea Basic*` | `textarea()` — `input()`'s box around a `<textarea>`; `rows` from the frame's height (24 per row) |
 | `*Multiselect Basic*` | `multiselect()` — the same trigger as the select, with the chosen labels joined by `, ` |
 | `*Tag Colorful*` | `tag()`; inside the page header's tabs it is the shell's |
 | `*Counter*` | `counter()` |
@@ -204,6 +207,33 @@ and opening one menu closes any other. Without `items:` the trigger is a picture
 
 `dscheck.js` watches it by clicking the story's selector first: a check may carry `"click": "<selector>"`,
 which is what brings the menu and the modal under the same cover as everything else.
+
+## Textarea — `SnsTextarea`
+
+Story `forms-snstextarea--playground`, read on 2026-09-25. The same `.sns-input-box` as the input
+(medium: padding 4 / 12, radius 8, inset 1px `#d1d5dc`) around a `<textarea>`: 14/24 `#1e2939`, two
+rows by default (`min-height` 48, box 56), resizable by its handle (`resize: both`), and 8px of
+right padding given back by a negative margin so the scrollbar sits inside the box. `textarea()`
+is `input()` with `multiline`, so label, hint, error, `titleIcon` and `titleRight` all apply; the
+2026-09-24 run built it by hand on the input box and got the same numbers — now it is one call.
+`dscheck.js` watches the box and the control.
+
+## Skeleton — `SnsSkeletonBlock`
+
+Radius 8, `--components-skeleton-background-normal` = `#f3f4f6`, Tailwind's `animate-pulse` (opacity
+1 → 0.5 → 1, 2s, `cubic-bezier(0.4, 0, 0.6, 1)`), no shimmer; off under `prefers-reduced-motion`.
+`skeleton({height, width, radius, ai})` — `ai: true` paints the AI button's gradient (`#e0e7ff → #f3e8ff`),
+the way the questionnaire editor shows a translation in flight. It replaces the control whole, at the
+control's resting height, with no field frame around it; the label, the `(optional)` mark and the caption
+stay put. A field that already holds a value gets none. The 2026-10-06 run built it locally because the
+library had no such component.
+
+## Select Inline — `.Select / Field Inline`
+
+Not in Storybook. Read from frame `5729:7905` on 2026-09-24: an icon (16), the value 14/24
+`#1e2939` and the chevron, gap 8, padding 4 / 0, no box, no label, and the frame draws no hover —
+`selectInline()` carries the pointer and the focus ring only. It shares the select's script: the
+same `c-sel-has`, the same menu 4px under the trigger, the same pick-and-close.
 
 ## Tag — `SnsTag`
 
@@ -286,7 +316,8 @@ Story `design-system-snscodeblock--default`, read 2026-09-19. `#f9fafb` behind a
 radius 12. Header padding 8/20 over its own bottom rule `#d1d5dc`, title **16/24 Bold** `#030712` — the
 Dev space frames draw that title at 14, which is a ledger line, not the component. The Copy control is
 the product's small secondary button. The code area is padded 16 top and bottom, the gutter 20 left and
-12 right in `#4a5565`, everything 12/18 in the mono family.
+12 right in `#4a5565`, everything 12/18 in the mono family. That family is the product's `--font-family-mono`, Geist Mono, embedded by `shell.js` since
+2026-10-02 (`assets/shell/dashboard/VERSION.md`); before that it fell back to the system's mono face.
 
 Token colours, from `--components-code-block-*`:
 
@@ -418,10 +449,16 @@ five things it did not have. All five are here now, with the frame's own values:
 | `group(items, {title})` | a **visible** label over a radio or checkbox group. With a title the group is named by it (`aria-labelledby`), so the visible and the announced name cannot disagree | 14/24 medium `#030712`, 4 under |
 | `card({color})` | the card in a status colour — the product draws a check that needs attention in yellow. `grey` is still the default | yellow border `#fad24a` header `#fffbeb`; green `#bbf7d0` / `#f0fdf4`; red `#fecaca` / `#fef2f2` |
 
-Two things the colour card had to get right, both found the hard way: the header's own
-background paints over an inset shadow, so a coloured card carries a real `border`; and the
-rules name the outer card with `>`, because a descendant selector paints the nested Collapsible
-Cards too, and in the product those stay grey.
+Two things the card had to get right, both found the hard way. **The 1px frame is a
+`::after` overlay** carrying an inset shadow in `--c-card-bd`: the header's own background
+paints over a shadow set on the card itself — the grey card shipped that way on 2026-09-21 and
+again on 2026-09-24, its header open on three sides, and a zone diff at TH=60 cannot see
+`#d1d5dc` against `#f3f4f6` — while a real `border` would move every child by 1px. The same
+mechanism ate the right edge of a drawer whose header was white: any box whose frame is a
+shadow and whose child paints a background needs the overlay. And the header rules name the
+outer card with `>`, because a descendant selector paints the nested Collapsible Cards too,
+and in the product those stay grey. `.c-card` is `position:relative` for the overlay, so an
+absolutely positioned child of a card is placed against the card, not the canvas.
 
 **One disagreement, settled the usual way.** The Figma file maps DataList's label to
 `font/family/body`, which is Inter, and the first build of the Applicant page followed it. The
@@ -488,6 +525,55 @@ markup, positioning follows the product's `position-top`.
 before reading. The width, the header and the backdrop are watched; the sizes beyond small are not, since
 the story ships one.
 
+**With a footer — `SnsModalScrollFooter`**, read 2026-10-04 from the Storybook build's stylesheets
+(`SnsModalScrollFooter-*.css`, `HeadlessModal-*.css`): the card is a column capped at `100vh − 80px`
+(the wrapper's `position-top` puts it 40 from the top), header padded 24, content padded 0/24 and
+`overflow-y: auto`, footer padded 24 with the actions at the end. `modal()` switches to it whenever a
+`footer` is passed — the plain card has no cap, and on 2026-09-28 a results modal's primary action sat
+below the fold of a 756px window. Not in the stylesheet: the gap between the footer's buttons; 8 is
+used and is a ledger line until the story is read. Also from that build: sizes `x-large` 1000 and
+`xx-large` 1200.
+
+## Calendar — `SnsDateCalendar`, `SnsDateRangeCalendar`
+
+Stories `design-system-snscalendar-snsdatecalendar--playground` and `…-snsdaterangecalendar--playground`, read
+2026-10-05 in a browser (the popup renders only after a click), with the `--components-calendar-*` tokens.
+`calendar()` renders the open popup; its geometry matched the stories to the pixel (range 705×338, single
+286×351).
+
+| part | value |
+|---|---|
+| popup | white, 1px `#e5e7eb`, radius 12, shadow `0 4px 16px 3px rgba(4,29,47,.15)` |
+| range presets | a column padded 12 with a 1px `#e5e7eb` rule on its right; tertiary medium buttons, 118 wide, left-aligned |
+| months area | padded 12 / 16, gap 12; months 24 apart, each 252 wide |
+| month header | 24 high: a small tertiary arrow (only on the outer months), month and year as inline selects 16 apart |
+| weekdays | 24 high, 12/16 Medium `#6a7282`, 4 under |
+| day | 36×36, radius 8, 14/24 `#030712`; hover `#f3f4f6`; today bold; another month's day `#4a5565` (single) or hidden (range) |
+| selected | `#030712`, white text; hover `#1e2939` |
+| range | the days between `#f3f4f6` and square (hover `#e5e7eb`); the ends rounded outward only |
+| rows | **always six, top-aligned** — a five-week month leaves its last row empty |
+| footer | single: under a 1px rule, padded 12 / 16, Today (tertiary small) and Clear; range: Clear (plain) at the bottom right; a disabled Clear is `#6a7282` text with no plate |
+
+Not read from the product: what the presets compute. "Last 3 days" is today and the two before, "Last 30
+days" today and the 29 before, "This month" the 1st to today, "Last 3 months" the day after the same date
+three months back to today — a ledger line until a spec says otherwise.
+
+## Table — `SnsTable`, through `assets/templates/list-table.js`
+
+Read 2026-10-05 from the Storybook build's stylesheet (`SnsTableColumnControl-*.css`) and the
+`--components-table-*` tokens; the template is the elastic list page, not a `controls.js` component, but its
+values are the product's and are recorded here with the others.
+
+| part | value |
+|---|---|
+| header | `#f3f4f6`, outer cells rounded 8, text 14/24 Medium `#1e2939`, sort icon `#4a5565` |
+| cell | white, padding 16 / 12 / 8 vertical (size large / medium / small; header 56 / 48 / 40), 12 across, 16 at the outer edges; text `#1e2939`, caption `#4a5565`, link `#2563eb` |
+| divider | 1px `#e5e7eb` drawn after the cells (the product's cell `::after`), none under the last row |
+| hover | `#f9fafb` on the cells, outer cells rounded 8 |
+| expanded row | content 56 in from the left, padded 16 vertically, a 1px `#e5e7eb` rule above it; the divider under the whole row |
+| footer | 76 high, padding 16, a 1px `#e5e7eb` rule on top, three equal columns with the pagination in the middle |
+| toolbar | `controls.js` `searchBar` and `button` (size medium); the checkbox column is `checkbox` |
+
 ## Collapsible card — `SnsCollapsibleCard`
 
 Story `design-system-snscollapsiblecard--playground`, read fully on 2026-09-19. The card is white,
@@ -512,6 +598,12 @@ The product animates the chevron and the body (0.2s and 0.25s). Rule 5 says the 
 Not read: the `draggable` header variant and the non-`classic` skin.
 
 ## Toast — `SnsToast`
+
+**Figma and Storybook disagree here, and Storybook is right.** On 2026-09-24 the mockups drew a
+modal with a 56px header (the story: 52) and a toast in `#eefbf7` / `#d0f1e8` — the deprecated
+success/10 and /20 tokens (the story: `#f0fdf4` / `#bbf7d0`, 476 wide). `dscheck.js --only modal`
+and `--only toast` on 2026-09-25 confirmed the record still matches the product, so the drift is
+the library file's, and the component wins with a ledger line — as it did.
 
 476 wide, padding 16, radius 12, 1px border, drop shadow `0 2px 6px 1px rgba(4,29,47,.1)`; icon 24 in a
 4px box, message column 8px to its right, title SemiBold above text 14/24 `#030712`, 4px between them.
