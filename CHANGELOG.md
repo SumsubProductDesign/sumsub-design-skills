@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.268.0 — 2026-10-06 (island migration: keep the reference's instance whole; audit 7.62 fixed)
+- **An instance stays whole when the reference keeps it.** If the original's content sits inside a component instance and the reference has an instance of the same component in its content, the engine moves the instance as it is instead of cloning its parts out and removing it. Levels › ID document settings: `Configurations` stays one instance, as in the reference, instead of a loose `Block Title` + `Table`. Note: `instance kept whole, as in the reference`.
+- **Audit 7.62 (renamed `Page`)** — the check added in v3.266 read the issue list before it existed and shared its number with the Table column check (7.60). It now runs after the list is created, under its own number.
+- Internal: shorter helpers in `build.js` (header property names, a per-function `rendered` shortcut) to stay under the 49 800 limit.
+
 ## v3.267.0 — 2026-10-06 (figma-to-prototype: questions as forms, the library's table, calendar and skeleton, three runs' worth of fixes)
 Eleven runs by four designers since v3.204.0, each run log read against the eval and the fixes made at the sentence that let the miss through. User-visible:
 

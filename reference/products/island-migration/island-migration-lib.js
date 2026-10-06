@@ -7,7 +7,7 @@ const box = (n, ref) => { const a = n.absoluteTransform, r = ref.absoluteTransfo
 // v3.254: short names that keep finish.js under the use_figma limit.
 // v3.260: finish.js also writes isB(n) for the body-slot test isS(n) && (Main content | Side content | Aside › Content), drops
 // line indentation and leaves out unwrapSingle / isCardStack, which only plan.js and build.js call.
-const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", isI = n => n.type === "INSTANCE", byId = id => figma.getNodeByIdAsync(id), CP = n => n.componentProperties, CT = n => n.characters.trim(), fI = (r, nm) => r.findOne(n => isI(n) && n.name === nm), isT = n => n.type === "TEXT", fT = n => n.findOne(q => isT(q) && q.visible), fS = (r, nm) => r.findAll(n => isS(n) && n.name === nm), fill = n => { try { n.layoutSizingHorizontal = "FILL"; } catch {} }, rm = n => { try { n.remove(); } catch {} };
+const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", isI = n => n.type === "INSTANCE", byId = id => figma.getNodeByIdAsync(id), CP = n => n.componentProperties, CT = n => n.characters.trim(), fI = (r, nm) => r.findOne(n => isI(n) && n.name === nm), isT = n => n.type === "TEXT", fT = n => n.findOne(q => isT(q) && q.visible), fS = (r, nm) => r.findAll(n => isS(n) && n.name === nm), fill = n => { try { n.layoutSizingHorizontal = "FILL"; } catch {} }, rm = n => { try { n.remove(); } catch {} }, SA = "Show actions slot#6943:20", SI = "Show Info slot#6985:0", SD = "Show additional info slot#6943:18", TT = "Title text#3817:0", CTL = "Copy title#6943:15";
 const vis = n => ("children" in n) ? n.children.filter(k => k.visible !== false) : [];
 // Figma keeps Shift+Enter as U+2028; a returned string with it cuts the MCP response ("Failed to parse SSE message … EOF while
 // parsing a string … column ~20000") although the call ran. Every result goes through clean(). The regexp is built from char
@@ -396,7 +396,8 @@ if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q o
     // instance itself is removed once the cards are placed. Its name is read BEFORE the removal (reading it after throws → rollback).
     const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (isI(p)) top = p; return top; };
     const wrappers = new Map();
-    nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); });
+    // v3.268: an instance the reference keeps (e.g. Configurations on Levels › ID document settings) is moved whole, not taken apart into cloned parts — that would be a detach
+    const kw = new Set(); nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (a.refRoot && refAll(a.refRoot, w.name).some(k => isI(k) && mainName(k) === mainName(w))) return kw.has(w.id) ? null : (kw.add(w.id), w); if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); }).filter(Boolean); if (kw.size) N("instance kept whole, as in the reference");
     if (wrappers.size) N("groups in instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
     const bundles = []; let pending = [];
     for (const g of nodes.groups) { if (isHeadingBlock(g)) { pending.push(g); continue; } bundles.push([...pending, g]); pending = []; }
@@ -474,8 +475,8 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
   const keepHdr = !a.refRoot && hdr0 && isI(hdr0) && !/^\*Header\*/.test(mainName(hdr0));
   if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); N("header: the original's " + mainName(hdr0) + " is kept (no reference)"); }
   else if (getHdr()) {
-    try { hset({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
-        "Show Info slot#6985:0": !!R.status, "Show additional info slot#6943:18": !!R.addInfo }); } catch (e) { N("header props: " + e.message); }
+    try { hset({ [TT]: plan.title || name, "Key#5362:0": !!R.key, [CTL]: !!R.copy,
+        [SI]: !!R.status, [SD]: !!R.addInfo }); } catch (e) { N("header props: " + e.message); }
     if (R.key) { try { hset({ "↪ Key Name#6943:13": R.key }); } catch {} }
     // v3.253: a header element the original SHOWS and the Page header exposes as a BOOLEAN of the same name (AP Actions: the
     // country `Flag` next to the name — the engine left `Flag#…` false) is switched on, and its variants (Country) copied
@@ -492,13 +493,13 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
     const refSlot = re => rh ? rh.findAll(n => isS(n) && re.test(n.name)).find(sl => sl.children.some(k => k.visible)) : null;
     // the reference's title counts only when it re-uses the original's data (TM: "Transfer: - 250,000.00 USD" ⊃ "250,000.00");
     // a placeholder title (Case refs: "SSO Login") shares nothing with the original and is ignored
-    const refTitle = rh && CP(rh)["Title text#3817:0"] ? String(CP(rh)["Title text#3817:0"].value) : null;
+    const refTitle = rh && CP(rh)[TT] ? String(CP(rh)[TT].value) : null;
     const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
-    if (refTitle && reuses(refTitle)) { try { const rc = CP(rh)["Copy title#6943:15"]; hset(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); N("title from the reference: " + refTitle); } catch {} }   // the copy button belongs to the title it sits next to
+    if (refTitle && reuses(refTitle)) { try { const rc = CP(rh)[CTL]; hset(Object.assign({ [TT]: refTitle }, rc ? { [CTL]: !!rc.value } : {})); N("title from the reference: " + refTitle); } catch {} }   // the copy button belongs to the title it sits next to
     const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => isT(q)) : [])) { const c = CT(t);
         if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch {} } } };
     const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
-    if (rInfo) { try { hset({ "Show Info slot#6985:0": true });
+    if (rInfo) { try { hset({ [SI]: true });
         // the reference's row, but the ORIGINAL's data: a status with another label → the original status goes in; the counter gets the original score
         const stT = R.status ? (isT(R.status) ? R.status : fT(R.status)) : null, stLbl = stT ? CT(stT) : null;
         const src = vis(rInfo).map(k => { const t = k.findOne ? fT(k) : null;
@@ -508,7 +509,7 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
         if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = fT(c); if (t && CT(t) !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch {} } }
         N("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { N("ref info: " + e.message); } }
     else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { N("status: " + e.message); } }
-    if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, vis(rAdd));
+    if (rAdd) { try { hset({ [SD]: true }); fillSlot(/^Additional info/i, vis(rAdd));
         const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); N("additional info from the reference"); } catch (e) { N("ref additional info: " + e.message); } }
     else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { N("additional info: " + e.message); } }
     // tabs — items live in the Tab Basic "Items wrapper" slot; clone one in when the original had more tabs than the header ships
@@ -523,18 +524,18 @@ if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizing
     } catch (e) { N("tabs: " + e.message); }
 // v3.246: dividers between the original's actions come along in their place (AP: icons | Request check · Change applicant status)
     const acts0 = R.actions.length ? R.actions : carry, acts = []; { const seen = new Set(), isA = k => acts0.some(a => a.id === k.id); for (const b of acts0) { const p = b.parent; if (seen.has(p.id)) continue; seen.add(p.id); const ks = p.children.filter(k => k.visible !== false), mine = ks.filter(isA), i0 = ks.findIndex(k => k.id === mine[0].id), i1 = ks.findIndex(k => k.id === mine[mine.length - 1].id); ks.forEach((k, i) => { if (isA(k) || (i > i0 && i < i1 && /Divider/i.test(k.name))) acts.push(k); }); } }
-    if (acts.length) { try { hset({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { hset({ "Show actions slot#6943:20": false }); N("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
+    if (acts.length) { try { hset({ [SA]: true }); if (!hslot(/Actions slot/i)) { hset({ [SA]: false }); N("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
         for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = fT(c); if (tt && /^Button$/i.test(CT(tt))) c.remove(); } catch {} }
 // v3.246: an action already shown in the Info / Additional info rows is not repeated — the AP header keeps ID / External ID / Add tag
 // in a row outside its Buttons bar, `carry` took them as actions while the reference's Additional info row brought them too
-{ const hp = CP(getHdr()), taken = new Set(); for (const [re, pr] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => isT(q) && q.visible && CT(q))) taken.add(CT(t)); }
+{ const hp = CP(getHdr()), taken = new Set(); for (const [re, pr] of [[/^Info slot/i, SI], [/^Additional info/i, SD]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => isT(q) && q.visible && CT(q))) taken.add(CT(t)); }
 for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => isT(q) && q.visible && CT(q)), l = t ? CT(t) : ""; if (l && taken.has(l)) { N("action \"" + l + "\" already in the info rows"); c.remove(); } } catch {} } }
         // the published header brings its own Summy AI and help icons outside the Actions slot; the old header kept them inside its Actions
         // row, so they were copied twice (Case page AML / Financial data). An icon-only copy whose icon the header already shows goes.
         try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => isI(n) && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => isT(q) && q.visible && CT(q))) continue; const ic = c.findOne(q => isI(q) && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { N("the header has its own " + ic.name + " — copy removed"); c.remove(); } } catch {} } } catch {}
 // v3.246: no divider at the edges of the Actions slot after removals
       { const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => vis(s); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
-const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); N("actions slot empty — left off"); } } } catch (e) { N("actions: " + e.message); } }
+const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ [SA]: false }); N("actions slot empty — left off"); } } } catch (e) { N("actions: " + e.message); } }
   }
   // 7. overlays beside the instance (its children are locked)
   try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { N("sidebar: " + e.message); }
@@ -813,7 +814,7 @@ for (const s of h.findAll(n => isS(n) && /^(Info slot|Additional info)/i.test(n.
 if (!k.visible || !("findAll" in k)) continue; const t = k.findAll(q => isT(q) && q.visible && CT(q)).map(q => CT(q));
 if (t.length && t.every(x => PLACEHOLDER_TEXT.test(x))) { const nm = k.name; try { k.remove(); log.push("header: " + nm + " removed — it only shows the placeholder \"" + t[0] + "\""); } catch {} } }
 const h2 = page.findOne(n => isI(n) && /^\*Header\*/.test(n.name) && n.visible);
-for (const [re, prop] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = h2 && h2.findAll(n => isS(n) && re.test(n.name))[0];
+for (const [re, prop] of [[/^Info slot/i, SI], [/^Additional info/i, SD]]) { const s = h2 && h2.findAll(n => isS(n) && re.test(n.name))[0];
 if (s && !s.children.some(k => k.visible)) { try { h2.setProperties({ [prop]: false }); log.push("header: " + s.name + " empty — switched off"); } catch {} } }
 return log; }
 // v3.260: the paints of the header WRAPPER itself (AP page header) come from the reference too. The designers override the

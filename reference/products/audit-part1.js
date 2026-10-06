@@ -22,13 +22,13 @@ const productContext = null;
 const inPlace = false;
 // v3.222: an island-layout root (a live `Page` instance) is grey by design — the white content-frame check doesn't apply
 const islandRoot = root.type === "INSTANCE" && (() => { try { const m = root.mainComponent; return !!m && !!m.parent && m.parent.type === "COMPONENT_SET" && m.parent.name === "Page"; } catch (e) { return false; } })();
-// v3.266: a component instance keeps its component name — the migrated Page is "Page", never the old screen's name (team rule; the engine used to copy the frame name onto it).
-if (islandRoot && root.name !== "Page") issues.push(`7.60 renamed component: the Page instance is named "${root.name}" — instances keep the component name; set it back to "Page"`);
 // ⚠️ v3.151: `page` is used by checks 7.46/7.47/7.48/7.45 (root must live on a Drafts page,
 // section containment). Derive it from root's ancestor chain so those checks run verbatim.
 let page = root.parent;
 while (page && page.type !== "PAGE") page = page.parent;
 const issues = [];
+// v3.266 (7.62): a component instance keeps its component name — the migrated Page is "Page", never the old screen's name (team rule; the engine used to copy the frame name onto it).
+if (islandRoot && root.name !== "Page") issues.push(`7.62 renamed component: the Page instance is named "${root.name}" — instances keep the component name; set it back to "Page"`);
 const all = root.findAll(n => true);
 
 // Helper: component internals are not our responsibility. Skip any node
