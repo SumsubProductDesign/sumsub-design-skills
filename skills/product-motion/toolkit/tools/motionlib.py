@@ -29,9 +29,47 @@ def cb(e): return "cubic-bezier(%s,%s,%s,%s)" % e
 SQUARE = True
 FRAME_RR = re.compile(r'M0 16C0 [\d.]+ [\d.]+ 0 16 0H478C[\d.]+ 0 494 [\d.]+ 494 16V338C494 [\d.]+ [\d.]+ 354 478 354H16C[\d.]+ 354 0 [\d.]+ 0 338V16Z')
 
+def _lum(c):
+    """Relative luminance of "#rrggbb" / "white" / "black"; anything else (url(…), none) counts as mid-grey."""
+    c = {"white": "#ffffff", "black": "#000000"}.get(c.lower(), c)
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", c): return 0.5
+    return sum(k * int(c[i:i + 2], 16) / 255 for k, i in ((0.2126, 1), (0.7152, 3), (0.0722, 5)))
+FLAG_GID = re.compile(r'<g id="Flag(?:_\d+)?"')         # the Assets country-flag component (not the normal/flag icon)
+def _g_end(s, i):
+    d = 0
+    for t in re.finditer(r'<g\b|</g>', s[i:]):
+        d += 1 if t.group(0) == '<g' else -1
+        if d == 0: return i + t.end()
+def keep_flag_colours(dark, light):
+    """Country flags are pictures: the same in both themes. The Assets dark illustrations bind a flag's white base to
+    the dark surface (#1A1B1C) and its black to the light text colour, so Austria's white stripe turns black (06.10).
+    A fill of a flag in the dark source goes back to the light source's value (same flag, same tag) only where light and
+    dark swapped (luminance apart by more than half): a near-white base fixed in Figma (#F7F7F7) is left as drawn."""
+    spans = lambda s: [(m.start(), _g_end(s, m.start())) for m in FLAG_GID.finditer(s)]
+    ls, ds = spans(light), spans(dark)
+    assert len(ls) == len(ds), f"flags: {len(ls)} in the light source, {len(ds)} in the dark one"
+    tag = re.compile(r'<[a-zA-Z][^>]*>')
+    out, pos = [], 0
+    for (li, lj), (di, dj) in zip(ls, ds):
+        if di < pos: continue                                  # nested in a flag already done
+        lt = iter(tag.findall(light[li:lj]))
+        def fix(m):
+            t, src_t = m.group(0), next(lt)
+            v, w = re.search(r'\sfill="([^"]+)"', src_t), re.search(r'\sfill="([^"]+)"', t)
+            if v and w and abs(_lum(v.group(1)) - _lum(w.group(1))) > 0.5:
+                t = t.replace(w.group(0), ' fill="%s"' % v.group(1), 1)
+            return t
+        assert len(tag.findall(light[li:lj])) == len(tag.findall(dark[di:dj])), "a flag differs between the sources"
+        out += [dark[pos:di], tag.sub(fix, dark[di:dj])]; pos = dj
+    return "".join(out) + dark[pos:]
+
 def prep_svg(src, work):
     """Flatten background to JPEG, shrink embedded images, soften Figma layer-blur export."""
     os.makedirs(work, exist_ok=True)
+    light = src[:-len("-dark.svg")] + ".svg" if src.endswith("-dark.svg") else None
+    if light and os.path.exists(light):                        # dark sources: flags keep their real colours
+        raw = open(src).read(); fixed = keep_flag_colours(raw, open(light).read())
+        if fixed != raw: src = os.path.join(work, "src-flags.svg"); open(src, "w").write(fixed)
     if SQUARE:   # the frame's fills and its clip become plain rectangles before anything is rendered
         raw = open(src).read(); sq, n = FRAME_RR.subn("M0 0H494V354H0Z", raw)
         assert n >= 1, ("no rounded frame outline in", src)

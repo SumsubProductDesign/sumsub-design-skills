@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.271.0 — 2026-10-06 (product-motion: country flags keep their colours in dark)
+- **New rule C6 — flags are pictures, the same in both themes.** Some dark illustrations in Assets bind a flag's white base to the dark surface and its black to the light text colour (Austria's white stripe turned black). `prep_svg` now fixes every dark source that has a light sibling: a flag fill whose light and dark values swapped goes back to the light value; a near-white base already fixed in the source is left as drawn. The skill also tells you which dark component in the source still needs the fix.
+
 ## v3.270.0 — 2026-10-06 (product-motion: hand-overs glide, jumps are checked frame by frame)
 - **New rule B18 — hand an object over to its own layer while it still moves.** A one-frame switch at rest from a scaled render to the element's native one jumps even with exact geometry (anti-aliasing of text, edges, corners; baked vs live opacity). The skill now lets an opaque copy of the target ride inside the moving group, fade in over the last ~0.3 s, fades the source out under it, and switches at rest from the same raster — the switch frame changes nothing. Text that changes style on the way gets a twin in the target's style. Found on the Transaction Monitoring card turning into a feed row (frames 152–154).
 - **New check: `framediff.py`** compares neighbouring frames in a region and draws a ×8 heat map of the difference; a hand-over passes when its step is no bigger than the motion steps around it. Feedback row "it jumps between frames N and N+1" points to both.

@@ -144,6 +144,13 @@ reads as late. Use `bez_y` / `ease_y`; never guess seconds.
 **C5. Square corners.** Deliverables have square corners; the product rounds the container (16 px
 for the Assets set). Only the player's Page view rounds its slot, the way the product will.
 
+**C6. Country flags are pictures: the same in both themes.** Some dark illustrations in Assets bind a flag's white base
+to the dark surface and its black to the light text colour, so in dark Austria's white stripe turns black. `prep_svg`
+fixes it for every dark source with a light sibling: a flag fill whose light and dark values swapped (luminance apart by
+more than half) goes back to the light value; a near-white base fixed in the source is left as drawn. Icons such as
+`normal/flag` are not flags and keep their theme colours. When you see one, also tell the user which dark component in
+the source file still has it, so it gets fixed there too.
+
 ## D. The motion language (`motion(NAME)`, real seconds / px)
 
 | Kind of element | Values |
@@ -185,6 +192,7 @@ Reviewers describe symptoms; map them to the rule before changing code.
 | "the skeleton shouldn't exist / should load step by step" | B9 / B10 |
 | "corners look wrong", "two frames on top of each other" | B12 / B13 — and check the Lottie, not the HTML |
 | "blue toggle" / "old colour" | C1 |
+| "the flag is inverted in dark" | C6 |
 | "it loops" | A1 |
 
 When the feedback is about something seen in the player, it is the **Lottie** — reproduce it there
