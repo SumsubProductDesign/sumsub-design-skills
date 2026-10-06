@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.270.0 — 2026-10-06 (product-motion: hand-overs glide, jumps are checked frame by frame)
+- **New rule B18 — hand an object over to its own layer while it still moves.** A one-frame switch at rest from a scaled render to the element's native one jumps even with exact geometry (anti-aliasing of text, edges, corners; baked vs live opacity). The skill now lets an opaque copy of the target ride inside the moving group, fade in over the last ~0.3 s, fades the source out under it, and switches at rest from the same raster — the switch frame changes nothing. Text that changes style on the way gets a twin in the target's style. Found on the Transaction Monitoring card turning into a feed row (frames 152–154).
+- **New check: `framediff.py`** compares neighbouring frames in a region and draws a ×8 heat map of the difference; a hand-over passes when its step is no bigger than the motion steps around it. Feedback row "it jumps between frames N and N+1" points to both.
+
 ## v3.269.0 — 2026-10-06 (island migration: the plan shows the instance kept whole)
 - **`planOne` follows the v3.268 rule.** Before, the plan listed the parts (`Block Title` + `Table`) while the build moved the whole `Configurations` instance, so checking the plan against the reference looked like a mismatch. Now the plan shows one block: `Configurations → bare (white), instance kept whole (reference)`. Found by the skill on the ID document settings re-run.
 - Internal: in `island-migration-lib.js` the `planOne` side-block line sat behind a `//` comment on the same line; it is on its own line again.

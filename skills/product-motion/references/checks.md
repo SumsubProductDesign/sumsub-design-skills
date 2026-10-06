@@ -35,6 +35,11 @@ intend shows up here; a change limited to what you touched is a pass.
 
 - Snapshots: `python3 snap_html.py --2x <name>.html out t …` and
   `python3 snap_lottie.py --2x <name>-<theme>.json out <frame|last> …`.
+- A jump between two frames is checked on the neighbouring frames, not by eye on separate crops:
+  `python3 framediff.py out.png x y w h 2 a.png b.png c.png …` (snapshots of frames N−2 … N+2) prints the change
+  between each pair and draws the crops next to a ×8 heat map of the difference. Pass: the hand-over step is no bigger
+  than the ordinary motion steps around it (no pixels over 24). Fractional Lottie frames (152.2, 152.4 …) find the
+  exact moment.
 - Live, real-time capture (rAF, IntersectionObserver): `node live.mjs <url> out.png [waitMs] [js]`
   (needs Node; set `CHROME` on Linux). Headless `--virtual-time-budget` does not tick
   requestAnimationFrame — a "frozen frame 0" there is not a bug.

@@ -107,6 +107,17 @@ against the motion, which reads as jerky.
 with the same ink width, set labels in the source's exact text style), write the new final look to `ref.svg` so the
 checks compare against it, and tell the user that the static illustration in the source file is now out of date.
 
+**B18. Hand an object over to its own layer while it still moves, never with a switch at rest.** A scaled render and the
+element's native render differ even when the geometry is exact: anti-aliasing of scaled text, edges and corners, and a
+baked opacity vs a live one. A one-frame switch at rest shows all of it as a jump (seen at the corners first). Instead:
+an opaque copy of the target rides inside the moving group (placed by the inverse of the group's end transform, so the
+group lays it exactly onto the target) and fades in over the last ~0.3 s, while about 1 px of travel is left; then the
+source's own body fades out under it; at rest the target takes over drawn from the same raster with live opacity, so
+the switch frame changes nothing. Translucent things cross-fade inside one group opacity (opaque copy on top, the group
+carries the translucency) — two translucent layers cross-fading dip in tone. Don't put the group's mask on the copy: it
+cuts the copy's anti-aliased edge. Text that has to change style on the way (size, weight, tracking) gets a twin in the
+target's style that cross-fades in while it moves.
+
 ## C. Look
 
 **C1. Current DS colours.** Many source illustrations predate the dashboard redesign (blue primary,
@@ -169,6 +180,7 @@ Reviewers describe symptoms; map them to the rule before changing code.
 | "the arrow shouldn't bounce" | B8 |
 | "it lags behind the others" | B15 |
 | "moves a little jerkily" | B16 — soft start, no shape change while moving; trace it per frame |
+| "it jumps between frames N and N+1" | B18 — and prove the fix with `framediff.py` on those two frames (checks §3) |
 | "same names / surnames" | B6 / B17 |
 | "the skeleton shouldn't exist / should load step by step" | B9 / B10 |
 | "corners look wrong", "two frames on top of each other" | B12 / B13 — and check the Lottie, not the HTML |

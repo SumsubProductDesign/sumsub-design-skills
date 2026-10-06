@@ -166,7 +166,8 @@ checking; never run checks in parallel with each other.
 
 Run the protocol in `references/checks.md` after **every** change, both themes:
 final frame vs original (`check_final.py`), HTML vs Lottie at the moments that change
-(`midsync.py`), layer order (`layer_order.py`), zoomed crops of every shape change and contact.
+(`midsync.py`), layer order (`layer_order.py`), zoomed crops of every shape change and contact,
+and `framediff.py` on the neighbouring frames of every hand-over (a jump hides between two frames).
 Look at the rasters you baked. A failure that disappears on a re-run is a headless flake; one that
 stays is yours.
 
