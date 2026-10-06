@@ -1,6 +1,6 @@
 ---
 name: sumsub-mockup
-description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states — and Mobile SDK (native app) screens, which keep the platform fonts (iOS SF Pro, Android Roboto). Describe what you need and get a pixel-perfect screen using Sumsub design system components."
+description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states. Describe what you need and get a pixel-perfect screen using Sumsub design system components."
 argument-hint: "[screen description]"
 ---
 
@@ -225,6 +225,8 @@ await figma.loadFontAsync({ family: "Geist", style: "Bold" });
 **Rule:** every `use_figma` call that performs ANY text mutation begins with the 4 `loadFontAsync` calls above. No exceptions, even if you "think" the font is loaded from a previous call — each `use_figma` call is a separate execution context.
 
 ### Mobile SDK and platform fonts — iOS SF Pro, Android Roboto (v3.258)
+
+> MSDK screens are normally built with `websdk-mockup`, which has the same rule and helper ("Platform fonts"). This copy covers an MSDK component that lands in a Dashboard-skill build.
 
 Geist is the Dashboard font only. **Mobile SDK (MSDK, the native app) screens use the platform's system font**: iOS components of the `Mobile SDK / UI Kit` are set in `SF Pro Text` / `SF Pro Display` (Button = SF Pro Text Semibold, `Input / OTP` = SF Pro Text Regular, `Status Bar` = SF Pro Display Medium); Android in `Roboto`. Never retype them to Geist or Manrope, and never use Geist in MSDK content.
 

@@ -1,6 +1,6 @@
 ---
 name: websdk-mockup
-description: "Create Figma mockups for WebSDK screens — verification flows, KYC steps, liveness, selfie, document capture, onboarding, status screens. Uses the WebSDK design system (Manrope, dark shell, separate token set); mobile platform chrome keeps its system fonts (iOS SF Pro, Android Roboto)."
+description: "Create Figma mockups for WebSDK screens — verification flows, KYC steps, liveness, selfie, document capture, onboarding, status screens. Uses the WebSDK design system (Manrope, dark shell, separate token set). Also Mobile SDK (MSDK, the native app) screens, which use the system fonts (iOS SF Pro, Android Roboto), as does the phone's status and browser bar."
 argument-hint: "[screen description]"
 ---
 
@@ -321,7 +321,7 @@ These files are NOT pre-loaded into context. They contain exact component keys, 
 
 **Critical differences to internalize:**
 
-1. **Font is Manrope** for all SDK content — never Geist, Inter, or any other family there. **Exception: mobile platform chrome keeps its system font** — iOS uses SF Pro (`SF Pro Text`, `SF Pro Display`, `SF Compact`), Android uses Roboto. See "Platform fonts" below.
+1. **Font is Manrope** for all WebSDK content — never Geist, Inter, or any other family there. **Exceptions, both on the platform's system font** (iOS SF Pro: `SF Pro Text`, `SF Pro Display`, `SF Compact`; Android Roboto): the phone's status / browser bar on mobile WebSDK screens, and **Mobile SDK (MSDK, native app) screens as a whole** (`Mobile SDK / UI Kit` components). See "Platform fonts" below.
 
 2. **Tokens use `semantic/` prefix for ALL categories** — spacing, border-radius, icons all have `semantic/` prefix. Dashboard has bare `spacing/*` and `border-radius/*` — WebSDK does not.
 
@@ -595,7 +595,7 @@ Zero values do not need variable binding.
 
 > These are quick-reference tables. Always read `reference/variables.md`, `reference/base-components.md`, and `reference/organisms.md` for the full set of import keys.
 
-### Platform fonts — iOS / Android chrome (v3.257)
+### Platform fonts — MSDK screens and the phone's own UI (v3.257, MSDK v3.259)
 
 Mobile screens carry the phone's own UI: the `Mobile / Top` set of the WebSDK UI Kit (`Platform=IOS | Android`, `Type=None | Chrome | WebView`) and the Mobile SDK UI Kit `Status Bar`. Their texts are set in the **platform's system font**, not Manrope:
 
@@ -604,10 +604,32 @@ Mobile screens carry the phone's own UI: the `Mobile / Top` set of the WebSDK UI
 | iOS | `SF Pro Text Bold` (time in the status bar), `SF Pro Display Medium`, `SF Compact Light` |
 | Android | `Roboto Medium` (time), `Roboto Regular` (URL in Chrome) |
 
+**Mobile SDK (MSDK, the native app) screens are on the system font throughout.** Their components come from the `Mobile SDK / UI Kit` library (find them with `search_design_system`, library key `lk-25eb751450b168d99177259b78ff89cf333efdbdbac26118b8363998ab5618ed58dfe70d68be96e6fb7ea27c8091123a2e78c4fbe2814bb160cdd9a9709cbf12`), not the WebSDK UI Kit. On iOS they are set in SF Pro Text / SF Pro Display: `Button` in SF Pro Text Semibold / Regular, `Input / OTP` in SF Pro Text Regular, `Status Bar` in SF Pro Display Medium. On Android they use Roboto. In MSDK screens Manrope is wrong; so are Geist and Inter.
+
 Rules:
-- **Keep the platform font.** Never retype status-bar / browser-bar texts to Manrope, and never use SF Pro or Roboto for SDK content (titles, buttons, captions stay Manrope).
+- **Keep the platform font.** Never retype MSDK texts or the status / browser bar to Manrope. On WebSDK (web) screens, never use SF Pro or Roboto for the SDK content: titles, buttons and captions stay Manrope.
 - **Load every font a text already uses before writing it** (`getRangeAllFontNames`), not only `fontName`.
-- **If `appendChild` of an instance throws `unloaded font "SF Pro Text …"`**, the font is missing: run `fixMissingFonts` (sumsub-mockup, "Mobile SDK and platform fonts") on the fresh instance first, then append.
+- **Run `fixMissingFonts` on every MSDK instance right after `createInstance()` and before `appendChild`.** When `SF Pro Text` is missing on the computer, Figma refuses to place the component at all (`appendChild` throws `unloaded font "SF Pro Text Semibold"`), and none of its text can be edited. The SDK team reported this as "Claude can't work with the content, it has no text". The helper loads the fonts that exist and switches a missing `SF Pro Text X` / `SF Pro Display X` to `SF Pro X`. Checked live: 12 `Button` and 6 `Input / OTP` variants failed before and went in after.
+
+```js
+const AVAIL = new Set((await figma.listAvailableFontsAsync()).map(f => f.fontName.family + "|" + f.fontName.style));
+async function fixMissingFonts(node) {          // call on a fresh instance BEFORE appendChild
+  const log = [];
+  for (const t of node.findAll(n => n.type === "TEXT")) {
+    let fonts = []; try { fonts = t.getRangeAllFontNames(0, t.characters.length); } catch (e) { continue; }
+    for (const f of fonts) {
+      if (AVAIL.has(f.family + "|" + f.style)) { await figma.loadFontAsync(f); continue; }
+      const alt = /^SF Pro (Text|Display)$/.test(f.family) ? { family: "SF Pro", style: f.style } : null;
+      if (!alt || !AVAIL.has(alt.family + "|" + alt.style)) { log.push("missing font: " + f.family + " " + f.style); continue; }
+      await figma.loadFontAsync(alt);
+      for (const seg of t.getStyledTextSegments(["fontName"])) if (seg.fontName.family === f.family && seg.fontName.style === f.style) t.setRangeFontName(seg.start, seg.end, alt);
+      log.push(f.family + " " + f.style + " → SF Pro " + f.style);
+    }
+  }
+  return log;   // put the switched texts and missing fonts in the report
+}
+// const inst = variant.createInstance(); const fl = await fixMissingFonts(inst); frame.appendChild(inst);
+```
 - **SF Pro Text / SF Pro Display may be missing.** Apple's current installer gives one family, `SF Pro`, with the same styles. The old `SF Pro Text` and `SF Pro Display` families are often missing, and then the text can't be edited. When the text has one font and only that family is missing, switch it to `SF Pro` with the same style: it looks the same. Say in the report which texts were switched.
 - **If even `SF Pro` / `Roboto` doesn't load**, the font isn't on this computer. Leave the text as it is and tell the user which font is missing: SF Pro comes from developer.apple.com/fonts, Roboto is a Google font and Figma normally has it. Never substitute Manrope.
 
@@ -623,7 +645,7 @@ async function setTextKeepFont(t, value) {
 }
 ```
 
-### Typography (Manrope only)
+### Typography (WebSDK — Manrope only; MSDK uses the system font, see above)
 
 | Style | Size | Weight | Line Height | Key |
 |---|---|---|---|---|

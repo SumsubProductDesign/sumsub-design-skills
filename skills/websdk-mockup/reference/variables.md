@@ -36,7 +36,7 @@
 | `Caption Header` | 14 | SemiBold | 20 | `c21458cb8055a21749f87ef555b73c5df18f26a8` |
 | `Button` | 16 | SemiBold | 24 | `7443ac0a044e19ad3b0d7b1a6b3b3c4c1a8e799b` |
 
-All SDK fonts are **Manrope**. Never use Geist, Inter, or any other family. The only exception is mobile platform chrome (iOS status bar / browser bar in SF Pro, Android in Roboto): those keep their system font (SKILL.md, "Platform fonts").
+All SDK fonts are **Manrope**. Never use Geist, Inter, or any other family. Exceptions on the system font: Mobile SDK (native app) screens as a whole, and the phone's status / browser bar on mobile WebSDK screens. Both use SF Pro on iOS and Roboto on Android (SKILL.md, "Platform fonts").
 
 ---
 
