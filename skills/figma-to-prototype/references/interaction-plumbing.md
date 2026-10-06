@@ -5,6 +5,21 @@ a missing feature; a popup that closes on mousedown looks like a state bug; a
 tooltip that never appears looks like a CSS typo. Knowing the shapes saves the
 hunt.
 
+## Contents
+
+- Hit layers go last
+- Capture phase when the handler re-renders its own target
+- Keep canvas coordinates under a scroll
+- Canvas-level hosts for anything that escapes a clip
+- Popup placement, derived
+- A delay is not an animation
+- An event-driven element needs its own host and a commit, not a value change
+- State that survives a rebuild but not a session
+- A focused field does not survive a repaint
+- Small things worth knowing
+- Step 6 in full — build one working thing at a time
+- Hover policy
+
 ## Hit layers go last
 
 In an absolutely-positioned canvas, the text and icons of a "card" are usually
@@ -237,3 +252,55 @@ is cut off; centring flex clips the left edge.
 **Resolve reference chains on read, not on write.** If `Neutral → All text →
 per-block colour`, do not push updates down the chain — resolve each value when
 rendering. One flat repaint pass then covers any depth and cannot recurse.
+
+## Step 6 in full — build one working thing at a time
+
+**Add a single capability, check it, then add the next.** When something
+breaks it then breaks next to the change that caused it, instead of three
+features later. Building several at once buys nothing: the increments are cheap,
+the debugging is not.
+
+Work panel by panel, and factor as you go: one primitive per control family
+(table row, menu item, toggle, radio card, dropdown, text input, section header,
+panel section), each written once and parameterised. Anything shared across
+screens — a preview area, a shell — is built **once** and reused, never
+duplicated per screen. Panels come off a registry, so adding one is one entry.
+
+Four rules that decide a lot of small questions, each worked out in a reference:
+
+* **Changed → saw is the deliverable.** Every live control gets a named visible
+  consequence as you build it, asserted in Step 7; a preview that updates the
+  wrong thing invalidates the session. `research-prototypes.md` §4.
+* **Verbatim for chrome, computed for state.** A mock's handle positions are
+  illustrative; compute them from the real value. `architecture.md` § Verbatim for chrome, computed for state.
+* **Any state affecting more than one node lives in a variable, not in the
+  DOM**, and its zones are repainted from it. `architecture.md` § One value, several write paths, `theming.md` § Palette plus accessor, not conditionals.
+* **A brief constraint outranks an implementation suggestion.** If the user says
+  "just use a colour-picker library" and the brief forbids CDN dependencies, say
+  so in one line and implement it inline — for a prototype, writing the control
+  is nearly always cheaper than inlining a library.
+
+This file covers the bugs that look like something else: hit layers, capture-phase mousedown, scrolling without losing canvas
+coordinates, delays that aren't animations, popup placement, state lifecycle.
+Read it before building the first interactive control, not after. Adaptivity is
+scale-only, one factor in one variable applied in one place —
+`architecture.md` § Scale-only adaptivity.
+
+## Hover policy
+
+**Decide the hover policy in Step 0, not mid-build.** It covers the controls
+a task can reach; scenery outside the tested area is a picture unless the
+*entrances outside the task* parameter says otherwise. A policy that survived review:
+
+| element | hover |
+|---|---|
+| buttons, icon buttons, fields on white | fill `#F3F4F6` (neutral/10) |
+| table row | `#F9FAFB` |
+| anything already filled `#F3F4F6` | `#E5E7EB` |
+| left-menu items | exactly the selected style from the mockup |
+| dark primary buttons, gradient buttons, toggles, radios, avatars, breadcrumbs | rule does not apply — a grey wash would repaint the control itself. Cursor only, or agree each one separately |
+
+Inside the tested area, inertness is expressed **only** by nothing happening
+beyond the control's own state — the radio still picks, the menu still opens. Never a grey cursor, never `pointer-events:none`, never a `disabled`
+style unless the mockup has one — there, a respondent must not be able to tell
+live from dead before clicking. Outside it, a picture is a picture.

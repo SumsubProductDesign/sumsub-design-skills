@@ -55,14 +55,20 @@ echo "shell   : $LAYOUT, sidebar $STATE ($SIDE), header $TOP, active index $IDX"
 
 # ---- the frame's header: the island leaves an 8px page-coloured gap above it (current layout);
 #      without the gap, the header's bottom border row tells the component: 56 current, 64 old
-HDR_PX="$("$DIR/pixprobe.sh" "$REF" "[[$((SIDE + 4)),3]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
-HDR_NEW=0; HDR_NOTE=""
+# read at the header's right end, not beside the shell's sidebar: a frame with the older rail + section panel
+# (276 wide) has its grey panel at x = SIDE + 4, and the gap check took that grey for the island gap (2026-10-06)
+HX=$((W - 100))
+HDR_PX="$("$DIR/pixprobe.sh" "$REF" "[[$HX,3]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
+HDR_NEW=0; HDR_NOTE=""; OLD64=0
 isline() { case "$1" in "#e5e7eb"|"#e1e5ea"|"#d1d5dc") return 0 ;; *) return 1 ;; esac; }
+R55="$("$DIR/pixprobe.sh" "$REF" "[[$HX,55]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
+R63="$("$DIR/pixprobe.sh" "$REF" "[[$HX,63]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
+R96="$("$DIR/pixprobe.sh" "$REF" "[[$HX,96]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
+# the old header's signature is its border row at 63 — read whether or not the island gap is there, because
+# the AML frame (3130:238046) has the gap's colour above a 64px header and was taken for the current one (2026-10-06)
+isline "$R63" && ! isline "$R55" && OLD64=1
 if [ "$HDR_PX" = "#f3f4f6" ]; then HDR_NEW=1
 else
-  R55="$("$DIR/pixprobe.sh" "$REF" "[[$((SIDE + 4)),55]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
-  R63="$("$DIR/pixprobe.sh" "$REF" "[[$((SIDE + 4)),63]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
-  R96="$("$DIR/pixprobe.sh" "$REF" "[[$((SIDE + 4)),96]]" 2>/dev/null | grep -o '#[0-9a-f]*' | head -1)"
   if isline "$R55"; then HDR_NOTE="the current 56px header component$(isline "$R96" && echo " with the 41px tab subheader")"
   elif isline "$R63"; then HDR_NOTE="the old 64px header"
   else HDR_NOTE="a header of unknown height (no border row at 56 or 64)"; fi
@@ -132,4 +138,24 @@ elif [ -n "$SHIFT" ]; then VERDICT="shell landmarks match the frame up to a unif
 else VERDICT="shell landmarks off by up to ${WORST}px — not a uniform offset: check the frame's component version"; fi
 HDR=$([ "$HDR_NEW" = 1 ] && echo "header compared" || echo "frame header: $HDR_NOTE; default used")
 echo "ledger  : shell gate vs $FRAME_ID ${W}x${H}: $VERDICT; $Z; $HDR"
+# A miss that is not a uniform offset, or a sidebar zone over 3%, is a question before it is a
+# ledger line. On 2026-10-02 the gate said "landmarks off … check the frame's component version"
+# with the sidebar at 11.87%, the line went into the ledger as printed, the default shell was
+# published, and the user found the different menu on the live link.
+SBZ=$(echo "$Z" | grep -oE 'sidebar [0-9.]+%' | head -1 | grep -oE '[0-9.]+')
+if { [ "$WORST" -gt 1 ] && [ -z "$SHIFT" ]; } || awk -v z="${SBZ:-0}" 'BEGIN{exit !(z>3)}'; then
+  # the old 64px header is the older shell's signature: shell.md decides that case without a question,
+  # and on 2026-10-06 an ASK printed for it anyway, against the table and an answer already given in Step 0
+  case "$OLD64:$HDR_NOTE" in
+  1:*|*"the old 64px header"*)
+  echo "OLDER   : the frame's shell differs (landmarks ${WORST}px; sidebar ${SBZ:-?}%) and carries the old 64px header — the older shell."
+  echo "          Use the default; ledger: \"frame shell outdated, default used\". No question, unless the menu's items differ"
+  echo "          from the shell's (references/shell.md § When the frame's menu disagrees with the shell) or Step 0 said otherwise." ;;
+  *)
+  echo "ASK     : the frame's shell differs from the default (landmarks ${WORST}px${SHIFT:+, uniform $SHIFT}; sidebar ${SBZ:-?}%)."
+  echo "          Show the user a crop of both sidebars and ask: the default shell, or the frame's own chrome?"
+  echo "          Older, newer or on purpose decides the answer — references/shell.md § The gate, in Step 2. Not a ledger line until answered."
+  echo "          Already answered in Step 0: no second question — the answer and this line go to the ledger." ;;
+  esac
+fi
 echo "render  : $SHOT"

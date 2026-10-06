@@ -4,6 +4,20 @@ A prototype for a moderated test usually has to be a link: the respondent joins
 a call, opens a URL, and starts clicking. Vercel serves a static file well, and
 the whole deliverable is one static file.
 
+## Contents
+
+- The two rules that come before any command
+- Which host
+- Publish
+- The trap that ruins a session
+- Unpublish
+- As a claude.ai artifact
+- Authentication
+- What it costs
+- Where the slug and the scope come from
+- What to hand back
+- Step 9 in full — publish, when asked
+
 ## The two rules that come before any command
 
 **Publishing is outward-facing.** It puts the content on the public internet
@@ -32,11 +46,35 @@ under a respondent mid-interview.
 if someone is in it. Confirm before running it, even when a previous delete was
 approved: approval does not carry from one round to the next.
 
+## Which host
+
+Two ways to give someone a link, and the audience decides:
+
+| | Vercel (`publish.sh`) | claude.ai artifact (the Artifact tool) |
+|---|---|---|
+| who can open it | anyone holding the URL — a respondent from outside the company | private to the author until they share it; then the people they share it with, inside claude.ai |
+| right for | a moderated interview with a client | a demo to the team, a review |
+| updates | the same slug replaces the content at the same URL | the same file path republishes to the same URL |
+| limit | none that a prototype meets | **16 MB for the page**, base64 plates included |
+
+Ask which one when the purpose does not settle it. Everything below up to
+§ Unpublish is Vercel; § As a claude.ai artifact is the other.
+
 ## Publish
 
 ```bash
 scripts/publish.sh prototype.html --project sdk-flow-test --scope <team>
+scripts/publish.sh _work/site --project sdk-flow-test --scope <team> --spa   # a History-API prototype
 ```
+
+**`--spa` for a prototype that routes with the History API** (`/s1`,
+`/registry/x`): every path is served `index.html`, so a deep link or a reload
+does not 404. A directory's own `vercel.json` is kept and merged — its
+redirects and rewrites stay, the cache and robots headers are added. An
+overwritten `vercel.json` is how a History-API prototype loses its rewrites and
+404s on every deep link. `cleanUrls` is dropped when a rewrite is present: together
+they 404 every route. `--dry` prints the `vercel.json` that would go up.
+Locally the same prototype runs under `SPA=1 node scripts/serve.cjs` (or `"env":{"ROOT":".","SPA":"1"}` in `.claude/launch.json`).
 
 The script creates the project if it does not exist yet — `vercel deploy
 --project <slug>` fails with `project_not_found` rather than creating one — then
@@ -47,6 +85,14 @@ resolved from the deployment's aliases — the URL `deploy` itself prints carrie
 a build hash and changes every time, so it is the wrong one to send anybody),
 and warns if deployment protection would block a respondent. `--dry` inspects the payload without uploading; `--password <pw>`
 turns on Vercel's password protection where the plan allows it.
+
+**The link to send is `https://<slug>.vercel.app` and nothing else.** A
+deployment carries other aliases — the build-hash URL, and on a team account
+`<slug>-<team>.vercel.app`, which is SSO-walled. The script reports the
+project's own domain only; when it is not among the aliases it says so, lists
+them and reports the build URL rather than guess. "The shortest alias" is not
+a rule: on a team account it becomes the walled team alias after a few
+publishes, and the reported link flips between rounds.
 
 Choose the project slug once and reuse it for every round. Re-publishing the
 same slug **replaces the content at the same URL**, so the link you sent last
@@ -92,8 +138,11 @@ curl -s -o /dev/null -w '%{http_code}\n' https://<slug>.vercel.app/   # want 200
 curl -s https://<slug>.vercel.app/ | head -c 300                       # want your <title>
 ```
 
-`publish.sh` does both and prints the code next to each URL. Report the result;
-do not ask the user to verify what you can verify.
+`publish.sh` does both and prints the code next to each URL — **following
+redirects**: a prototype's own `/` → `/s1` lands on the same host and is
+routing; a hop to `vercel.com/login` is the wall. Read without following
+redirects, a prototype's own 307 looks exactly like a wall. Report the result; do not ask the
+user to verify what you can verify.
 
 Password protection is the middle ground when a public link is unacceptable —
 one shared password, told to the respondent at the start of the call. It is a
@@ -117,7 +166,45 @@ plausible failure, and an unrecoverable one. Afterwards the script *checks*
 rather than claims: `project inspect` must fail and the URL must return 404, and
 it prints the status code it actually got.
 
+## As a claude.ai artifact
+
+The Artifact tool wraps the page in its own document skeleton, and its viewer
+expects a page that works at phone width without scrolling sideways. A
+prototype is neither: it is a whole document, and its canvas is a fixed 1440.
+Do not strip it by hand — on 2026-10-02 that was done from memory, twice, and
+the published pages were never opened in the viewer. Build as always, then:
+
+```bash
+scripts/artifact-page.js prototype.html _work/artifact/prototype.html   # what gets published
+scripts/statecheck.sh _work/artifact/prototype.html --size 1440x900 --hits auto
+```
+
+`artifact-page.js` keeps the `<title>` and every style and script of the head,
+drops the document tags, wraps the body in a box that scrolls sideways (the
+page never does, the canvas keeps its width), gives the page the canvas colour so
+the viewer's dark mode shows no dark frame around a light product, and prints
+the size against 16 MB — exit 1 above it. The hit test runs on **that** file,
+not on the prototype, because it is the one the viewer shows.
+
+Publish `_work/artifact/prototype.html` with the Artifact tool, and keep
+publishing **the same path** every round: a different path is a second URL. Then
+**open the URL in the browser pane** and walk the first task with real clicks
+(`computer` → `left_click` at the control, not `javascript_tool`): the viewer
+shows the page inside claude.ai's own frame, where a script in the tab may not
+reach it, and a real click is the only check of the thing people will actually
+use. One screenshot of the
+first screen and one of the newest state.
+
+What to hand back is the same as for Vercel, minus the scope: the URL, that it is
+private until shared, and the source path that republishes it.
+
 ## Authentication
+
+Every CLI call the scripts make runs with stdin closed and under a two-minute
+clock (`VC_TIMEOUT`): a call that wants to ask something — `teams list` with
+stale credentials starts the login flow and waits for a key — gets EOF and dies
+instead of holding the session. One such call cost a two-minute background job
+on 2026-09-28. Run `npx vercel …` by hand the same way: `</dev/null`.
 
 `vercel login` is an interactive browser device flow. **An agent must not
 trigger it** — and it is easy to trigger by accident, because ordinary read-only
@@ -131,9 +218,15 @@ The user runs, once:
 npx vercel login
 ```
 
-Or exports a token from vercel.com/account/tokens as `VERCEL_TOKEN`. Tokens
-expire; "the deploy suddenly asks me to log in" is an expiry, not a bug. Never
-print the token, and never write it into a project file.
+The CLI keeps its own credential; the scripts never see it. A non-interactive credential — a
+shared machine, CI — lives in the keychain and reaches the command through the corporate
+**`auth-core`** launcher (`claude plugin install auth-core@sumsub-internal-marketplace`): on
+first run it asks for the secret once and stores it, afterwards it injects it into the child
+process for that one command. `scripts/_vercel.sh` prints the exact invocation when it finds no
+credentials. Never export a token into the shell by hand — the marketplace refuses a skill that
+does, and the secret leaks to every later command of the session. Credentials expire: "the
+deploy suddenly asks me to log in" is an expiry, not a bug. Never print one, never write it
+into a project file.
 
 ## What it costs
 
@@ -164,3 +257,34 @@ is on, and that the link is unlisted rather than secret. Put the slug and the
 URL in the handoff document — otherwise the next session cannot update the
 prototype the respondents are looking at, and will publish a second one beside
 it.
+
+## Step 9 in full — publish, when asked
+
+A remote moderated session needs a link, and the deliverable is one static file,
+so this is one command on Vercel — or, for a demo to the team, a claude.ai
+artifact made from the build by `scripts/artifact-page.js`
+(`references/publishing.md` § Which host, § As a claude.ai artifact):
+
+```bash
+scripts/publish.sh prototype.html --project <slug> --scope <team>
+scripts/unpublish.sh <slug> --confirm <slug> --scope <team>   # after the round
+```
+
+Three things decide whether this goes well, and all three are in
+`references/publishing.md`:
+
+* **Publishing is outward-facing and deleting is irreversible.** Both happen
+  only when the user asks in this session, and an approval for one round does
+  not carry to the next.
+* **Deployment protection is the trap.** With SSO on, a respondent outside the
+  team hits a login wall instead of the prototype, and you learn this during the
+  call. The script asks the URL anonymously; then open it once yourself.
+* **A published page is checked where it is published.** Run the hit test on
+  the file that goes out, then open the URL itself and walk the first task with
+  real clicks — a local copy in a wrapper is not the page the viewer shows.
+* **`vercel login` is an interactive browser flow an agent must not trigger.**
+  The scripts gate every call behind an auth check that fails with instructions
+  instead.
+
+The slug and the URL go in the handoff, or the next session publishes a second
+prototype next to the live one.

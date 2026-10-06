@@ -7,6 +7,20 @@ short config, and the prototype puts its content into the slot the shell
 provides. What it is made of, and the numbers it was accepted at, are in
 `assets/shell/dashboard/VERSION.md`.
 
+## Contents
+
+- Default: the shell, not the frame's own chrome
+- The gate, in Step 2
+- Content in the shell's coordinates
+- Content in a fluid shell
+- Two layouts
+- Config
+- The header's two slots
+- When the frame's menu disagrees with the shell
+- Tabs
+- Ledger lines, not questions
+- What the shell does not cover
+
 ## Default: the shell, not the frame's own chrome
 
 The frames a designer hands over often carry an older shell than the product
@@ -49,7 +63,9 @@ One call renders the shell at the frame's size, screenshots it and prints:
 | `zones:` | % of differing pixels: sidebar, its text-free gutter, and the header only when the frame has the current one | secondary: text-free strips ≈ 0, sidebar ≤ 3% with the same menu; the number rises with an off-grid instance or a different item list — read it with the landmarks, not instead of them |
 | `header:` | printed when the frame has no island gap above the header: says whether that header is the current 56px component (with or without the 41px tab subheader) or the old 64px one | not compared; the default header is used, the line goes to the ledger |
 | `landmark: the frame has no Collapse/Expand row…` | the frame's sidebar instance is taller than the frame (962 in 900 on *AML rules*) and shows clipped menu rows where the shell has Collapse | the landmark is skipped, not counted as a miss |
-| `ledger:` | one sentence with all of the above | paste into the deviation ledger |
+| `ledger:` | one sentence with all of the above | paste into the deviation ledger — **unless `ASK` follows** |
+| `OLDER:` | printed instead of `ASK` when the miss comes with the old 64px header | the older shell: the default, the ledger line, no question — unless the menu's items differ |
+| `ASK:` | printed when the landmarks miss by more than a uniform offset, or the sidebar zone is over 3%, and the header is not the old one | **a question to the user, with a crop of both sidebars**, before anything is built on either shell; the ledger line goes in after the answer. On 2026-10-02 an 11.87% sidebar went into the ledger as printed and the user found the different menu on the published link |
 
 | landmarks | what to do |
 |---|---|
@@ -57,6 +73,24 @@ One call renders the shell at the frame's size, screenshots it and prints:
 | match, but the frame's *menu* differs (other items, other nesting, an active item the shell lacks) | the shell's menu, and the questions in § When the frame's menu disagrees with the shell |
 | non-uniform miss, and the frame's shell is simply older | use the shell; ledger: "frame shell outdated, default used" |
 | non-uniform miss, and the design changes the shell on purpose | **ask**: default shell or the frame's? Show the crop |
+| non-uniform miss, and the frame's shell is **newer** than `shell.js` — it has parts no config key renders | **ask**, with the crop and a recommendation: when no task touches the chrome, bake the frame's chrome as one plate (Step 5); otherwise the default shell with the missing parts named in the question. Either way the ledger line is "frame shell newer than shell.js: <the parts>", and the same line goes into the run log's §7 — it is a request to update `shell.js`, not a property of this prototype |
+
+**Which of the three misses it is** is read from the parts, not guessed:
+
+* **older** — the frame lacks something the shell draws, or carries the old 64px
+  header (`header:` says so);
+* **newer** — the frame has something **no config key of `scripts/shell.js`
+  renders**. Check the key list at the top of that file before saying so: the
+  `fullscreen` header today renders `section`, `title`, `keyName`, `actions`,
+  the `info` row and `tabs`, and **no** status pill, flag or copy button (`tag`
+  is drawn in the `basic` header only). A part the config can draw is a config
+  line, not a newer shell;
+* **on purpose** — the brief or the person says the chrome is part of the change.
+
+On 2026-10-02 the OCR frames had a flag, a copy button and a status pill in a
+fullscreen header, with an 8px gap above a rounded island: newer, by this list.
+The table had no row for it, so the skill decided alone to bake the chrome —
+the right answer, reached without asking.
 
 **An icon rail plus a section panel is a basic sidebar.** Older frames draw the
 navigation as a 52 rail and a 224 section panel beside it (AML screening
@@ -94,6 +128,17 @@ arithmetic: `padding-left = frame x − 284`. Getting this wrong shifts everythi
 by the island's inset, which reads as a plausible 20px and survives a glance —
 it cost a rebuild on the Dev space pages, 2026-09-19.
 
+**What the product pins to the window is not content.** A toast, a modal, a
+drawer sit at the window's edges, not in the slot, so they take neither the
+slot's anchor nor the frame's raw coordinates. A top-right toast keeps the
+frame's distance from the **right edge** of the canvas and from the **bottom of
+the header** — measured in the frame (toast top minus the frame's header bottom)
+and added to the shell's header bottom. With the frame's raw y, a shell whose
+header is shorter than the frame's puts the toast over the tabs: on 2026-10-06 the
+content moved 15 up with the current header, the toast stayed at the frame's y,
+and at 1440 it covered the top of the card and the last tab. The ledger line is
+the shift, not the overlap.
+
 **Read the field size from the frame, not from the component's default.** A
 Figma `*Input* / Form` block 60 tall is label 24 + 4 + field **32**, the
 product's *medium*; `input()` defaults to *large* (40). Six of those in a column
@@ -126,7 +171,8 @@ only two come from the frame:
 * `frameWidth`, the content block's width where the frame draws it, and the two
   column widths — read;
 * `primary.min`, the floor — **measured, never guessed**: narrow the built page
-  with `scripts/fluidcheck.sh` until something clips, and write that number down.
+  with `scripts/fluidcheck.sh` until something clips or a label wraps (its `wrapped`
+  column, against the widest width), and write that number down.
   A guessed floor is an invented layout, which rule 3 forbids;
 * the gutter is **additional to the slot's own inset**, which is the arithmetic that
   matters: the slot starts at `SIDE + PAD`, measured 284 against an island edge of
@@ -135,6 +181,17 @@ only two come from the frame:
   Pass 0 to stay level with the tabs; pass 12 for the 32 from the island's edge
   that the AML page wanted. Passing 32 puts the content at 52 and past the tabs,
   which is what the old wording here caused on run 6.
+* **the same holds vertically**: the slot's top is already 20 below the header
+  (or the tabs' line), the island's own top padding. A frame's content that sits
+  20 under the tabs is at slot y 0, not 20 — measured from the frame's tabs line,
+  subtract the 20 before writing the coordinate. On 2026-10-06 a form went in at
+  24 and landed 44 under the tabs;
+* **the floor and the shell's `minWidth` are one number**: below the shell's
+  minimum the window scrolls, above it the island shrinks, so a floor without a
+  matching `minWidth` lets the island clip the aside before any scrollbar
+  appears. `fluid-page.js`'s `shellMinWidth(spec, contentOrigin, canvasWidth)`
+  returns it; put that in `_work/shell.json` as `"minWidth"` whenever the floor
+  changes.
 
 **Decision, 2026-09-18:** elastic content is for list and table pages, and only when
 the respondents' screens are known to differ — there a fixed table looks like a
@@ -194,8 +251,21 @@ when it is an older version of it.
             "expanded": [],
             "items": null,
             "children": null },                          // per-section nesting for this prototype only
-  "hover": true }
+  "hover": true,
+  "scroll": true }                                             // fixed canvas: the island scrolls taller content
 ```
+
+**`"sidebar": {"plate": "<png>", "width": 256}`** is the frame's own sidebar, baked —
+the config line for "the frame's chrome" when the gate's `ASK` comes back that way.
+Cut the sidebar out of the frame's 2x export with `cut.js`, give its width in canvas
+px, and the island and the slot start there; the menu config is not used and the
+active path is not checked. The 2026-10-02 Device list did this by hand and moved
+its island from 264 to 256 itself.
+
+**`"scroll": true`** gives a fixed canvas what the viewport canvas always has: the
+island scrolls content taller than itself, and the slot grows with it. A list page
+on a 900 canvas has 788 of island; without it the rows below are clipped, and the
+2026-10-02 run added `overflow-y:auto` by hand.
 
 **Both rows take the same entries**, so the two states the product shows most often
 need no special casing: several buttons on the right, and the record's tags and

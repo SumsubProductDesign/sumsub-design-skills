@@ -11,6 +11,64 @@ caption painted under its own plate, and a pill 0.35px wide because a constant
 had been eyeballed.
 
 
+
+## Contents
+
+- A pale outline is not ink
+- A frame is checked along its whole perimeter
+- A forced state must not leave focus behind
+- Write assertions that carry the expected value
+- A failing assertion is a suspect, not a verdict
+- Deterministic build
+- Probe discipline
+- `:hover` cannot be triggered from automation
+- If you measure in a live browser pane at all
+- Bitmap comparison, when there is a reference PNG
+- A content block: align first, then measure
+- Pick the method before you start measuring
+- A written spec and the export can disagree — measure the export
+- What a measurement cannot see
+- The cheap ladder: numbers first, pictures last
+- Two references, not one
+- A zone's reference can go stale
+- Set the threshold as a number
+- Verify interactions separately from pixels
+- Verify scaling separately
+- Chrome renders, Node measures
+- Step 7 in full — verify by measurement
+
+## A pale outline is not ink
+
+`inkbbox.sh` takes a threshold, and its default is deliberately dark: it looks for
+glyphs. The design system's own outlines are not glyphs — an unselected radio's
+ring is `#d1d5dc`, a divider is `#e5e7eb` — and at the usual threshold the box
+comes back `[none]`, which reads exactly like "the element is missing".
+
+Measure a pale outline with `pixprobe.sh` on the pixel, or `minpx.sh` over the
+rect, which reports the darkest pixel it found. Reserve `inkbbox.sh` for text and
+for filled shapes, and when it says `[none]` on something you can see in the
+render, suspect the threshold before you suspect the build. Run 7, 2026-09-21.
+
+## A frame is checked along its whole perimeter
+
+A card's 1px frame, a drawer's edge, a modal's border: `#d1d5dc` on `#f3f4f6`
+is 91 across RGB, far under a zone diff's threshold, so a header that paints
+over the top of its card's frame reads 0.00% and ships. It shipped four times —
+a card header (twice), a drawer header, a yellow check card — found by eye each
+time. `statecheck.sh --frames '.c-card, .drawer|left'` walks each element's
+perimeter every 4px in the render and compares the edge pixel with the one 3px
+inside; a run of more than 12px with no difference is a `FRAME GAP`, named with
+the edge and the span, exit 3. Corners are skipped by the element's radius; an
+element framed on some sides only names them after `|`. Run it on every
+framed container of a screen once per state, next to `--hits` and `--texts`.
+
+**A hover is a state too.** A table row's divider drawn as an inset shadow on the
+row is painted over by its cell's hover fill: the 2026-10-02 Device list lost
+every divider under the cursor, and nothing asserted it. Force the hover with
+`--css` (mirror the `:hover` rule onto the row) and run `--frames '.row|bottom'`
+in that state. The product's own table draws the divider as an `::after` above
+the cells, which is why its rows never lose it.
+
 ## A forced state must not leave focus behind
 
 A probe that forces a state and then measures it also has to say what it did NOT
@@ -77,9 +135,13 @@ Both are reasons to re-read the export, not to touch the build.
 Two consecutive builds must produce the same hash:
 
 ```bash
-python3 build.py && md5 -q out.html && python3 build.py && md5 -q out.html   # macOS
-python3 build.py && md5sum out.html && python3 build.py && md5sum out.html   # Linux
+node _work/gen/gen.js && md5 -q out.html && node _work/gen/gen.js && md5 -q out.html   # macOS
+node _work/gen/gen.js && md5sum out.html && node _work/gen/gen.js && md5sum out.html   # Linux
 ```
+
+(`python3 build.py` in the same place on an export-path build.) The library's
+ids come from a counter that resets per process, so two builds match; a
+`Date.now()` or a random id anywhere in `gen.js` is what breaks this.
 
 Cheap, and it removes the question "did I break the pipeline" from every
 debugging session. It also proves a project move was clean: after relocating the
@@ -155,9 +217,13 @@ in one call:
 
 **It takes an HTML file of the block alone, not the whole page.** Point it at a
 prototype and it renders the shell into a 640-wide window, aligns the sidebar
-against the block's reference and reports nonsense residuals. Build the block
-into its own file (the generator can emit one), or crop the page's render and
-compare with `zonediff.sh` instead.
+against the block's reference and reports nonsense residuals. The skeleton
+generator emits the block: `node _work/gen/gen.js --block 1920x900` writes
+`_work/gen/block.html` — the content at the slot's width with the shell's fonts —
+and never touches the deliverable. A generator of your own does the same, and
+**decides every mode's output path before it writes anything**: on 2026-10-06 one
+rendered the shell into the deliverable's path and branched afterwards, and the
+finished prototype became a bare shell that `fluidcheck.sh` passed as "ok".
 
 * it renders the block, builds an **ink profile** of both images (how much ink per row and per column)
   and cross-correlates them over ±span px to find the offset;
@@ -294,8 +360,20 @@ matches exactly, whatever the antialiasing did around it.
 
 ## What a measurement cannot see
 
-Numbers confirm position, size and colour. Three things are invisible to them,
-and all three have shipped as bugs **after** every measurement passed:
+Numbers confirm position, size and colour. Four things are invisible to them,
+and all four have shipped as bugs **after** every measurement passed:
+
+* **A short text that is not there.** A zone diff counts pixels; a missing
+  14px label is a few hundred of them in a zone of a hundred thousand, and the
+  number barely moves. On 2026-10-02 the OCR modal lacked First name's
+  transliteration at 1.4%, inside a threshold of 3, and the designer found it by
+  comparing the modal with the page. The check is a list, not a picture:
+  `figctx.py <the zone's design context> --texts > _work/texts/<zone>.txt`, then
+  `statecheck.sh page.html --js '<the frame's state>' --texts _work/texts/<zone>.txt --texts-in '<the zone>'`.
+  Every string must be found; `MISSING` exits 3. **Scope it to the zone**: the
+  page under a modal carries most of the modal's labels, and an unscoped check
+  finds them there. A baked zone has no design context and so no list — its
+  text is the plate's, which the zone diff does see.
 
 * **Pixel density.** Headless Chrome renders at DPR 1; the respondent's screen
   is DPR 2. A baked plate exported at 1x diffs at 0.00% and looks soft next to
@@ -426,6 +504,12 @@ bbox (light ink on a dark ground) rather than by diffing.
 
 ## Verify interactions separately from pixels
 
+**One assertion per visible consequence.** A control that changes two things on
+screen gets two assertions. A filter changes the rows and the counter on its
+button; on 2026-10-02 the probe checked the rows, passed, and the counter read
+"2" for one size range — an array counted by its length — until the designer
+saw it. List what a control changes before writing its probe, and assert each.
+
 A pixel-perfect prototype with a dead menu fails the test it was built for. In
 the browser:
 
@@ -437,6 +521,39 @@ the browser:
 * list elements that are clickable but have **no hover affordance** — usually
   the controls the agreed hover rule could not repaint. That list belongs in the
   handoff, not in your head.
+
+### A click in a probe is not a click
+
+`element.click()` and `dispatchEvent` deliver the event to the element you
+named. A real click is delivered to `elementFromPoint` — whatever is on top. So
+a probe proves the handler works, and says nothing about whether a person can
+reach it. On 2026-10-02 the toast's full-width wrapper, empty and invisible, lay
+over a header button: ten scripted walks passed, the designer's first click did
+nothing, and the fix was one `pointer-events:none`.
+
+`statecheck.sh --hits auto` is the check. It collects the live controls —
+buttons, links, fields, ARIA roles, `tabindex`, and the outermost element of
+every `cursor:pointer` region, which is how a hit layer over a plate is found —
+and for each one asks `elementFromPoint` at the centre of its visible part
+(clipped to the window and to every scrolling ancestor). Its answer:
+
+```
+hits  : 106 controls · 54 reachable · 1 BLOCKED · 0 under another clickable layer · 8 not on screen · 40 disabled/hidden/pointer-events:none
+        BLOCKED by div#toastwrap: 1 — button#report "Report issue" @935,25
+```
+
+* **BLOCKED by X** — a non-clickable element is on top: an empty wrapper, a
+  fixed host, a text or an icon painted over its hit layer (the trap *Click on a
+  label does nothing*). Exit 3. Fix the layer, not the probe.
+* **under a clickable X** — another `cursor:pointer` element is on top. Usually
+  the control's own hit layer, and then it is fine; check the name.
+* **not on screen** — scrolled out of the window or of a scrolling box. Scroll it
+  in with `--js` and run again if a task reaches it.
+
+Run it in every state a task passes through, because overlays come and go with
+state. With a modal open, scope it to the modal (`--hits '#modal'`): its
+backdrop covers the page by design, and unscoped every page control reads as
+BLOCKED by the backdrop. A scope that matches nothing is an error, not a pass.
 
 Drive press-and-drag with synthetic pointer events and assert the consequences:
 after a colour drag, the popup hex, the row hex, the row swatch and the handle
@@ -454,7 +571,12 @@ the deviation ledger.
 
 Chrome is used for one thing: turning HTML into a PNG. Every script that needs
 it drives it directly, with the flags kept in one place, `scripts/_chrome.sh`.
-Change a flag there, not in a script. No measuring page is left in `scripts/`:
+Change a flag there, not in a script. One thing Chrome does that the flags
+cannot undo: with `--dump-dom` the page is laid out 87px shorter than the
+window (Chrome 153), while the screenshot is full-size. `statecheck.sh` measures
+that delta once per binary and grows its DOM pass by it; pixels come from a
+probe-free pass. A DOM height read any other way — a hand-rolled `--dump-dom`
+call — is short by that much, and nothing in the output says so. No measuring page is left in `scripts/`:
 if you find yourself writing one, the answer belongs in `_pix.cjs`.
 
 Renders run in parallel where there is more than one. `shoot.js` shoots four
@@ -485,3 +607,101 @@ screenshot of the measuring page and carried that page's margin.
 **`--screenshot=/dev/null` silently breaks `--dump-dom`.** Always pass a real
 path, even when the image is not wanted. That still applies to the scripts that
 do render: `shoot.js`, `statecheck.sh`, `scaletest.js`, `crop.js`.
+
+## Step 7 in full — verify by measurement
+
+**You cannot see a 0.4px error, and it is still wrong.** Actually run it; never
+report a verification you did not perform, and if screenshots are impossible,
+say so instead.
+
+**A page taller than the canvas is gated at its own height.** `statecheck.sh --full`
+measures the content — including a scrolling island, whose height lives on the
+scrolling box and not on the document — and renders at that height. Without it
+every number describes the first screen and says nothing about the rest: the
+Applicant page is 1788 tall in a 900 window, so two of its three cards sat below
+the fold and no zone diff had ever looked at them.
+
+**Run the skill's checks, do not write your own lighter one.** `zonediff.sh`,
+`inkbbox.sh`, `shellgate.sh`, `blockgate.sh` and `statecheck.sh` exist so that
+the thing being graded is not also writing the exam. Measuring a couple of
+values by hand and declaring a match is the same failure as skipping the check.
+Extra measurements are welcome; replacing a script with them is not. If a check
+looks like a false positive, say so and show its output — do not quietly drop
+it.
+
+Three levels, cheapest first:
+
+1. **Numbers, no pictures.** Zone diff (`scripts/zonediff.sh`, "% of pixels that
+   differ" against the Figma PNG) and ink bboxes (`scripts/inkbbox.sh`). One
+   call per screen, a 200-byte answer. This is 90% of the value.
+2. **A crop into context** (`scripts/crop.js`) only for a zone level 1 flagged.
+   Each image costs 1–2k tokens.
+3. **A full screenshot**, once per screen, at the end.
+
+**A content block gets `scripts/blockgate.sh`**: it renders the block, aligns it
+with the node's own render by ink profile, and prints the offset it found plus a
+per-band residual. That removes the step where a person reads the node's y out
+of the metadata and crops the reference by hand — one mis-crop cost a cycle on
+the AML form. A whole-block offset is the anchor (Step 4), not a defect;
+residuals ≤1px mean the block matches; a `MISSING` band means something is not
+built.
+
+Plus DOM assertions with `scripts/probe.js` for anything positional you can
+state exactly — each named with **where its expected value came from**.
+
+**Choose the method before measuring**, and keep to the budget: a small visual
+addition is about seven calls. Static states are verified by forcing the state
+and rendering (`scripts/statecheck.sh` does render and measure in one call);
+behaviour by `statecheck.sh --probe`, which starts a fresh process; a hover by
+mirroring its rule onto a class — `:hover` cannot be triggered from automation,
+so **tell the user every hover needs one human look.** Force a state on **one**
+element, or its neighbours will overlap what you are measuring.
+
+**"It is clickable" is a hit test, not a probe.** A probe's `element.click()`
+fires through whatever lies on top of the element, so every probe passes on a
+button nobody can press. Before saying anything is clickable, run
+`statecheck.sh --hits auto` once in every state the tasks pass through — the
+page, each open menu, each modal (scoped to it: `--hits '#modal'`, or every
+control under its backdrop reads as covered). It asks `elementFromPoint` at the
+centre of each live control and names what sits on top; `BLOCKED` is a defect
+and exits 3 (`references/verification.md` § A click in a probe is not a click
+has the run that made it necessary).
+
+**A rule is checked as its table.** In a logic demo, `node "$SKILL/scripts/rulecheck.cjs" _work/rules.json`
+runs every row of the person's table in a fresh process — set the input as typing
+would, read the outcome, compare — and exits 3 on any FAIL. Its clicks go where a
+person's would (`elementFromPoint`), so a covered button fails its row with what
+covers it. Ten walks written from memory prove the walks; the table proves the
+rule. `--markdown` prints the same table with this run's results for the handoff's
+§ Rules.
+
+**A frame is checked along its perimeter.** `statecheck.sh --frames '<every
+framed container>'` once per state: a 1px frame is below a zone diff's
+threshold, and a header painting over its card's frame shipped four times
+(`references/verification.md` § A frame is checked along its whole perimeter).
+
+**A text is checked as text.** A zone diff barely moves for a missing label, so
+every live zone whose design context was pulled gets
+`statecheck.sh --texts <figctx.py … --texts> --texts-in '<the zone>'` in the
+frame's state: each string of the design must be on the page, in that zone
+(`references/verification.md` § What a measurement cannot see).
+
+**Diff against two references, not one.** Figma answers "does it match the
+design"; the last accepted render of the same screen answers "did I break
+something I did not touch" — the question every increment raises. Untouched
+zones must come back at 0.00%, and every non-zero zone must be explained.
+
+**Set the stopping threshold as a number.** ≤3% per frame and ≤2% per text-free
+zone worked; the residue is rasteriser difference on text, not geometry. Double
+it for dark zones.
+
+**A failing assertion is a suspect, not a verdict.** More than half turn out to
+be bugs in the assertion. Check Figma before changing the code.
+
+Measurements are blind to orientation, stacking and pixel density — give every
+directional or overflowing element one look at a crop, with its neighbours in
+frame, and assert on every baked plate that `naturalWidth` is twice its CSS
+width: a 1x plate diffs at 0.00% and looks soft on the respondent's screen.
+Verify interactions separately from pixels, and scaling separately from both.
+The rest of this file is the full method; `references/traps.md` § Measurement
+has the artefacts that produce false failures.

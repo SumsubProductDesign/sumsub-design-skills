@@ -705,6 +705,74 @@
           }
         }
       ]
+    },
+    {
+      "component": "textarea",
+      "checks": [
+        {
+          "what": "medium box, two rows",
+          "story": "forms-snstextarea--playground",
+          "sel": ".sns-input-box.size-medium",
+          "expect": {
+            "h": "56",
+            "padding": "4px 12px",
+            "borderRadius": "8px"
+          }
+        },
+        {
+          "what": "control",
+          "story": "forms-snstextarea--playground",
+          "sel": ".sns-textarea-control",
+          "expect": {
+            "minHeight": "48px",
+            "fontSize": "14px",
+            "lineHeight": "24px",
+            "color": "rgb(30, 41, 57)",
+            "resize": "both",
+            "paddingRight": "8px",
+            "marginRight": "-8px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "calendar",
+      "checks": [
+        {
+          "what": "day cell",
+          "story": "design-system-snscalendar-snsdatecalendar--playground",
+          "click": "button.sns-button",
+          "sel": ".sns-calendar-grid-body-cell .control",
+          "expect": {
+            "w": "36",
+            "h": "36",
+            "borderRadius": "8px",
+            "fontSize": "14px"
+          }
+        },
+        {
+          "what": "weekday",
+          "story": "design-system-snscalendar-snsdatecalendar--playground",
+          "click": "button.sns-button",
+          "sel": "th.text-components-calendar-weekday-text-normal",
+          "expect": {
+            "h": "24",
+            "fontSize": "12px",
+            "fontWeight": "500",
+            "color": "rgb(106, 114, 130)"
+          }
+        },
+        {
+          "what": "range months",
+          "story": "design-system-snscalendar-snsdaterangecalendar--playground",
+          "click": "button.sns-button",
+          "sel": "table:has(.sns-calendar-grid-body-cell)",
+          "expect": {
+            "w": "252",
+            "h": "240"
+          }
+        }
+      ]
     }
   ],
   "frame": "1000x420",

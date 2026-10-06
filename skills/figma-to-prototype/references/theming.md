@@ -1,5 +1,16 @@
 # A second theme
 
+## Contents
+
+- Via MCP: the theme is a palette, nothing else
+- Via exports: prove the geometry matches
+- Deriving a palette from colour pairs (exports, no layer names)
+- Binding an element to a token replaces its drawn default
+- Palette plus accessor, not conditionals
+- Sweep for literals that escaped the palette
+- The antialiasing seam
+- Driving the theme from more than one control
+
 ## Via MCP: the theme is a palette, nothing else
 
 A dark frame typically differs from its light twin **only in colours and a few
@@ -13,8 +24,7 @@ grep 'bg-\[' 'border-\[' 'text-\[' the file → the palette
 ```
 
 Geometry then matches within 1px by construction. The dark zone's diff number
-will be higher than the light one's without being worse — `verification.md`,
-"Set the threshold as a number".
+will be higher than the light one's without being worse — `verification.md` § Set the threshold as a number.
 
 Two things to check while you are there:
 
@@ -169,8 +179,8 @@ box(x, y, w, h, {background: T().shell,            // not just the border
 ```
 
 Same class of problem: a rounded parent whose child has square corners. The
-parent needs `overflow:hidden` (see `reading-exports.md`), and the child needs
-to be *inside* it, not a sibling.
+parent needs `overflow:hidden` — the exporter does not clip a child to its
+parent's rounded corners — and the child needs to be *inside* it, not a sibling.
 
 ## Driving the theme from more than one control
 
@@ -178,5 +188,4 @@ A theme is the state most likely to grow extra controls: a settings radio, a
 switch inside the preview, a colour row that belongs to one theme. Keep the
 theme in one field, let every control write it, and decide per control whether
 it also moves the saved *setting* — the full rule, and why a preview switch
-should leave the setting alone, is in `architecture.md` under "Two or three
-controls, one state".
+should leave the setting alone, is in `architecture.md` § Two or three controls, one state: setting versus view.

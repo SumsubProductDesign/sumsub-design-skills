@@ -10,6 +10,13 @@
 > Both paths converge from Step 3 of `SKILL.md` onward. Where the two disagree
 > about a value, the live file wins.
 
+## Contents
+
+- Triage before you write a line
+- Stroke conventions — memorise these
+- Other things the exporter does
+- Two exports that disagree
+
 ## Triage before you write a line
 
 Run `scripts/svg_dump.py` on every file first, then answer these five questions.
@@ -25,7 +32,7 @@ reverse-engineering every time.
 
 **2. Do the groups have names?**
 Unnamed groups mean elements are addressable only by geometry. Workable — see
-`theming.md` for the colour-pair trick that survives it — but say so early,
+`theming.md` § Deriving a palette from colour pairs (exports, no layer names), which survives it — but say so early,
 because it changes how long the work takes.
 
 **3. Raster or vector?**

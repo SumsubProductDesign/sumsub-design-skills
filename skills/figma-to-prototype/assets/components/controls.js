@@ -40,9 +40,13 @@ function input(spec = {}) {
   // secret: the product's *Secret / Input Field* — the value arrives masked and the
   // field stays a real input, so a respondent can click into it and select the text
   const value = spec.secret && spec.value == null ? '\u2022'.repeat(16) : (spec.value || '');
+  // multiline: the product's SnsTextarea is the same box around a <textarea> — rows 2 by default,
+  // resizable by its handle (resize:both), the value inside the element, not in an attribute
   const field = spec.live === false
     ? `<span class="c-input-text">${value ? esc(value) : `<span class="c-input-ph">${esc(spec.placeholder || '')}</span>`}</span>`
-    : `<input class="c-input-ctl" type="text" ${attrs} value="${esc(value)}">`;
+    : spec.multiline
+      ? `<textarea class="c-input-ctl c-input-ta" rows="${spec.rows || 2}" ${attrs}>${esc(value)}</textarea>`
+      : `<input class="c-input-ctl" type="text" ${attrs} value="${esc(value)}">`;
   // buttons sit inside the box, to the right of the value: the design system's
   // secret field carries two (show and copy), an ordinary field none
   // a button may be a string (the glyph) or {icon, label}; the label is its name for
@@ -59,13 +63,33 @@ function input(spec = {}) {
           // ("FREYA"), an age ("42 y.o."), a unit. It is not the hint, which sits under the box
           + `${spec.titleRight ? `<span class="c-input-tr">${esc(spec.titleRight)}</span>` : ''}</label>`
         : '')
-    + `<span class="c-input-box">${spec.icon ? `<span class="c-input-icon">${spec.icon}</span>` : ''}${field}${buttons}</span>`
+    + `<span class="c-input-box${spec.multiline ? ' c-input-tabox' : ''}">${spec.icon ? `<span class="c-input-icon">${spec.icon}</span>` : ''}${field}${buttons}</span>`
     + (spec.error
         ? `<span class="c-input-err" id="${descId}">${spec.errorIcon || ''}<span>${esc(spec.error)}</span></span>`
         : spec.hint ? `<span class="c-input-hint" id="${descId}">${esc(spec.hint)}</span>` : '')
     + `</span>`;
 }
 
+
+// textarea(spec) — the product's *Textarea Basic* (SnsTextarea): input()'s box and label around a
+//   <textarea>. spec as input(), plus rows (default 2, the story's; the frame's one-line textarea
+//   is rows: 1). The box is rows × 24 plus the size's padding: medium with two rows is 56.
+//   Read from forms-snstextarea--playground on 2026-09-25; dscheck.js watches it
+const textarea = (spec = {}) => input(Object.assign({}, spec, {multiline: true}));
+
+// selectInline(spec) — the product's `.Select / Field Inline`: an icon, the value and a chevron on
+//   the bare page, no box, no label. value, icon (inline SVG, 16), items (the menu, as select()),
+//   ariaLabel. Read from frame 5729:7905 on 2026-09-24: gap 8, padding 4 0, 14/24 #1e2939; the
+//   frame draws no hover, so the trigger carries the pointer only. Storybook has no inline story
+function selectInline(spec = {}) {
+  const menu = spec.items
+    ? `<span class="c-menu-anchor">${selectMenu({items: spec.items, search: spec.search, searchPlaceholder: spec.searchPlaceholder})}</span>`
+    : '';
+  return `<span class="c-input c-sel c-seli${spec.items ? ' c-sel-has' : ''}"${spec.id ? ` id="${esc(spec.id)}"` : ''}>`
+    + `<span class="c-input-box" role="combobox" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(spec.ariaLabel || spec.value || '')}">`
+    + `${spec.icon ? `<span class="c-input-icon">${spec.icon}</span>` : ''}<span class="c-input-text">${esc(spec.value || '')}</span>`
+    + `<span class="c-sel-ch">${ICON('chevron-down')}</span></span>${menu}</span>`;
+}
 
 // button(spec) — spec.type 'primary' | 'secondary' | 'tertiary' | 'plain' | 'outline'
 //   status 'default' | 'success' | 'danger', size 'small' | 'medium' | 'large' (24 / 32 / 40),
@@ -85,18 +109,21 @@ function button(spec = {}) {
 
 // ---- icons shipped with the components (Figma exports, verbatim)
 const fs = require('fs'), path = require('path');
-const ICON = n => fs.readFileSync(path.join(__dirname, 'icons', n + '.svg'), 'utf8').replace(/<\?xml[^>]*>/, '').trim();
+// every copy gets its own ids (scripts/_svg.cjs): two copies of one icon share a gradient id, and a hidden first copy blanks the visible one
+const {uniq: uniqIds} = require(path.join(__dirname, '..', '..', 'scripts', '_svg.cjs'));
+const ICON = n => uniqIds(fs.readFileSync(path.join(__dirname, 'icons', n + '.svg'), 'utf8').replace(/<\?xml[^>]*>/, '').trim());
 
-// radio(spec) — label, checked, disabled, caption, name, id
+// radio(spec) — label, checked, disabled, caption, name, id, titleIcon (a glyph after the label, as the field's
+//   label has: the frame's "?" — 4 after the text, 16, #6a7282; it was spliced in by string replacement on 2026-10-06)
 function radio(spec = {}) {
   const st = spec.disabled ? ' c-rd-disabled' : '';
   return `<label class="c-rd${spec.checked ? ' c-rd-on' : ''}${st}"${spec.id ? ` id="${esc(spec.id)}"` : ''}`
     + `${spec.name ? ` data-name="${esc(spec.name)}"` : ''} role="radio" aria-checked="${spec.checked ? 'true' : 'false'}"`
     + `${spec.disabled ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="0"'}><span class="c-rd-m"></span>`
-    + `<span class="c-rd-b"><span class="c-rd-l">${esc(spec.label || '')}</span>`
+    + `<span class="c-rd-b"><span class="c-rd-l">${esc(spec.label || '')}${spec.titleIcon ? `<span class="c-ti">${spec.titleIcon}</span>` : ''}</span>`
     + `${spec.caption ? `<span class="c-rd-c">${esc(spec.caption)}</span>` : ''}</span></label>`;
 }
-// checkbox(spec) — same shape; a checked box carries the design system's tick
+// checkbox(spec) — same shape, titleIcon included; a checked box carries the design system's tick
 function checkbox(spec = {}) {
   const st = spec.disabled ? ' c-cb-disabled' : '';
   const on = spec.checked || spec.indeterminate;          // the product gives both states the same filled plate
@@ -106,7 +133,7 @@ function checkbox(spec = {}) {
     + ` role="checkbox" aria-checked="${spec.indeterminate ? 'mixed' : spec.checked ? 'true' : 'false'}"`
     + `${spec.disabled ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="0"'}>`
     + `<span class="c-cb-m"><span class="c-cb-tick">${ICON('checkmark')}</span><span class="c-cb-bar">${ICON('indeterminate')}</span></span>`
-    + `<span class="c-cb-b"><span class="c-cb-l">${esc(spec.label || '')}</span>`
+    + `<span class="c-cb-b"><span class="c-cb-l">${esc(spec.label || '')}${spec.titleIcon ? `<span class="c-ti">${spec.titleIcon}</span>` : ''}</span>`
     + `${spec.caption ? `<span class="c-cb-c">${esc(spec.caption)}</span>` : ''}</span></label>`;
 }
 // group(items, spec) — a vertical stack of radios or checkboxes, 8px apart (the product's pitch: 24 + 8)
@@ -240,6 +267,14 @@ const kbd = (keys) => `<span class="c-kbd">`
   + [].concat(keys).filter(k => k != null && k !== '').map(k => `<kbd>${esc(k)}</kbd>`).join('')
   + `</span>`;
 
+// skeleton(spec) — *SnsSkeletonBlock*: the placeholder a value takes before it arrives. It stands IN PLACE
+// of the control (the whole box, no field frame), never inside it; the label and caption around it stay.
+//   width   css width (default '100%')      height   px, the control's own height in the resting state
+//   radius  px, default 8                    ai       true → the AI gradient (the button's own start/end tokens)
+// Pulse 1 → 0.5 → 1 over 2s, cubic-bezier(0.4, 0, 0.6, 1), the product's animate-pulse; no running shimmer.
+// Off under prefers-reduced-motion. The one animation rule 5 allows, and only when the brief asks for a loading state.
+const skeleton = (spec = {}) => `<span class="c-skel${spec.ai ? ' c-skel-ai' : ''}" aria-hidden="true" style="width:${spec.width || '100%'};height:${spec.height || 32}px${spec.radius != null ? ';border-radius:' + spec.radius + 'px' : ''}"></span>`;
+
 // tooltip(spec) — the box, and optionally its arrow. Where the tooltip goes is still the
 // prototype's own; what the arrow looks like and which way it points is not.
 //   side  'top'|'right'|'bottom'|'left' — where the TOOLTIP sits against the thing it explains,
@@ -255,11 +290,15 @@ const tooltip = (spec = {}) => {
     + (side ? `<span class="c-tip-arrow"${spec.at != null ? ` style="${along}:${spec.at}px"` : ''}>${ICON('tooltip-arrow-' + size)}</span>` : '')
     + `</span>`;
 };
-// modal(spec) — backdrop + card; body and footer are HTML the caller builds
+// modal(spec) — backdrop + card; body and footer are HTML the caller builds. size small | medium |
+//   large | x-large | xx-large. With a `footer` the card is the product's SnsModalScrollFooter:
+//   header and footer padded 24, the body scrolls inside a card capped at the canvas height − 80,
+//   so the primary action never falls below the fold (it did, on a 756px window, 2026-09-28).
+//   Without a footer it is the plain SnsModal: padding 16/24, as tall as its content.
 function modal(spec = {}) {
   const id = spec.id || nextId('c-mod');
   return `<div class="c-mod-wrap"${spec.hidden === false ? '' : ' hidden'} id="${esc(id)}">`
-    + `<div class="c-mod-back"></div><div class="c-mod c-mod-${spec.size || 'small'}" role="dialog" aria-modal="true" aria-labelledby="${esc(id)}-t">`
+    + `<div class="c-mod-back"></div><div class="c-mod c-mod-${spec.size || 'small'}${spec.footer ? ' c-mod-scroll' : ''}" role="dialog" aria-modal="true" aria-labelledby="${esc(id)}-t">`
     + `<div class="c-mod-h"><span class="c-mod-ttl"><span class="c-mod-t" id="${esc(id)}-t">${esc(spec.title || '')}</span>`
     + `${spec.subtitle ? `<span class="c-mod-s">${esc(spec.subtitle)}</span>` : ''}</span>`
     + `${spec.close || ''}</div>`
@@ -380,6 +419,15 @@ const css = `
 .c-input-ctl,.c-input-text{flex:1;min-width:0;min-height:24px;font:inherit;font-size:14px;line-height:24px;color:#1e2939;
   background:transparent;border:0;padding:0;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c-input-ctl::placeholder,.c-input-ph{color:#6a7282}
+/* the textarea: the story's control wraps, scrolls, keeps its resize handle, and takes 8px on the
+   right that a negative margin gives back — the product's own way of keeping the scrollbar inside */
+.c-input-ta{white-space:pre-wrap;overflow:auto;text-overflow:clip;resize:both;height:auto;padding-right:8px;margin-right:-8px}
+.c-input-tabox{align-items:stretch}
+/* the inline select: the trigger is the value on the bare page, the size classes do not apply */
+.c-seli{width:auto}
+.c-seli .c-input-box{width:auto;padding:4px 0;background:transparent;box-shadow:none;column-gap:8px}
+.c-seli .c-input-icon,.c-seli .c-sel-ch{margin:0}
+.c-seli .c-input-text{flex:none}
 .c-input-error .c-input-box{box-shadow:inset 0 0 0 1px #dc2626;background:#fef2f2}
 .c-input-warning .c-input-box{box-shadow:inset 0 0 0 1px #d27a0a;background:#fffbeb}
 .c-input-disabled .c-input-box{background:#f3f4f6}
@@ -514,6 +562,9 @@ const css = `
 .c-cb-m svg{width:12px;height:12px}
 .c-cb-m svg[viewBox="0 0 16 16"]{width:16px;height:16px}  /* the indeterminate bar is drawn in the 16 box, the tick in a 12 one */
 .c-rd-b,.c-cb-b{display:flex;flex-direction:column;margin-left:8px}
+.c-rd-l,.c-cb-l{display:inline-flex;align-items:center;gap:4px}
+.c-ti{display:flex;width:16px;height:16px;color:#6a7282}
+.c-ti svg{width:16px;height:16px}
 .c-rd-c,.c-cb-c{color:#4a5565}
 .c-rd:hover .c-rd-m,.c-cb:hover .c-cb-m{box-shadow:inset 0 0 0 1px #b4bac4;background:#f9fafb}
 .c-rd:active .c-rd-m,.c-cb:active .c-cb-m{box-shadow:inset 0 0 0 1px #99a1af;background:#f3f4f6}
@@ -686,6 +737,10 @@ const css = `
 .c-dl-v{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;
   font-size:14px;line-height:24px;color:#030712}
 /* --- keyboard shortcut: the grey keycaps inside a button */
+.c-skel{display:block;box-sizing:border-box;border-radius:8px;background:#f3f4f6;animation:c-skel 2s cubic-bezier(0.4,0,0.6,1) infinite}
+.c-skel-ai{background:linear-gradient(90deg,#e0e7ff,#f3e8ff)}
+@keyframes c-skel{0%,100%{opacity:1}50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){.c-skel{animation:none}}
 .c-kbd{display:inline-flex;align-items:center;gap:2px}
 .c-kbd kbd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;box-sizing:border-box;
   padding:2px 4px;border-radius:8px;background:#edeff2;color:#373d4d;
@@ -711,12 +766,26 @@ const css = `
 .c-mod-small{width:480px}
 .c-mod-medium{width:600px}
 .c-mod-large{width:720px}
+.c-mod-x-large{width:1000px}
+.c-mod-xx-large{width:1200px}
+/* with a footer: SnsModalScrollFooter — header 24, content 0/24 and scrolling, footer 24 flex-end; the
+   card is capped at the canvas height − 80 (the product: 100vh − 80, 40 above in position-top) */
+.c-mod-scroll{display:flex;flex-direction:column;padding:0;margin-top:40px;max-height:calc(100% - 80px)}
+.c-mod-scroll .c-mod-h{padding:24px;min-height:0}
+.c-mod-scroll .c-mod-b{padding:0 24px;overflow-y:auto;min-height:0}
+.c-mod-scroll .c-mod-f{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:24px}
 .c-mod-h{min-height:52px;display:flex;align-items:center;gap:16px}
 .c-mod-ttl{display:flex;flex-direction:column;flex:1;min-width:0}
 .c-mod-t{font-size:18px;line-height:24px;font-weight:700;color:#030712}
 .c-mod-s{font-size:14px;line-height:24px;font-weight:400;color:#4a5565}
 /* --- collapsible card */
-.c-card{overflow:hidden;background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px #d1d5dc;box-sizing:border-box}
+/* the 1px frame is an overlay, not a box-shadow on the card and not a border: the header's own
+   background paints over an inset shadow (two prototypes shipped with the header open on three
+   sides before anyone looked), and a real border would move every child by 1px against the
+   frame. The overlay sits above the header, takes no clicks, and its colour is the card's own
+   variable — set on every card, so a nested card stays grey inside a coloured one */
+.c-card{position:relative;overflow:hidden;background:#fff;border-radius:16px;box-sizing:border-box;--c-card-bd:#d1d5dc}
+.c-card::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--c-card-bd);pointer-events:none}
 /* the header bar is grey, not white, and the chevron sits on its left in a 24 box
    that lights up on hover — read from the live story 2026-09-19 */
 .c-card-h{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
@@ -728,14 +797,13 @@ const css = `
 .c-card-small .c-card-h{padding:8px}
 .c-card-medium .c-card-h{padding:12px 16px}
 .c-card-large .c-card-h{padding:16px 20px}
-/* the card in a status colour. The header's own background paints over an inset shadow, so a
-   coloured card carries a real border; and the rules name the OUTER card with > so a nested
-   Collapsible Card stays grey, which is what the product draws */
-.c-card-yellow{box-shadow:none;border:1px solid #fad24a}
+/* the card in a status colour: the frame variable and the header, both on the OUTER card only —
+   the header rule names it with > so a nested Collapsible Card stays grey, as the product draws */
+.c-card-yellow{--c-card-bd:#fad24a}
 .c-card-yellow > .c-card-h{background:#fffbeb}
-.c-card-green{box-shadow:none;border:1px solid #bbf7d0}
+.c-card-green{--c-card-bd:#bbf7d0}
 .c-card-green > .c-card-h{background:#f0fdf4}
-.c-card-red{box-shadow:none;border:1px solid #fecaca}
+.c-card-red{--c-card-bd:#fecaca}
 .c-card-red > .c-card-h{background:#fef2f2}
 .c-card-ch{display:flex;align-items:center;justify-content:center;flex-shrink:0;
   width:24px;height:24px;border-radius:8px;color:#4a5565}
@@ -940,4 +1008,160 @@ const script = `(function(){
   });
 })();`;
 
-module.exports = {css, script, input, button, radio, checkbox, group, dataList, kbd, select, multiselect, selectMenu, tag, counter, status, statusSelect, emptyState, codeBlock, tagMultiselect, searchBar, link, tabs, tooltip, modal, card, toast, alert};
+// calendar(spec) — SnsDateCalendar (mode 'single') and SnsDateRangeCalendar (mode 'range'), the open popup.
+//   month 'YYYY-MM' (the first month shown; default: today's), today 'YYYY-MM-DD' (default: the real date —
+//   pass the frame's own "today" so the prototype shows what the design shows), value 'YYYY-MM-DD' (single),
+//   start / end 'YYYY-MM-DD' (range), months 1 | 2 (range default 2), presets ['Today', 'Yesterday',
+//   'Last 3 days', 'Last 30 days', 'This month', 'Last 3 months'] (range: the left column; omit for none), id.
+//   Live through `script`: the arrows page the months, a click picks (range: start, then end, swapped when the
+//   second is earlier), a preset picks its range, Clear empties; each pick fires `c-cal-change` on the calendar
+//   with {value} or {start, end}, and the picked dates are on its data-value / data-start / data-end.
+// Read from the Storybook stories on 2026-10-05 (the popup only renders after a click, so the values were read
+// in a browser): white, 1px #e5e7eb, radius 12, shadow 0 4 16 3 rgba(4,29,47,.15); months area padded 12/16,
+// months 24 apart, each 252 wide; header 24 high — a small tertiary arrow, month and year as inline selects 16
+// apart; weekday row 24 high, 12/16 Medium #6a7282, 4 under; day cells 36×36, radius 8, 14/24 #030712, hover
+// #f3f4f6; today bold; another month's days #4a5565 (single) or not shown (range); selected #030712 on white text,
+// hover #1e2939; in a range the days between are #f3f4f6 and square, the ends rounded outward only. **A month is
+// always six rows, top-aligned** — a five-week month leaves its last row empty rather than centring: a calendar
+// built by hand on 2026-10-02 centred its months and a five-row month floated lower. Single: a footer under a
+// 1px rule, Today (tertiary small) left, Clear right. Range: presets in a 12-padded column with a rule on its
+// right, tertiary medium buttons left-aligned; Clear (plain) at the bottom right of the months area.
+function calMonth(y, m, st) {
+  // y, m (0-11); st: {today, value, start, end, range}. Returns the six rows of one month, Monday first.
+  const pad = n => (n < 10 ? '0' : '') + n;
+  const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7;
+  let html = '';
+  for (let w = 0; w < 6; w++) {
+    html += '<tr>';
+    for (let k = 0; k < 7; k++) {
+      const d = new Date(y, m, 1 - lead + w * 7 + k), s = iso(d), cls = ['c-cal-d'];
+      if (d.getMonth() !== m) cls.push('c-cal-out');
+      if (s === st.today) cls.push('c-cal-today');
+      if (st.range) {
+        const a = st.start, b = st.end;
+        if (d.getMonth() === m) {
+          if (s === a || s === b) cls.push('c-cal-sel');
+          if (a && b && s >= a && s <= b) { cls.push('c-cal-hl'); if (s === a) cls.push('c-cal-hs'); if (s === b) cls.push('c-cal-he'); }
+        }
+      } else if (s === st.value) cls.push('c-cal-sel');
+      html += '<td class="' + cls.join(' ') + '"><button type="button" class="c-cal-b" data-d="' + s + '" tabindex="-1">' + d.getDate() + '</button></td>';
+    }
+    html += '</tr>';
+  }
+  return html;
+}
+const CAL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function calendar(spec = {}) {
+  const pad = n => (n < 10 ? '0' : '') + n;
+  const now = new Date(), todayIso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  const range = spec.mode === 'range';
+  const today = spec.today || todayIso;
+  const [y0, m0] = (spec.month || (range ? spec.start : spec.value) || today).slice(0, 7).split('-').map(Number);
+  const n = range ? (spec.months || 2) : 1;
+  const st = {today, value: spec.value || '', start: spec.start || '', end: spec.end || '', range};
+  const arrow = dir => button({type: 'tertiary', size: 'small', iconOnly: true, label: dir === 'p' ? 'Previous month' : 'Next month',
+    icon: `<span class="c-cal-ar c-cal-ar-${dir}">${ICON('chevron-down')}</span>`});
+  const month = i => {
+    const d = new Date(y0, m0 - 1 + i, 1);
+    return `<div class="c-cal-mo" data-i="${i}"><div class="c-cal-h">`
+      + `<span class="c-cal-nav${i === 0 ? '' : ' c-cal-hide'}" data-nav="-1">${arrow('p')}</span>`
+      + `<span class="c-cal-my">${selectInline({value: CAL_MONTHS[d.getMonth()]})}${selectInline({value: String(d.getFullYear())})}</span>`
+      + `<span class="c-cal-nav${i === n - 1 ? '' : ' c-cal-hide'}" data-nav="1">${arrow('n')}</span></div>`
+      + `<table class="c-cal-t"><thead><tr>${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(w => `<th>${w}</th>`).join('')}</tr></thead>`
+      + `<tbody>${calMonth(d.getFullYear(), d.getMonth(), st)}</tbody></table></div>`;
+  };
+  const picked = range ? !!st.start : !!st.value;
+  const clear = button({type: 'plain', size: range ? 'large' : 'small', label: 'Clear', state: picked ? 'normal' : 'disabled'}).replace('class="', 'class="c-cal-clear ');
+  const presets = range && spec.presets && spec.presets.length
+    ? `<div class="c-cal-pre">${spec.presets.map(p => button({type: 'tertiary', size: 'medium', label: p}).replace('class="', `data-preset="${esc(p)}" class="`)).join('')}</div>` : '';
+  const months = `<div class="c-cal-months">${Array.from({length: n}, (_, i) => month(i)).join('')}</div>`;
+  const body = range
+    ? `${presets}<div class="c-cal-main">${months}<div class="c-cal-ft">${clear}</div></div>`
+    : `<div class="c-cal-col"><div class="c-cal-main">${months}</div><div class="c-cal-ft">${button({type: 'tertiary', size: 'small', label: 'Today'}).replace('class="', 'data-today-btn class="')}${clear}</div></div>`;
+  return `<div class="c-cal" data-mode="${range ? 'range' : 'single'}" data-month="${y0}-${pad(m0)}" data-months="${n}" data-today="${today}"`
+    + ` data-value="${esc(st.value)}" data-start="${esc(st.start)}" data-end="${esc(st.end)}"${spec.id ? ` id="${esc(spec.id)}"` : ''}>${body}</div>`;
+}
+const CAL_CSS = `
+/* --- calendar: SnsDateCalendar / SnsDateRangeCalendar, the open popup */
+.c-cal{display:inline-flex;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 16px 3px rgba(4,29,47,.15);box-sizing:border-box;color:#030712;font-size:14px;line-height:24px}
+.c-cal-col{display:flex;flex-direction:column}
+.c-cal-pre{display:flex;flex-direction:column;padding:12px;border-right:1px solid #e5e7eb}
+.c-cal-pre .c-btn{justify-content:flex-start;width:118px}
+.c-cal-main{display:flex;flex-direction:column;gap:12px;padding:12px 16px}
+.c-cal-months{display:flex;gap:24px}
+.c-cal-mo{display:flex;flex-direction:column;gap:12px;width:252px}
+.c-cal-h{display:flex;justify-content:space-between;align-items:center;height:24px}
+.c-cal-my{display:flex;gap:16px}
+.c-cal-hide{visibility:hidden}
+.c-cal-ar{display:flex;width:16px;height:16px}
+.c-cal-ar svg{width:16px;height:16px}
+.c-cal-ar-p svg{transform:rotate(90deg)}.c-cal-ar-n svg{transform:rotate(-90deg)}
+.c-cal-t{border-collapse:collapse;align-self:flex-start}
+.c-cal-t th{width:36px;height:24px;padding:0 0 4px;box-sizing:border-box;font-size:12px;line-height:16px;font-weight:500;color:#6a7282;text-align:center;vertical-align:top}
+.c-cal-t td{width:36px;height:36px;padding:0}
+.c-cal-b{display:block;width:36px;height:36px;padding:0;border:0;border-radius:8px;background:transparent;font:inherit;font-size:14px;line-height:24px;color:#030712;cursor:pointer}
+.c-cal-b:hover{background:#f3f4f6}
+.c-cal-today .c-cal-b{font-weight:700}
+.c-cal-out .c-cal-b{color:#4a5565}
+.c-cal[data-mode=range] .c-cal-out .c-cal-b{visibility:hidden}
+.c-cal-hl .c-cal-b{background:#f3f4f6;border-radius:0}
+.c-cal-hl .c-cal-b:hover{background:#e5e7eb}
+.c-cal-sel .c-cal-b{background:#030712;color:#fff}
+.c-cal-sel .c-cal-b:hover{background:#1e2939}
+.c-cal-hs:not(.c-cal-he) .c-cal-b{border-radius:8px 0 0 8px}
+.c-cal-he:not(.c-cal-hs) .c-cal-b{border-radius:0 8px 8px 0}
+.c-cal-hs.c-cal-he .c-cal-b{border-radius:8px}
+.c-cal[data-mode=range] .c-cal-ft{display:flex;justify-content:flex-end}
+.c-cal[data-mode=range] .c-cal-clear{padding:0;height:24px}
+.c-cal[data-mode=single] .c-cal-ft{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb}
+.c-cal-clear:disabled,.c-cal-clear.c-btn-disabled,.c-cal-clear:disabled:hover{--c-fg:#6a7282;--c-bg:transparent}   /* a disabled plain button is grey text, no plate */`;
+const CAL_SCRIPT = `
+(function(){
+  var calMonth = ${calMonth.toString()};
+  var M = ${JSON.stringify(CAL_MONTHS)};
+  function pad(n){return (n<10?'0':'')+n}
+  function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function add(s,days){var p=s.split('-').map(Number);return iso(new Date(p[0],p[1]-1,p[2]+days))}
+  function draw(c){
+    var ym=c.dataset.month.split('-').map(Number), st={today:c.dataset.today,value:c.dataset.value,start:c.dataset.start,end:c.dataset.end,range:c.dataset.mode==='range'};
+    c.querySelectorAll('.c-cal-mo').forEach(function(mo){var i=+mo.dataset.i,d=new Date(ym[0],ym[1]-1+i,1);
+      var t=mo.querySelectorAll('.c-cal-my .c-input-text');t[0].textContent=M[d.getMonth()];t[1].textContent=d.getFullYear();
+      mo.querySelector('tbody').innerHTML=calMonth(d.getFullYear(),d.getMonth(),st)});
+    var cl=c.querySelector('.c-cal-clear'),on=st.range?!!st.start:!!st.value;cl.disabled=!on;cl.classList.toggle('c-btn-disabled',!on);
+  }
+  function pick(c,detail){c.dispatchEvent(new CustomEvent('c-cal-change',{bubbles:true,detail:detail}));draw(c)}
+  document.addEventListener('click',function(e){
+    var c=e.target.closest&&e.target.closest('.c-cal');if(!c)return;
+    var nav=e.target.closest('[data-nav]');
+    if(nav){var p=c.dataset.month.split('-').map(Number),d=new Date(p[0],p[1]-1+(+nav.dataset.nav),1);c.dataset.month=d.getFullYear()+'-'+pad(d.getMonth()+1);draw(c);return}
+    var b=e.target.closest('.c-cal-b');
+    if(b&&!b.closest('.c-cal-out')||b&&c.dataset.mode==='single'){var s=b.dataset.d;
+      if(c.dataset.mode==='single'){c.dataset.value=s;pick(c,{value:s});return}
+      if(!c.dataset.start||c.dataset.end){c.dataset.start=s;c.dataset.end=''}
+      else if(s<c.dataset.start){c.dataset.end=c.dataset.start;c.dataset.start=s}else c.dataset.end=s;
+      pick(c,{start:c.dataset.start,end:c.dataset.end});return}
+    var pr=e.target.closest('[data-preset]');
+    if(pr){var t=c.dataset.today,p=t.split('-').map(Number),a=t,z=t;
+      switch(pr.dataset.preset){case 'Yesterday':a=z=add(t,-1);break;case 'Last 3 days':a=add(t,-2);break;case 'Last 30 days':a=add(t,-29);break;
+        case 'This month':a=p[0]+'-'+pad(p[1])+'-01';break;case 'Last 3 months':a=iso(new Date(p[0],p[1]-4,p[2]+1));break}
+      c.dataset.start=a;c.dataset.end=z;var f=a.split('-').map(Number);c.dataset.month=f[0]+'-'+pad(f[1]);pick(c,{start:a,end:z});return}
+    if(e.target.closest('[data-today-btn]')){var t2=c.dataset.today;c.dataset.value=t2;c.dataset.month=t2.slice(0,7);pick(c,{value:t2});return}
+    if(e.target.closest('.c-cal-clear')){c.dataset.value='';c.dataset.start='';c.dataset.end='';pick(c,{})}
+  });
+})();`;
+
+module.exports = {css: css + CAL_CSS, script: script + CAL_SCRIPT, calendar, input, textarea, skeleton, selectInline, button, radio, checkbox, group, dataList, kbd, select, multiselect, selectMenu, tag, counter, status, statusSelect, emptyState, codeBlock, tagMultiselect, searchBar, link, tabs, tooltip, modal, card, toast, alert};
+
+// `node controls.js --api` prints every component's signature — the comment block above each
+// one — so a build reads thirty lines instead of VERSION.md's six hundred (a run spent a cycle
+// on 2026-09-24 grepping this file's CSS for what those comments already say)
+if (require.main === module && process.argv.includes('--api')) {
+  const src = fs.readFileSync(__filename, 'utf8').split('\n');
+  for (const n of Object.keys(module.exports).filter(k => k !== 'css' && k !== 'script')) {
+    const i = src.findIndex(l => l.startsWith('// ' + n + '('));
+    if (i < 0) { console.log('// ' + n + '(spec) — no header comment; read VERSION.md\n'); continue; }
+    let j = i; while (j < src.length && src[j].startsWith('//')) j++;
+    console.log(src.slice(i, j).join('\n') + '\n');
+  }
+}
