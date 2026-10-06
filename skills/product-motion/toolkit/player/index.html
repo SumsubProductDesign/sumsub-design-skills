@@ -256,7 +256,7 @@ function renderList() {
     const shown = items.filter(i => i.name.toLowerCase().includes(q));
     if (!shown.length) {
       const e = document.createElement('div'); e.className = 'empty';
-      e.textContent = items.length ? 'No matches' : (kind === 'server' ? 'Put .json / .lottie files into promo-motion/lottie' : 'Nothing dropped yet');
+      e.textContent = items.length ? 'No matches' : (kind === 'server' ? 'Put .json / .lottie files into the workspace lottie/ folder' : 'Nothing dropped yet');
       list.appendChild(e); return;
     }
     shown.forEach(i => {
@@ -279,7 +279,7 @@ function renderList() {
     const e = document.createElement('div'); e.className = 'empty';
     e.innerHTML = 'Folder list is unavailable — start the player with <b>Lottie Player.command</b>. Dropping files still works.';
     list.appendChild(e);
-  } else section('promo-motion/lottie', state.server, 'server');
+  } else section('lottie/', state.server, 'server');
   section('Dropped files', state.local, 'local');
 }
 $('#q').oninput = renderList;

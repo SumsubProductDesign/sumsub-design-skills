@@ -32,7 +32,7 @@ if FIGMA and not ONLY:
 PREFIX = CFG.get("component_prefix", "")
 W1, H1 = CFG.get("size_1x", [494, 354]); RADIUS = CFG.get("corner_radius", 16)
 TITLE = CFG.get("title", "Promo illustrations — motion"); PREVIEW = CFG.get("preview_url", ""); CONTACT = CFG.get("contact", "")
-LABEL = args.label or (CFG.get("label", "promo-motion") + ("-update" if ONLY else ""))
+LABEL = args.label or (CFG.get("label", "product-motion") + ("-update" if ONLY else ""))
 node_url = lambda n: f"https://www.figma.com/design/{ASSETS}/?node-id={n.replace(':', '-')}"
 README_TAIL = """## Behaviour (same for both formats)
 

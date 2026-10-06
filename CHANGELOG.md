@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.256.0 — 2026-10-06 (promo-motion is now product-motion)
+- **The illustration animation skill is now `/sumsub-design:product-motion`.** Same skill, new name: call it as `/sumsub-design:product-motion`; `/sumsub-design:promo-motion` no longer exists. Its suggested workspace folder is now `~/product-motion`; an existing `~/promo-motion` keeps working, just tell the skill to use it.
+
 ## v3.255.0 — 2026-10-06 (new skill: promo-motion)
 - **New skill `/sumsub-design:promo-motion`.** Turns a static illustration into a short animation that plays once when it is seen and stops on the original picture, delivered as Lottie and as an animated SVG in light and dark. It is the method behind the 16 animated Assets promo illustrations: the same story rules, the same motion language (how a card arrives, a tag pops, a row joins), current design-system colours, square corners for the product to round.
 - **Same checks for everyone.** Every change is checked in both themes: the last frame against the original, the HTML against the Lottie at every moment that changes, the layer order, and close-ups of shape changes.

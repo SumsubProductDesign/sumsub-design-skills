@@ -1,5 +1,5 @@
 ---
-name: promo-motion
+name: product-motion
 description: >-
   Animate a static product illustration (the promo / empty-state illustrations from the Assets
   library, or any illustration built the same way) into a short motion piece that plays once and
@@ -13,7 +13,7 @@ description: >-
 argument-hint: "[Figma link of the illustration, or which animation to change]"
 ---
 
-# Promo motion — static illustration → play-once animation
+# Product motion — static illustration → play-once animation
 
 ## 🚨 Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
@@ -98,12 +98,12 @@ Chromium, Brave, Edge — found automatically, or `export CHROME=/path`). On mac
 with the built-in `sips`; elsewhere the toolkit does it in the browser. Node is only needed for
 `live.mjs` (real-time capture). No installs, no network at build time except the Geist web font.
 
-**Set up a workspace once** (ask the user where; default `~/promo-motion`). Copy the toolkit into it
+**Set up a workspace once** (ask the user where; default `~/product-motion`). Copy the toolkit into it
 — the scripts expect exactly this layout:
 
 ```bash
-WS=~/promo-motion; mkdir -p "$WS/lottie"
-cp -R "${CLAUDE_PLUGIN_ROOT}/skills/promo-motion/toolkit/." "$WS/"
+WS=~/product-motion; mkdir -p "$WS/lottie"
+cp -R "${CLAUDE_PLUGIN_ROOT}/skills/product-motion/toolkit/." "$WS/"
 ```
 
 ```
@@ -117,7 +117,7 @@ cp -R "${CLAUDE_PLUGIN_ROOT}/skills/promo-motion/toolkit/." "$WS/"
 ```
 
 Worked examples (complete builders of the original Assets promo set) are in
-`${CLAUDE_PLUGIN_ROOT}/skills/promo-motion/examples/` — `examples/README.md` says which technique
+`${CLAUDE_PLUGIN_ROOT}/skills/product-motion/examples/` — `examples/README.md` says which technique
 each one shows. Start a new illustration by copying the closest one.
 
 ## Workflow

@@ -107,7 +107,7 @@ def page(out, title, desc, svg, css, T):
     css = a11y_css(css, "dark" if out.endswith("-dark.html") else "light")
     html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Promo Motion</title>
+<title>Product Motion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">{FONT}
 <style>
 :root{{--bg:#f3f4f6;--fg:#030712;--sub:#4a5565;--line:#d1d5dc;--card:#fff}}

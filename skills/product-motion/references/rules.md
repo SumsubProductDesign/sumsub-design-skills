@@ -96,7 +96,7 @@ do not hurry it.
 ## C. Look
 
 **C1. Current DS colours.** Many source illustrations predate the dashboard redesign (blue primary,
-old greys). Promo motion must look like the live product: map old hex values to current semantic
+old greys). Product motion must look like the live product: map old hex values to current semantic
 tokens per theme (`DS_REMAP` in motionlib; add new pairs you find, resolved from the Base components
 variables). Controls (toggle, checkbox, radio, buttons, tabs) take the DS component's colours per
 state; a clicked control plays hover → pressed → on. Country flags are not DS colours — leave them.

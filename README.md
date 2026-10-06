@@ -85,14 +85,14 @@ Ships the dashboard shell in three layouts, the design system's controls as mark
 
 > This is the one skill that goes **out of** Figma. The others build **inside** it.
 
-### `/sumsub-design:promo-motion` — Illustration Motion
+### `/sumsub-design:product-motion` — Illustration Motion
 
 Animates a static product illustration (the Assets promo / empty-state set, or anything built the same way) into a short piece that plays once when it is seen and freezes on the original — as Lottie and as an animated SVG, light and dark. One toolkit, one motion language and one set of story rules, so animations made by different designers read as one set. Builds the developer bundle and later update packages.
 
 ```
-/sumsub-design:promo-motion https://figma.com/design/<key>?node-id=<id>
-/sumsub-design:promo-motion make the Blueprints cards bounce, not the arrow
-/sumsub-design:promo-motion prepare an update for the developer with just Blueprints
+/sumsub-design:product-motion https://figma.com/design/<key>?node-id=<id>
+/sumsub-design:product-motion make the Blueprints cards bounce, not the arrow
+/sumsub-design:product-motion prepare an update for the developer with just Blueprints
 ```
 
 Runs locally: Python 3 and a Chromium-based browser. The toolkit is copied into a workspace folder once; a local player shows each animation alone and inside a dashboard page.
@@ -167,7 +167,7 @@ sumsub-design-skills/
 │   │   ├── assets/components/                      # DS controls as markup + dscheck.js (Storybook drift watch)
 │   │   ├── assets/templates/                       # elastic form + elastic list
 │   │   └── scripts/                                # headless renders, pixel probes, zone diffs, doctor.sh, lint.sh
-│   ├── promo-motion/                       # /sumsub-design:promo-motion (illustration → play-once Lottie + SVG)
+│   ├── product-motion/                     # /sumsub-design:product-motion (illustration → play-once Lottie + SVG)
 │   │   ├── SKILL.md                                # workflow: sources → story → build → checks → player → handoff
 │   │   ├── references/                             # rules (story + motion language), technique, checks, handoff
 │   │   ├── toolkit/                                # copied into the workspace: motionlib + checks, local player, handoff.json
