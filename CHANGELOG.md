@@ -4,6 +4,12 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.257.0 — 2026-10-06 (mobile mockups: iOS and Android system fonts)
+- **Texts in the phone's own UI can be edited.** Mobile WebSDK screens include the iOS and Android status bar and browser bar (`Mobile / Top`, Mobile SDK `Status Bar`). These are set in the platform font: SF Pro Text / SF Pro Display / SF Compact on iOS, Roboto on Android. The skill used to know only Manrope, so it could not change those texts. `websdk-mockup` now keeps the platform font in platform chrome and loads every font a text uses before writing it.
+- **SF Pro Text / Display missing → SF Pro.** Apple's current installer gives one `SF Pro` family, so the old `SF Pro Text` / `SF Pro Display` are often missing and the text can't be edited. The skill then switches that text to `SF Pro` with the same style, which looks the same, and says so. Roboto is a Google font and loads everywhere. If a font is missing altogether, the skill leaves the text and names the missing font; it never substitutes Manrope.
+- **Design review** no longer flags SF Pro / Roboto inside mobile platform chrome. SDK content itself stays Manrope.
+- Requested by the SDK team (Ekaterina Egorova).
+
 ## v3.256.0 — 2026-10-06 (promo-motion is now product-motion)
 - **The illustration animation skill is now `/sumsub-design:product-motion`.** Same skill, new name: call it as `/sumsub-design:product-motion`; `/sumsub-design:promo-motion` no longer exists. Its suggested workspace folder is now `~/product-motion`; an existing `~/promo-motion` keeps working, just tell the skill to use it.
 

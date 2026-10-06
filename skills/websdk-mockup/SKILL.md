@@ -1,6 +1,6 @@
 ---
 name: websdk-mockup
-description: "Create Figma mockups for WebSDK screens — verification flows, KYC steps, liveness, selfie, document capture, onboarding, status screens. Uses the WebSDK design system (Manrope, dark shell, separate token set)."
+description: "Create Figma mockups for WebSDK screens — verification flows, KYC steps, liveness, selfie, document capture, onboarding, status screens. Uses the WebSDK design system (Manrope, dark shell, separate token set); mobile platform chrome keeps its system fonts (iOS SF Pro, Android Roboto)."
 argument-hint: "[screen description]"
 ---
 
@@ -312,7 +312,7 @@ These files are NOT pre-loaded into context. They contain exact component keys, 
 
 | Property | Dashboard UI Kit | WebSDK UI Kit |
 |---|---|---|
-| Font | **Geist** | **Manrope** |
+| Font | **Geist** | **Manrope** (platform chrome: SF Pro / Roboto, see below) |
 | Icon token category | `semantic/icon/*` | **`semantic/icons/*` (plural)** |
 | Spacing token prefix | `spacing/*` | **`semantic/spacing/*`** |
 | Border-radius prefix | `border-radius/*` | **`semantic/border-radius/*`** |
@@ -321,7 +321,7 @@ These files are NOT pre-loaded into context. They contain exact component keys, 
 
 **Critical differences to internalize:**
 
-1. **Font is Manrope** — never use Geist, Inter, or any other family. All text nodes must use Manrope.
+1. **Font is Manrope** for all SDK content — never Geist, Inter, or any other family there. **Exception: mobile platform chrome keeps its system font** — iOS uses SF Pro (`SF Pro Text`, `SF Pro Display`, `SF Compact`), Android uses Roboto. See "Platform fonts" below.
 
 2. **Tokens use `semantic/` prefix for ALL categories** — spacing, border-radius, icons all have `semantic/` prefix. Dashboard has bare `spacing/*` and `border-radius/*` — WebSDK does not.
 
@@ -595,6 +595,33 @@ Zero values do not need variable binding.
 
 > These are quick-reference tables. Always read `reference/variables.md`, `reference/base-components.md`, and `reference/organisms.md` for the full set of import keys.
 
+### Platform fonts — iOS / Android chrome (v3.257)
+
+Mobile screens carry the phone's own UI: the `Mobile / Top` set of the WebSDK UI Kit (`Platform=IOS | Android`, `Type=None | Chrome | WebView`) and the Mobile SDK UI Kit `Status Bar`. Their texts are set in the **platform's system font**, not Manrope:
+
+| Platform | Fonts in the components |
+|---|---|
+| iOS | `SF Pro Text Bold` (time in the status bar), `SF Pro Display Medium`, `SF Compact Light` |
+| Android | `Roboto Medium` (time), `Roboto Regular` (URL in Chrome) |
+
+Rules:
+- **Keep the platform font.** Never retype status-bar / browser-bar texts to Manrope, and never use SF Pro or Roboto for SDK content (titles, buttons, captions stay Manrope).
+- **Load every font a text already uses before writing it** (`getRangeAllFontNames`), not only `fontName`.
+- **SF Pro Text / SF Pro Display may be missing.** Apple's current installer gives one family, `SF Pro`, with the same styles. The old `SF Pro Text` and `SF Pro Display` families are often missing, and then the text can't be edited. When the text has one font and only that family is missing, switch it to `SF Pro` with the same style: it looks the same. Say in the report which texts were switched.
+- **If even `SF Pro` / `Roboto` doesn't load**, the font isn't on this computer. Leave the text as it is and tell the user which font is missing: SF Pro comes from developer.apple.com/fonts, Roboto is a Google font and Figma normally has it. Never substitute Manrope.
+
+```js
+// Write text in any component, platform chrome included
+async function setTextKeepFont(t, value) {
+  const fonts = t.getRangeAllFontNames(0, t.characters.length), missing = [];
+  for (const f of fonts) { try { await figma.loadFontAsync(f); } catch (e) { missing.push(f); } }
+  if (!missing.length) { t.characters = value; return "ok"; }
+  const f = fonts[0], alt = fonts.length === 1 && /^SF Pro (Text|Display)$/.test(f.family) ? { family: "SF Pro", style: f.style } : null;
+  if (alt) { try { await figma.loadFontAsync(alt); t.fontName = alt; t.characters = value; return "switched " + f.family + " → SF Pro " + f.style; } catch (e) {} }
+  return "font missing: " + missing.map(m => m.family + " " + m.style).join(", ");  // report it, don't change the text
+}
+```
+
 ### Typography (Manrope only)
 
 | Style | Size | Weight | Line Height | Key |
@@ -691,7 +718,7 @@ await textNode.setTextStyleIdAsync(style.id);
 - **Top Bar variants differ** — Mobile top bar (`254391124180127f6e7f06364d0e45d1aa8aa55c`) and Desktop top bar (`495969debf3bd2cabab7b4ba95b7907967b9b12f`) are different component sets with different properties. Use the correct one for the target platform.
 - **Widget instance fills are EMPTY by default** — even though the Widget master has `semantic/background/secondary/normal` bound, the instance is created with `fills: []`. You MUST explicitly bind the variable yourself after creating the instance. Without this, the screen has a transparent background and looks broken.
 - **`slot.appendChild(organism)` silently drops the organism** in some cases — use `slot.insertChild(0, organism)` instead. Verify by reading `slot.children.length` after insert.
-- **Cross-file cloning fails on missing fonts** — Aeonik Pro and SF Pro Text appear in Sumsub source files but aren't installed locally. `node.clone()` works in same parent context but `parent.appendChild(clone)` triggers font load that fails. If you must clone cross-file, do it in the same parent (clone auto-inserts as sibling) and don't manually re-append.
+- **Cross-file cloning fails on missing fonts** — Aeonik Pro and SF Pro Text appear in Sumsub source files but aren't installed locally (for SF Pro Text / Display see "Platform fonts": switch to `SF Pro`). `node.clone()` works in same parent context but `parent.appendChild(clone)` triggers font load that fails. If you must clone cross-file, do it in the same parent (clone auto-inserts as sibling) and don't manually re-append.
 - **Widget responsiveness is partial** — `widget.resize(375, 812)` resizes the outer frame but the Container stays at 1392 wide unless you set `Container.layoutSizingHorizontal = "FILL"`. This is the #1 cause of mobile widgets looking broken.
 - **Mobile padding default is wrong** — Widget master has `padding: 0/24/24/24` (desktop). For mobile (375 wide) you must override to `0/12/12/12` to match Examples.
 - **Always audit before delivering** — use the `auditWidget` function from `reference/examples-library.md` to verify all 7 overrides are correctly applied. Never deliver a Widget without running this audit.
