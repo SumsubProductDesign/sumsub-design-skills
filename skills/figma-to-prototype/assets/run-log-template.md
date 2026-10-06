@@ -85,7 +85,8 @@ real numbers (`--since <ISO time>` for the part of a long session that was this 
   and reading their output) / *build* (writing the generator and the page) / *verification*
   (renders, diffs, probes, and the cycles a failed check cost). A run that used twice the
   budget and cannot say which third ate it teaches nothing; the 2026-09-24 run was 330k
-  against 150–180k and the log could not say why
+  against a measured 280k and the log could not say why. Reading the skill's own files is
+  part of *other*: a run that cats a whole reference or `controls.js` shows up there
 
 ## 6. Where the skill was wrong
 

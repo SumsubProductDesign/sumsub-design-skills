@@ -530,7 +530,9 @@ fs.writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-
   expect "fluid-page.js: the primary column shrinks to its floor, the aside never does, and under the floor the page scrolls; fluidcheck names the label that wrapped" "1920 : scroll 1920/1920 ok | main 640 · aside 380 | clipped none | wrapped reference 1100 : scroll 1100/1100 ok | main 592 · aside 380 | clipped none | wrapped none 960 : scroll 988/960 SIDEWAYS | main 512 · aside 380 | wrapped 1: a b c 1>2" "$(echo "$FL" | tr '\n' ' ' | tr -s ' ' | sed 's/ | clipped [0-9][^|]*/ /' | sed 's/^ //;s/ $//')"
   # --api prints one header block per exported component, and every component has one
   NAPI=$(node -e 'const C=require(process.argv[1]);console.log(Object.keys(C).filter(k=>k!=="css"&&k!=="script").length)' "$ROOT/assets/components/controls.js")
-  expect "controls.js --api: a header comment for every exported component" "$NAPI 0" \
+  expect "controls.js --api: one line per component; --api <name> the whole header; --doc <name> its VERSION.md section" "$NAPI 1 ## Input" \
+  "$(node "$ROOT/assets/components/controls.js" --api | wc -l | tr -d ' ') $([ "$(node "$ROOT/assets/components/controls.js" --api input | wc -l | tr -d ' ')" -ge 5 ] && echo 1 || echo 0) $(node "$ROOT/assets/components/controls.js" --doc input | head -1 | cut -c1-8)"
+expect "controls.js --api: a header comment for every exported component" "$NAPI 0" \
     "$(node "$ROOT/assets/components/controls.js" --api | grep -c '^// [a-zA-Z]*(') $(node "$ROOT/assets/components/controls.js" --api | grep -c 'no header comment')"
   # fit-height.js: the block scales by (host − reserve) / height from its top centre, capped at 1
   node -e '
@@ -1129,7 +1131,8 @@ expect "controls.js radio and checkbox: titleIcon after the label, 4 apart, 16, 
 
 # Step 0's questions go through the native question tool, not as text (the person asked for it, 2026-10-06)
 expect "shell.js: the header's AI button is .sh-ai — no bare .ai rule to leak onto a page's own class" "0 1" "$(grep -c '^\.ai{\|[ ,]\.ai[{:]' "$ROOT/scripts/shell.js") $(grep -c 'class=\"sh-ai\"' "$ROOT/scripts/shell.js" | sed 's/2/1/')"
-expect "statecheck --rects-of beside --probe is refused, not dropped" "2" "$("$DIR/statecheck.sh" "$T/fluid.html" --rects-of 'body' --probe 'return 1' >/dev/null 2>&1; echo $?)"
+printf '<!doctype html><p>x</p>' > "$T/rects.html"
+expect "statecheck --rects-of beside --probe is refused, not dropped" "2" "$("$DIR/statecheck.sh" "$T/rects.html" --rects-of 'body' --probe 'return 1' >/dev/null 2>&1; echo $?)"
 node -e '
 const C=require(process.argv[1]),fs=require("fs");
 fs.writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}${C.css}</style></head><body><div style="width:300px;padding:20px">${C.skeleton({height:56})}${C.skeleton({height:32,ai:true,radius:4})}</div></body></html>`);
@@ -1141,6 +1144,9 @@ expect "rule 5 names its one exception: a loading state the brief asks for" "1" 
 # that exports a variable names shell-env as the mechanism
 expect "marketplace: no 'export VERCEL_TOKEN' anywhere in the skill" "0" "$(grep -rl 'export VERCEL_TOKEN' "$ROOT/SKILL.md" "$ROOT/scripts" "$ROOT/references" --exclude=lint.sh 2>/dev/null | wc -l | tr -d ' ')"
 expect "marketplace: SKILL.md names shell-env beside the \$SKILL export, and auth-core for a credential" "1 1" "$(grep -c 'shell-env' SKILL.md) $(grep -c 'auth-core' SKILL.md)"
+# eval.md §4: every row of the run table has the header's cell count — four rows were a cell short for
+# two weeks and runs 5 and 6 read under the wrong column
+expect "eval.md run table: every row has as many cells as the header" "1" "$(awk '/^\| \| run 1 \| run 2/,/^$/' "$ROOT/assets/eval.md" | awk -F'|' 'NF>1{print NF}' | sort -u | wc -l | tr -d ' ')"
 expect "Step 0 asks through AskUserQuestion, never as text" "1" "$(grep -c 'Every question goes through the `AskUserQuestion` tool, never as text' SKILL.md)"
 expect "Step 0: a parameter with a default is not a question, no option points at Other, no baking offered" "1 1 1" "$(grep -c 'A parameter with a written default is not a question' SKILL.md) $(grep -c 'no option of yours may only point at it' SKILL.md) $(grep -c 'Never offer to bake what holds' SKILL.md)"
 

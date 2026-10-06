@@ -1153,15 +1153,30 @@ const CAL_SCRIPT = `
 
 module.exports = {css: css + CAL_CSS, script: script + CAL_SCRIPT, calendar, input, textarea, skeleton, selectInline, button, radio, checkbox, group, dataList, kbd, select, multiselect, selectMenu, tag, counter, status, statusSelect, emptyState, codeBlock, tagMultiselect, searchBar, link, tabs, tooltip, modal, card, toast, alert};
 
-// `node controls.js --api` prints every component's signature — the comment block above each
-// one — so a build reads thirty lines instead of VERSION.md's six hundred (a run spent a cycle
-// on 2026-09-24 grepping this file's CSS for what those comments already say)
-if (require.main === module && process.argv.includes('--api')) {
+// `node controls.js --api` lists every component in one line — its signature, from the header comment above
+// each one; `--api <name>` prints that one component's whole header; `--doc <name>` prints its section of
+// VERSION.md (values, states, their source). A build reads these instead of this file's source or all of
+// VERSION.md: on 2026-10-06 a run spent 40k characters on `--api | head -150` and grep over the CSS below.
+if (require.main === module && (process.argv.includes('--api') || process.argv.includes('--doc'))) {
   const src = fs.readFileSync(__filename, 'utf8').split('\n');
-  for (const n of Object.keys(module.exports).filter(k => k !== 'css' && k !== 'script')) {
-    const i = src.findIndex(l => l.startsWith('// ' + n + '('));
-    if (i < 0) { console.log('// ' + n + '(spec) — no header comment; read VERSION.md\n'); continue; }
-    let j = i; while (j < src.length && src[j].startsWith('//')) j++;
-    console.log(src.slice(i, j).join('\n') + '\n');
+  const names = Object.keys(module.exports).filter(k => k !== 'css' && k !== 'script');
+  const argAt = f => { const k = process.argv.indexOf(f); return k >= 0 && process.argv[k + 1] && !process.argv[k + 1].startsWith('--') ? process.argv[k + 1] : null; };
+  const header = n => { const i = src.findIndex(l => l.startsWith('// ' + n + '(')); if (i < 0) return null; let j = i; while (j < src.length && src[j].startsWith('//')) j++; return src.slice(i, j); };
+  const want = argAt('--api');
+  if (process.argv.includes('--api')) {
+    if (want) {
+      if (!names.includes(want)) { console.error(`no component "${want}"; the list: ${names.join(' ')}`); process.exit(2); }
+      const h = header(want); console.log(h ? h.join('\n') : '// ' + want + '(spec) — no header comment; --doc ' + want);
+    } else for (const n of names) { const h = header(n); console.log(h ? h[0] : '// ' + n + '(spec) — no header comment; read VERSION.md'); }
+  }
+  const doc = argAt('--doc');
+  if (process.argv.includes('--doc')) {
+    if (!doc) { console.error('--doc <component>: ' + names.join(' ')); process.exit(2); }
+    const md = fs.readFileSync(path.join(__dirname, 'VERSION.md'), 'utf8').split('\n');
+    const key = doc.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+    const h = md.findIndex(l => /^## /.test(l) && l.slice(3).toLowerCase().replace(/[`*]/g, '').startsWith(key));
+    if (h < 0) { console.error(`VERSION.md has no section starting "${key}"; try --api ${doc}`); process.exit(2); }
+    let e = h + 1; while (e < md.length && !/^## /.test(md[e])) e++;
+    console.log(md.slice(h, e).join('\n').trim());
   }
 }

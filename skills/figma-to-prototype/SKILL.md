@@ -82,9 +82,9 @@ rest:
   message, that neither a frame nor the person gave (Step 0, *data and rules*).
 
 A nice-looking approximation, quickly, is the wrong skill: say so and build it
-the ordinary way. Budget: a shell plus two or three screens is about 150–180k
-tokens, a later increment about a quarter; build every screen a task list names
-in one run, because the setup dominates (`references/architecture.md` § The
+the ordinary way. Budget: a shell plus two or three screens grows the context by
+about 200k tokens on a 78k start (prompt, tools, this file), a later increment about a
+quarter; build every screen a task list names in one run, because the setup dominates (`references/architecture.md` § The
 method behind the steps).
 
 ## Before you start
@@ -122,8 +122,7 @@ where they live, not copied:
   _work/
     run-log.md         what was asked, decided, measured and corrected (opened in Step 0, closed in Step 8)
     figma-ref/         raw MCP responses (*.jsx) and downloaded assets (icons/)
-    shell.json         the shell's state for this prototype (Step 0), fed to scripts/shell.js
-    gen/               gen.js — data, CSS, markup, script; the one file that builds the deliverable (Step 3)
+    shell.json  gen/   the shell's state (Step 0), fed to scripts/shell.js · gen.js, the one file that builds the deliverable (Step 3)
     baseline/  shots/  last accepted render per screen (Step 7) · current renders
 ```
 
@@ -314,7 +313,8 @@ One Node script, `_work/gen/gen.js`, builds the deliverable: the data at the top
 as literals with the node id beside each value, the CSS, the markup, the page
 script, rendered through the shell and the library. Copy
 `assets/templates/gen-list.skeleton.js` to start. A live control comes from
-`assets/components/controls.js` (`--api` prints the signatures), a list or table page from
+`assets/components/controls.js` (`--api` lists them, `--api <name>` one header, `--doc <name>`
+its VERSION.md section — never its source), a list or table page from
 `list-table.js`, a column that shrinks from `fluid-page.js`, a block the window
 is too short for from `fit-height.js`. Never hand-edit the built file; a script
 that edits one aborts on a missing anchor and asserts its definitions appear
@@ -488,7 +488,7 @@ from this map.
 | `references/tools.md` | the full table of scripts and templates, and the maintainer's routine: lint, the fixtures, the eval run, `dscheck.js` |
 | `references/publishing.md` | putting the prototype on a URL, and taking it down |
 | `references/shell.md` | the default dashboard shell — sidebar, island, header — its gate against the frame, and how content anchors inside it |
-| `assets/components/VERSION.md` | the controls' values and states, their source, and what is not covered yet |
+| `assets/components/VERSION.md` | the controls' values and states, their source, and what is not covered yet — one section at a time, through `controls.js --doc <name>`, never the whole file |
 | `assets/CHANGELOG-entry.md` | the entry to paste into the plugin's own `CHANGELOG.md` at merge time, in that file's own format — the update prompt shows these entries verbatim, and an empty "what's new" is what a colleague sees without one |
 | `assets/run-log-template.md` | the run log the session keeps at `_work/run-log.md` (opened in Step 0, closed in Step 8): what was asked, decided, measured, and where the skill was wrong. Offered to the user once, sent by nobody but them |
 | `assets/handoff-template.md` | writing the handoff |

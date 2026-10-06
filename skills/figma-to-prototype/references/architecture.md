@@ -430,7 +430,8 @@ If the user wants a nice-looking approximation quickly, this is the wrong skill
 — say so, and build it the ordinary way.
 
 Budget: the first build of a shell plus two or three screens is roughly
-**150–180k tokens**, and every later increment about a quarter of that.
+**about 200k tokens of growth on a 78k start** (system prompt, tools and SKILL.md are the
+start), and every later increment about a quarter of that.
 `references/architecture.md` has the per-increment table. A run heading far
 past that is reading what it did not need: scenery it should have baked, or a
 control the design system already ships and Step 2's split should have taken
@@ -452,43 +453,31 @@ _work/gen/gen.js         one Node script: the data (extraction results, verbatim
                          library and written as the single deliverable — `node _work/gen/gen.js`
 ```
 
-That is the shape every real build has taken — the skeleton
-`assets/templates/gen-list.skeleton.js` is one, ready to copy — because the
-shell, the controls and the templates are Node modules and the generator calls
-them. Keep the data at the top of the file as literals with the node id beside
-each one, so a value still traces to a Figma call; a build that has outgrown one
-file splits the data out to `data.js` and keeps `gen.js` as the assembler.
-(The export path's Python trio — `data.py`, `template.html`, `build.py`,
-`references/architecture.md` — is still right when the source is SVG exports
-and nothing Node-side is needed.)
+The skeleton `assets/templates/gen-list.skeleton.js` is one, ready to copy: the shell,
+the controls and the templates are Node modules and the generator calls them. Data at the
+top as literals with the node id beside each value, so it still traces to a Figma call; a
+build that outgrows one file splits the data to `data.js` and keeps `gen.js` as the
+assembler. (The export path's Python trio — `data.py`, `template.html`, `build.py` — is
+still right when the source is SVG exports.)
 
-Hand-editing a 300KB generated file is how a prototype stops being traceable.
-**Any script that edits a built file must abort when its anchor is missing, and
-assert afterwards that key definitions appear exactly once** — the failure this
-prevents, a doubled document that still passed the pixel diff, is in
-`references/architecture.md` under "Edits to a built file".
+**Any script that edits a built file aborts when its anchor is missing and asserts that
+key definitions appear exactly once** (§ Edits to a built file must be able to fail: a
+doubled document once passed the pixel diff). Paths relative to `__dirname`, project
+paths off the project root. Serve with `scripts/serve.cjs` (`Cache-Control: no-store`)
+from the project folder with `ROOT=.`; in the Claude desktop app register it in
+`.claude/launch.json` so the preview pane starts it.
 
-Keep every path relative to `__file__` / `__dirname`. Serve with the skill's
-`scripts/serve.cjs` (`Cache-Control: no-store`), run from the project folder
-with `ROOT=.` — in the Claude desktop app register that command in
-`.claude/launch.json` so the preview pane starts it; elsewhere run it in a
-terminal.
+**A live control has a component.** `assets/components/controls.js` renders the design
+system's controls with every state the product ships, read from its Storybook. The mockup
+gives the text, the width and the state it draws; a disagreement with the component is a
+ledger line or a question, as for the shell. `node "$SKILL/assets/components/controls.js"
+--api` lists the components, `--api <name>` prints one header, `--doc <name>` its section
+of `VERSION.md` — the source and the whole VERSION.md are never read.
 
-**A live control has a component.** `assets/components/controls.js` renders the design system's
-input, button, radio, checkbox, select with its menu, tag, counter, link, tabs, tooltip, toast, alert,
-modal and collapsible card with every state the product ships — hover, focus, disabled, error, warning — read from its
-Storybook, not invented. Use it for a control the task makes live; the mockup still gives the text,
-the width and the state it draws, and a disagreement with the component is a ledger line or a question,
-as for the shell. What is covered and at which values: `assets/components/VERSION.md` — and for
-the signatures alone, `node "$SKILL/assets/components/controls.js" --api` prints every component's
-header comment, twenty lines instead of six hundred.
-
-**A block the window is too short for has a template.** A device mock in a preview column, a
-canvas, a stacked form: the frame fixes its height and a laptop does not respect it.
-`assets/templates/fit-height.js` scales it from its top centre by `(host height − reserve) / height`,
-capped at 1, so the top edge and the centre stay where the frame put them and only the bottom gives
-way; what sits under it (an actions bar) is the reserve and stays put. Width has `fluid-page.js`;
-this is the other axis, read from a run where a 720-high phone scaled to 0.72 in a 700 window.
+**A block the window is too short for has a template.** `assets/templates/fit-height.js`
+scales it from its top centre by `(host height − reserve) / height`, capped at 1: the top
+edge and the centre stay, only the bottom gives way, what sits under it (an actions bar) is
+the reserve. Width has `fluid-page.js`; this is the other axis.
 
 **A list or table page has a template and a recipe.** `assets/templates/list-table.js` renders toolbar, header, rows and footer as DOM boxes that follow the shell's slot; the generator feeds it the column rules and the cells' markup, nothing else. The recipe, five moves:
 
@@ -498,9 +487,7 @@ this is the other axis, read from a run where a 720-high phone scaled to 0.72 in
 4. copy `assets/templates/gen-list.skeleton.js` to `gen.js`, fill data, spec and cell styles;
 5. verify: `node gen.js --canvas WxH` at the frame's size, then ink boxes of a header label, a first-row text and the right-most control against the frame, each shifted by the slot offset (slot origin minus the frame's content origin). Flexible columns share the island's extra width — at 1440 the island is 9px wider than a 1440 frame's, so right-hand columns sit 4–9px right of the frame: expected, not a miss.
 
-The two builds that shaped this: `references/shell.md` § Content in a fluid shell.
-
-Details and the extension patterns: `references/architecture.md`.
+The fluid modes: `references/shell.md` § Content in a fluid shell.
 
 ## Step 4 in full — the coordinate contract
 

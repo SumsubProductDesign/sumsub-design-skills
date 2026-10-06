@@ -255,16 +255,10 @@ rendering. One flat repaint pass then covers any depth and cannot recurse.
 
 ## Step 6 in full — build one working thing at a time
 
-**Add a single capability, check it, then add the next.** When something
-breaks it then breaks next to the change that caused it, instead of three
-features later. Building several at once buys nothing: the increments are cheap,
-the debugging is not.
-
-Work panel by panel, and factor as you go: one primitive per control family
-(table row, menu item, toggle, radio card, dropdown, text input, section header,
-panel section), each written once and parameterised. Anything shared across
-screens — a preview area, a shell — is built **once** and reused, never
-duplicated per screen. Panels come off a registry, so adding one is one entry.
+**Add a single capability, check it, then add the next** — a break then sits next to
+the change that caused it. One primitive per control family, written once and
+parameterised; anything shared across screens built **once**; panels off a registry, so
+adding one is one entry.
 
 Four rules that decide a lot of small questions, each worked out in a reference:
 
@@ -280,11 +274,10 @@ Four rules that decide a lot of small questions, each worked out in a reference:
   so in one line and implement it inline — for a prototype, writing the control
   is nearly always cheaper than inlining a library.
 
-This file covers the bugs that look like something else: hit layers, capture-phase mousedown, scrolling without losing canvas
-coordinates, delays that aren't animations, popup placement, state lifecycle.
-Read it before building the first interactive control, not after. Adaptivity is
-scale-only, one factor in one variable applied in one place —
-`architecture.md` § Scale-only adaptivity.
+The sections above cover the bugs that look like something else: hit layers,
+capture-phase mousedown, scrolling without losing canvas coordinates, delays that are not
+animations, popup placement, state lifecycle. Adaptivity is scale-only, one factor in one
+variable applied in one place — `architecture.md` § Scale-only adaptivity.
 
 ## Hover policy
 
