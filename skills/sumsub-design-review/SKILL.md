@@ -103,7 +103,7 @@ If local plugin.json read or remote WebFetch fails (network / file missing), war
 | Check | Rule |
 |---|---|
 | Manual font properties | ❌ Must use text styles via `setTextStyleIdAsync` |
-| Correct font family | Must be `Geist` (not Inter, SF Pro, etc.). WebSDK screens: `Manrope`. Mobile platform chrome (iOS status/browser bar, Android bars) keeps its system font, SF Pro / Roboto: don't flag it |
+| Correct font family | Must be `Geist` (not Inter, SF Pro, etc.). WebSDK screens: `Manrope`. Mobile platform chrome (iOS status/browser bar, Android bars) and Mobile SDK (native app) screens use the system font, SF Pro / Roboto (a switch from `SF Pro Text` to `SF Pro` is expected): don't flag it |
 | `SemiBold` spelling | One word, no space (Geist `SemiBold`, not `Semi Bold`) |
 
 ### 4. Components — Correct Libraries

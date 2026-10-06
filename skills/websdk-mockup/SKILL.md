@@ -607,6 +607,7 @@ Mobile screens carry the phone's own UI: the `Mobile / Top` set of the WebSDK UI
 Rules:
 - **Keep the platform font.** Never retype status-bar / browser-bar texts to Manrope, and never use SF Pro or Roboto for SDK content (titles, buttons, captions stay Manrope).
 - **Load every font a text already uses before writing it** (`getRangeAllFontNames`), not only `fontName`.
+- **If `appendChild` of an instance throws `unloaded font "SF Pro Text …"`**, the font is missing: run `fixMissingFonts` (sumsub-mockup, "Mobile SDK and platform fonts") on the fresh instance first, then append.
 - **SF Pro Text / SF Pro Display may be missing.** Apple's current installer gives one family, `SF Pro`, with the same styles. The old `SF Pro Text` and `SF Pro Display` families are often missing, and then the text can't be edited. When the text has one font and only that family is missing, switch it to `SF Pro` with the same style: it looks the same. Say in the report which texts were switched.
 - **If even `SF Pro` / `Roboto` doesn't load**, the font isn't on this computer. Leave the text as it is and tell the user which font is missing: SF Pro comes from developer.apple.com/fonts, Roboto is a Google font and Figma normally has it. Never substitute Manrope.
 

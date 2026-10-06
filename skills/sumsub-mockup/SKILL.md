@@ -1,6 +1,6 @@
 ---
 name: sumsub-mockup
-description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states. Describe what you need and get a pixel-perfect screen using Sumsub design system components."
+description: "Create Figma mockups for any dashboard screen — table pages, detail views, forms, modals, empty states — and Mobile SDK (native app) screens, which keep the platform fonts (iOS SF Pro, Android Roboto). Describe what you need and get a pixel-perfect screen using Sumsub design system components."
 argument-hint: "[screen description]"
 ---
 
@@ -223,6 +223,36 @@ await figma.loadFontAsync({ family: "Geist", style: "Bold" });
 - Reporting "Geist Bold not loaded — silent fail" as a known issue. If silent fail happened, you loaded it AFTER, then re-ran the mutation. Standard recovery: load fonts FIRST in every write chunk, no silent fails.
 
 **Rule:** every `use_figma` call that performs ANY text mutation begins with the 4 `loadFontAsync` calls above. No exceptions, even if you "think" the font is loaded from a previous call — each `use_figma` call is a separate execution context.
+
+### Mobile SDK and platform fonts — iOS SF Pro, Android Roboto (v3.258)
+
+Geist is the Dashboard font only. **Mobile SDK (MSDK, the native app) screens use the platform's system font**: iOS components of the `Mobile SDK / UI Kit` are set in `SF Pro Text` / `SF Pro Display` (Button = SF Pro Text Semibold, `Input / OTP` = SF Pro Text Regular, `Status Bar` = SF Pro Display Medium); Android in `Roboto`. Never retype them to Geist or Manrope, and never use Geist in MSDK content.
+
+**The failure this prevents:** Apple's current installer gives one `SF Pro` family, so `SF Pro Text` / `SF Pro Display` are often not on the designer's computer. Then Figma refuses to even place the component: `appendChild` throws `unloaded font "SF Pro Text Semibold"`, and no text in it can be edited. The SDK team reported this as "Claude can't work with the content, it has no text".
+
+**Rule:** for every instance you place in an MSDK (or other mobile) screen, run `fixMissingFonts` on it **right after `createInstance()` and before `appendChild`**, and before writing any text. It loads the fonts that exist; a missing `SF Pro Text X` / `SF Pro Display X` becomes `SF Pro X` (same style, looks the same). Roboto is a Google font and loads everywhere. If a font is missing even after the switch, say which one in the report (SF Pro: developer.apple.com/fonts). Never substitute Geist or Manrope. Report the switched texts too.
+
+```js
+const AVAIL = new Set((await figma.listAvailableFontsAsync()).map(f => f.fontName.family + "|" + f.fontName.style));
+async function fixMissingFonts(node) {          // call on a fresh instance BEFORE appendChild
+  const log = [];
+  for (const t of node.findAll(n => n.type === "TEXT")) {
+    let fonts = []; try { fonts = t.getRangeAllFontNames(0, t.characters.length); } catch (e) { continue; }
+    for (const f of fonts) {
+      if (AVAIL.has(f.family + "|" + f.style)) { await figma.loadFontAsync(f); continue; }
+      const alt = /^SF Pro (Text|Display)$/.test(f.family) ? { family: "SF Pro", style: f.style } : null;
+      if (!alt || !AVAIL.has(alt.family + "|" + alt.style)) { log.push("missing font: " + f.family + " " + f.style); continue; }
+      await figma.loadFontAsync(alt);
+      for (const seg of t.getStyledTextSegments(["fontName"])) if (seg.fontName.family === f.family && seg.fontName.style === f.style) t.setRangeFontName(seg.start, seg.end, alt);
+      log.push(f.family + " " + f.style + " → SF Pro " + f.style);
+    }
+  }
+  return log;
+}
+// const inst = variant.createInstance(); const fl = await fixMissingFonts(inst); frame.appendChild(inst);
+```
+
+Checked live (2026-10-06): 12 `Button` variants and 6 `Input / OTP` variants of the Mobile SDK UI Kit threw on `appendChild` before the fix and went in after it. The WebSDK skill has the same rule for the phone's status / browser bar (`websdk-mockup`, "Platform fonts").
 
 ### Default expansion + organism reuse (NEW v3.120 — class-fix from AP sim 2026-05-11)
 
