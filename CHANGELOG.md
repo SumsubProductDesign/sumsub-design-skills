@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.265.0 — 2026-10-06 (island migration: side column from the reference, white screens)
+- **White layout: a block the reference shows in the side column moves there.** On Levels › AML the original keeps the `Tip` (AML configuration, how to set up) inside the `Configurations` block; the designers' reference shows it in the side column and switches it off in the block (`Tips` = false). The engine now does the same: it puts the reference's `Tip` into the side column with the original's texts and turns the same switch off on the original's block. `planOne` reports it as `side: Tip from the reference`.
+- **A reference width that does not fit its own parent is not copied.** The AML reference's `Configurations` is 1084 wide inside a 640 column; the finish used to copy that and push the block out of the column. It now keeps the block filling the column.
+- Internal: build.js made shorter with small helpers (`isT`, `fT`, `fI`, `fS`, `fill`, `rm`); checked by expanding them back and comparing with the previous version.
+
 ## v3.264.0 — 2026-10-06 (island migration: long navigation labels)
 - **White layout: a navigation item whose label wraps grows with it.** The navigation item in the design system is fixed at 32 px. A long label from the original («Sandbox mode for verification testing») wraps to two lines, and the item now hugs it (56 px), as in the designers' reference. Before, the second line spilled over the next item. Found on the first white test (Levels / Configurations), the only difference from the reference.
 

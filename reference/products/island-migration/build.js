@@ -1,5 +1,5 @@
 // BUILD — call 1 of 2. Paste this file into use_figma and append:  return JSON.stringify(await migrateOne("<screen node id>", "<reference node id, optional>"));
-const ICN = "Page / Body / IslandCard", isI = n => n.type === "INSTANCE", isS = n => n.type === "SLOT", CP = n => n.componentProperties, CT = n => n.characters.trim();
+const ICN = "Page / Body / IslandCard", isI = n => n.type === "INSTANCE", isS = n => n.type === "SLOT", CP = n => n.componentProperties, CT = n => n.characters.trim(), fI = (r, nm) => r.findOne(n => isI(n) && n.name === nm), isT = n => n.type === "TEXT", fT = n => n.findOne(q => isT(q) && q.visible), fS = (r, nm) => r.findAll(n => isS(n) && n.name === nm), fill = n => { try { n.layoutSizingHorizontal = "FILL"; } catch {} }, rm = n => { try { n.remove(); } catch {} };
 const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
 while (p && p.type !== "PAGE" && p.id !== sid) { if ("visible" in p && p.visible === false) return false; p = p.parent; } return true; };
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
@@ -50,7 +50,7 @@ const header = all.filter(n => { const b = box(n, scr); return b.y <= 2 && b.h >
 const hdrH = header ? Math.round(header.height) : 0;
 let stackBottom = header ? box(header, scr).y + box(header, scr).h : 0;
 const header2 = !header ? null : all.filter(n => { const b = box(n, scr); return !contains(header, n) && Math.abs(b.y - stackBottom) <= 8 && b.w >= 0.9 * (W - sbW) && b.h >= 40 && b.h <= 200 &&
-(/header/i.test(n.name) || /Header/.test(mainName(n))) && "findOne" in n && !!n.findOne(x => x.type === "INSTANCE" && /^\*Button/.test(x.name)); }).sort((a, b) => b.height - a.height)[0] || null;
+(/header/i.test(n.name) || /Header/.test(mainName(n))) && "findOne" in n && !!n.findOne(x => isI(x) && /^\*Button/.test(x.name)); }).sort((a, b) => b.height - a.height)[0] || null;
 if (header2) stackBottom = box(header2, scr).y + box(header2, scr).h;
 const subheader = all.filter(n => { const b = box(n, scr); return !contains(header, n) && !contains(header2, n) && b.y >= Math.min(hdrH, stackBottom) - 2 && b.y <= stackBottom + 32 && b.h >= 32 && b.h <= 72 &&
 "findOne" in n && !!n.findOne(x => /^\*Tab Basic\*|Tab( \/)? Basic \/ Item/.test(x.name)); }).sort((a, b) => b.width - a.width)[0] || null;
@@ -70,7 +70,7 @@ const table = !!main && isTableNode(main);
 let groups = [];
 if (main) { if (table) { const u = unwrap(main); groups = [vis(u).find(isTableSelf) ? u : u]; }
 else { let inner = unwrap(main); let k = vis(inner).filter(x => !isChrome(x));
-if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = inner.type === "INSTANCE" ? [inner] : vis(inner).filter(x => !isChrome(x)); }
+if (k.length === 1 && "children" in k[0]) { inner = unwrapSingle(k[0]); k = isI(inner) ? [inner] : vis(inner).filter(x => !isChrome(x)); }
 const hasChrome = vis(inner).some(isChrome) || (!!subheader && contains(inner, subheader)); if (isCardLayout(inner) && !hasChrome) groups = [inner];
 else groups = (k.length >= 2 && k.every(x => x.width >= 0.6 * inner.width || isGraphic(x)) && k.some(x => !isGraphic(x))) ? k : (hasChrome && k.length ? k : [inner]); } }
 const isOv = n => isI(n) && /Toast|Dropdown|Modal|Drawer/i.test(n.name + " " + mainName(n));
@@ -88,26 +88,26 @@ else content = "◼️ Main (Ghost)";
 if (!header) notes.push("no header found");
 if (!main) notes.push("no main content found");
 const width = table ? (W >= 1900 ? "1920 max" : "Full width") : (content === "◼️ Main + Right (Ghost)" ? "Full width" : "1084 max");
-let title = null; if (header) { const t = header.findOne(n => n.type === "TEXT" && n.name === "Title" && rendered(n, scr)) ||
-header.findAll(n => n.type === "TEXT" && rendered(n, scr) && CT(n).length > 1).sort((a, b) => (b.fontSize || 0) - (a.fontSize || 0))[0]; if (t) title = CT(t); }
+let title = null; if (header) { const t = header.findOne(n => isT(n) && n.name === "Title" && rendered(n, scr)) ||
+header.findAll(n => isT(n) && rendered(n, scr) && CT(n).length > 1).sort((a, b) => (b.fontSize || 0) - (a.fontSize || 0))[0]; if (t) title = CT(t); }
 const tabSrc = [header, subheader].filter(Boolean);
 const tabPairs = tabSrc.flatMap(h => h.findAll(n => isI(n) && /Tab( \/)? Basic \/ Item/i.test(n.name) && rendered(n, scr)))
-.map(t => { const x = t.findOne(y => y.type === "TEXT" && y.visible); const sp = CP(t) && CP(t).Selected;
-const ck = Object.keys(CP(t) || {}).find(k => /^Counter/.test(k)), nt = ck && CP(t)[ck].value === true ? t.findOne(y => y.type === "TEXT" && y.visible && y.name === "Number") : null; return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true", cnt: nt ? nt.characters : null }; }).filter(t => t.label);
+.map(t => { const x = t.findOne(y => isT(y) && y.visible); const sp = CP(t) && CP(t).Selected;
+const ck = Object.keys(CP(t) || {}).find(k => /^Counter/.test(k)), nt = ck && CP(t)[ck].value === true ? t.findOne(y => isT(y) && y.visible && y.name === "Number") : null; return { label: x ? x.characters : null, sel: !!sp && String(sp.value) === "true", cnt: nt ? nt.characters : null }; }).filter(t => t.label);
 const tabs = tabPairs.map(t => t.label), tabCnt = tabPairs.map(t => t.cnt), tabSelected = Math.max(0, tabPairs.findIndex(t => t.sel));
-let sandbox = false; if (header) { const s = header.findOne(n => n.type === "TEXT" && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }
+let sandbox = false; if (header) { const s = header.findOne(n => isT(n) && /sandbox mode/i.test(n.characters)); if (s) { const hb = header.absoluteBoundingBox, tb = s.absoluteBoundingBox; sandbox = rendered(s, scr) && s.visible && !!hb && !!tb && tb.y >= hb.y - 1 && tb.y + tb.height <= hb.y + hb.height + 1; } }
 const plan = { pageType, content, width, sideContent: !!right && content === "◼️ Main (Ghost)", sandbox, title, tabs, tabCnt, tabSelected };
 return { W, H, nodes: { sidebar, header, header2, subheader, scrollbars, main, left, right, groups, overlays, table }, plan, confident: !!header && !!main && notes.length === 0, notes };
 }
 function headerRegions(h, scr) {
 if (!h) return { actions: [] };
 const inA = (n, re) => { let q = n.parent; while (q && q.id !== h.id) { if (re.test(q.name)) return q; q = q.parent; } return null; };
-const T = h.findAll(n => n.type === "TEXT" && n.visible && rendered(n, scr));
+const T = h.findAll(n => isT(n) && n.visible && rendered(n, scr));
 const cr = T.find(t => inA(t, /Breadcrumb/i) && CT(t).length > 1 && !/^Section name$/i.test(CT(t)));
 const keyT = T.find(t => /^Key name$/i.test(t.name) && !/^Key name$/i.test(CT(t)) && !inA(t, /Additional info/i));
 const status = h.findOne(n => n.id !== h.id && /status/i.test(n.name) && n.visible && rendered(n, scr) && !inA(n, /status/i)) || null;
 const addInfo = h.findOne(n => /^Additional info$/i.test(n.name) && "children" in n && n.visible && rendered(n, scr)) || null;
-const copy = !!h.findOne(n => isI(n) && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && (/Title \+ button/i.test(n.parent.name) || (!n.findOne(q => q.type === "TEXT" && q.visible && CT(q)) && !!n.findOne(q => q.type === "INSTANCE" && /^(normal|small)\/copy$/.test(q.name)) && [n.parent, n.parent && n.parent.parent].some(p => p && /Title/i.test(p.name)))));
+const copy = !!h.findOne(n => isI(n) && /^\*Button\*/.test(n.name) && n.visible && rendered(n, scr) && (/Title \+ button/i.test(n.parent.name) || (!n.findOne(q => isT(q) && q.visible && CT(q)) && !!n.findOne(q => isI(q) && /^(normal|small)\/copy$/.test(q.name)) && [n.parent, n.parent && n.parent.parent].some(p => p && /Title/i.test(p.name)))));
 const actions = h.findAll(n => isI(n) && /^\*Button( AI)?\*/.test(n.name) && n.visible && rendered(n, scr) &&
 !!inA(n, /Actions/i) && !inA(n, /Additional info/i) && !inA(n, /\*Button/));
 return { crumb: cr ? CT(cr) : null, key: keyT ? CT(keyT) : null, status, addInfo, copy, actions };
@@ -117,13 +117,13 @@ const refAll = (r, nm) => refScope(r).flatMap(s => s.findAll(x => x.name === nm 
 function refPlacement(refRoot, name) {
 if (!refRoot) return null;
 const n = refAll(refRoot, name)[0]; if (!n) return null;
-let q = n.parent; while (q && q.id !== refRoot.id) { if (q.type === "INSTANCE" && q.name === ICN) return "island"; q = q.parent; }
-return ("findOne" in n && n.findOne(x => x.type === "INSTANCE" && x.name === ICN)) ? "split" : "bare";
+let q = n.parent; while (q && q.id !== refRoot.id) { if (isI(q) && q.name === ICN) return "island"; q = q.parent; }
+return ("findOne" in n && n.findOne(x => isI(x) && x.name === ICN)) ? "split" : "bare";
 }
 function refIslandOf(refRoot, name) {
 if (!refRoot) return null;
 const n = refAll(refRoot, name)[0]; if (!n) return null;
-for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === ICN) return q.id;
+for (let q = n.parent; q && q.id !== refRoot.id; q = q.parent) if (isI(q) && q.name === ICN) return q.id;
 return null;
 }
 function refIslandByKids(refRoot, g) {
@@ -131,14 +131,14 @@ if (!refRoot || !("children" in g)) return null;
 let cur = g; for (let d = 0; d < 3; d++) { const k = cur.children.filter(x => x.visible !== false); if (k.length === 1 && k[0].type === "FRAME" && "children" in k[0]) cur = k[0]; else break; }
 const kids = cur.children.filter(k => k.visible !== false); if (!kids.length) return null;
 const ids = []; for (const k of kids) { const all = refAll(refRoot, k.name); if (!all.length) { if (isHeadingBlock(k)) continue; return null; } if (all.length > 1) continue;
-let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (q.type === "INSTANCE" && q.name === ICN) { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
+let isl = null; for (let q = all[0].parent; q && q.id !== refRoot.id; q = q.parent) if (isI(q) && q.name === ICN) { isl = q.id; break; } if (!isl) return null; ids.push(isl); }
 return ids.length && ids.every(id => id === ids[0]) ? ids[0] : null;
 }
 function refUnboxed(refRoot, g) {
 if (!refRoot || !cardLike(g) || refPlacement(refRoot, g.name) || refIslandByKids(refRoot, g) || !("findAll" in g)) return false;
-const ms = refRoot.findAll(n => isS(n) && n.name === "Main content")[0]; if (!ms) return false;
-const names = [...new Set(g.findAll(x => x.visible !== false && x.type === "INSTANCE").map(x => x.name))];
-const wrapped = y => { for (let q = y.parent; q && q.id !== ms.id; q = q.parent) { if (q.type === "INSTANCE" && q.name === ICN) return true; if (q.type === "FRAME" && isCard(q)) return true; } return false; };
+const ms = fS(refRoot, "Main content")[0]; if (!ms) return false;
+const names = [...new Set(g.findAll(x => x.visible !== false && isI(x)).map(x => x.name))];
+const wrapped = y => { for (let q = y.parent; q && q.id !== ms.id; q = q.parent) { if (isI(q) && q.name === ICN) return true; if (q.type === "FRAME" && isCard(q)) return true; } return false; };
 const found = names.map(nm => ms.findOne(y => y.name === nm && y.visible)).filter(Boolean);
 return found.length >= 2 && found.every(y => !wrapped(y));
 }
@@ -153,7 +153,7 @@ function refCrumb(refRoot) {
 if (!refRoot) return null;
 const h = refRoot.findOne(n => isI(n) && /^\*Header\*/.test(n.name) && n.visible); if (!h) return null;
 const bc = h.findOne(n => isI(n) && /Breadcrumb/i.test(n.name) && n.visible); if (!bc) return null;
-const t = bc.findAll(n => n.type === "TEXT" && n.visible).map(n => CT(n)).find(s => s.length > 1 && s !== "/");
+const t = bc.findAll(n => isT(n) && n.visible).map(n => CT(n)).find(s => s.length > 1 && s !== "/");
 return t && !/^Section name$/i.test(t) ? t : null;
 }
 async function sideFromReference(page, refRoot, colName, labelValue, notes) {
@@ -163,18 +163,18 @@ const refMain = refRoot.findAll(n => isS(n) && /^(Main content|Side content)$/.t
 const refCol = refMain.flatMap(sl => sl.children).find(k => k.visible && /right column|side content/i.test(k.name)) ||
 refRoot.findAll(n => isS(n) && n.name === "Content" && n.parent && /Aside/.test(n.parent.name)).flatMap(sl => sl.children).find(k => k.visible);
 if (!refCol || !("children" in refCol)) return;
-const firstText = n => { const t = n.type === "TEXT" ? n : (n.findOne ? n.findOne(q => q.type === "TEXT" && q.visible) : null); return t ? CT(t) : ""; };
+const firstText = n => { const t = isT(n) ? n : (n.findOne ? fT(n) : null); return t ? CT(t) : ""; };
 const padOf = n => (n.paddingTop || 0) + (n.paddingLeft || 0);
-const refBlocks = refCol.children.filter(k => k.visible);
+const refBlocks = vis(refCol);
 const sectioned = padOf(refCol) === 0 && refBlocks.length >= 2 && refBlocks.every(k => padOf(k) > 0);
 if (sectioned) {
-let as = col.parent; while (as && !(as.type === "INSTANCE" && as.name === "Page / Body / Aside")) as = as.parent;
+let as = col.parent; while (as && !(isI(as) && as.name === "Page / Body / Aside")) as = as.parent;
 if (as && padOf(as) > 0) { try { as.setProperties({ "Paddings": "No" }); } catch (e) { notes.push("aside paddings: " + e.message); } }
 col = page.findOne(n => n.name === colName && n.visible);
 col.itemSpacing = refCol.itemSpacing || 0;
 notes.push("side column: flush sections as in the reference");
 }
-if (col.type === "INSTANCE") { notes.push("side column is an instance — kept as is"); return; }
+if (isI(col)) { notes.push("side column is an instance — kept as is"); return; }
 const sectionLike = async (rb) => {
 const w = figma.createFrame(); w.name = rb.name; w.layoutMode = "VERTICAL"; w.fills = [];
 for (const k of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "itemSpacing"]) w[k] = rb[k] || 0;
@@ -193,14 +193,14 @@ if (sectioned && padOf(mine) === 0 && mine.name !== rb.name) {
 const w = await sectionLike(rb), mid = mine.id; col.insertChild(Math.max(0, col.children.findIndex(k => k.id === mid)), w);
 try { w.layoutSizingHorizontal = "FILL"; w.layoutSizingVertical = "HUG"; } catch {}
 const m2 = col.children.find(k => k.id === mid) || col.findOne(k => k.id === mid); w.appendChild(m2);
-try { m2.layoutSizingHorizontal = "FILL"; } catch {}
+fill(m2);
 notes.push("side block in a section like the reference: " + m2.name);
 used.add(w.id); at = col.children.findIndex(k => k.id === w.id) + 1;
 } else at = col.children.findIndex(k => k.id === mine.id) + 1;
 continue; }
 const c = rb.clone(); col.insertChild(Math.min(at, col.children.length), c); at++; used.add(c.id);
-try { c.layoutSizingHorizontal = "FILL"; } catch {}
-const T = c.findAll(q => q.type === "TEXT" && q.visible);
+fill(c);
+const T = c.findAll(q => isT(q) && q.visible);
 for (let i = 0; i < T.length - 1; i++) { const v = labelValue[T[i].characters.trim().toLowerCase()];
 if (v && T[i + 1].characters.trim() !== v) { try { await figma.loadFontAsync(T[i + 1].fontName); T[i + 1].characters = v; } catch {} } }
 notes.push("side block from the reference: " + (firstText(rb) || rb.name));
@@ -213,28 +213,28 @@ const isActive = n => { try { return isI(n) && CP(n) && CP(n).State && String(CP
 const depthOf = n => { let d = 0; for (let q = n; q && q.id !== old.id; q = q.parent) d++; return d; };
 const act = old.findAll(n => n.visible !== false && isActive(n) && /Menu Item|Sections/i.test(n.name)).sort((p, q) => depthOf(q) - depthOf(p));
 if (!act.length) return null;
-const txt = n => { const t = n.type === "TEXT" ? n : n.findOne(q => q.type === "TEXT" && q.visible); return t ? CT(t) : ""; };
+const txt = n => { const t = isT(n) ? n : fT(n); return t ? CT(t) : ""; };
 const trail = [txt(act[0])];
 for (let q = act[0].parent; q && q.id !== old.id; q = q.parent) if (/Sections/i.test(q.name)) { const row = q.findOne(x => /Menu Item \/ (First|Second) Level/i.test(x.name)); const t = row ? txt(row) : txt(q); if (t && t !== trail[trail.length - 1]) trail.push(t); }
 return trail.filter(Boolean);
 }
 async function carrySidebar(old, page, notes) {
-const sb = page.findOne(n => isI(n) && n.name === "*Sidebar*"); if (!sb || !old) return;
+const sb = fI(page, "*Sidebar*"); if (!sb || !old) return;
 let type = null;
-try { if (old.type === "INSTANCE" && CP(old) && CP(old).Type) type = String(CP(old).Type.value); } catch {}
+try { if (isI(old) && CP(old) && CP(old).Type) type = String(CP(old).Type.value); } catch {}
 const trail = sidebarTrail(old) || [];
 if (!type && trail.length) { const first = trail[trail.length - 1].toLowerCase(); const key = Object.keys(SIDEBAR_TYPE).sort((a, b) => b.length - a.length).find(k => first.startsWith(k)); if (key) type = SIDEBAR_TYPE[key]; }
 if (!type) { if (trail.length) notes.push("sidebar: no DS type for " + trail[trail.length - 1]); return; }
 try { if (String(CP(sb).Type.value) !== type) sb.setProperties({ Type: type }); } catch (e) { notes.push("sidebar type " + type + ": " + e.message); return; }
-const sb2 = page.findOne(n => isI(n) && n.name === "*Sidebar*");
+const sb2 = fI(page, "*Sidebar*");
 const seconds = sb2 ? sb2.findAll(n => isI(n) && /Sections \/ Second Level/.test(n.name)) : [];
 for (const t of trail.slice(0, -1)) { const hit = seconds.find(s => { try { const v = CP(s)["Section Name"]; return v && String(v.value).split("|").pop().trim().toLowerCase() === t.toLowerCase(); } catch (e) { return false; } });
 if (hit) { const hsn = String(CP(hit)["Section Name"].value); try { hit.setProperties({ State: "Active" }); } catch {}
-const sb3 = page.findOne(n => isI(n) && n.name === "*Sidebar*");
+const sb3 = fI(page, "*Sidebar*");
 const sec = sb3 ? sb3.findAll(n => isI(n) && /Sections \/ Second Level/.test(n.name)).find(n => CP(n)["Section Name"] && String(CP(n)["Section Name"].value) === hsn) : null;
 let leaf = "";
 if (sec && t !== trail[0]) { const thirds = sec.findAll(n => isI(n) && /Third Level/.test(n.name) && n.visible); const want = trail[0].toLowerCase();
-const tx = n => { const q = n.findOne(x => x.type === "TEXT" && x.visible); return q ? CT(q).toLowerCase() : ""; };
+const tx = n => { const q = n.findOne(x => isT(x) && x.visible); return q ? CT(q).toLowerCase() : ""; };
 const own = thirds.find(n => tx(n) === want);
 for (const n of thirds) { try { n.setProperties({ State: n === own ? "Active" : "Default" }); } catch {} }
 leaf = own ? " › " + trail[0] : " (\"" + trail[0] + "\" is not a DS sidebar item)"; }
@@ -250,31 +250,31 @@ c.strokes = []; c.cornerRadius = 0; c.paddingTop = c.paddingRight = c.paddingBot
 }
 async function buildIsland(scr, a, crumb) {
 const { nodes, plan } = a; const origW = a.W, origH = a.H, notes = [], N = t => notes.push(t);
-const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
+const inInst = (n, top) => { for (let q = n.parent; q && q.id !== top.id; q = q.parent) if (isI(q)) return true; return false; };
 for (const g of nodes.groups) { if (!("findAll" in g)) continue; for (const n of g.findAll(x => x.visible !== false && (x.layoutSizingHorizontal === "FIXED" || (x.layoutSizingHorizontal === "HUG" && x.type === "FRAME" && x.layoutMode !== "NONE")) && x.parent && x.parent.layoutMode === "VERTICAL" && !inInst(x, g))) {
 const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 0); if (Math.abs(n.width - inner) <= 1) { try { n.setSharedPluginData("sumsub_island", "span", "1"); } catch {} } } }
 const parent = scr.parent, x = scr.x, y = scr.y, idx = parent.children.indexOf(scr), name = scr.name;
 const R = headerRegions(nodes.header, scr);
 if (nodes.header2) { const R2 = headerRegions(nodes.header2, scr); if (R2.actions.length) R.actions = R2.actions; R.status = R.status || R2.status; R.crumb = R.crumb || R2.crumb; R.key = R.key || R2.key; R.addInfo = R.addInfo || R2.addInfo; }
-const stackTexts = [nodes.header, nodes.header2, nodes.subheader].filter(Boolean).flatMap(h => h.findAll(t => t.type === "TEXT" && t.visible && rendered(t, scr)).map(t => CT(t))).filter(Boolean);
-const labelValue = {}; if (nodes.header2) for (const f of nodes.header2.findAll(n => n.type === "FRAME" && n.visible)) { const tx = f.children.filter(k => k.visible).flatMap(k => k.type === "TEXT" ? [k] : (k.findAll ? k.findAll(t => t.type === "TEXT" && t.visible) : []));
+const stackTexts = [nodes.header, nodes.header2, nodes.subheader].filter(Boolean).flatMap(h => h.findAll(t => isT(t) && t.visible && rendered(t, scr)).map(t => CT(t))).filter(Boolean);
+const labelValue = {}; if (nodes.header2) for (const f of nodes.header2.findAll(n => n.type === "FRAME" && n.visible)) { const tx = vis(f).flatMap(k => isT(k) ? [k] : (k.findAll ? k.findAll(t => isT(t) && t.visible) : []));
 if (tx.length === 2 && /^[A-Za-z][A-Za-z ]+$/.test(tx[0].characters.trim())) labelValue[tx[0].characters.trim().toLowerCase()] = tx[1].characters.trim(); }
 const origId = (stackTexts.find(t => /^ID\s*:/i.test(t)) || null);
 const hdr0 = nodes.header;
 const cands = hdr0 ? hdr0.findAll(n => isI(n) && /^\*Button\*/.test(n.name) && rendered(n, scr) && n.visible) : [];
 const carry = [];
 for (const b of cands) { let vn = ""; try { const mc = await b.getMainComponentAsync(); vn = mc ? mc.name : ""; } catch {}
-const t = b.findOne(q => q.type === "TEXT" && q.visible); const lbl = t ? CT(t) : "";
+const t = fT(b); const lbl = t ? CT(t) : "";
 const inActions = /Buttons/i.test(b.parent ? b.parent.name : "");
 if ((lbl.length > 1 && !/^Button$/i.test(lbl) && (inActions || !/close|back/i.test(b.name))) || (inActions && /Icon Only/i.test(vn) && /Type=Secondary/i.test(vn))) carry.push(b); }
 const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
 const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
-const page = variant.createInstance(); const slotOf = nm => page.findAll(n => isS(n)).find(s => s.name === nm); const instOf = nm => page.findOne(n => isI(n) && n.name === nm);
+const page = variant.createInstance(); const slotOf = nm => page.findAll(n => isS(n)).find(s => s.name === nm); const instOf = nm => fI(page, nm);
 parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
 try { page.setSharedPluginData("sumsub_island", "origH", String(Math.round(scr.height))); } catch {}
 instOf("Page / Body").setProperties({ "Content": plan.content });
 instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });
-if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { try { q.remove(); } catch {} } N("side column left empty, like the reference"); } }
+if (plan.sideRoom) { const sr = slotOf("Side content"); if (sr) { for (const q of [...sr.children]) { rm(q); } N("side column left empty, like the reference"); } }
 const mainSlot = slotOf("Main content");
 const mph = [...mainSlot.children];
 if (plan.content.includes("Ghost") || plan.white) {
@@ -284,16 +284,16 @@ for (const g of nodesIn) { try { for (const c of [g, ...vis(g)]) if (stripCardCh
 const ic = icComp.createInstance(); parent.appendChild(ic);
 try { ic.setProperties({ "Heading#26638:9": false }); } catch {}
 const slot = ic.findOne(n => isS(n) && n.name === "Slot");
-const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { try { q.remove(); } catch {} }
+const ph = [...slot.children]; nodesIn.forEach((g, i) => slot.insertChild(i, g)); for (const q of ph) { rm(q); }
 const sl = ic.findOne(n => isS(n) && n.name === "Slot");
-for (const k of sl.children) { try { k.layoutSizingHorizontal = "FILL"; } catch {} }
+for (const k of sl.children) { fill(k); }
 for (const k of sl.children) { try { if (k.type === "FRAME" && k.layoutMode && k.layoutMode !== "NONE" && k.layoutSizingVertical !== "HUG") { const h0 = Math.round(k.height); k.layoutSizingVertical = "HUG"; if (Math.abs(k.height - h0) > 1) N("hugs its content: " + k.name + " " + h0 + " → " + Math.round(k.height)); } } catch {} }
 try { for (const p of ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]) { try { sl.setBoundVariable(p, null); } catch {} }
 sl.paddingTop = sl.paddingRight = sl.paddingBottom = sl.paddingLeft = 0; if (sl.children.length > 1) sl.itemSpacing = 16; } catch {}
 try { sl.layoutSizingVertical = "HUG"; } catch {}
 try { ic.layoutSizingVertical = "HUG"; } catch {}
 return ic; };
-const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE") top = p; return top; };
+const instAnc = g => { let top = null; for (let p = g.parent; p && p.id !== scr.id && p.type !== "PAGE"; p = p.parent) if (isI(p)) top = p; return top; };
 const wrappers = new Map();
 nodes.groups = nodes.groups.map(g => { const w = instAnc(g); if (!w) return g; if (!wrappers.has(w.id)) wrappers.set(w.id, { node: w, name: w.name }); return g.clone(); });
 if (wrappers.size) N("groups in instance " + [...wrappers.values()].map(w => w.name).join(", ") + " — cloned out");
@@ -314,7 +314,7 @@ for (const part of vis(stack)) { const c = part.clone(); const pp = refPlacement
 if (pp === "bare" || (pp !== "island" && (cardLike(part) || isCardLayout(part)))) { cards.push(c); continue; }
 flat.push(part.name); cards.push(wrapInIsland([c])); }
 if (flat.length) N("split " + stack.name + " into parts; islands added for: " + flat.join(", "));
-try { stack.remove(); } catch (e) { N("could not remove " + stack.name + " — guard will keep the source"); }
+try { stack.remove(); } catch (e) { N("could not remove " + stack.name); }
 continue; }
 cards.push(wrapInIsland(bundle));
 }
@@ -323,8 +323,8 @@ for (const w of wrappers.values()) { const wn = w.name; try { w.node.remove(); N
 } else if (nodes.groups[0]) {
 mainSlot.insertChild(0, nodes.groups[0]);
 }
-for (const p of mph) { try { p.remove(); } catch {} }
-for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; try { c.layoutSizingHorizontal = "FILL"; } catch {} try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; N("hugs its content: " + c.name); } } catch {} }
+for (const p of mph) { rm(p); }
+for (const c of slotOf("Main content").children) { if (isGraphic(c)) continue; fill(c); try { if (c.layoutSizingVertical === "FILL") { c.layoutSizingVertical = "HUG"; N("hugs its content: " + c.name); } } catch {} }
 try { slotOf("Main content").layoutSizingVertical = "FILL"; } catch {}
 const intoAside = (node, which) => {
 const asides = page.findAll(n => isI(n) && n.name === "Page / Body / Aside");
@@ -332,10 +332,10 @@ const as = which === "left" ? asides[0] : asides[asides.length - 1]; if (!as) { 
 if (fillOf(node)) { try { as.setProperties({ "Paddings": "No" }); } catch {} }
 const as2 = page.findAll(n => isI(n) && n.name === "Page / Body / Aside"); const tgtAs = which === "left" ? as2[0] : as2[as2.length - 1];
 const slot = tgtAs.findOne(n => isS(n) && n.name === "Content"); const ph = [...slot.children];
-const nid = node.id, nname = node.name; slot.insertChild(0, node); for (const p of ph) { try { p.remove(); } catch {} }
+const nid = node.id, nname = node.name; slot.insertChild(0, node); for (const p of ph) { rm(p); }
 const moved = page.findOne(n => n.id === nid) || page.findOne(n => n.name === nname);
-if (moved) { try { moved.layoutSizingHorizontal = "FILL"; } catch {} try { moved.layoutSizingVertical = "FILL"; } catch (e) { try { moved.layoutSizingVertical = "HUG"; } catch (e2) {} } } };
-const navFrom = L => { const tx = n => { const t = n.findOne(q => q.type === "TEXT" && q.visible && CT(q)); return t ? CT(t) : ""; };
+if (moved) { fill(moved); try { moved.layoutSizingVertical = "FILL"; } catch (e) { try { moved.layoutSizingVertical = "HUG"; } catch (e2) {} } } };
+const navFrom = L => { const tx = n => { const t = n.findOne(q => isT(q) && q.visible && CT(q)); return t ? CT(t) : ""; };
 const on = n => { try { return Object.entries(CP(n)).some(([k, v]) => /^(State|Selected)/.test(k) && /active|yes|true/i.test(String(v.value))); } catch { return false; } };
 const its = L.findAll(n => isI(n) && /item/i.test(n.name) && rendered(n, scr) && tx(n)).filter((n, i, a) => !a.some(m => m !== n && contains(m, n)));
 const sl = () => page.findAll(n => isS(n) && n.name === "Items" && /1st level/.test(n.parent.name))[0], l2 = () => sl().children.filter(k => /2nd level/.test(k.name));
@@ -345,9 +345,10 @@ l2().forEach((k, i) => { if (i >= its.length) { k.visible = false; return; } con
 l2().forEach(k => { if (k.visible && k.children.some(c => c.height > k.height + 1)) try { k.layoutSizingVertical = "HUG"; N("nav: " + tx(k) + " wraps — the item hugs it"); } catch {} });
 N("nav from the original: " + its.length + " items"); };
 if (nodes.left) { if (plan.white) navFrom(nodes.left); else intoAside(nodes.left, "left"); }
+if (a.sideMove) { const rs = fS(a.refRoot, "Side content")[0]; [...slotOf("Side content").children].forEach(rm); for (const [i, nm] of a.sideMove.entries()) { const I = slotOf("Main content").children.find(k => k.findOne && k.findOne(q => q.name === nm && q.visible)), o = I && I.findOne(q => q.name === nm && q.visible), rb = vis(rs).find(k => k.name === nm); if (!o || !rb) continue; const U = o.findAll(isT).map(t => t.characters); const RI = isI(I) && fI(a.refRoot, I.name), p = {}; for (const [k, v] of Object.entries(RI ? CP(RI) : {})) if (v.type === "BOOLEAN" && CP(I)[k] && CP(I)[k].value !== v.value) p[k] = v.value; if (Object.keys(p).length) I.setProperties(p); else o.visible = false; const c = rb.clone(); slotOf("Side content").insertChild(i, c); const T = c.findAll(isT); for (const [j, t] of T.entries()) if (T.length === U.length && t.characters !== U[j]) try { await figma.loadFontAsync(t.fontName); t.characters = U[j]; } catch {} } slotOf("Side content").children.forEach(fill); N("side from the reference: " + a.sideMove.join(", ")); }
 if (nodes.right) {
 if (plan.sideContent) { const sc = slotOf("Side content");
-if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { try { p.remove(); } catch {} }
+if (sc) { const ph = [...sc.children]; sc.insertChild(0, nodes.right); for (const p of ph) { rm(p); }
 const sc2 = slotOf("Side content"), mv = sc2 && sc2.children[0];
 if (mv) { try { if (mv.layoutMode && mv.layoutMode !== "NONE" && mv.layoutSizingVertical !== "HUG") { const h0 = Math.round(mv.height); mv.layoutSizingVertical = "HUG"; N("side column hugs its content: " + mv.name + " " + h0 + " → " + Math.round(mv.height)); } } catch {} } } }
 else intoAside(nodes.right, "right");
@@ -356,8 +357,8 @@ try { await sideFromReference(page, a.refRoot, nodes.right.name, labelValue, not
 const getHdr = () => page.findOne(n => isI(n) && /^\*Header\*/.test(n.name) && n.visible); const hset = p => getHdr().setProperties(p);
 const hslot = re => { const h = getHdr(); return h && h.findAll(n => isS(n)).find(s => re.test(s.name)); };
 const fillSlot = (re, sources) => { const s = hslot(re); if (!s) { N("header has no slot " + re); return; } const ph = [...s.children];
-sources.forEach((o, i) => { const c = o.clone(); s.insertChild(i, c); try { c.visible = true; } catch {} }); for (const q of ph) { try { q.remove(); } catch {} } };
-const keepHdr = !a.refRoot && hdr0 && hdr0.type === "INSTANCE" && !/^\*Header\*/.test(mainName(hdr0));
+sources.forEach((o, i) => { const c = o.clone(); s.insertChild(i, c); try { c.visible = true; } catch {} }); for (const q of ph) { rm(q); } };
+const keepHdr = !a.refRoot && hdr0 && isI(hdr0) && !/^\*Header\*/.test(mainName(hdr0));
 if (keepHdr) { const c = hdr0.clone(); parent.appendChild(c); c.visible = false; c.x = x; c.y = y; c.setSharedPluginData("sumsub_island", "hdrFor", page.id); N("header: the original's " + mainName(hdr0) + " is kept (no reference)"); }
 else if (getHdr()) {
 try { hset({ "Title text#3817:0": plan.title || name, "Key#5362:0": !!R.key, "Copy title#6943:15": !!R.copy,
@@ -372,19 +373,19 @@ const refSlot = re => rh ? rh.findAll(n => isS(n) && re.test(n.name)).find(sl =>
 const refTitle = rh && CP(rh)["Title text#3817:0"] ? String(CP(rh)["Title text#3817:0"].value) : null;
 const reuses = t => (t.match(/[A-Za-z0-9][\w.,:+-]{3,}/g) || []).some(tok => /\d/.test(tok) && stackTexts.some(o => o.includes(tok)));
 if (refTitle && reuses(refTitle)) { try { const rc = CP(rh)["Copy title#6943:15"]; hset(Object.assign({ "Title text#3817:0": refTitle }, rc ? { "Copy title#6943:15": !!rc.value } : {})); N("title from the reference: " + refTitle); } catch {} }
-const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => q.type === "TEXT") : [])) { const c = CT(t);
+const fixTexts = async root => { for (const t of (root.findAll ? root.findAll(q => isT(q)) : [])) { const c = CT(t);
 if (/^ID\s*:/i.test(c) && origId && c !== origId) { try { await figma.loadFontAsync(t.fontName); t.characters = origId; } catch {} } } };
 const rInfo = refSlot(/^Info slot/i), rAdd = refSlot(/^Additional info/i);
 if (rInfo) { try { hset({ "Show Info slot#6985:0": true });
-const stT = R.status ? (R.status.type === "TEXT" ? R.status : R.status.findOne(q => q.type === "TEXT" && q.visible)) : null, stLbl = stT ? CT(stT) : null;
-const src = rInfo.children.filter(k => k.visible).map(k => { const t = k.findOne ? k.findOne(q => q.type === "TEXT" && q.visible) : null;
+const stT = R.status ? (isT(R.status) ? R.status : fT(R.status)) : null, stLbl = stT ? CT(stT) : null;
+const src = vis(rInfo).map(k => { const t = k.findOne ? fT(k) : null;
 return (/Status/i.test(k.name) && stLbl && t && CT(t) !== stLbl) ? R.status : k; });
 fillSlot(/^Info slot/i, src);
 const sc = labelValue["score"]; const s1 = hslot(/^Info slot/i);
-if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = c.findOne(q => q.type === "TEXT" && q.visible); if (t && CT(t) !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch {} } }
+if (sc && s1) for (const c of s1.children) if (/Counter/i.test(c.name)) { const t = fT(c); if (t && CT(t) !== sc) { try { await figma.loadFontAsync(t.fontName); t.characters = sc; } catch {} } }
 N("info row from the reference" + (src.includes(R.status) ? ", status from the original" : "")); } catch (e) { N("ref info: " + e.message); } }
 else if (R.status) { try { fillSlot(/^Info slot/i, [R.status]); } catch (e) { N("status: " + e.message); } }
-if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, rAdd.children.filter(k => k.visible));
+if (rAdd) { try { hset({ "Show additional info slot#6943:18": true }); fillSlot(/^Additional info/i, vis(rAdd));
 const s2 = hslot(/^Additional info/i); if (s2) await fixTexts(s2); N("additional info from the reference"); } catch (e) { N("ref additional info: " + e.message); } }
 else if (R.addInfo) { try { fillSlot(/^Additional info/i, vis(R.addInfo)); } catch (e) { N("additional info: " + e.message); } }
 try { const tbOf = () => getHdr().findOne(n => /^\*Tab Basic\*/.test(n.name));
@@ -393,16 +394,16 @@ if (tbOf() && plan.tabs.length) {
 for (let guard = 0; guard < 12; guard++) { const ws = wsOf(); if (!ws) break; const its = ws.children.filter(n => /Tab Basic \/ Item/i.test(n.name));
 if (its.length >= plan.tabs.length) break; ws.appendChild(its[its.length - 1].clone()); }
 const items = tbOf().findAll(n => /Tab Basic \/ Item/i.test(n.name));
-for (let i = 0; i < items.length; i++) { const it = items[i], c = plan.tabCnt[i]; try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false", "Counter#5190:0": !!c }); const nt = c && it.findOne(y => y.type === "TEXT" && y.name === "Number"); if (nt && nt.characters !== c) { await figma.loadFontAsync(nt.fontName); nt.characters = c; } } else it.visible = false; } catch {} }
+for (let i = 0; i < items.length; i++) { const it = items[i], c = plan.tabCnt[i]; try { if (i < plan.tabs.length) { it.visible = true; it.setProperties({ "Label text#4517:0": plan.tabs[i], "Selected": i === plan.tabSelected ? "true" : "false", "Counter#5190:0": !!c }); const nt = c && it.findOne(y => isT(y) && y.name === "Number"); if (nt && nt.characters !== c) { await figma.loadFontAsync(nt.fontName); nt.characters = c; } } else it.visible = false; } catch {} }
 if (items.length < plan.tabs.length) N("header shows " + items.length + " of " + plan.tabs.length + " tabs"); }
 } catch (e) { N("tabs: " + e.message); }
 const acts0 = R.actions.length ? R.actions : carry, acts = []; { const seen = new Set(), isA = k => acts0.some(a => a.id === k.id); for (const b of acts0) { const p = b.parent; if (seen.has(p.id)) continue; seen.add(p.id); const ks = p.children.filter(k => k.visible !== false), mine = ks.filter(isA), i0 = ks.findIndex(k => k.id === mine[0].id), i1 = ks.findIndex(k => k.id === mine[mine.length - 1].id); ks.forEach((k, i) => { if (isA(k) || (i > i0 && i < i1 && /Divider/i.test(k.name))) acts.push(k); }); } }
 if (acts.length) { try { hset({ "Show actions slot#6943:20": true }); if (!hslot(/Actions slot/i)) { hset({ "Show actions slot#6943:20": false }); N("the header has no actions slot — left off"); } else { fillSlot(/Actions slot/i, acts);
-for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = c.findOne(q => q.type === "TEXT" && q.visible); if (tt && /^Button$/i.test(CT(tt))) c.remove(); } catch {} }
-{ const hp = CP(getHdr()), taken = new Set(); for (const [re, pr] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => q.type === "TEXT" && q.visible && CT(q))) taken.add(CT(t)); }
-for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => q.type === "TEXT" && q.visible && CT(q)), l = t ? CT(t) : ""; if (l && taken.has(l)) { N("action \"" + l + "\" already in the info rows"); c.remove(); } } catch {} } }
-try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => isI(n) && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => q.type === "TEXT" && q.visible && CT(q))) continue; const ic = c.findOne(q => q.type === "INSTANCE" && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { N("the header has its own " + ic.name + " — copy removed"); c.remove(); } } catch {} } } catch {}
-{ const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => s.children.filter(k => k.visible); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
+for (const c of [...hslot(/Actions slot/i).children]) { try { const tt = fT(c); if (tt && /^Button$/i.test(CT(tt))) c.remove(); } catch {} }
+{ const hp = CP(getHdr()), taken = new Set(); for (const [re, pr] of [[/^Info slot/i, "Show Info slot#6985:0"], [/^Additional info/i, "Show additional info slot#6943:18"]]) { const s = hslot(re); if (!s || !hp[pr] || hp[pr].value !== true) continue; for (const k of s.children) if (k.visible && k.findAll) for (const t of k.findAll(q => isT(q) && q.visible && CT(q))) taken.add(CT(t)); }
+for (const c of [...hslot(/Actions slot/i).children]) { try { const t = c.findOne && c.findOne(q => isT(q) && q.visible && CT(q)), l = t ? CT(t) : ""; if (l && taken.has(l)) { N("action \"" + l + "\" already in the info rows"); c.remove(); } } catch {} } }
+try { const hh = getHdr(), asl = hslot(/Actions slot/i); const inAsl = n => { let q = n.parent; while (q && q.id !== hh.id) { if (q.id === asl.id) return true; q = q.parent; } return false; }; const shownIn = n => { let q = n; while (q && q.id !== hh.id) { if (q.visible === false) return false; q = q.parent; } return true; }; const own = new Set(hh.findAll(n => isI(n) && /^(normal|small|large)\//.test(n.name) && shownIn(n) && !inAsl(n)).map(n => n.name)); for (const c of [...asl.children]) { try { if (c.findOne(q => isT(q) && q.visible && CT(q))) continue; const ic = c.findOne(q => isI(q) && /^(normal|small|large)\//.test(q.name)); if (ic && own.has(ic.name)) { N("the header has its own " + ic.name + " — copy removed"); c.remove(); } } catch {} } } catch {}
+{ const s = hslot(/Actions slot/i), dv = k => /Divider/i.test(k.name), vk = () => vis(s); if (s) { let ks = vk(); while (ks.length && dv(ks[0])) { ks[0].remove(); ks = vk(); } while (ks.length && dv(ks[ks.length - 1])) { ks[ks.length - 1].remove(); ks = vk(); } } }
 const asl2 = hslot(/Actions slot/i); if (asl2 && !asl2.children.some(k => k.visible)) { hset({ "Show actions slot#6943:20": false }); N("actions slot empty — left off"); } } } catch (e) { N("actions: " + e.message); } }
 }
 try { await carrySidebar(nodes.sidebar, page, notes); } catch (e) { N("sidebar: " + e.message); }
@@ -411,16 +412,16 @@ for (const n of spans) { try { n.setSharedPluginData("sumsub_island", "span", ""
 if (k) N("spanning blocks kept: " + k); }
 for (const ov of nodes.overlays) { try { const ob = box(ov, scr); parent.appendChild(ov); ov.x = x + ob.x; ov.y = y + ob.y; } catch {} }
 try { page.resize(origW, origH); } catch {}
-try { const shown = new Set(page.findAll(t => t.type === "TEXT" && t.visible).map(t => CT(t)));
+try { const shown = new Set(page.findAll(t => isT(t) && t.visible).map(t => CT(t)));
 const shownLow = new Set([...shown].map(t => t.toLowerCase()));
 const lost = Object.entries(labelValue).filter(([k, v]) => !shown.has(v) && !shownLow.has(k)).map(([k, v]) => k + ": " + v); if (lost.length) N("header values not placed: " + lost.join(", ")); } catch {}
-if (plan.white && nodes.left && nodes.left.findOne(n => /search/i.test(n.name) && rendered(n, scr))) try { const nv = page.findOne(n => isI(n) && n.name === "Section navigation"); nv.setProperties({ [Object.keys(CP(nv)).find(q => /^Search/.test(q))]: true }); N("nav: search on, as in the original"); } catch {}
+if (plan.white && nodes.left && nodes.left.findOne(n => /search/i.test(n.name) && rendered(n, scr))) try { const nv = fI(page, "Section navigation"); nv.setProperties({ [Object.keys(CP(nv)).find(q => /^Search/.test(q))]: true }); N("nav: search on, as in the original"); } catch {}
 _idCache.clear();
-const leftover = scr.findAll(n => (n.type === "TEXT" ? CT(n) !== "" : isI(n)) && n.visible !== false && rendered(n, scr) &&
+const leftover = scr.findAll(n => (isT(n) ? CT(n) !== "" : isI(n)) && n.visible !== false && rendered(n, scr) &&
 !contains(nodes.header, n) && !contains(nodes.header2, n) && !contains(nodes.sidebar, n) && !contains(nodes.subheader, n) && !(nodes.scrollbars || []).some(sb => contains(sb, n)) && !(plan.white && contains(nodes.left, n)));
 if (leftover.length) {
 return { page, kept: [...new Set(leftover.map(n => n.name))], notes }; }
-try { scr.remove(); } catch {}
+rm(scr);
 return { page, kept: [], notes };
 }
 function keepWholeCard(a, refP) {
@@ -429,16 +430,16 @@ if (refPlacement(refP, m.name) !== "bare") return false;
 a.nodes.groups = [m]; return true;
 }
 function refSideOnly(P, a) {
-const d = P ? P.findOne(n => isI(n) && n.name === "Page / Body / Default") : null; const p = d && CP(d) ? CP(d)["Show side content#23483:22"] : null;
+const d = P ? fI(P, "Page / Body / Default") : null; const p = d && CP(d) ? CP(d)["Show side content#23483:22"] : null;
 return !!p && p.value === true && !a.nodes.right && !a.nodes.left && !a.nodes.table && a.plan.content === "◼️ Main (Ghost)"; }
 function refWidth(P) {
-const d = P ? P.findOne(n => isI(n) && n.name === "Page / Body / Default") : null; const t = d && CP(d) && CP(d).Type ? String(CP(d).Type.value) : "";
+const d = P ? fI(P, "Page / Body / Default") : null; const t = d && CP(d) && CP(d).Type ? String(CP(d).Type.value) : "";
 return /^(Full width|1084 max|1920 max)$/.test(t) ? t : null; }
 function surfaceOf(refP, opts) {
 const refG = refP ? refIsGrey(refP) : null, tbl = opts && opts.surface ? opts.surface === "grey" : null;
 return { grey: tbl !== null ? tbl : refG, refGrey: refG, from: tbl !== null ? "table" : (refG === null ? null : "reference") }; }
 function refIsGrey(P) {
-const ms = P.findAll(n => isS(n) && n.name === "Main content")[0]; if (!ms || !ms.absoluteBoundingBox) return null; const mb = ms.absoluteBoundingBox;
+const ms = fS(P, "Main content")[0]; if (!ms || !ms.absoluteBoundingBox) return null; const mb = ms.absoluteBoundingBox;
 return P.findAll(n => n.visible && n.fills && n.fills !== figma.mixed && n.fills.length && n.fills[0].type === "SOLID" && n.fills[0].visible !== false && !!n.absoluteBoundingBox &&
 (() => { const c = n.fills[0].color; return c.r > 0.93 && c.r < 0.985 && Math.abs(c.r - c.b) < 0.03; })() &&
 (() => { const b = n.absoluteBoundingBox; const ix = Math.max(0, Math.min(b.x + b.width, mb.x + mb.width) - Math.max(b.x, mb.x)), iy = Math.max(0, Math.min(b.y + b.height, mb.y + mb.height) - Math.max(b.y, mb.y)); return ix * iy > 0.4 * mb.width * mb.height; })()).length > 0;
@@ -452,12 +453,12 @@ if (!a.confident) return { id: scrId, name, stopped: "not confident", notes: a.n
 let refP = null;
 if (refId) { const ref = await figma.getNodeByIdAsync(refId);
 if (ref) { let pr = ref; while (pr.type !== "PAGE") pr = pr.parent; await pr.loadAsync();
-refP = ref.type === "INSTANCE" && ref.name === "Page" ? ref : ref.findOne(n => isI(n) && n.name === "Page"); } }
-const wh = !!opts && opts.surface === "white"; if (refP && surfaceOf(refP, opts).grey === false && !wh) return { id: scrId, name, stopped: "the reference is WHITE — run it with { surface: \"white\" } (the white layout)", ref: refId };
-if (wh) { a.plan.white = true; a.plan.content = a.nodes.left ? "◻️ Nav + Main (Default)" : "◻️ Main (Default)"; a.plan.sideContent = !!a.nodes.right; }
+refP = isI(ref) && ref.name === "Page" ? ref : fI(ref, "Page"); } }
+const wh = !!opts && opts.surface === "white"; if (refP && surfaceOf(refP, opts).grey === false && !wh) return { id: scrId, name, stopped: "white reference — run with { surface: \"white\" }", ref: refId };
+if (wh) { a.plan.white = true; a.plan.content = a.nodes.left ? "◻️ Nav + Main (Default)" : "◻️ Main (Default)"; a.plan.sideContent = !!a.nodes.right; } if (wh && refP && !a.nodes.right && a.nodes.main) { const d = fI(refP, "Page / Body / Default"), rs = d && CP(d)["Show side content#23483:22"].value && fS(refP, "Side content")[0]; const mv = rs ? vis(rs).map(k => k.name).filter(nm => a.nodes.main.findOne(n => n.name === nm && n.visible)) : []; if (mv.length) a.plan.sideContent = !!(a.sideMove = mv); }
 a.refRoot = refP; const whole = keepWholeCard(a, refP);
 if (refP) { const t = CP(refP).Type; if (t && /Basic|Full screen page/.test(t.value)) a.plan.pageType = t.value;
-const ms = refP.findAll(n => isS(n) && n.name === "Main content")[0];
+const ms = fS(refP, "Main content")[0];
 if (ms && !a.nodes.table) a.plan.width = refWidth(refP) || ((ms.width >= 1280 || a.plan.content === "◼️ Main + Right (Ghost)") ? "Full width" : "1084 max");
 a.W = Math.round(refP.width); a.H = Math.round(refP.height); a.plan.sideRoom = refSideOnly(refP, a); }
 const r = await buildIsland(scr, a, null);
