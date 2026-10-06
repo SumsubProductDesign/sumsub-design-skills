@@ -357,7 +357,7 @@ const p = n.parent, inner = p.width - (p.paddingLeft || 0) - (p.paddingRight || 
   const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
   const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
   const page = variant.createInstance(); const slotOf = nm => page.findAll(n => isS(n)).find(s => s.name === nm); const instOf = nm => fI(page, nm);
-  parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
+  parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y;
   // v3.252: the original's height, for the finish — a reference taller only because of its own content must not stretch the page (AP Actions: 1155 for content to 413, the original is 900)
   try { page.setSharedPluginData("sumsub_island", "origH", String(Math.round(scr.height))); } catch {}
   // 2. layout + width (re-fetch after each variant change)

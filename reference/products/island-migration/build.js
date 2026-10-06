@@ -270,7 +270,7 @@ if ((lbl.length > 1 && !/^Button$/i.test(lbl) && (inActions || !/close|back/i.te
 const pageSet = await figma.importComponentSetByKeyAsync("f907195876aad003b980b77d6e9471e9418a0941");
 const variant = pageSet.children.find(c => /Ver=New/.test(c.name) && c.name.includes("Type=" + plan.pageType) && c.name.includes("Sandbox=" + (plan.sandbox ? "Yes" : "No")));
 const page = variant.createInstance(); const slotOf = nm => page.findAll(n => isS(n)).find(s => s.name === nm); const instOf = nm => fI(page, nm);
-parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y; page.name = name;
+parent.insertChild(Math.max(0, idx), page); page.x = x; page.y = y;
 try { page.setSharedPluginData("sumsub_island", "origH", String(Math.round(scr.height))); } catch {}
 instOf("Page / Body").setProperties({ "Content": plan.content });
 instOf("Page / Body / Default").setProperties({ "Type": plan.width, "Show side content#23483:22": plan.sideContent || !!plan.sideRoom });

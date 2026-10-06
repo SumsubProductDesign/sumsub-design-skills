@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.266.0 — 2026-10-06 (island migration: the Page keeps its name)
+- **The migrated screen is no longer renamed.** The engine used to give the new `Page` instance the old screen's name (in one designer's run it became «1 Default state. 1440px — island (copy, made by Claude)»). Renaming a component instance is against the team rule, so the result now stays `Page`. The rule in the skill and in the layout doc is corrected: no layer and no component instance is renamed.
+- **New audit check 7.60:** fails when the migrated `Page` has any name other than `Page`.
+
 ## v3.265.0 — 2026-10-06 (island migration: side column from the reference, white screens)
 - **White layout: a block the reference shows in the side column moves there.** On Levels › AML the original keeps the `Tip` (AML configuration, how to set up) inside the `Configurations` block; the designers' reference shows it in the side column and switches it off in the block (`Tips` = false). The engine now does the same: it puts the reference's `Tip` into the side column with the original's texts and turns the same switch off on the original's block. `planOne` reports it as `side: Tip from the reference`.
 - **A reference width that does not fit its own parent is not copied.** The AML reference's `Configurations` is 1084 wide inside a 640 column; the finish used to copy that and push the block out of the column. It now keeps the block filling the column.
