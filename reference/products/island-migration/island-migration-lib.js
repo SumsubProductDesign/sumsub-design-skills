@@ -600,6 +600,8 @@ async function copyVarsFromRef(refRoot, page, anchors) {
 const inChrome = n => { for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) if (p.type === "INSTANCE" && /^\*(Sidebar|Header)\*$/.test(p.name)) return true; return false; };
 // Blocks pair inside the content slots only: a same-named frame inside the sidebar or the header is chrome, not content.
 const inBody = (root, a) => { const sl = bodySlots(root), seen = new Set(); return (sl.length ? sl : [root]).flatMap(s => s.findAll(n => n.name === a && n.visible && !inChrome(n))).filter(n => !seen.has(n.id) && seen.add(n.id)); };
+// a variable from the reference, imported into this file when it lives in a library
+const vOf = async id => { try { let v = await figma.variables.getVariableByIdAsync(id); return v && v.remote && v.key ? await figma.variables.importVariableByKeyAsync(v.key) : v; } catch (e) { return null; } };
 const bvOf = (n, prop) => n.boundVariables && n.boundVariables[prop] && n.boundVariables[prop][0] ? n.boundVariables[prop][0].id : null;
   const runAnchor = async a => { let gone = 0;
     const R = inBody(refRoot, a), B = inBody(page, a);
@@ -647,7 +649,7 @@ try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && !headPair && !rootTop && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
               if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own spacing, not an override
-              let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch {} }
+              const v = rbv ? await vOf(rbv.id) : null;
               try { bn.setBoundVariable(k, null); } catch {}
               if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
               changed.push((k === "itemSpacing" ? "gap" : k === "gridRowGap" ? "row gap" : k === "gridColumnGap" ? "column gap" : k.replace("padding", "").toLowerCase()) + " " + Math.round(rv)); }
@@ -660,11 +662,14 @@ try { if ((gapOnly || headPair || (mode !== "style" && mode !== "paint")) && rn.
               const rv = rn[k] || 0, rbv = rn.boundVariables && rn.boundVariables[k], bbv = bn.boundVariables && bn.boundVariables[k]; if (mode !== "full" && rv === 0 && (bn[k] || 0) > 0 && /^padding/.test(k)) continue;
               if (Math.abs((bn[k] || 0) - rv) < 0.5 && (!rbv || (bbv && bbv.id === rbv.id))) continue;
               if (ov && (!mc || Math.abs((mc[k] || 0) - rv) < 0.5)) continue;                       // the variant's own radius, not an override
-              let v = null; if (rbv) { try { v = await figma.variables.getVariableByIdAsync(rbv.id); if (v && v.remote && v.key) v = await figma.variables.importVariableByKeyAsync(v.key); } catch {} }
+              const v = rbv ? await vOf(rbv.id) : null;
               try { bn.setBoundVariable(k, null); } catch {}
               if (v) { try { bn.setBoundVariable(k, v); } catch (e) { bn[k] = rv; } } else bn[k] = rv;
               changed = true; }
             if (changed) applied.push(a + path + " radius → " + Math.round(rn.topLeftRadius || 0)); } } catch (e) { skipped.push(a + path + " radius: " + e.message); }
+            // v3.263: a height (or min/max height) the reference binds to a variable — e.g. *Empty State* on
+            // dimension/45 = 360 — is bound the same way here; the original's fixed height (400) made the island taller.
+            try { if (mode !== "paint" && mode !== "gaps" && !ov) for (const k of ["height", "minHeight", "maxHeight"]) { const rb = rn.boundVariables && rn.boundVariables[k], bb = bn.boundVariables && bn.boundVariables[k]; if (!rb || (bb && bb.id === rb.id)) continue; const v = await vOf(rb.id); if (v) { bn.setBoundVariable(k, v); applied.push(a + path + " " + k + " → " + v.name); } } } catch (e) { skipped.push(a + path + " height: " + e.message); }
         if (mode !== "gaps") for (const prop of ["fills", "strokes"]) { try {
           const rVis = prop === "fills" ? visFill(rn) : visStroke(rn), bVis = prop === "fills" ? visFill(bn) : visStroke(bn);
           if (ov && (!mc || (rVis === (prop === "fills" ? visFill(mc) : visStroke(mc)) && bvOf(rn, prop) === bvOf(mc, prop)))) continue;   // the variant's own paint

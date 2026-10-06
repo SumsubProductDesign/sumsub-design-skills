@@ -235,6 +235,8 @@ Components bring their own variables, but the old blocks carry the pre-island on
 
 Radius: with a reference, the paired reference layer's radius, bound to its variable when it has one. The designers round cards 12 → 16 for the island layout (CM Overview for managers: `.To do`, `Team` … on `border-radius/xl`), while some blocks keep theirs (`Documents block old` stays 12 in every reference). Without a reference, keep the block's own.
 
+Height (v3.263): when the paired reference layer binds its height (or min/max height) to a variable, ours is bound to the same variable. AP Devices empty: the reference has `*Empty State*` on `dimension/45` = 360, the original kept a fixed 400, so the island came out 432 instead of 392. A height the reference leaves unbound is not touched — it comes from the original's content.
+
 **When an after-reference exists, copy its variables — and its horizontal sizing (§7.10) and inner spacing — instead of this table:** pair each block of the result with the same-named block of the reference (same order for repeated names), walk both trees with the same relative path, and wherever the reference binds a fill, stroke, spacing or corner-radius variable (or sets a value) that differs from yours, take the reference's. Grids count too: their paddings, row and column gaps, and each child's alignment in its cell (paints via `setBoundVariableForPaint` on a copy of its paint, spacing and radius via `setBoundVariable`). Where the reference has no visible fill and yours does, clear it. Skip the `IslandCard` frame and its `Slot` (published internals). Log every change.
 
 **Bind by key** in a consumer file: `await figma.variables.importVariableByKeyAsync(key)`; in the reference's own file the reference's variable ids resolve directly.

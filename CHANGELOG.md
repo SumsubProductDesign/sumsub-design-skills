@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.263.0 — 2026-10-06 (island migration: heights bound to a variable)
+- **A height the reference binds to a variable now carries over.** When a layer in the designers' reference has its height (or min/max height) bound to a variable, the finish binds the matching layer of the result to the same variable. On AP Devices empty the empty state was 400 high (from the original) instead of 360 (`dimension/45` in the reference), so the island was 40 px taller; this was the one manual fix of that run. Heights the reference leaves free still follow the content.
+- Internal: one helper imports a reference variable for spacing, radius and height.
+
 ## v3.262.0 — 2026-10-06 (product-motion: lessons from the latest review)
 - **Three new rules in `/sumsub-design:product-motion`.**
   - Things that travel together keep their spacing until the story separates them, so no card looks like it lags behind.
