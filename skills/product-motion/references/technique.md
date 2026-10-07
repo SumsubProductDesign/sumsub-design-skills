@@ -47,8 +47,9 @@ Make the timeline a whole number of frames: `T = ceil(T * TEMPO * 60) / (60 * TE
 
 ## 3. HTML (CSS on the SVG's layers)
 
-- Animate `transform` and `opacity` (plus `fill` for colour, `stroke-dashoffset` for drawing, and
-  `backdrop-filter` for glass). Set `transform-box` and `transform-origin` explicitly per element.
+- Animate `transform` and `opacity` (plus `fill` for colour, `stroke-dashoffset` for drawing, `clip-path` for a
+  fold or reveal, `backdrop-filter` for glass, a fading `drop-shadow`) — rules C7. Set `transform-box` and
+  `transform-origin` explicitly per element.
 - An element with its own `transform` attribute (a rotated rect) is animated through a wrapper group.
 - **Extra motion on top of existing motion** (a knock, a bounce) = a separate wrapper `<g>` between
   the element and its parent; never edit the element's own keyframes for it.

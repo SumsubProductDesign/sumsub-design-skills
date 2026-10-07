@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.272.0 — 2026-10-07 (product-motion: two rules from apple-design written out)
+- **New rule B19 — things leave the way they came, and a move back mirrors the move out.** Same side in and out, a fold unfolds out of the row it folded into, tooltips grow from and shrink into their anchor, a feed's rows keep scrolling out instead of fading in place, and the way back uses the mirrored curve. From apple-design §7 (spatial consistency); the skill followed it in practice, now it is a rule.
+- **New rule C7 — move and fade with `transform` and `opacity`; never animate layout.** No `x`/`y`/`width`/`height`/`d` attributes, `top`/`left` or font sizes; a size change is a scale or a clip. The few other properties (`fill`, `stroke-dashoffset`, `clip-path`, `backdrop-filter`, a fading `drop-shadow`) each have one job and are listed in the technique notes. From apple-design §11 (frame-level smoothness).
+
 ## v3.271.0 — 2026-10-06 (product-motion: country flags keep their colours in dark)
 - **New rule C6 — flags are pictures, the same in both themes.** Some dark illustrations in Assets bind a flag's white base to the dark surface and its black to the light text colour (Austria's white stripe turned black). `prep_svg` now fixes every dark source that has a light sibling: a flag fill whose light and dark values swapped goes back to the light value; a near-white base already fixed in the source is left as drawn. The skill also tells you which dark component in the source still needs the fix.
 

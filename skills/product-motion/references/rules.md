@@ -118,6 +118,13 @@ carries the translucency) — two translucent layers cross-fading dip in tone. D
 cuts the copy's anti-aliased edge. Text that has to change style on the way (size, weight, tracking) gets a twin in the
 target's style that cross-fades in while it moves.
 
+**B19. Things leave the way they came, and a move back mirrors the move out.** An element that slides in from the
+right leaves to the right; a card that folds into a feed row unfolds out of that row; a tooltip or popover grows from
+its anchor and shrinks back into it (`transform-origin` on the anchor, not on its own centre); rows a feed scrolls up
+keep going up and out of the frame instead of fading in place. A reversible move uses the mirrored curve on the way
+back — for `cubic-bezier(x1, y1, x2, y2)` out, `cubic-bezier(1−x2, 1−y2, 1−x1, 1−y1)` back — so both directions feel
+like the same motion. (apple-design §7, spatial consistency.)
+
 ## C. Look
 
 **C1. Current DS colours.** Many source illustrations predate the dashboard redesign (blue primary,
@@ -150,6 +157,15 @@ fixes it for every dark source with a light sibling: a flag fill whose light and
 more than half) goes back to the light value; a near-white base fixed in the source is left as drawn. Icons such as
 `normal/flag` are not flags and keep their theme colours. When you see one, also tell the user which dark component in
 the source file still has it, so it gets fixed there too.
+
+**C7. Move and fade with `transform` and `opacity`; never animate layout.** Position, size and rotation go through
+`transform` (a wrapper group when the element has its own `transform` attribute); appearing and disappearing through
+`opacity`. Never animate `x`/`y`/`width`/`height`/`d`/`r` attributes, `top`/`left`, or a font size — they re-lay out
+and repaint every frame and step on whole pixels. A size change is a `scale` of a wrapper or a clip that opens, not a
+new width. The few other properties have one job each and stay on one element for the length of that move: `fill`
+for a colour change, `stroke-dashoffset` for a line drawing itself, `clip-path` for a fold or a reveal,
+`backdrop-filter` for glass, a `drop-shadow` that fades out. In Lottie the same holds by construction: layers move by
+their transform, colours change by cross-fading two rasters. (apple-design §11, frame-level smoothness.)
 
 ## D. The motion language (`motion(NAME)`, real seconds / px)
 
@@ -193,6 +209,8 @@ Reviewers describe symptoms; map them to the rule before changing code.
 | "corners look wrong", "two frames on top of each other" | B12 / B13 — and check the Lottie, not the HTML |
 | "blue toggle" / "old colour" | C1 |
 | "the flag is inverted in dark" | C6 |
+| "it comes in from one side and leaves to another" | B19 |
+| "it stutters / steps while it moves" | C7 — and measure it (checks §3) |
 | "it loops" | A1 |
 
 When the feedback is about something seen in the player, it is the **Lottie** — reproduce it there
