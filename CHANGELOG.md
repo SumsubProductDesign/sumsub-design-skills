@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.273.0 — 2026-10-09 (island migration: a bare check header becomes its status card)
+- **Collapsed checks get their status border.** Old KYB and AP mockups drew a collapsed check as a bare `APCardCollapsible/Header` with a green fill and no border, so the migrated screen showed it without the card's outline (KYB Applicant › Docs requirements, reported from a designer's run). The finish now swaps such a header for the AP kit's collapsed card of the same status — `APCardCollapsible` `Type=Green - Approved` (or Yellow / Red / Black / Default) — and moves the header's data into it: card name, date, icon, buttons. The result lists them under `cards`. When the reference keeps a bare header in its content (AP Payment methods), nothing is swapped.
+- Internal: `finish.js` written shorter (helper names, `?.`, unused `catch` bindings) to make room; checked line by line against the old file by expanding the short forms back.
+
 ## v3.272.0 — 2026-10-07 (product-motion: two rules from apple-design written out)
 - **New rule B19 — things leave the way they came, and a move back mirrors the move out.** Same side in and out, a fold unfolds out of the row it folded into, tooltips grow from and shrink into their anchor, a feed's rows keep scrolling out instead of fading in place, and the way back uses the mirrored curve. From apple-design §7 (spatial consistency); the skill followed it in practice, now it is a rule.
 - **New rule C7 — move and fade with `transform` and `opacity`; never animate layout.** No `x`/`y`/`width`/`height`/`d` attributes, `top`/`left` or font sizes; a size change is a scale or a clip. The few other properties (`fill`, `stroke-dashoffset`, `clip-path`, `backdrop-filter`, a fading `drop-shadow`) each have one job and are listed in the technique notes. From apple-design §11 (frame-level smoothness).

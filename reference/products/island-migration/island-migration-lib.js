@@ -5,6 +5,10 @@ const rendered = (n, stop) => { const sid = stop ? stop.id : null; let p = n;
 const mainName = n => { try { const m = n.mainComponent; return m ? ((m.parent && m.parent.type === "COMPONENT_SET") ? m.parent.name : m.name) : ""; } catch (e) { return ""; } };
 const box = (n, ref) => { const a = n.absoluteTransform, r = ref.absoluteTransform; return { x: Math.round(a[0][2] - r[0][2]), y: Math.round(a[1][2] - r[1][2]), w: Math.round(n.width), h: Math.round(n.height) }; };
 // v3.254: short names that keep finish.js under the use_figma limit.
+// v3.273: finish.js is written shorter than this file to fit the 49 800 limit: isI(n), imV(key) / gV(id) for the variable
+// imports, sBP(...) for setBoundVariableForPaint, isSd(n) for a side slot, PD for the four paddings, x.boundVariables?.[k]
+// for x.boundVariables && x.boundVariables[k], findAll(isB) for findAll(n => isB(n)), ap(...) / sk(...) for applied /
+// skipped.push(a + path + " " + ...), `catch {}` where the error is unused. Same behaviour, checked by expanding back.
 // v3.260: finish.js also writes isB(n) for the body-slot test isS(n) && (Main content | Side content | Aside › Content), drops
 // line indentation and leaves out unwrapSingle / isCardStack, which only plan.js and build.js call.
 const ICN = "Page / Body / IslandCard", isS = n => n.type === "SLOT", isI = n => n.type === "INSTANCE", byId = id => figma.getNodeByIdAsync(id), CP = n => n.componentProperties, CT = n => n.characters.trim(), fI = (r, nm) => r.findOne(n => isI(n) && n.name === nm), isT = n => n.type === "TEXT", fT = n => n.findOne(q => isT(q) && q.visible), fS = (r, nm) => r.findAll(n => isS(n) && n.name === nm), fill = n => { try { n.layoutSizingHorizontal = "FILL"; } catch {} }, rm = n => { try { n.remove(); } catch {} }, SA = "Show actions slot#6943:20", SI = "Show Info slot#6985:0", SD = "Show additional info slot#6943:18", TT = "Title text#3817:0", CTL = "Copy title#6943:15";
@@ -1103,14 +1107,32 @@ if (isI(a) && isI(b)) { const p = {}; let ap = {}, bp = {}; try { ap = CP(a) || 
 if (isT(a) && isT(b) && a.characters !== b.characters) { try { for (const f of a.getRangeAllFontNames(0, a.characters.length)) await figma.loadFontAsync(f); a.characters = b.characters; } catch {} }
 const bk = "children" in b ? b.children : [];
 for (let i = 0; i < bk.length; i++) { const pa = await byId(aid), ak = pa && "children" in pa ? pa.children : []; if (i >= ak.length) break; if (ak[i].name === bk[i].name) await syncNode(ak[i].id, bk[i], false); } }
+// v3.273 (KYB Applicant, Олеся 09.10): a check header standing on its own — an `APCardCollapsible/Header` that is not
+// inside an `APCardCollapsible` card (old KYB/AP mockups drew a collapsed check as the bare header, `Status=Aproved`) —
+// becomes the collapsed card of the same status from the AP kit: `APCardCollapsible` Type Green - Approved / Yellow -
+// Pending/Warning / Red - Rejected / Black - Failed Ignored / Default, its smallest (collapsed) variant. That card draws the
+// status border (`semantic/border/green/subtle/normal` …) the bare header never had. The header's data moves into the
+// card's own header: properties by name (Card name, Date, Buttons, Counter, Country, the icon swap), same-named texts
+// (the date), and the original's buttons cloned into the `Buttons slot`. Skipped when the reference itself keeps a bare
+// header right in its content (AP Payment methods: `Payment source`, State=Default, with a card-border override) — the
+// copy step then carries the reference's border as before.
+async function headerCards(page, refId) { const H = "APCardCollapsible/Header", cH = c => c.findOne(q => isI(q) && q.name === H), cT = n => n.findAll(q => q.type === "TEXT" && q.visible), cP = n => Object.fromEntries(Object.entries(n.componentProperties).map(([k, v]) => [k.split("#")[0], [k, v]])), out = [], up = n => { let q = n.parent; while (q && !isI(q)) q = q.parent; return q || {}; };
+const hs = oursOf(page).map(e => e[0]).filter(n => isI(n) && n.visible && n.name === H && up(n).name !== "APCardCollapsible"); const rp = refId && await byId(refId); if (!hs.length || (rp && rp.findOne(n => isI(n) && n.name === H && isS(n.parent) && /^(Main content|Side content)$/.test(n.parent.name)))) return out; const set = await figma.importComponentSetByKeyAsync("cc6745d97b3b9e7ac0a149ad577630de096b8bc1");
+for (const h of hs) { const o = cP(h), st = String(((o.Status || o.State || [])[1] || {}).value).toLowerCase(), t = (["ap|Green - Approved", "rej|Red - Rejected", "pend|Yellow - Pending/Warning", "err|Black - Failed Ignored"].find(x => st.startsWith(x.split("|")[0])) || "|Default").split("|")[1];
+const v = set.children.filter(c => c.name.includes("Type=" + t)).sort((a, b) => a.height - b.height)[0]; if (!v) continue; const c = v.createInstance(), par = h.parent; par.insertChild(par.children.indexOf(h), c); try { c.layoutSizingHorizontal = "FILL"; } catch { c.resize(h.width, c.height); }
+let bt = false; for (const [b, [k, x]] of Object.entries(cP(cH(c)))) if (b !== "State" && x.type !== "SLOT" && o[b] && o[b][1].type === x.type) try { cH(c).setProperties({ [k]: o[b][1].value }); if (b === "Buttons") bt = o[b][1].value; } catch {}
+const nh = cH(c), sl = nh.findOne(q => isS(q) && /^Buttons/.test(q.name)), old = cT(h); if (sl && bt) { [...sl.children].forEach(q => q.remove()); h.findAll(q => isI(q) && /^\*Button/.test(q.name) && q.visible).forEach(q => sl.appendChild(q.clone())); }
+for (const x of cT(nh)) { const m = old.filter(q => q.name === x.name); if (!(sl && sl.findOne(q => q.id === x.id)) && m.length === 1 && cT(nh).filter(q => q.name === x.name).length === 1 && m[0].characters !== x.characters) try { await figma.loadFontAsync(x.fontName); x.characters = m[0].characters; } catch {} }
+out.push((o["Card name"] ? o["Card name"][1].value + " → " : "") + t); h.remove(); } return out; }
 async function finishAndAudit(pageId, refId, part) {
   const page = await byId(pageId); let pg = page; while (pg.type !== "PAGE") pg = pg.parent; await pg.loadAsync();   // no setCurrentPageAsync: the finish creates no nodes, and switching re-renders the whole page in the app (~16 s on the big test page)
   let fin = { from: "skipped (part audit)", applied: [], skipped: [] };
 let kh = null; if (part !== "audit") { try { kh = await keepHeader(page) || await refHeader(page, refId); } catch (e) { kh = "keep header: " + e.message; } }
+  let hc; if (part !== "audit") { try { hc = await headerCards(page, refId); } catch (e) { hc = ["error: " + e.message]; } }
   if (part !== "audit") { try { fin = await finishIsland(page, refId); } catch (e) { fin = { from: "error", applied: [], skipped: [e.message] }; } }
   // v3.254: after the header swap, the audit in the same call hits a dead node of the old header (a Figma cache); the copy
 // result comes back with `next`, and the audit runs as its own call.
-if (part === "copy" || (!part && /as in the reference/.test(kh || ""))) return clean({ pageId, part: "copy", header: kh || undefined, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
+if (part === "copy" || (!part && /as in the reference/.test(kh || ""))) return clean({ pageId, part: "copy", header: kh || undefined, cards: hc && hc.length ? hc : undefined, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, next: "call again with part \"audit\"" });
   let orphans; try { orphans = await rebindOrphanVars(page); } catch (e) { orphans = { rebound: 0, missing: ["error: " + e.message] }; }
 let hyg; try { hyg = await tokenHygiene(page); } catch (e) { hyg = { fixed: 0, rawPaints: ["error: " + e.message], rawSpacing: [], sideWhites: [] }; }
   const gridIssues = stretchToWidth(page, !!refId);
@@ -1137,5 +1159,5 @@ if (bottom + 20 > page.height || (rPg && page.height > want + 1)) { try { page.r
   for (const k of s.children.filter(k => k.visible && "findAll" in k && !o.includes(k.name))) { const d = k.findAll(x => x.type !== "TEXT" && !!x.absoluteBoundingBox && x.absoluteBoundingBox.x + x.absoluteBoundingBox.width > sb.x + sb.width + 1).find(x => !inI(x) && sh(x)); if (d) o.push(k.name + " › " + d.name); }   // v3.250: overflow looks inside each block too (Overview #2: a 1377 wrapper in a 1340 column; KYC: a 1376 heading in a 1308 island)
   return o.length ? s.name + ": " + o.join(", ") : null; }).filter(Boolean);
   const items = ms2 ? vis(ms2).map(k => k.name === ICN ? "ISL[" + ((k.findOne(n => isS(n)) || { children: [] }).children.map(q => q.name.slice(0, 24)).join(" + ")) + "]" : "bare:" + k.name.slice(0, 26)) : [];
-  return clean({ pageId, header: kh || undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
+  return clean({ pageId, header: kh || undefined, cards: hc && hc.length ? hc : undefined, size: Math.round(page.width) + "×" + Math.round(page.height), main: items, notIsland, overflow, gridIssues, sideFit: side.fit, sideOverflow: side.inside, narrowFills: narrowFills(page), rawPaints: hyg.rawPaints, rawSpacing: hyg.rawSpacing, sideWhites: hyg.sideWhites, tokens: { fixed: hyg.fixed, by: hyg.by, noToken: hyg.noToken }, sectionFit, vars: { from: fin.from, n: fin.applied.length, skipped: fin.skipped.slice(0, 3) }, orphanVars: orphans });
 }
