@@ -40,6 +40,12 @@ half flow, because then no value in the code corresponds to anything. Everything
 foundation: the moment a value in the code stops corresponding to a value in the
 export, every check in Step 7 becomes guesswork.
 
+**The websdk profile is the exception to this section**: inside the widget the kit lays the
+content out — flex, gap, its own spacing tokens — and the generator writes flow markup into
+the shell's `#content-slot`, never a coordinate; what the frame fixes is the order, the texts
+and each control's state. `references/websdk.md` § The responsive contract has the rules and
+the three breakpoints. The rest of this file holds for both profiles.
+
 One consequence to keep in mind from the start: **everything this method writes
 is an inline style, and an inline style outranks any stylesheet rule.** So a
 state expressed as a class — `:hover`, `.open`, `.sel` — silently loses on every

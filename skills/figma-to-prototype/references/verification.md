@@ -579,6 +579,18 @@ probe-free pass. A DOM height read any other way — a hand-rolled `--dump-dom`
 call — is short by that much, and nothing in the output says so. No measuring page is left in `scripts/`:
 if you find yourself writing one, the answer belongs in `_pix.cjs`.
 
+**The command line's renders run under virtual time** (`--virtual-time-budget` in
+`_chrome.sh`): Chrome advances the page's clock until the budget is spent, so
+every `setTimeout` inside it fires before the shot, while a CSS transition never
+advances. A timed state — a loader that leaves by itself — renders as the state
+after it, and nothing in the PNG says so: run 16's 1440 baselines of its two
+timed states showed the next screen, and only the 375 ones, made through
+`--device`, were right (2026-10-14). `--device` renders in real time;
+`shoot.js … '#state?hold'` and `statecheck.sh --hash '#state?hold'` (or
+`--js 'window.__proto.timers(false)'`) hold a page's timers — the convention in
+`references/interaction-plumbing.md` § Timed transitions; `--no-anim` kills the
+transitions. `shoot.js` warns when a page that sets timers is shot with neither.
+
 Renders run in parallel where there is more than one. `shoot.js` shoots four
 views at a time (`SHOOT_PARALLEL` changes the number) and `scaletest.js` shoots
 its five widths at once, which turns a six-process walk-through into one round.

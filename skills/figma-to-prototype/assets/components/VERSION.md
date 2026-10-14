@@ -188,6 +188,32 @@ plate. A vertical group stacks items 8px apart
 | selected | fill `#030712` (hover `#1e2939`, active `#364153`); radio adds an 8px white dot |
 | disabled | bg `#f3f4f6`, 1px `#d1d5dc`, text `#4a5565`; selected + disabled fills `#e5e7eb` |
 
+## Checkbox — `SnsCheckbox`
+
+Story `forms-snscheckbox--playground` and the group story; `storybook.json` watches the mark box
+(16×16, radius 4, `#fff`). The row is the radio's: the mark 16, 4px down so it centres on the first
+14/24 line, the label 8px to its right `#1e2939`, a caption under it `#4a5565`, `titleIcon` a 16px
+`#6a7282` glyph 4px after the label. The tick is 12 in the 16 box (2px in on each side), the
+indeterminate bar a 10px stroke of 1.5 drawn in the full 16 box, both white Figma exports.
+
+| state | `checkbox({…})` | mark | `aria-checked` |
+|---|---|---|---|
+| unchecked | — | bg `#fff`, 1px inset `#d1d5dc`; hover 1px `#b4bac4` on `#f9fafb`, pressed 1px `#99a1af` on `#f3f4f6` | `false` |
+| checked | `checked: true` | fill `#030712`, no border (hover `#1e2939`, pressed `#364153`), the tick (`icons/checkmark.svg`) | `true` |
+| indeterminate | `indeterminate: true` | the checked plate with the minus bar (`icons/indeterminate.svg`) instead of the tick | `mixed` |
+| disabled | `disabled: true` | bg `#f3f4f6`, 1px `#d1d5dc`, label `#4a5565`, no hover; checked or indeterminate and disabled: fill `#e5e7eb` | as its state, plus `aria-disabled`, out of the tab order |
+
+**What `script` does.** A click, or Space or Enter on the focused box, toggles `c-cb-on` and
+`aria-checked`; an indeterminate box becomes checked, as a browser's does; a disabled one does
+nothing. Both glyphs are always in the markup and the class picks one, so a page changes a box's
+state with classes alone (`c-cb-on`, `c-cb-ind`) and needs no icon at run time.
+
+**A parent over its children is the page's.** The library has no tri-state group: the page renders
+the parent with the state the frame draws, and after every click derives it — every child on is
+checked, some is `c-cb-on c-cb-ind` and `mixed`, none is unchecked — while a click on the parent (the
+script has already toggled it) sets every child to the parent's state. Run 18's two parents over
+nine warning types took a dozen lines of `gen.js`.
+
 ## Select — `SnsSelect`
 
 The product builds the trigger out of the **input box** plus a chevron, so `select()` reuses `input()`'s

@@ -1,0 +1,536 @@
+{
+  "note": "What scripts/dscheck.js --spec <this file> reads out of the WebSDK kit's live Storybook and compares with this record: the values controls.js and VERSION.md depend on. Selectors are the kit's stable hooks (data-testid, data-variant, role, the plain classes), never the build's hashed module classes. Hover, focus and anything behind a click cannot be read here and stay a human look (Step 7).",
+  "upstream": "storybook-websdk-uikit.dev.euc1.sumsub.net",
+  "taken": "2026-10-08",
+  "waitMs": 20000,
+  "frame": "1000x600",
+  "batch": 3,
+  "varsStory": "components-sdkbutton--primary",
+  "varsRoot": "body",
+  "components": [
+    {
+      "component": "header",
+      "checks": [
+        {
+          "what": "bar",
+          "story": "components-sdkheader--default",
+          "sel": "header[data-testid=sdk-header]",
+          "expect": {
+            "h": "68",
+            "maxWidth": "718px",
+            "paddingLeft": "4px"
+          }
+        },
+        {
+          "what": "back button",
+          "story": "components-sdkheader--default",
+          "sel": "header[data-testid=sdk-header] button[data-icon-only]",
+          "expect": {
+            "w": "44",
+            "h": "44",
+            "borderRadius": "32px"
+          }
+        },
+        {
+          "what": "step ring box",
+          "story": "components-sdkheader--default",
+          "sel": "[role=progressbar]",
+          "expect": {
+            "w": "44",
+            "h": "44"
+          }
+        }
+      ]
+    },
+    {
+      "component": "button",
+      "checks": [
+        {
+          "what": "primary",
+          "story": "components-sdkbutton--primary",
+          "sel": "button[data-variant=primary]",
+          "expect": {
+            "h": "48",
+            "backgroundColor": "rgb(32, 37, 44)",
+            "color": "rgb(255, 255, 255)",
+            "borderRadius": "32px",
+            "fontSize": "16px",
+            "fontWeight": "600",
+            "fontFamily": "Manrope, sans-serif",
+            "paddingLeft": "16px"
+          }
+        },
+        {
+          "what": "secondary",
+          "story": "components-sdkbutton--secondary",
+          "sel": "button[data-variant=secondary]",
+          "expect": {
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(32, 37, 44)",
+            "borderWidth": "1px",
+            "borderColor": "rgba(32, 37, 44, 0.3)"
+          }
+        },
+        {
+          "what": "plain",
+          "story": "components-sdkbutton--plain",
+          "sel": "button[data-variant=plain]",
+          "expect": {
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(32, 37, 44)"
+          }
+        },
+        {
+          "what": "link",
+          "story": "components-sdkbutton--link",
+          "sel": "[data-variant=link]",
+          "expect": {
+            "color": "rgb(20, 60, 255)",
+            "fontWeight": "500",
+            "textDecorationLine": "none"
+          }
+        },
+        {
+          "what": "topbar",
+          "story": "components-sdkbutton--topbar",
+          "sel": "button[data-variant=topbar]",
+          "expect": {
+            "h": "44",
+            "borderRadius": "32px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "borderColor": "rgba(32, 37, 44, 0.3)"
+          }
+        },
+        {
+          "what": "topbar disabled",
+          "story": "components-sdkbutton--topbar",
+          "sel": "button[data-variant=topbar][disabled]",
+          "expect": {
+            "opacity": "1",
+            "color": "rgba(32, 37, 44, 0.6)"
+          }
+        },
+        {
+          "what": "small",
+          "story": "components-sdkbutton--small",
+          "sel": "button[data-variant=primary]",
+          "expect": {
+            "h": "32",
+            "fontSize": "16px"
+          }
+        },
+        {
+          "what": "icon-only",
+          "story": "components-sdkbutton--icon-only",
+          "sel": "button[data-icon-only]",
+          "expect": {
+            "w": "48",
+            "h": "48"
+          }
+        }
+      ]
+    },
+    {
+      "component": "inputField",
+      "checks": [
+        {
+          "what": "box",
+          "story": "components-sdkfield-sdkinputfield--default",
+          "sel": "div:has(> input[type=text])",
+          "expect": {
+            "h": "44",
+            "borderRadius": "12px",
+            "borderWidth": "1px",
+            "borderColor": "rgba(32, 37, 44, 0.3)",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        },
+        {
+          "what": "input",
+          "story": "components-sdkfield-sdkinputfield--default",
+          "sel": "input[type=text]",
+          "expect": {
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontFamily": "Manrope, sans-serif",
+            "color": "rgb(32, 37, 44)"
+          }
+        },
+        {
+          "what": "label",
+          "story": "components-sdkfield-sdkinputfield--default",
+          "sel": "label",
+          "expect": {
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontWeight": "500",
+            "color": "rgb(32, 37, 44)"
+          }
+        },
+        {
+          "what": "required mark",
+          "story": "components-sdkfield-sdkinputfield--required",
+          "sel": "label span span",
+          "expect": {
+            "color": "rgb(209, 36, 36)"
+          }
+        },
+        {
+          "what": "error box",
+          "story": "components-sdkfield-sdkinputfield--with-error",
+          "sel": "div:has(> input[aria-invalid=true])",
+          "expect": {
+            "borderColor": "rgb(209, 36, 36)"
+          }
+        },
+        {
+          "what": "error text",
+          "story": "components-sdkfield-sdkinputfield--with-error",
+          "sel": "[role=alert] li",
+          "expect": {
+            "color": "rgb(209, 36, 36)",
+            "fontSize": "14px",
+            "lineHeight": "20px"
+          }
+        },
+        {
+          "what": "disabled box",
+          "story": "components-sdkfield-sdkinputfield--disabled",
+          "sel": "div:has(> input[disabled])",
+          "expect": {
+            "backgroundColor": "rgba(32, 37, 44, 0.05)",
+            "borderColor": "rgba(32, 37, 44, 0.1)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "selectField",
+      "checks": [
+        {
+          "what": "native select",
+          "story": "components-sdkfield-sdkselectfield--default",
+          "sel": "select.sdk-select-native",
+          "expect": {
+            "h": "44",
+            "borderRadius": "12px",
+            "borderColor": "rgba(32, 37, 44, 0.3)",
+            "fontSize": "16px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "textareaField",
+      "checks": [
+        {
+          "what": "textarea",
+          "story": "components-sdkfield-sdktextareafield--default",
+          "sel": "textarea.SdkTextarea__input",
+          "expect": {
+            "borderRadius": "12px",
+            "borderColor": "rgba(32, 37, 44, 0.3)",
+            "fontSize": "16px",
+            "paddingLeft": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "checkbox",
+      "checks": [
+        {
+          "what": "box",
+          "story": "components-sdkinput-checkbox-sdkcheckboxcommon--default",
+          "sel": ".sdk-checkbox",
+          "expect": {
+            "w": "24",
+            "h": "24",
+            "borderRadius": "8px",
+            "borderColor": "rgba(32, 37, 44, 0.3)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "radio",
+      "checks": [
+        {
+          "what": "row",
+          "story": "components-sdkinput-radio-sdkinputradio--default",
+          "sel": "label.RadioCheckContainer",
+          "expect": {
+            "h": "44",
+            "borderRadius": "12px",
+            "borderColor": "rgba(32, 37, 44, 0.3)",
+            "paddingLeft": "12px"
+          }
+        },
+        {
+          "what": "active row",
+          "story": "components-sdkinput-radio-sdkinputradio--active",
+          "sel": "label.RadioCheckContainer",
+          "expect": {
+            "borderColor": "rgba(32, 37, 44, 0.3)"
+          }
+        },
+        {
+          "what": "radio",
+          "story": "components-sdkinput-radio-sdkinputradio--default",
+          "sel": ".sdk-radio",
+          "expect": {
+            "w": "24",
+            "h": "24"
+          }
+        }
+      ]
+    },
+    {
+      "component": "toggle",
+      "checks": [
+        {
+          "what": "switch",
+          "story": "components-sdktoggle--default",
+          "sel": "[role=switch]",
+          "expect": {
+            "w": "34",
+            "h": "20",
+            "borderRadius": "9999px",
+            "backgroundColor": "rgba(32, 37, 44, 0.6)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "tag",
+      "checks": [
+        {
+          "what": "default",
+          "story": "components-sdktag--default",
+          "sel": ".SdkTag",
+          "expect": {
+            "h": "26",
+            "borderRadius": "8px",
+            "fontSize": "14px",
+            "backgroundColor": "rgba(32, 37, 44, 0.1)",
+            "color": "rgb(32, 37, 44)"
+          }
+        },
+        {
+          "what": "success",
+          "story": "components-sdktag--success",
+          "sel": ".SdkTag",
+          "expect": {
+            "backgroundColor": "rgba(0, 139, 94, 0.1)",
+            "color": "rgb(7, 79, 61)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "alert",
+      "checks": [
+        {
+          "what": "warning",
+          "story": "components-sdkalert--warning-with-title",
+          "sel": "[role=alert][data-type=warning]",
+          "expect": {
+            "borderRadius": "16px",
+            "backgroundColor": "rgba(191, 131, 0, 0.1)",
+            "padding": "12px"
+          }
+        },
+        {
+          "what": "error",
+          "story": "components-sdkalert--error-with-title",
+          "sel": "[role=alert][data-type=error]",
+          "expect": {
+            "backgroundColor": "rgba(209, 36, 36, 0.1)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "iconBlock",
+      "checks": [
+        {
+          "what": "medium",
+          "story": "components-sdkiconblock--default",
+          "sel": "#storybook-root > div",
+          "expect": {
+            "w": "48",
+            "h": "48",
+            "borderRadius": "12px",
+            "backgroundColor": "rgb(236, 237, 242)"
+          }
+        },
+        {
+          "what": "extra small",
+          "story": "components-sdkiconblock--extra-small",
+          "sel": "#storybook-root > div",
+          "expect": {
+            "w": "32",
+            "h": "32"
+          }
+        }
+      ]
+    },
+    {
+      "component": "logoBlock",
+      "checks": [
+        {
+          "what": "medium",
+          "story": "components-sdklogoblock--default",
+          "sel": "#storybook-root > span",
+          "expect": {
+            "w": "48",
+            "h": "48",
+            "borderRadius": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "text",
+      "checks": [
+        {
+          "what": "page title",
+          "story": "components-sdkpagetitle--default",
+          "sel": "#storybook-root h1",
+          "expect": {
+            "fontSize": "24px",
+            "lineHeight": "32px",
+            "fontWeight": "600",
+            "fontFamily": "Manrope, sans-serif",
+            "color": "rgb(32, 37, 44)"
+          }
+        },
+        {
+          "what": "body",
+          "story": "components-sdktext--default",
+          "sel": "#storybook-root > div",
+          "expect": {
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontWeight": "500"
+          }
+        }
+      ]
+    },
+    {
+      "component": "content",
+      "checks": [
+        {
+          "what": "section",
+          "story": "components-sdkcontent--default",
+          "sel": "[data-testid=sdk-content]",
+          "expect": {
+            "paddingTop": "24px",
+            "paddingLeft": "16px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "footer",
+      "checks": [
+        {
+          "what": "footer",
+          "story": "components-sdkfooter--default",
+          "sel": "[data-testid=sdk-footer]",
+          "expect": {
+            "padding": "8px 16px 16px",
+            "borderTopLeftRadius": "32px",
+            "backdropFilter": "blur(13px)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "container",
+      "checks": [
+        {
+          "what": "widget",
+          "story": "components-sdkbasecontainer--full-layout",
+          "sel": "#sdk-base-container",
+          "expect": {
+            "maxWidth": "718px",
+            "borderRadius": "32px",
+            "backgroundColor": "rgb(255, 255, 255)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "card",
+      "checks": [
+        {
+          "what": "card",
+          "story": "components-sdkcard--default",
+          "sel": "article",
+          "expect": {
+            "borderRadius": "16px",
+            "backgroundColor": "rgb(236, 237, 242)"
+          }
+        }
+      ]
+    },
+    {
+      "component": "choiceList",
+      "checks": [
+        {
+          "what": "item",
+          "story": "components-sdkchoicelist--default",
+          "sel": "button[aria-label]",
+          "expect": {
+            "h": "60",
+            "borderRadius": "12px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "loader",
+      "checks": [
+        {
+          "what": "ring",
+          "story": "components-sdkloader--default",
+          "sel": "svg.spin",
+          "expect": {
+            "width": "24px",
+            "height": "24px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "modal",
+      "checks": [
+        {
+          "what": "dialog",
+          "story": "components-sdkmodal--default",
+          "click": "#storybook-root button",
+          "sel": "[role=dialog]",
+          "expect": {
+            "borderRadius": "28px",
+            "maxWidth": "726px"
+          }
+        }
+      ]
+    },
+    {
+      "component": "bottomSheet",
+      "checks": [
+        {
+          "what": "sheet",
+          "story": "components-sdkbottomsheet--default",
+          "click": "#storybook-root button",
+          "sel": "[role=dialog]",
+          "expect": {
+            "borderTopLeftRadius": "28px"
+          }
+        }
+      ]
+    }
+  ]
+}

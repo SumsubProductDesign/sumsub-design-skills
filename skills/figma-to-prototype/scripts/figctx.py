@@ -17,7 +17,9 @@ nothing else:
   --texts        every text string of the context, one per line, in order, each once — the file
                  `statecheck.sh --texts` checks the built page against. A design context is pulled
                  for live zones only, so every string in it must be on the page; a baked zone has
-                 none to check, and its text is the plate's
+                 none to check, and its text is the plate's. A context with no text node at all — only
+                 SVG groups, an empty wrapper — prints "no text in this context" and exits 1, rather
+                 than an empty answer that reads like a list of nothing (2026-10-12, a modal's QR part)
   --grep REGEX   only lines matching (plus their assets)
 
 Two checks run on every call, because both bit a real run (2026-09-28) and neither shows in the outline:
@@ -66,6 +68,11 @@ if '--texts' in args:
         t = re.sub(r'\s+', ' ', html.unescape(raw).replace('\u00a0', ' ')).strip()
         if t and t not in seen:
             seen.add(t); out.append(t)
+    if not out:
+        print('no text in this context: no text node in it (only shapes or empty wrappers) — the texts are '
+              'elsewhere in the tree or only in the render; references/figma-mcp.md § A modal instance whose '
+              'texts the MCP never returns')
+        sys.exit(1)
     print('\n'.join(out)); sys.exit(0)
 if assets_dir:
     # The file is named after the const, and const names are unique only INSIDE one design

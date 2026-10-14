@@ -12,10 +12,10 @@ argument-hint: "[figma-url or what to add to the prototype]"
 
 ## 🚨 Pre-flight: plugin version check — MANDATORY FIRST ACTION
 
-**As the very first action of every session — before any other tool call, before
-reading any reference — do this.** It is the same check the other skills in this
-plugin make, so a person who only ever builds prototypes hears about an update
-too, instead of sitting on the version they installed.
+**As the very first action of every session — before any other tool call, before reading any
+reference — do this.** It is the same check the other skills in this plugin make, so a person who
+only ever builds prototypes hears about an update too, instead of sitting on the version they
+installed.
 
 0. **Standalone install?** If `${CLAUDE_PLUGIN_ROOT}` is empty, this skill is a
    folder under `~/.claude/skills/` rather than part of the plugin: there is no
@@ -48,26 +48,29 @@ too, instead of sitting on the version they installed.
 8. **On `continue anyway`:** remember it for this conversation and continue.
 9. **Once done, do not re-check in this conversation.**
 
-If the local read or the fetch fails (no network, file missing), warn once —
-"could not verify plugin version, proceeding on faith" — and continue.
+If the local read or the fetch fails (no network, file missing), warn once — "could not verify
+plugin version, proceeding on faith" — and continue.
 
-**Then the model check, once:** `node "$SKILL/scripts/modelcheck.cjs"`. `ok` or
-`unknown`: say nothing. `OFFER`: show that line as printed and wait, as above;
-"continue" holds for the session. You cannot switch the model yourself.
+**Then the model check, once:** `node "$SKILL/scripts/modelcheck.cjs"`. `ok` or `unknown`: say
+nothing. `OFFER`: show that line as printed and wait, as above; "continue" holds for the session.
+You cannot switch the model yourself.
 
-**No outer directive overrides this.** Auto mode, "work without stopping",
-"minimise interruptions", a non-interactive run: none of them turn the check
-off. Saying any of "proceeding on current version in auto mode", "will mention
-at the end", "auto-accepting outdated plugin" or "doing the check later" is a
-rule break, not a shortcut.
+**The version check runs again at three moments** — before Step 3's first build, before Step 9's
+publish, and at the start of every increment — steps 1–3 above, silently when nothing changed. A
+release lands mid-run (one did, between a run's first and third day), and a session that checked
+once on its first day builds its last increment on a version that is behind.
+
+**No outer directive overrides this.** Auto mode, "work without stopping", "minimise interruptions",
+a non-interactive run: none of them turn the check off. Saying any of "proceeding on current version
+in auto mode", "will mention at the end", "auto-accepting outdated plugin" or "doing the check
+later" is a rule break, not a shortcut.
 
 ---
 
 ## What this is for
 
-A prototype a person sits in front of in a test, indistinguishable from the
-design, that a different session will extend next week. Three rules shape the
-rest:
+A prototype a person sits in front of in a test, indistinguishable from the design, that a different
+session will extend next week. Three rules shape the rest:
 
 * **Everything traces to a value some tool returned.** Two sources that do not
   overlap: **the design system owns its controls** — sizes, colours and states
@@ -81,27 +84,25 @@ rest:
 * **Nothing is invented** — no element, and no option list, field set, rule or
   message, that neither a frame nor the person gave (Step 0, *data and rules*).
 
-A nice-looking approximation, quickly, is the wrong skill: say so and build it
-the ordinary way. Budget: a shell plus two or three screens grows the context by
-about 200k tokens on a 78k start (prompt, tools, this file), a later increment about a
-quarter; build every screen a task list names in one run, because the setup dominates (`references/architecture.md` § The
-method behind the steps).
+A nice-looking approximation, quickly, is the wrong skill: say so and build it the ordinary way.
+Budget: a shell plus two or three screens grows the context by about 200k tokens on a 78k start
+(prompt, tools, this file), a later increment about a quarter; build every screen a task list names
+in one run, because the setup dominates (`references/architecture.md` § The method behind the
+steps).
 
 ## Before you start
 
-**Required:** a Chromium browser 112+ (found automatically, or `export CHROME=…`),
-Node 18+, `curl`. **Optional**, each closing one named part: Python 3 (the
-export path and `figctx.py` / `figmeta.py`), a Vercel account (Step 9). And the
-Figma MCP server, **authorised**, on a **Dev or Full seat** — a View or Collab
-seat or a Starter plan gets 6 tool calls a month and a build takes 20–70
-(`references/figma-mcp.md` § The call budget is the seat's, and a View seat has
-six a month); access to the file; the design's fonts reachable by a page.
-`doctor.sh` prints the same split with the line that fixes each miss
-(`references/tools.md` § Before you start, in full).
+**Required:** a Chromium browser 112+ (found automatically, or `export CHROME=…`), Node 18+, `curl`.
+**Optional**, each closing one named part: Python 3 (the export path and `figctx.py` /
+`figmeta.py`), a Vercel account (Step 9). And the Figma MCP server, **authorised**, on a **Dev or
+Full seat** — a View or Collab seat or a Starter plan gets 6 tool calls a month and a build takes
+20–70 (`references/figma-mcp.md` § The call budget is the seat's, and a View seat has six a month);
+access to the file; the design's fonts reachable by a page. `doctor.sh` prints the same split with
+the line that fixes each miss (`references/tools.md` § Before you start, in full).
 
-**`$SKILL` is this folder**, and no file in the skill spells it out: in the `sumsub-design`
-plugin it is `${CLAUDE_PLUGIN_ROOT}/skills/figma-to-prototype`, a versioned directory that
-changes on every update; standalone, a folder under `~/.claude/skills/`. Export it once per session:
+**`$SKILL` is this folder**, and no file in the skill spells it out: in the `sumsub-design` plugin
+it is `${CLAUDE_PLUGIN_ROOT}/skills/figma-to-prototype`, a versioned directory that changes on every
+update; standalone, a folder under `~/.claude/skills/`. Export it once per session:
 
 ```bash
 export SKILL=<the folder this SKILL.md is in>     # packaged: ${CLAUDE_PLUGIN_ROOT}/skills/<name>
@@ -112,8 +113,8 @@ export SKILL=<the folder this SKILL.md is in>     # packaged: ${CLAUDE_PLUGIN_RO
 > here needs it, the export and the work share a call. Credentials for publishing: `npx vercel login`,
 > once, by the person; a non-interactive one only through **`auth-core`** (`references/publishing.md` § Authentication).
 
-**Project layout** — one folder per prototype; the skill's scripts are run from
-where they live, not copied:
+**Project layout** — one folder per prototype; the skill's scripts are run from where they live, not
+copied:
 
 ```
 <project>/
@@ -129,16 +130,17 @@ where they live, not copied:
 ## Two ways in
 
 **Primary: the Figma MCP server**; **secondary: SVG exports** the designer sends when MCP is
-unavailable (`references/reading-exports.md`). A server listed but not callable is not authorised: say so and ask for exports.
+unavailable (`references/reading-exports.md`). A server listed but not callable is not authorised:
+say so and ask for exports.
 
 ## The run, as a checklist
 
-Copy this into the first reply of a build and tick it as the run goes; an
-unticked line at the end is the line the final message names.
+Copy this into the first reply of a build and tick it as the run goes; an unticked line at the end
+is the line the final message names.
 
 ```
 Prototype run:
-- [ ] 0  doctor.sh ready · purpose and tasks asked · parameters, data and rules, behaviour in words — forms, defaults as one chat line · run log opened
+- [ ] 0  doctor.sh ready · profile read from the frames · purpose and tasks asked · parameters, data and rules, behaviour in words — forms, defaults as one chat line · run log opened
 - [ ] 1  live set named: interactive / entrances / scenery, each task mapped to a control
 - [ ] 2  shell gate run · metadata per frame · design context per live zone · figctx.py: no UNDEFINED, no NAME MISMATCH
 - [ ] 3  gen.js from the skeleton · same hash on two builds
@@ -152,26 +154,24 @@ Prototype run:
 
 ## Step 0 — ask, then fix the brief
 
-**Run `"$SKILL/scripts/doctor.sh"` first, before the two questions.** `ready.`
-or `ready — with the warnings above`: carry on, naming the closed parts when
-they come up. Anything else: **stop, say what is missing in one sentence, and offer to run
-the install line it printed** — "Node is missing — shall I run `brew install
-node`?" — and run it only on a yes. Never install unasked, never type a password
-(hand a `sudo` line back), never work around the miss.
+**Run `"$SKILL/scripts/doctor.sh"` first, before the two questions.** `ready.` or `ready — with the
+warnings above`: carry on, naming the closed parts when they come up. Anything else: **stop, say
+what is missing in one sentence, and offer to run
+the install line it printed** — "Node is missing — shall I run `brew install node`?" — and run it
+only on a yes. Never install unasked, never type a password (hand a `sudo` line back), never work
+around the miss.
 
-**Ask two questions before any Figma call**; they decide what gets built. The
-parameter table comes after `get_metadata` — the frames answer half of it — and
-before any `get_design_context` or export.
+**Ask two questions before any Figma call**; they decide what gets built. The parameter table comes
+after `get_metadata` — the frames answer half of it — and before any `get_design_context` or export.
 
-**Every question goes through the `AskUserQuestion` tool, never as text**: the
-person picks an option instead of writing a reply. 2–4 options each, the
-recommended one first, marked "(Recommended)". The tool adds "Other" for free
-text, so no option of yours may only point at it ("another — type it in Other").
-**A parameter with a written default is not a question**: the defaults in force
-go to the chat as one line ("default shell, standard hovers, one file") and a
-form holds only what no frame answers, no default settles and the brief has not
-said (a brief naming the purpose gets its reading back in a line, not a form): the
-canvas, the data, the behaviour in words, an entrance outside the task. Never offer to bake what holds state (Step 5).
+**Every question goes through the `AskUserQuestion` tool, never as text**: the person picks an
+option instead of writing a reply. 2–4 options each, the recommended one first, marked
+"(Recommended)". The tool adds "Other" for free text, so no option of yours may only point at it
+("another — type it in Other"). **A parameter with a written default is not a question**: the
+defaults in force go to the chat as one line ("default shell, standard hovers, one file") and a form
+holds only what no frame answers, no default settles and the brief has not said (a brief naming the
+purpose gets its reading back in a line, not a form): the canvas, the data, the behaviour in words,
+an entrance outside the task. Never offer to bake what holds state (Step 5).
 
 **1. What is this prototype for?** Five options; the answer decides what has to be live:
 
@@ -183,14 +183,13 @@ canvas, the data, the behaviour in words, an entrance outside the task. Never of
 | **Unmoderated test (Wynde, Maze, Lyssna)** | the interview's build plus what the absence of a moderator demands: one tab only, the test bar and the outcome screen from `assets/templates/test-scaffold.js` in the first build, shortcuts in words, no codes to copy, a rehearsal through the platform. `references/unmoderated.md` before Step 1 |
 | **Viewer over real data** | not this skill — build it as an ordinary small tool, without the pixel rules, the ledger or the threshold |
 
-**2. What will the respondent be asked to do with their hands?** The task list,
-in plain prose, three to six lines; tasks are coarse on purpose and name no
-controls — deriving the controls is Step 1. No task list (a demo, a handover):
-say the live set will be your judgment, name what you chose, carry on.
-`references/research-prototypes.md` §1–§2 has the reasoning behind both.
+**2. What will the respondent be asked to do with their hands?** The task list, in plain prose,
+three to six lines; tasks are coarse on purpose and name no controls — deriving the controls is Step
+1. No task list (a demo, a handover): say the live set will be your judgment, name what you chose,
+carry on. `references/research-prototypes.md` §1–§2 has the reasoning behind both.
 
-When you offer options, **recommend the one closest to the mockup and cheapest
-to build**; "as the real product does it" is the alternative you name, not the default.
+When you offer options, **recommend the one closest to the mockup and cheapest to build**; "as the
+real product does it" is the alternative you name, not the default.
 
 ### The eight rules
 
@@ -225,24 +224,25 @@ Then settle the parameters — each of these blocked a real run when left open
 |---|---|
 | purpose and tasks | the two questions above |
 | frames | link or `file-key` + node id **per screen** — a frame's link, never a section's or a page's (`references/figma-mcp.md`) |
-| **canvas** | **Default: fixed, the frame's exact size.** Alternatives, each named with its cost: *scale-only* (cap 1.5), *fluid shell, pinned content* (forms, drawers, canvases), and when the respondents' screens are narrower than the frame the content itself follows — *elastic form* (`fluid-page.js`) or *elastic content* (`list-table.js`), from the template, checked by `fluidcheck.sh`. **Offer the elastic mode whenever the frame is wider than the screens the test runs on.** `references/shell.md` § Content in a fluid shell |
+| **canvas** | **Default: fixed, the frame's exact size.** **A frame wider than the screens the test runs on gets the elastic mode as the first alternative** — *elastic form* (`fluid-page.js`) or *elastic content* (`list-table.js`), from the template, checked by `fluidcheck.sh` — because screens narrower than 1440 exist and pinned content scrolls sideways below the content's width plus the shell's; *fluid shell, pinned content* (forms, drawers, canvases) only beside it, with that cost named. The others, each with its cost: *scale-only* (cap 1.5); *responsive* — the websdk profile's default and its only mode: the page follows the window, the widget the page, as the SDK does. `references/shell.md` § Content in a fluid shell |
 | **frame width** | **1440 is the working width.** A 1920 frame gets a warning in the first message: respondents' screens are 1440 or narrower, so 1920 scrolls sideways or scales to 0.75 (14px text becomes 10.5). Ask for the 1440 frame; if only 1920 exists the user chooses knowingly |
 | one file or a folder | decides whether baked plates may be used freely |
+| **profile** | **Dashboard or WebSDK, read from the frames before any question**: a `Widget` root, a `Toolbar / Top Bar`, a WebSDK file key → websdk, where the shell is the widget, the controls `websdk/controls.js`, the canvas *responsive* and the checks at 1440 / 744 / 375; a sidebar and an island → dashboard. Said in the defaults line; a form only when neither clue is there (`references/websdk.md` § The profile, and how it is decided) |
 | **shell** (sidebar, island, header) | **Default: the dashboard shell** from `assets/shell/dashboard/`; the frame's own chrome only when the test is about the navigation or the design changes it on purpose. Settle its state: active item, client name, title. A gate miss is *older*, *newer than `shell.js`* or *on purpose*, and only *older* is decided without asking — `references/shell.md` § The gate, in Step 2. *The frame's chrome* is one config line, a baked sidebar: `"sidebar": {"plate", "width"}` |
 | **entrances outside the task** (left menu, tabs, header) | **Default: the shell's hover on** — it ships with the shell at no cost. A plain picture only when the user asks for it |
 | **hover policy** | the policy in `references/interaction-plumbing.md` § Hover policy, confirmed or amended in this message, not mid-build; it applies inside the tested area, and there inertness is only nothing happening beyond the control's own state |
 | **live controls** | **Default: on** — radios, checkboxes, fields and menus carry their own state (rule 4). Off only for a screen that must be a picture; say so in the handoff |
 | **accuracy threshold** | two numbers: against a frame of the components' generation, a percentage (≤3% per frame, ≤2% per text-free zone); against an older frame the gates instead (`shellgate.sh` landmarks, `blockgate.sh` residuals ≤1px) and one ledger line per difference. Say which is in force before the first build. A logic demo may trade pixel strictness for every row of `_work/rules.json` passing |
 | fonts | which families; confirm they exist before promising fidelity |
-| **data and rules the frames do not show** | **Default: ask, never fill in.** List every value the tasks need that no frame draws — a select's other options, the field set after a change, the rule behind a computed value, a limit, a message — in the same message, each with where it goes. Three answers: *given* (data in `gen.js` verbatim; a rule as a table, the same rows in `_work/rules.json`), *take it from X* (read it, do not paraphrase), *make it up* (a `placeholder` ledger line and a row in the handoff's § Placeholders). Holds for every later round |
-| **behaviour the brief names but no frame draws** | a hover zoom, a drag, "the label follows the input". **Default: describe it in one line before building it** — trigger, what appears, where, how big, what ends it — and ask for a reference. Build on a yes; built from the words alone it is a ledger line. Holds for every later round |
+| **data and rules the frames do not show** | **Default: ask, never fill in.** List every value the tasks need that no frame draws — a select's other options, the field set after a change, the rule behind a computed value, a limit, a message — in the same message, each with where it goes. Three answers: *given* (data in `gen.js` verbatim; a rule as a table, the same rows in `_work/rules.json`), *take it from X* (read it, do not paraphrase), *make it up* (a `placeholder` ledger line and a row in the handoff's § Placeholders). **Unfilled content** on the task path or the first screen — identical rows, a component's default text, Lorem ipsum — is one question per place: what the frame draws, then *verbatim* (*source*; the default for a test with respondents), *proposed* (the agent's values from the flow, written into the option; *placeholder*; recommended for every demo — "the flow only walks this one step" is not a reason against it: the demo opens on that list, and three identical rows read as broken) or *given*. Never replaced silently (`references/figma-mcp.md` § A mockup can be unfilled). Holds for every later round |
+| **behaviour the brief names but no frame draws** | a hover zoom, a drag, "the label follows the input". **Default: describe it in one line before building it** — trigger, what appears, where, how big, what ends it — and ask for a reference. Build on a yes; built from the words alone it is a ledger line. **A loading state** the frames draw (the kit's ring or dots, a state named Loading / Uploading / Processing) has no drawn exit, so the form asks once how it ends: *timer and tap* (recommended for a demo — it advances by itself after 2 s and on a tap, so the presenter never waits), *timer only* (recommended for a usability test — a tap on a loader is behaviour the product does not have), *tap only*. **Only a state that draws a loader**: every other button-less transition on the task path — a viewfinder that frames the document, a shutter, a sheet that closes — is by tap, said in the defaults line, no question. The seconds are a placeholder (the real ones are the network's): a row in the handoff's § Placeholders; the timer itself per `references/interaction-plumbing.md` § Timed transitions. Holds for every later round |
 
 ### Open the run log now, not in Step 8
 
-As soon as the answers are in, copy `assets/run-log-template.md` to
-`_work/run-log.md` and fill §1 and §2 — what was asked, and for each parameter
-whether you asked or decided. The person does not create it and does not have to
-remember it. From here on it is written at fixed moments, not at the end:
+As soon as the answers are in, copy `assets/run-log-template.md` to `_work/run-log.md` (its prose
+deleted, as its first line says) and fill §1 and §2 — what was asked, and for each parameter whether
+you asked or decided. The person does not create it and does not have to remember it. From here on it is written at fixed moments, not at the
+end:
 
 | when | what goes in |
 |---|---|
@@ -254,35 +254,34 @@ remember it. From here on it is written at fixed moments, not at the end:
 
 ## Step 1 — derive the live set from the tasks
 
-The question is **"where could a task lead"**, not "what changes on this
-screen". Write every plausible path for each task and sort what you find into
-three tiers: **every entrance is live** (a menu item, tab or button leading
-anywhere a task could go), **every destination shows its real content**
-(baked, Step 5), **interactive only where a task is answered**. A dead entrance
-inside the tested area is a defect; for every task, name the control that
-answers it and confirm it is in the interactive tier. Everything else is
-scenery and is baked. Anything live beyond the three tiers is its own yes/no
-question to the user, with its cost — default no, never folded into a plan
-table. Before extracting a frame you have not seen, zone-diff its shared areas
-against the screens already built and ask which is canonical where they differ.
-`references/research-prototypes.md` § Step 1 in full — derive the live set from
-the tasks, and §3 for the tiers with their costs.
+The question is **"where could a task lead"**, not "what changes on this screen". Write every
+plausible path for each task and sort what you find into three tiers: **every entrance is live** (a
+menu item, tab or button leading anywhere a task could go), **every destination shows its real
+content** (baked, Step 5), **interactive only where a task is answered**. A dead entrance inside the
+tested area is a defect; for every task, name the control that answers it and confirm it is in the
+interactive tier. Everything else is scenery and is baked. Anything live beyond the three tiers is
+its own yes/no question to the user, with its cost — default no, never folded into a plan table.
+Before extracting a frame you have not seen, zone-diff its shared areas against the screens already
+built and ask which is canonical where they differ. `references/research-prototypes.md` § Step 1 in
+full — derive the live set from the tasks, and §3 for the tiers with their costs.
 
 ## Step 2 — extract from Figma
 
-**Split the frame before reading anything:** the **shell** (never extracted:
-`shell.js` and its gate), **controls the design system ships** (not extracted:
-`controls.js` has their geometry and states, `data-name` is the key —
-`assets/components/VERSION.md` — and the frame gives only text, width, state
-and icons), and **everything else**, which is what the order below is for.
+**Split the frame before reading anything:** the **shell** (never extracted: `shell.js` and its
+gate), **controls the design system ships** (not extracted: `controls.js` has their geometry and
+states, `data-name` is the key — `assets/components/VERSION.md` — and the frame gives only text,
+width, state and icons), and **everything else**, which is what the order below is for. In the
+websdk profile the shell is the widget (`websdk-shell.js`, `websdkgate.sh`, one frame per width) and
+the controls are `websdk/controls.js` (`references/websdk.md` § Step 2 in the websdk profile — the
+widget gate and the frames).
 
-**The shell gate comes first:** the frame's screenshot for the shell's state,
-`_work/shell.json`, `scripts/shellgate.sh` against the frame's render — one
-call, one ledger line (`references/shell.md` § The gate, in Step 2).
+**The shell gate comes first:** the frame's screenshot for the shell's state, `_work/shell.json`,
+`scripts/shellgate.sh` against the frame's render — one call, one ledger line (`references/shell.md`
+§ The gate, in Step 2).
 
-The order, per frame — every call is the Figma MCP server's (`figma:<tool>`; in
-Claude Code `mcp__plugin_sumsub-design_figma__<tool>`, that one even when a
-claude.ai Figma connector is also present):
+The order, per frame — every call is the Figma MCP server's (`figma:<tool>`; in Claude Code
+`mcp__plugin_sumsub-design_figma__<tool>`, that one even when a claude.ai Figma connector is also
+present):
 
 ```
 get_metadata      frame   → tree, sizes, what is hidden   (a FRAME id: never a section or a page)
@@ -300,33 +299,37 @@ download_assets   frame @2x → one PNG; scripts/cut.js cuts every plate from it
 * **Geometry from `get_metadata`, styles and text from `get_design_context`** —
   never the reverse; layer names lie.
 * **Raw responses go to a file**: a large one is saved for you, a small one you
-  write to `_work/figma-ref/<node>.jsx` yourself. Read them with `figctx.py` /
-  `figmeta.py`, never from the 2 KB preview; `figctx.py` names the leaves a cut
-  response left `UNDEFINED` and the icons with a `NAME MISMATCH`.
+  write to `_work/figma-ref/<node>.jsx` yourself. One that came back inline and is
+  too long to retype — a section's metadata of 25k characters — is never copied
+  out by hand: its values go into `gen.js` with their node ids, and that is the
+  record. Read saved files with `figctx.py` / `figmeta.py`, never from the 2 KB
+  preview; `figctx.py` names the leaves a cut response left `UNDEFINED` and the
+  icons with a `NAME MISMATCH`.
+* **An unfilled place asked in Step 0 is a `placeholder` row** (or *source*, as answered); one off
+  the task path is a contradiction row, left verbatim.
 
-`references/figma-mcp.md` before the first extraction, and its § Step 2 in
-full — extract from Figma.
+`references/figma-mcp.md` before the first extraction, and its § Step 2 in full — extract from
+Figma.
 
 ## Step 3 — set up a generator, not a hand-written file
 
-One Node script, `_work/gen/gen.js`, builds the deliverable: the data at the top
-as literals with the node id beside each value, the CSS, the markup, the page
-script, rendered through the shell and the library. Copy
-`assets/templates/gen-list.skeleton.js` to start. A live control comes from
-`assets/components/controls.js` (`--api` lists them, `--api <name>` one header, `--doc <name>`
-its VERSION.md section — never its source), a list or table page from
-`list-table.js`, a column that shrinks from `fluid-page.js`, a block the window
-is too short for from `fit-height.js`. Never hand-edit the built file; a script
-that edits one aborts on a missing anchor and asserts its definitions appear
-once. Paths relative to `__dirname`; serve with `ROOT=. node
-"$SKILL/scripts/serve.cjs"` (`SPA=1` for a routed prototype).
-`references/architecture.md` § Step 3 in full — set up a generator, not a
-hand-written file, with the list-page recipe.
+One Node script, `_work/gen/gen.js`, builds the deliverable: the data at the top as literals with
+the node id beside each value, the CSS, the markup, the page script, rendered through the shell and
+the library. Copy `assets/templates/gen-list.skeleton.js` to start. A live control comes from
+`assets/components/controls.js` (`--api` lists them, `--api <name>` one header, `--doc <name>` its
+VERSION.md section — never its source), a list or table page from `list-table.js`, a column that
+shrinks from `fluid-page.js`, a block the window is too short for from `fit-height.js`. Never
+hand-edit the built file; a script that edits one aborts on a missing anchor and asserts its
+definitions appear once. Paths relative to `__dirname`; serve with `ROOT=. node
+"$SKILL/scripts/serve.cjs"` (`SPA=1` for a routed prototype). A websdk generator takes the shell
+from `websdk-shell.js --fragment` and its controls from `websdk/controls.js`: flow markup into
+`#content-slot`, no coordinates (`references/websdk.md` § The generator).
+`references/architecture.md` § Step 3 in full — set up a generator, not a hand-written file, with
+the list-page recipe.
 
 ## Step 4 — the coordinate contract
 
-**Absolute children, Figma coordinates**, sub-pixels kept; flex only inside a
-leaf component.
+**Absolute children, Figma coordinates**, sub-pixels kept; flex only inside a leaf component.
 
 ```css
 #app { position:relative; width:1440px; height:900px; overflow:hidden;
@@ -334,23 +337,22 @@ leaf component.
 #app div, #app img, #app svg, #app input { position:absolute; }
 ```
 
-CSS insets a child by its parent's border width and Figma does not; Figma
-paints a bottom stroke on the last pixel row; a clipped zone keeps page
-coordinates through an offset layer; a standalone block under 500 wide is
-`margin:0`. Content in the shell lives in a zero-size anchor at
-`#content-slot`, and the generator writes frame coordinates minus the frame's
-content origin (`references/shell.md`). A text run positioned by baseline uses
-a *measured* offset (`references/text-and-type.md`). The helpers and the
-reasons: `references/architecture.md` § Step 4 in full — the coordinate
-contract.
+CSS insets a child by its parent's border width and Figma does not; Figma paints a bottom stroke on
+the last pixel row; a clipped zone keeps page coordinates through an offset layer; a standalone
+block under 500 wide is `margin:0`. Content in the shell lives in a zero-size anchor at
+`#content-slot`, and the generator writes frame coordinates minus the frame's content origin
+(`references/shell.md`). A text run positioned by baseline uses a *measured* offset
+(`references/text-and-type.md`). The helpers and the reasons: `references/architecture.md` § Step 4
+in full — the coordinate contract. **The websdk profile is the exception**: inside the widget the
+kit lays the content out and nothing is positioned by coordinate — the frame fixes the order, the
+texts and each control's state (`references/websdk.md` § The responsive contract).
 
 ## Step 5 — bake the scenery
 
-Bake what **no task touches**. Never a control that carries state; never the
-area around a live control a task could change (write the **plate plan** in the
-ledger first: per plate, what is in it, which live controls sit on top, whether
-a task could change their labels, number or order — one "could" makes it DOM);
-never anything that has to stretch on an elastic canvas. A whole panel may be
+Bake what **no task touches**. Never a control that carries state; never the area around a live
+control a task could change (write the **plate plan** in the ledger first: per plate, what is in it,
+which live controls sit on top, whether a task could change their labels, number or order — one
+"could" makes it DOM); never anything that has to stretch on an elastic canvas. A whole panel may be
 one plate when no task touches it and nothing inside carries state.
 
 1. **Export the frame once at 2x** (`download_assets`, `defaultScale: 2`) and
@@ -365,43 +367,40 @@ one plate when no task touches it and nothing inside carries state.
 
 ## Step 6 — build one working thing at a time
 
-**One capability, checked, then the next** — a break then sits next to its
-cause. One primitive per control family, written once; anything shared across
-screens built once; panels off a registry. Every live control gets a named
-visible consequence, asserted in Step 7. Verbatim for chrome, computed for
-state; a state that affects more than one node lives in a variable. A brief
-constraint outranks an implementation suggestion. Read
-`references/interaction-plumbing.md` before the first interactive control,
-including its § Step 6 in full — build one working thing at a time.
+**One capability, checked, then the next** — a break then sits next to its cause. One primitive per
+control family, written once; anything shared across screens built once; panels off a registry.
+Every live control gets a named visible consequence, asserted in Step 7. Verbatim for chrome,
+computed for state; a state that affects more than one node lives in a variable. A brief constraint
+outranks an implementation suggestion. Read `references/interaction-plumbing.md` before the first
+interactive control, including its § Step 6 in full — build one working thing at a time.
 
 ## Step 7 — verify by measurement
 
-**Run the checks; never report one you did not run, and do not write a lighter
-one of your own.** A page taller than the canvas is gated at its own height
-(`statecheck.sh --full`). Numbers first, crops for what the numbers flag, one
-screenshot per screen at the end. Per screen and per state the tasks pass
-through:
+**Run the checks; never report one you did not run, and do not write a lighter one of your own.** A
+page taller than the canvas is gated at its own height (`statecheck.sh --full`). Numbers first,
+crops for what the numbers flag, one screenshot per screen at the end. Per screen and per state the
+tasks pass through:
 
 | what | how | passes when |
 |---|---|---|
-| pixels against Figma | `zonediff.sh`; `blockgate.sh` for a content block | within Step 0's threshold; untouched zones 0.00% against the last accepted render |
+| pixels against Figma | `zonediff.sh`; `blockgate.sh` for a content block, or a state of the page cut by an element (`--js`, `--crop-of`) | within Step 0's threshold; untouched zones 0.00% against the last accepted render |
 | real clicks reach | `statecheck.sh --hits auto` (a modal: `--hits '#modal'`) | 0 BLOCKED — a probe's `click()` is not a click |
 | the design's text is there | `statecheck.sh --texts <figctx.py … --texts> --texts-in '<zone>'` | 0 MISSING |
 | frames unbroken | `statecheck.sh --frames '<framed containers>'`, and again with a row forced into its hover (`--css` mirroring it, `--frames '.row\|bottom'`) | 0 FRAME GAP — a hover fill paints over an inset divider |
-| behaviour | `statecheck.sh --probe` in a fresh process; a logic demo: `rulecheck.cjs _work/rules.json` | every probe and every row — **one assertion per visible consequence**: a filter changes the rows *and* its counter |
+| behaviour | `statecheck.sh --probe` in a fresh process; a logic demo: `rulecheck.cjs _work/rules.json`; a timed state shot through `--device` or at `#state?hold` — virtual time fires its timer first (`references/interaction-plumbing.md` § Timed transitions) | every probe and every row — **one assertion per visible consequence**: a filter changes the rows *and* its counter |
 | plates sharp | probe `naturalWidth === 2 × clientWidth` | every plate |
+| the three widths (websdk) | `shoot.js … --device` at 375 and 744, `statecheck.sh --device` for a probe at a phone's width; `websdkgate.sh` for the shell | no sideways scroll at any width; the address search's sheet under 1023, its dropdown above (a dialog keeps its component at every width); the bar as the `narrow` rule says (`references/websdk.md` § The three widths) |
 
-`:hover` cannot be triggered from automation: mirror its rule onto a class, and
-**tell the user every hover needs one human look.** A failing assertion is a
-suspect before it is a verdict — check Figma first. Measurements are blind to
-orientation and stacking: one crop per directional or overflowing element, with
-its neighbours in frame. `references/verification.md` § Step 7 in full —
+`:hover` cannot be triggered from automation: mirror its rule onto a class, and **tell the user
+every hover needs one human look.** A failing assertion is a suspect before it is a verdict — check
+Figma first. Measurements are blind to orientation and stacking: one crop per directional or
+overflowing element, with its neighbours in frame. `references/verification.md` § Step 7 in full —
 verify by measurement, and `references/traps.md` for false failures.
 
 ## Step 8 — deviations, then handoff
 
-**When the threshold is met and the checks pass, stop building**; what else
-could be live is a proposed next increment in the handoff.
+**When the threshold is met and the checks pass, stop building**; what else could be live is a
+proposed next increment in the handoff.
 
 * **The deviation ledger** next to the prototype: element, zone, Figma value,
   prototype value, status (fixed / cannot fix and why / placeholder). Every
@@ -419,57 +418,53 @@ could be live is a proposed next increment in the handoff.
 
   If it prints, the final message waits. Then `runstats.cjs` for §5.
 
-**A delivered increment ends the session**: the next one starts a new session
-that opens `handoff.md` first; a one-sentence fix stays.
+**A delivered increment ends the session**: the next one starts a new session that opens
+`handoff.md` first; a one-sentence fix stays.
 
-**Then offer the run log, once, in one line, and never send it anywhere.** The
-person reads it and decides: it is their session, and
-nothing about it is automatic. `references/handoff.md` § Step 8 in full — deviations, then handoff.
+**Then offer the run log, once, in one line, and never send it anywhere.** The person reads it and
+decides: it is their session, and nothing about it is automatic. `references/handoff.md` § Step 8 in
+full — deviations, then handoff.
 
 ## Step 9 — publish, when asked
 
-Only when the user asks, in this session; deleting likewise, and an approval
-does not carry to the next round. Vercel for a respondent outside the company,
-a claude.ai artifact for a team demo (`references/publishing.md` § Which host):
+Only when the user asks, in this session; deleting likewise, and an approval does not carry to the
+next round. Vercel for a respondent outside the company, a claude.ai artifact for a team demo
+(`references/publishing.md` § Which host):
 
 ```bash
 scripts/publish.sh prototype.html --project <slug> --scope <team>   # --spa for a routed prototype
 scripts/unpublish.sh <slug> --confirm <slug> --scope <team>         # after the round
 ```
 
-The link to send is `https://<slug>.vercel.app` and the script checks it
-anonymously; then open it yourself and walk the first task with real clicks.
-`vercel login` is the user's to run, never yours. The slug and URL go in the
-handoff. `references/publishing.md` § Step 9 in full — publish, when asked.
+The link to send is `https://<slug>.vercel.app` and the script checks it anonymously; then open it
+yourself and walk the first task with real clicks. `vercel login` is the user's to run, never yours.
+The slug and URL go in the handoff. `references/publishing.md` § Step 9 in full — publish, when
+asked.
 
 ## Asking versus deciding
 
-**Ask when different readings mean materially different work**, with options;
-two frames disagreeing about a shared element is always an ask. **Otherwise
-decide under a stated assumption**, except: what the design does not draw (a
-loading state, an option list, a rule) is asked, not decided; and when the
-screenshot and the words disagree about scope, ask which ("scenario 3 only, or
+**Ask when different readings mean materially different work**, with options; two frames disagreeing
+about a shared element is always an ask. **Otherwise decide under a stated assumption**, except:
+what the design does not draw (a loading state, an option list, a rule) is asked, not decided; and
+when the screenshot and the words disagree about scope, ask which ("scenario 3 only, or
 everywhere?").
 
-**Say every decision you made, in the same response** — which element got which
-behaviour, what was left inert, what was approximated. **End every delivery with
-its cost**: `node "$SKILL/scripts/runstats.cjs" --round` prints one line —
-minutes, tool calls, Figma calls, what took most of it — and answers "why did
-that take so long?" before it is asked.
+**Say every decision you made, in the same response** — which element got which behaviour, what was
+left inert, what was approximated. **End every delivery with its cost**: `node
+"$SKILL/scripts/runstats.cjs" --round` prints one line — minutes, tool calls, Figma calls, what took
+most of it — and answers "why did that take so long?" before it is asked.
 
-**Deliver first, improve after an "ok".** Hand over what the user is waiting for
-as soon as its own check passes; a change to the skill or a shared asset is a
-separate step that starts with the user's go-ahead. Follow a written procedure
-by its purpose, not its letter.
+**Deliver first, improve after an "ok".** Hand over what the user is waiting for as soon as its own
+check passes; a change to the skill or a shared asset is a separate step that starts with the user's
+go-ahead. Follow a written procedure by its purpose, not its letter.
 
 ## Reference map
 
-**Read a reference at the moment its row names, and only the section that
-moment needs** — every long one opens with its contents, and each step's full
-text is its own section (`§ Step N in full`). `traps.md` is never read through:
-search its symptom column. **Every reference is opened from here, never through
-another reference**: a pointer between them names the section; open that file
-from this map.
+**Read a reference at the moment its row names, and only the section that moment needs** — every
+long one opens with its contents, and each step's full text is its own section (`§ Step N in full`).
+`traps.md` is never read through: search its symptom column. **Every reference is opened from here,
+never through another reference**: a pointer between them names the section; open that file from
+this map.
 
 | File | Read it when |
 |---|---|
@@ -488,21 +483,23 @@ from this map.
 | `references/tools.md` | the full table of scripts and templates, and the maintainer's routine: lint, the fixtures, the eval run, `dscheck.js` |
 | `references/publishing.md` | putting the prototype on a URL, and taking it down |
 | `references/shell.md` | the default dashboard shell — sidebar, island, header — its gate against the frame, and how content anchors inside it |
+| `references/websdk.md` | **the websdk profile, from Step 0 on** — how it is decided, the kit as a snapshot, the widget gate, the generator, the responsive contract, the three widths, the known ledger lines, what the kit does not have |
 | `assets/components/VERSION.md` | the controls' values and states, their source, and what is not covered yet — one section at a time, through `controls.js --doc <name>`, never the whole file |
 | `assets/CHANGELOG-entry.md` | the entry to paste into the plugin's own `CHANGELOG.md` at merge time, in that file's own format — the update prompt shows these entries verbatim, and an empty "what's new" is what a colleague sees without one |
 | `assets/run-log-template.md` | the run log the session keeps at `_work/run-log.md` (opened in Step 0, closed in Step 8): what was asked, decided, measured, and where the skill was wrong. Offered to the user once, sent by nobody but them |
 | `assets/handoff-template.md` | writing the handoff |
 | `assets/eval.md` | **never during a build — it is the answer sheet.** The fixed brief, the frames' contents and the checklist a run is scored against; opening it while working invalidates that run. For the maintainer setting a check up (`references/tools.md` § Maintaining the skill) |
+| `assets/eval-websdk.md` | **never during a build — the websdk profile's answer sheet**: two flows' briefs (Switch device on desktop frames, General flow on mobile frames with a camera), the answers, their checklists and the numbers of the runs so far. For the maintainer, as above |
 
-**Tools, in the order a build meets them** — every script's header says how to
-call it, and `references/tools.md` has the full table:
+**Tools, in the order a build meets them** — every script's header says how to call it, and
+`references/tools.md` has the full table:
 
 | step | tools |
 |---|---|
 | 0 | `doctor.sh`; `runstats.cjs` for the run log's §5 and the cost line that ends every delivery |
-| 2 | `figmeta.py`, `figctx.py` (saved MCP responses); `shell.js` + `shellgate.sh` (the shell gate); `grab.js`, `icons.js` |
-| 3 | `gen-list.skeleton.js` → `gen.js`; `shell.js`; `controls.js --api`; `list-table.js`, `fluid-page.js`, `fit-height.js`, `test-scaffold.js` |
+| 2 | `figmeta.py`, `figctx.py` (saved MCP responses); `shell.js` + `shellgate.sh` (the shell gate; websdk: `websdk-shell.js` + `websdkgate.sh`); `grab.js`, `icons.js` |
+| 3 | `gen-list.skeleton.js` → `gen.js`; `shell.js`; `controls.js --api` (websdk: `websdk/controls.js --api`); `list-table.js`, `fluid-page.js`, `fit-height.js`, `test-scaffold.js` |
 | 5 | `cut.js` (plates), `encode.sh` (photos), `inkbbox.sh` (margins), `weight.cjs` (the page's weight) |
 | 7 | `statecheck.sh` (one call: state, probe, `--hits`, `--texts`, `--frames`, diff), `zonediff.sh`, `blockgate.sh`, `inkbbox.sh`, `pixprobe.sh`, `minpx.sh`, `scanline.sh`, `crop.js`, `shoot.js`, `fluidcheck.sh`, `scaletest.js`, `rulecheck.cjs`; `serve.cjs` to look |
 | 9 | `publish.sh`, `unpublish.sh`, `artifact-page.js` |
-| the skill | `lint.sh`, `pre-commit`, `dscheck.js`, `fixture.js` |
+| the skill | `lint.sh`, `pre-commit`, `dscheck.js` (`--spec` for the WebSDK kit), `fixture.js`, `fixture-websdk.js`, `sbkit.cjs` (the WebSDK kit's snapshot) |

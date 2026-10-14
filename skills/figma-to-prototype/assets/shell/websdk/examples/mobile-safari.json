@@ -1,0 +1,8 @@
+{ "theme": "light",
+  "canvas": "responsive",
+  "frame": {"fileKey": "CTtG8WQa2doFeSYMWaAQ9S", "nodeId": "1:7480", "width": 375, "height": 812, "chrome": {"top": 62, "bottom": 90}},
+  "header": {"back": false, "step": false, "toPhone": false, "lang": "En"},
+  "footer": {"buttons": [{"label": "Start verification", "id": "start"}]},
+  "whitelabel": true,
+  "narrow": 600,
+  "title": "Welcome" }

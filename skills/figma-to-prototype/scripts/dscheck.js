@@ -17,6 +17,10 @@
 //                              print the design system's own resolved variables under
 //                              a prefix, sorted. This is how a palette is read when a
 //                              new component is added, instead of a browser pane
+//   dscheck.js --spec assets/components/websdk/storybook.json
+//                              another kit's record: the WebSDK kit's Storybook and the
+//                              values its controls.js and VERSION.md depend on. The spec
+//                              names its own upstream, frame, vars story and vars root
 //
 // Needs the network and Chrome; takes about half a minute. A check may carry
 // `"click": "<selector>"`, which is clicked in the story before reading — that is how
@@ -36,8 +40,9 @@ const fs = require('fs'), path = require('path'), os = require('os'), {spawn} = 
 const {CHROME} = require(path.join(__dirname, '_chrome.cjs'));
 const {start} = require(path.join(__dirname, '_dsproxy.cjs'));
 
-const SPEC = path.join(__dirname, '..', 'assets', 'components', 'storybook.json');
 const args = process.argv.slice(2);
+const SPEC = args.includes('--spec') ? path.resolve(args[args.indexOf('--spec') + 1] || '') : path.join(__dirname, '..', 'assets', 'components', 'storybook.json');
+if (!fs.existsSync(SPEC)) { console.error('dscheck: no spec at ' + SPEC); process.exit(1); }
 const RECORD = args.includes('--record'), JSONOUT = args.includes('--json');
 const VARS = args.includes('--vars') ? (args[args.indexOf('--vars') + 1] || '--components-') : null;
 const ONLY = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
@@ -69,7 +74,7 @@ const seen = {}, want = ${JSON.stringify(prefix)};
 const grab = () => {
   const d = document.getElementById('f').contentDocument;
   if (!d || d.readyState !== 'complete' || !d.styleSheets.length) return false;
-  const root = d.querySelector('.sns-ds-root') || d.documentElement;
+  const root = d.querySelector('.sns-ds-root') || (${JSON.stringify(spec.varsRoot || '')} && d.querySelector(${JSON.stringify(spec.varsRoot || '')})) || d.documentElement;
   let any = false;
   for (const ss of d.styleSheets) {
     try {
@@ -219,7 +224,7 @@ async function main() {
   if (JSONOUT) { console.log(JSON.stringify({checked, changed, unread, lines}, null, 2)); process.exit(changed || unread ? 1 : 0); }
   for (const l of lines) console.log(l);
   console.log(`dscheck: ${checked} values checked against the ${spec.taken} record, ${changed} changed, ${unread} unread` +
-    (changed || unread ? ' — fix controls.js and assets/components/VERSION.md, then re-run' : ' — the record still matches the product'));
+    (changed || unread ? ' — fix controls.js and VERSION.md beside ' + path.relative(process.cwd(), SPEC) + ', then re-run' : ' — the record still matches the product'));
   process.exit(changed || unread ? 1 : 0);
 }
 

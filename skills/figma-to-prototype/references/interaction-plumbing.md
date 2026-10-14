@@ -13,6 +13,8 @@ hunt.
 - Canvas-level hosts for anything that escapes a clip
 - Popup placement, derived
 - A delay is not an animation
+- Timed transitions — one timer per loading state
+- Every state a check needs is a hash route
 - An event-driven element needs its own host and a commit, not a value change
 - State that survives a rebuild but not a session
 - A focused field does not survive a repaint
@@ -156,6 +158,91 @@ the transition stops applying. Some Chrome versions serialise the shorthand as
 `visibility 300ms`, which reads like a duration; others print it faithfully. Do
 not judge from the shorthand either way — check the longhands
 (`transitionDuration: 0s`, `transitionDelay: 300ms`).
+
+## Timed transitions — one timer per loading state
+
+A loading state the frames draw (the kit's ring or dots, a state named Loading /
+Uploading / Processing) has no drawn exit, so Step 0 asked once how it ends —
+*timer and tap*, *timer only* or *tap only* (SKILL.md Step 0, *behaviour the
+brief names but no frame draws*). **The question is for states that draw a
+loader, and for them only.** Every other transition without a button on the task
+path — the viewfinder that frames the document, the shutter, a sheet closing —
+is by tap, said in the defaults line and never asked: run 16 put the camera's
+four button-less transitions into one question and offered timers for all of
+them, when two of the four were a loader. The plumbing is the same for all three:
+
+* **One `setTimeout` per loading state, in `gen.js`, armed where the state is
+  entered and cleared wherever it is left** — by its own firing, by the tap, by
+  the back chain, by a `#hash` route. Keep the id in one global (`loadTimer`)
+  and clear it at the top of the route function, so a tap that already advanced
+  the flow is not followed by the timer advancing it again. **The tap handler is
+  shared**: both exits call the same route function; the timer's callback is
+  nothing but that call, and under *timer only* the state simply has no hit
+  layer.
+* **The seconds are a placeholder, not the product's.** One named constant at
+  the top of `gen.js` (`UPLOAD_MS = 2000`), a row in the handoff's § Placeholders
+  with the network as *who has the real one*, and the interaction inventory says
+  which states advance by time (`assets/handoff-template.md` § 6). The presenter
+  reads both before the demo.
+* **Check it through `--device`, in real time**: `statecheck.sh --device` reads
+  the page once the probe has written its answer (up to 8 s), so a probe that
+  returns a Promise settled after at least the timer's length sees the state
+  after it — `--probe 'return new Promise(r=>setTimeout(()=>r(location.hash),2200))'`
+  — and `--hits` / `--texts` run at that moment too. The tap exit is checked like
+  any other route: `--js` with the tap, `--probe` with the hash. Both are Step 7
+  behaviour probes, one per loading state.
+* **A render of the state itself goes through `--device` too, or holds the
+  timers.** `shoot.js` and `statecheck.sh` without `--device` render under
+  Chrome's virtual time, which runs every `setTimeout` to its end before the
+  shot: a timed state renders as the state after it, and nothing in the PNG says
+  so — run 16's 1440 baselines showed the iOS dialog for the camera's dots and
+  Verified for Uploading, and the handoff called them the regression reference,
+  while the 375 ones went through `--device` and were right. A timed state is
+  shot through `--device` (real time: the shot about a second after load, before
+  a 2 s timer) or with its timers held — the route function reads a `?hold`
+  suffix on the hash, so `#upload?hold` is the state as drawn with no timer
+  armed, for `shoot.js … '#upload?hold'`, `statecheck.sh --hash '#upload?hold'`
+  and `blockgate.sh --hash '#upload?hold'` alike; `--js 'window.__proto.timers(false)'`
+  holds them from a probe. `shoot.js` prints one warning line when a page that
+  sets timers is shot with neither.
+
+  ```js
+  var loadTimer = null, hold = false;
+  window.__proto = {timers: function (on) { hold = !on; if (!on) clearTimeout(loadTimer); }};
+  function show(hash) {                                   // '#upload' or '#upload?hold'
+    var held = hold || /\?hold$/.test(hash), name = hash.slice(1).replace(/\?hold$/, '');
+    clearTimeout(loadTimer); loadTimer = null;
+    …                                                     // show the screen `name`
+    if (name === 'upload' && !held) loadTimer = setTimeout(function () { go('verified'); }, UPLOAD_MS);
+  }
+  ```
+
+* **The loader's own animation needs nothing.** The kit's ring and dots animate
+  as rendered, rule 5's one exception; `references/websdk.md` § What the kit
+  does not have has the loading rows. This section is about the state's exit,
+  not its motion.
+
+## Every state a check needs is a hash route
+
+`gen.js` gives every state that a gate, a probe or a baseline renders a `#hash`
+route — the screen after Save, the form switched to its other mode, the toast —
+read by one route function **on load and on `hashchange`**, which sets the state
+the same way the clicks do (calls the same handlers, so the derived state follows).
+`statecheck.sh --hash`, `blockgate.sh --hash` and `shoot.js` all load the page at
+the hash; a state reached by clicks only renders as the first screen there. Both
+gates compare the hashed load with the plain one and print one line —
+*the hash changed nothing: the page has no route for #x* — when they match: add
+the route, or force that state with `--js`. Run 18 read a 476px residual off its
+first screen before it noticed (2026-10-14).
+
+```js
+function route() {
+  var h = location.hash.replace(/\?hold$/, '');
+  if (h === '#custom' || h === '#saved') pick('custom');     // the handlers a click runs
+  if (h === '#saved') { field.value = PROFILE_ID; save(); }
+}
+route(); addEventListener('hashchange', route);
+```
 
 ## An event-driven element needs its own host and a commit, not a value change
 

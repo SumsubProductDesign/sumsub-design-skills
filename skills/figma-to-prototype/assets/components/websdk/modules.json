@@ -1,0 +1,628 @@
+{
+  "taken": "2026-10-08",
+  "upstream": "storybook-websdk-uikit.dev.euc1.sumsub.net",
+  "note": "hash → component → {build class: stable class}; `how` says what settled the owner (owns / name / only / shared / css-only). Pin a wrong guess with `owns` in stories.json and re-run.",
+  "modules": [
+    {
+      "hash": "1qon0",
+      "component": "SdkText",
+      "how": "owns",
+      "classes": {
+        "_text_1qon0_1": "sdk-text",
+        "_body_1qon0_26": "sdk-text__body",
+        "_header3_1qon0_14": "sdk-text__header3",
+        "_caption_1qon0_18": "sdk-text__caption",
+        "_header1_1qon0_6": "sdk-text__header1",
+        "_header2_1qon0_10": "sdk-text__header2",
+        "_danger_1qon0_22": "sdk-text__danger"
+      }
+    },
+    {
+      "hash": "1auf0",
+      "component": "SdkLoader",
+      "how": "owns",
+      "classes": {
+        "_loader_1auf0_1": "sdk-loader",
+        "_loaderColorWhite_1auf0_30": "sdk-loader__loaderColorWhite",
+        "_color-shift_1auf0_1": "sdk-loader__color-shift",
+        "_loaderColorSuccess_1auf0_36": "sdk-loader__loaderColorSuccess",
+        "_loaderColorBlue_1auf0_42": "sdk-loader__loaderColorBlue",
+        "_loaderColorDanger_1auf0_48": "sdk-loader__loaderColorDanger",
+        "_loaderColorWarning_1auf0_54": "sdk-loader__loaderColorWarning"
+      }
+    },
+    {
+      "hash": "1p5l1",
+      "component": "SdkInput",
+      "how": "owns",
+      "classes": {
+        "_inputContainer_1p5l1_1": "sdk-input__inputContainer",
+        "_input_1p5l1_1": "sdk-input",
+        "_isEmpty_1p5l1_78": "sdk-input__isEmpty",
+        "_error_1p5l1_24": "sdk-input__error",
+        "_right_1p5l1_85": "sdk-input__right",
+        "_left_1p5l1_84": "sdk-input__left",
+        "_requiredMark_1p5l1_81": "sdk-input__requiredMark"
+      }
+    },
+    {
+      "hash": "1l4xt",
+      "component": "SdkInputLabel",
+      "how": "owns",
+      "classes": {
+        "_item_1l4xt_1": "sdk-input-label",
+        "_itemText_1l4xt_7": "sdk-input-label__itemText",
+        "_errors_1l4xt_13": "sdk-input-label__errors"
+      }
+    },
+    {
+      "hash": "1hkln",
+      "component": "SdkSpanRequired",
+      "how": "owns",
+      "classes": {
+        "_requiredAsterisk_1hkln_1": "sdk-span-required"
+      }
+    },
+    {
+      "hash": "10x3d",
+      "component": "SdkInputFieldset",
+      "how": "owns",
+      "classes": {
+        "_item_10x3d_1": "sdk-input-fieldset",
+        "_itemText_10x3d_11": "sdk-input-fieldset__itemText",
+        "_errors_10x3d_17": "sdk-input-fieldset__errors",
+        "_error_10x3d_17": "sdk-input-fieldset__error"
+      }
+    },
+    {
+      "hash": "1ql8p",
+      "component": "SdkButtonInput",
+      "how": "owns",
+      "classes": {
+        "_no_style_1ql8p_1": "sdk-button-input",
+        "_button_1ql8p_12": "sdk-button-input__button",
+        "_sizeM_1ql8p_28": "sdk-button-input__sizeM",
+        "_left_1ql8p_34": "sdk-button-input__left",
+        "_placeholder_1ql8p_39": "sdk-button-input__placeholder",
+        "_right_1ql8p_35": "sdk-button-input__right",
+        "_value_1ql8p_38": "sdk-button-input__value",
+        "_invalid_1ql8p_67": "sdk-button-input__invalid",
+        "_sizeL_1ql8p_31": "sdk-button-input__sizeL"
+      }
+    },
+    {
+      "hash": "9pfi4",
+      "component": "SdkButton",
+      "how": "owns",
+      "classes": {
+        "_button_9pfi4_1": "sdk-button",
+        "_primary_9pfi4_41": "sdk-button__primary",
+        "_default_9pfi4_52": "sdk-button__default",
+        "_iconOnly_9pfi4_32": "sdk-button__iconOnly",
+        "_leftIcon_9pfi4_167": "sdk-button__leftIcon",
+        "_secondary_9pfi4_82": "sdk-button__secondary",
+        "_small_9pfi4_225": "sdk-button__small",
+        "_disabled_9pfi4_24": "sdk-button__disabled",
+        "_plain_9pfi4_190": "sdk-button__plain",
+        "_field_9pfi4_190": "sdk-button__field",
+        "_link_9pfi4_146": "sdk-button__link",
+        "_underline_9pfi4_161": "sdk-button__underline",
+        "_topbar_9pfi4_126": "sdk-button__topbar",
+        "_danger_9pfi4_67": "sdk-button__danger",
+        "_customLetterSpacing_9pfi4_35": "sdk-button__customLetterSpacing"
+      }
+    },
+    {
+      "hash": "eggox",
+      "component": "SdkDotsLoader",
+      "how": "owns",
+      "classes": {
+        "_dotsLoader_eggox_1": "sdk-dots-loader",
+        "_dotsLoaderLink_eggox_5": "sdk-dots-loader__dotsLoaderLink"
+      }
+    },
+    {
+      "hash": "1oywt",
+      "component": "SdkHeader",
+      "how": "owns",
+      "classes": {
+        "_SdkHeader_1oywt_1": "sdk-header",
+        "_left_1oywt_15": "sdk-header__left",
+        "_back-button_1oywt_49": "sdk-header__back-button",
+        "_progress_1oywt_34": "sdk-header__progress",
+        "_right_1oywt_16": "sdk-header__right",
+        "_progress-item_1oywt_45": "sdk-header__progress-item",
+        "_progress-bar_1oywt_45": "sdk-header__progress-bar"
+      }
+    },
+    {
+      "hash": "1334w",
+      "component": "SdkLangSelector",
+      "how": "owns",
+      "classes": {
+        "_langSelector_1334w_1": "sdk-lang-selector",
+        "_buttonContainer_1334w_6": "sdk-lang-selector__buttonContainer",
+        "_srOnly_1334w_10": "sdk-lang-selector__srOnly"
+      }
+    },
+    {
+      "hash": "1nw3q",
+      "component": "SdkStepsPopup",
+      "how": "owns",
+      "classes": {
+        "_container_1nw3q_1": "sdk-steps-popup__container",
+        "_step_1nw3q_19": "sdk-steps-popup",
+        "_step-label_1nw3q_25": "sdk-steps-popup__step-label",
+        "_active_1nw3q_31": "sdk-steps-popup__active"
+      }
+    },
+    {
+      "hash": "cg1gi",
+      "component": "SdkContent",
+      "how": "owns",
+      "classes": {
+        "_SdkContent_cg1gi_1": "sdk-content",
+        "_SdkContentInner_cg1gi_18": "sdk-content__SdkContentInner",
+        "_required-mark-footnote_cg1gi_38": "sdk-content__required-mark-footnote",
+        "_required-mark_cg1gi_38": "sdk-content__required-mark",
+        "_withMinHeight_cg1gi_15": "sdk-content__withMinHeight",
+        "_hide-scrollbar_cg1gi_27": "sdk-content__hide-scrollbar",
+        "_illustration_cg1gi_34": "sdk-content__illustration"
+      }
+    },
+    {
+      "hash": "lbpm3",
+      "component": "SdkPageTitle",
+      "how": "owns",
+      "classes": {
+        "_pageTitle_lbpm3_1": "sdk-page-title",
+        "_pageSubtitle_lbpm3_20": "sdk-page-title__pageSubtitle",
+        "_left_lbpm3_10": "sdk-page-title__left",
+        "_center_lbpm3_16": "sdk-page-title__center",
+        "_right_lbpm3_13": "sdk-page-title__right"
+      }
+    },
+    {
+      "hash": "qlbgu",
+      "component": "SdkFooter",
+      "how": "owns",
+      "classes": {
+        "_SdkFooter_qlbgu_1": "sdk-footer",
+        "_inner_qlbgu_18": "sdk-footer__inner",
+        "_flat_qlbgu_14": "sdk-footer__flat"
+      }
+    },
+    {
+      "hash": "1t9hi",
+      "component": "SdkBaseContainer",
+      "how": "owns",
+      "classes": {
+        "_container_1t9hi_1": "sdk-base-container"
+      }
+    },
+    {
+      "hash": "bdzoj",
+      "component": "SdkLogo",
+      "how": "owns",
+      "classes": {
+        "_dark_bdzoj_1": "sdk-logo",
+        "_light_bdzoj_5": "sdk-logo__light"
+      }
+    },
+    {
+      "hash": "1wawo",
+      "component": "SdkLogoBlock",
+      "how": "owns",
+      "classes": {
+        "_logoBlock_1wawo_1": "sdk-logo-block",
+        "_sizeMedium_1wawo_11": "sdk-logo-block__sizeMedium",
+        "_image_1wawo_29": "sdk-logo-block__image",
+        "_sizeSmall_1wawo_17": "sdk-logo-block__sizeSmall",
+        "_sizeExtraSmall_1wawo_23": "sdk-logo-block__sizeExtraSmall"
+      }
+    },
+    {
+      "hash": "1tos0",
+      "component": "SdkIconBlock",
+      "how": "owns",
+      "classes": {
+        "_iconBlock_1tos0_1": "sdk-icon-block",
+        "_sizeMedium_1tos0_10": "sdk-icon-block__sizeMedium",
+        "_stateDefault_1tos0_28": "sdk-icon-block__stateDefault",
+        "_stateStatus_1tos0_33": "sdk-icon-block__stateStatus",
+        "_stateAttention_1tos0_38": "sdk-icon-block__stateAttention",
+        "_stateError_1tos0_43": "sdk-icon-block__stateError",
+        "_stateSuccess_1tos0_48": "sdk-icon-block__stateSuccess",
+        "_stateDisabled_1tos0_53": "sdk-icon-block__stateDisabled",
+        "_sizeSmall_1tos0_16": "sdk-icon-block__sizeSmall",
+        "_sizeExtraSmall_1tos0_22": "sdk-icon-block__sizeExtraSmall"
+      }
+    },
+    {
+      "hash": "52x8u",
+      "component": "SdkPhoneField",
+      "how": "owns",
+      "classes": {
+        "_phoneInputContainer_52x8u_1": "sdk-phone-field",
+        "_select_52x8u_6": "sdk-phone-field__select",
+        "_placeholder_52x8u_35": "sdk-phone-field__placeholder",
+        "_input_52x8u_15": "sdk-phone-field__input",
+        "_phoneInputContainerSelected_52x8u_24": "sdk-phone-field__phoneInputContainerSelected",
+        "_callingCode_52x8u_28": "sdk-phone-field__callingCode",
+        "_option_52x8u_39": "sdk-phone-field__option"
+      }
+    },
+    {
+      "hash": "wcc6t",
+      "component": "SdkDateField",
+      "how": "owns",
+      "classes": {
+        "_input_wcc6t_1": "sdk-date-field__input",
+        "_picker_wcc6t_5": "sdk-date-field__picker",
+        "_nativeDate_wcc6t_10": "sdk-date-field"
+      }
+    },
+    {
+      "hash": "103b7",
+      "component": "SdkInputRadio",
+      "how": "only",
+      "classes": {
+        "_label_103b7_9": "sdk-input-radio__label",
+        "_icon_103b7_1": "sdk-input-radio__icon"
+      }
+    },
+    {
+      "hash": "13z5o",
+      "component": "SdkBaseContainer",
+      "how": "owns",
+      "classes": {
+        "_container_13z5o_1": "sdk-base-container__container"
+      }
+    },
+    {
+      "hash": "141w8",
+      "component": "SdkToggle",
+      "how": "owns",
+      "classes": {
+        "_switch_141w8_1": "sdk-toggle",
+        "_thumb_141w8_22": "sdk-toggle__thumb"
+      }
+    },
+    {
+      "hash": "1200i",
+      "component": "SdkChoiceList",
+      "how": "owns",
+      "classes": {
+        "_choice-list_1200i_1": "sdk-choice-list",
+        "_choice-item-wrapper_1200i_9": "sdk-choice-list__choice-item-wrapper",
+        "_choice-item_1200i_9": "sdk-choice-list__choice-item",
+        "_info-block_1200i_50": "sdk-choice-list__info-block",
+        "_chevron-icon-wrapper_1200i_60": "sdk-choice-list__chevron-icon-wrapper"
+      }
+    },
+    {
+      "hash": "kxauv",
+      "component": "SdkSeparator",
+      "how": "owns",
+      "classes": {
+        "_separator_kxauv_1": "sdk-separator"
+      }
+    },
+    {
+      "hash": "1gozd",
+      "component": "SdkSeparator",
+      "how": "owns",
+      "classes": {
+        "_horizontal_1gozd_1": "sdk-separator__horizontal"
+      }
+    },
+    {
+      "hash": "1m3xc",
+      "component": "SdkLink",
+      "how": "owns",
+      "classes": {
+        "_link_1m3xc_1": "sdk-link",
+        "_underline_1m3xc_9": "sdk-link__underline"
+      }
+    },
+    {
+      "hash": "gzf4w",
+      "component": "SdkAlert",
+      "how": "owns",
+      "classes": {
+        "_alert_gzf4w_5": "sdk-alert",
+        "_typeWarning_gzf4w_37": "sdk-alert__typeWarning",
+        "_alertIcon_gzf4w_14": "sdk-alert__alertIcon",
+        "_content_gzf4w_17": "sdk-alert__content",
+        "_textBlock_gzf4w_24": "sdk-alert__textBlock",
+        "_typeDanger_gzf4w_30": "sdk-alert__typeDanger",
+        "_typeInfo_gzf4w_44": "sdk-alert__typeInfo",
+        "_typeSuccess_gzf4w_51": "sdk-alert__typeSuccess",
+        "_typeNeutral_gzf4w_58": "sdk-alert__typeNeutral",
+        "_preLine_gzf4w_1": "sdk-alert__preLine",
+        "_bigTexts_gzf4w_65": "sdk-alert__bigTexts"
+      }
+    },
+    {
+      "hash": "y3ds3",
+      "component": "SdkToast",
+      "how": "owns",
+      "classes": {
+        "_container_y3ds3_1": "sdk-toast",
+        "_closeButtonContainer_y3ds3_32": "sdk-toast__closeButtonContainer",
+        "_closeButton_y3ds3_22": "sdk-toast__closeButton",
+        "_link_y3ds3_14": "sdk-toast__link",
+        "_move-from-top_y3ds3_1": "sdk-toast__move-from-top",
+        "_closing_y3ds3_9": "sdk-toast__closing"
+      }
+    },
+    {
+      "hash": "1mcqg",
+      "component": "SdkCard",
+      "how": "owns",
+      "classes": {
+        "_card_1mcqg_1": "sdk-card",
+        "_header_1mcqg_29": "sdk-card__header",
+        "_headerText_1mcqg_53": "sdk-card__headerText",
+        "_main_1mcqg_75": "sdk-card__main",
+        "_content_1mcqg_79": "sdk-card__content",
+        "_icon_1mcqg_45": "sdk-card__icon",
+        "_counter_1mcqg_61": "sdk-card__counter",
+        "_chevron_1mcqg_49": "sdk-card__chevron",
+        "_success_1mcqg_19": "sdk-card__success",
+        "_warning_1mcqg_24": "sdk-card__warning",
+        "_noPadding_1mcqg_85": "sdk-card__noPadding"
+      }
+    },
+    {
+      "hash": "2vg0s",
+      "component": "SdkTips",
+      "how": "owns",
+      "classes": {
+        "_header_2vg0s_1": "sdk-tips__header",
+        "_list_2vg0s_5": "sdk-tips",
+        "_row_2vg0s_14": "sdk-tips__row",
+        "_icon_2vg0s_30": "sdk-tips__icon",
+        "_content_2vg0s_19": "sdk-tips__content",
+        "_rightIcon_2vg0s_23": "sdk-tips__rightIcon",
+        "_description_2vg0s_26": "sdk-tips__description"
+      }
+    },
+    {
+      "hash": "bvi8i",
+      "component": "SdkTabs",
+      "how": "owns",
+      "classes": {
+        "_ToggleGroup_bvi8i_1": "sdk-tabs",
+        "_ToggleGroupItem_bvi8i_12": "sdk-tabs__ToggleGroupItem",
+        "_ToggleGroupItemText_bvi8i_21": "sdk-tabs__ToggleGroupItemText",
+        "_disabled_bvi8i_8": "sdk-tabs__disabled"
+      }
+    },
+    {
+      "hash": "19jl5",
+      "component": "SdkValidationStep",
+      "how": "owns",
+      "classes": {
+        "_step_19jl5_1": "sdk-validation-step",
+        "_iconContainer_19jl5_7": "sdk-validation-step__iconContainer",
+        "_iconBlock_19jl5_13": "sdk-validation-step__iconBlock",
+        "_content_19jl5_55": "sdk-validation-step__content",
+        "_summary_19jl5_62": "sdk-validation-step__summary",
+        "_header_19jl5_70": "sdk-validation-step__header",
+        "_headerContent_19jl5_76": "sdk-validation-step__headerContent",
+        "_headerTitle_19jl5_82": "sdk-validation-step__headerTitle",
+        "_iconBlockSuccess_19jl5_29": "sdk-validation-step__iconBlockSuccess",
+        "_icon_19jl5_7": "sdk-validation-step__icon",
+        "_headerTag_19jl5_89": "sdk-validation-step__headerTag",
+        "_iconBlockDanger_19jl5_43": "sdk-validation-step__iconBlockDanger",
+        "_iconBlockWarning_19jl5_36": "sdk-validation-step__iconBlockWarning",
+        "_description_19jl5_93": "sdk-validation-step__description",
+        "_preLine_19jl5_100": "sdk-validation-step__preLine",
+        "_accordionIcon_19jl5_104": "sdk-validation-step__accordionIcon",
+        "_contentWithAccordion_19jl5_112": "sdk-validation-step__contentWithAccordion",
+        "_contentWithDivider_19jl5_116": "sdk-validation-step__contentWithDivider",
+        "_contentOpen_19jl5_120": "sdk-validation-step__contentOpen"
+      }
+    },
+    {
+      "hash": "muzpe",
+      "component": "SdkSplashScreen",
+      "how": "owns",
+      "classes": {
+        "_splash_screen_muzpe_1": "sdk-splash-screen",
+        "_icon_muzpe_6": "sdk-splash-screen__icon",
+        "_header_muzpe_10": "sdk-splash-screen__header",
+        "_message_muzpe_14": "sdk-splash-screen__message",
+        "_footerButtons_muzpe_22": "sdk-splash-screen__footerButtons",
+        "_tips_muzpe_18": "sdk-splash-screen__tips"
+      }
+    },
+    {
+      "hash": "xofhr",
+      "component": "SdkModal",
+      "how": "owns",
+      "classes": {
+        "_DialogOverlay_xofhr_1": "sdk-modal",
+        "_DialogContentContainer_xofhr_25": "sdk-modal__DialogContentContainer",
+        "_noHeader_xofhr_236": "sdk-modal__noHeader",
+        "_DialogContent_xofhr_25": "sdk-modal__DialogContent",
+        "_DialogHeader_xofhr_66": "sdk-modal__DialogHeader",
+        "_HeaderRow_xofhr_74": "sdk-modal__HeaderRow",
+        "_HeaderWrapper_xofhr_84": "sdk-modal__HeaderWrapper",
+        "_DialogTitle_xofhr_20": "sdk-modal__DialogTitle",
+        "_DialogSubtitle_xofhr_21": "sdk-modal__DialogSubtitle",
+        "_closeButton_xofhr_93": "sdk-modal__closeButton",
+        "_DialogBody_xofhr_55": "sdk-modal__DialogBody",
+        "_DialogBodyContent_xofhr_106": "sdk-modal__DialogBodyContent",
+        "_footer_xofhr_130": "sdk-modal__footer",
+        "_footerContent_xofhr_140": "sdk-modal__footerContent",
+        "_footerContentInner_xofhr_145": "sdk-modal__footerContentInner",
+        "_fullscreenOverlay_xofhr_13": "sdk-modal__fullscreenOverlay",
+        "_hideScrollbar_xofhr_55": "sdk-modal__hideScrollbar",
+        "_fullWidth_xofhr_62": "sdk-modal__fullWidth",
+        "_centerAligned_xofhr_90": "sdk-modal__centerAligned",
+        "_isMobileFirefox_xofhr_154": "sdk-modal__isMobileFirefox",
+        "_fade-in_xofhr_1": "sdk-modal__fade-in",
+        "_fade-out_xofhr_1": "sdk-modal__fade-out",
+        "_slide-up_xofhr_1": "sdk-modal__slide-up",
+        "_slide-down_xofhr_1": "sdk-modal__slide-down"
+      }
+    },
+    {
+      "hash": "mvxie",
+      "component": "SdkBottomSheet",
+      "how": "owns",
+      "classes": {
+        "_DialogOverlay_mvxie_1": "sdk-bottom-sheet",
+        "_DialogContentContainer_mvxie_13": "sdk-bottom-sheet__DialogContentContainer",
+        "_noHeader_mvxie_219": "sdk-bottom-sheet__noHeader",
+        "_DialogContent_mvxie_13": "sdk-bottom-sheet__DialogContent",
+        "_DialogBody_mvxie_45": "sdk-bottom-sheet__DialogBody",
+        "_DialogBodyContent_mvxie_94": "sdk-bottom-sheet__DialogBodyContent",
+        "_DialogHeader_mvxie_63": "sdk-bottom-sheet__DialogHeader",
+        "_HeaderRow_mvxie_70": "sdk-bottom-sheet__HeaderRow",
+        "_HeaderWrapper_mvxie_80": "sdk-bottom-sheet__HeaderWrapper",
+        "_customScroll_mvxie_45": "sdk-bottom-sheet__customScroll",
+        "_footer_mvxie_125": "sdk-bottom-sheet__footer",
+        "_footerContent_mvxie_135": "sdk-bottom-sheet__footerContent",
+        "_footerContentInner_mvxie_140": "sdk-bottom-sheet__footerContentInner",
+        "_fade-in_mvxie_1": "sdk-bottom-sheet__fade-in",
+        "_fade-out_mvxie_1": "sdk-bottom-sheet__fade-out",
+        "_slide-up_mvxie_1": "sdk-bottom-sheet__slide-up"
+      }
+    },
+    {
+      "hash": "1gu9n",
+      "component": "SdkTwoFaCodeInput",
+      "how": "owns",
+      "classes": {
+        "_PinInputRoot_1gu9n_1": "sdk-two-fa-code-input",
+        "_PinInputCell_1gu9n_10": "sdk-two-fa-code-input__PinInputCell",
+        "_PinInputInput_1gu9n_84": "sdk-two-fa-code-input__PinInputInput",
+        "_invalid_1gu9n_45": "sdk-two-fa-code-input__invalid",
+        "_disabled_1gu9n_53": "sdk-two-fa-code-input__disabled",
+        "_active_1gu9n_34": "sdk-two-fa-code-input__active",
+        "_caret_1gu9n_59": "sdk-two-fa-code-input__caret",
+        "_sdk-two-fa-code-input-caret_1gu9n_1": "sdk-two-fa-code-input__sdk-two-fa-code-input-caret"
+      }
+    },
+    {
+      "hash": "16e1t",
+      "component": "SdkDropdownMenu",
+      "how": "owns",
+      "classes": {
+        "_DropdownMenuContent_16e1t_1": "sdk-dropdown-menu",
+        "_DropdownMenuLabel_16e1t_13": "sdk-dropdown-menu__DropdownMenuLabel",
+        "_DropdownMenuItem_16e1t_38": "sdk-dropdown-menu__DropdownMenuItem",
+        "_label_16e1t_51": "sdk-dropdown-menu__label",
+        "_DropdownMenuItemDanger_16e1t_69": "sdk-dropdown-menu__DropdownMenuItemDanger",
+        "_DropdownMenuItemSelected_16e1t_81": "sdk-dropdown-menu__DropdownMenuItemSelected",
+        "_DropdownMenuSubContent_16e1t_2": "sdk-dropdown-menu__DropdownMenuSubContent",
+        "_slide-down-and-fade_16e1t_1": "sdk-dropdown-menu__slide-down-and-fade",
+        "_slide-left-and-fade_16e1t_1": "sdk-dropdown-menu__slide-left-and-fade",
+        "_slide-up-and-fade_16e1t_1": "sdk-dropdown-menu__slide-up-and-fade",
+        "_slide-right-and-fade_16e1t_1": "sdk-dropdown-menu__slide-right-and-fade",
+        "_DropdownMenuCheckboxItem_16e1t_39": "sdk-dropdown-menu__DropdownMenuCheckboxItem",
+        "_DropdownMenuRadioItem_16e1t_40": "sdk-dropdown-menu__DropdownMenuRadioItem",
+        "_DropdownMenuSubTrigger_16e1t_41": "sdk-dropdown-menu__DropdownMenuSubTrigger"
+      }
+    },
+    {
+      "hash": "14fg3",
+      "component": "SdkAvatar",
+      "how": "owns",
+      "classes": {
+        "_avatar_14fg3_1": "sdk-avatar",
+        "_image_14fg3_15": "sdk-avatar__image",
+        "_char_14fg3_20": "sdk-avatar__char"
+      }
+    },
+    {
+      "hash": "moic9",
+      "component": "SdkPanel",
+      "how": "owns",
+      "classes": {
+        "_panel_moic9_1": "sdk-panel",
+        "_delimiter_moic9_11": "sdk-panel__delimiter"
+      }
+    },
+    {
+      "hash": "1goo3",
+      "component": "SdkCameraPopup",
+      "how": "owns",
+      "classes": {
+        "_cameraPopup_1goo3_1": "sdk-camera-popup"
+      }
+    },
+    {
+      "hash": "1klfh",
+      "component": "SdkFlag",
+      "how": "owns",
+      "classes": {
+        "_fallbackFlag_1klfh_1": "sdk-flag"
+      }
+    },
+    {
+      "hash": "1bg5z",
+      "component": "SdkPrompt",
+      "how": "owns",
+      "classes": {
+        "_promptButtons_1bg5z_1": "sdk-prompt"
+      }
+    },
+    {
+      "hash": "ybs3f",
+      "component": "SdkSelect",
+      "how": "owns",
+      "classes": {
+        "_optionContent_ybs3f_1": "sdk-select__optionContent",
+        "_optionText_ybs3f_10": "sdk-select__optionText",
+        "_text_ybs3f_16": "sdk-select__text",
+        "_optionsList_ybs3f_24": "sdk-select",
+        "_noResults_ybs3f_30": "sdk-select__noResults"
+      }
+    },
+    {
+      "hash": "1kicl",
+      "component": "Kit",
+      "how": "css-only",
+      "classes": {
+        "_modal-content_1kicl_1": "sdk-kit__modal-content",
+        "_full-modal-loader-container_1kicl_8": "sdk-kit__full-modal-loader-container",
+        "_full-image_1kicl_15": "sdk-kit__full-image"
+      }
+    }
+  ],
+  "binds": {
+    "--v5f0b281a": "--kit-bind1",
+    "--v3fc9fb09": "--kit-bind2",
+    "--v7c781a8b": "--steps-popup-bind1",
+    "--v0c0da3a6": "--steps-popup-bind2",
+    "--v65923a60": "--content-bind1",
+    "--v64322ec3": "--toast-bind1"
+  },
+  "scopes": {
+    "data-v-ccb88c70": "data-s-icon",
+    "data-v-61742e46": "data-s-illustration",
+    "data-v-491a37b2": "data-s-container",
+    "data-v-5196485d": "data-s-select",
+    "data-v-5905a4ef": "data-s-select-native",
+    "data-v-2dfc76d0": "data-s-textarea",
+    "data-v-6c8e41d0": "data-s-checkbox",
+    "data-v-f0542652": "data-s-radio",
+    "data-v-388db1e3": "data-s-radio-check-container",
+    "data-v-e22fc4f0": "data-s-radio-button-expanded",
+    "data-v-3fee1a90": "data-s-tag",
+    "data-v-02835b6d": "data-s-html",
+    "data-v-637dcc29": "data-s-dots",
+    "data-v-42c0945e": "data-s-pagination-item",
+    "data-v-ac4a95d2": "data-s-pagination",
+    "data-v-5d110c36": "data-s-camera-selectbutton-content",
+    "data-v-c7ced469": "data-s-camera-select-button",
+    "data-v-1ec999fb": "data-s-camera-native",
+    "data-v-7ec79a53": "data-s-camera-select",
+    "data-v-4f4b48e7": "data-s-no-results",
+    "data-v-443a44bb": "data-s-content"
+  }
+}

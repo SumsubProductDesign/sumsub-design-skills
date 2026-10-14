@@ -100,7 +100,10 @@ Three groups, because rule 4 splits them:
 * **controls that move but lead nowhere** — the state changes and nothing
   follows. Name each one: this is what a moderator needs to know before the
   session, not during it;
-* **inert by design** — a picture, and correct as one.
+* **inert by design** — a picture, and correct as one;
+* **states that advance by time** — every loading state (the kit's ring or dots)
+  with the exit Step 0 settled: *timer and tap*, *timer only* or *tap only*, the
+  seconds, and that they are a placeholder (§ Placeholders below).
 
 ### Rules — a logic demo only
 
@@ -114,13 +117,16 @@ computes nothing.
 
 Every option list, field set, rule or message that neither a frame nor the
 requester gave, and that the requester agreed could be made up (Step 0, *data and
-rules the frames do not show*). One row each: what it is, where it shows, what was
-used, who can give the real one. **Read this list out before a demo**: the
+rules the frames do not show*) — and every unfilled place in a frame answered
+*proposed* (identical rows, a component's default text: what the frame drew goes in
+*what*). One row each: what it is, where it shows, what was used, who can give the
+real one. **Read this list out before a demo**: the
 audience otherwise takes a placeholder for a decision. Empty when nothing was made
 up — say "none", do not drop the heading.
 
 | what | where it shows | what the prototype uses | who has the real one |
 |---|---|---|---|
+| the Uploading state's exit (example row — the shape, replace it) | the camera flow, after the shutter | a 2 s timer, and a tap | the network: the product's upload time |
 
 ## 7. Known deviations from the design
 
@@ -133,6 +139,9 @@ check first.
 Divergences between frames, and self-contradictions inside one frame,
 reproduced verbatim. Mark them clearly as source
 bugs rather than code bugs, so nobody spends an afternoon "fixing" the code.
+An unfilled place off the task path, never asked, belongs here too; one asked in
+Step 0 is not a contradiction — a row in § Placeholders, or *source* when the
+answer was *verbatim*.
 
 ## 9. How to verify
 

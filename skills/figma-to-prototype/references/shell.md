@@ -56,7 +56,7 @@ One call renders the shell at the frame's size, screenshots it and prints:
 | `header:` | printed when the frame has no island gap above the header: the current 56px component (with or without the 41px tab subheader) or the old 64px one | not compared; the default header is used, the line goes to the ledger |
 | `landmark: the frame has no Collapse/Expand row…` | the frame's sidebar instance is taller than the frame and shows clipped rows where the shell has Collapse | skipped, not a miss |
 | `ledger:` | one sentence with all of the above | paste into the ledger — **unless `ASK` follows** |
-| `OLDER:` | printed instead of `ASK` when the miss comes with the old 64px header | the older shell: the default, the ledger line, no question — unless the menu's items differ |
+| `OLDER:` | printed instead of `ASK` when the miss comes with the old 64px header | the older shell: the default, the ledger line, no question — its menu's items too (§ When the frame's menu disagrees with the shell) |
 | `ASK:` | the landmarks miss by more than a uniform offset, or the sidebar zone is over 3%, and the header is not the old one | **a question, with a crop of both sidebars**, before anything is built on either shell. Not a ledger line until answered: an 11.87% sidebar once went in as printed and the person found the different menu on the live link |
 
 | landmarks | what to do |
@@ -126,8 +126,12 @@ snapshot at one width. Three ways to combine them, chosen in Step 0:
 | **elastic form** | the content block keeps the frame's width and stays centred while the window is wide enough; below that the **primary column gives up width first** down to a floor, the aside keeps its width, and only under the floor does the page scroll sideways. `assets/templates/fluid-page.js`, checked with `scripts/fluidcheck.sh` | a form or a settings page beside a card, on screens narrower than the frame |
 | **elastic content** | width-spanning containers — table frame, toolbar, section headers — are DOM boxes that stretch; a table has one flexible column; what tells them apart is Figma's own auto-layout (*fill container* vs *fixed*, constraints), read from the design context. Plates cannot stretch, so Step 5 bakes only pieces that do not span the width. `assets/templates/list-table.js` | list and table pages whose respondents' screens differ from the frame |
 
-1440 is the working width. A 1920 frame is warned about in Step 0 (*frame width*):
-pinned content from it needs a 1920 window; the elastic modes are how it fits 1440.
+1440 is the working width. A 1920 frame is warned about in Step 0 (*frame width*), and
+for any frame wider than the screens the test runs on **the elastic mode is the first
+alternative offered**: screens narrower than 1440 exist (1366, 1280), and pinned content
+scrolls sideways below its own width plus the shell's ~310 — run 18's 1084 form at about
+1400, though it "fits 1440". *Fluid shell, pinned content* is offered only beside the
+elastic mode, with that cost named (run 18 recommended it alone).
 
 An elastic form does not *stretch* — above the frame's width nothing moves and the diff
 against the frame is unchanged — it *shrinks*. Its numbers:
@@ -243,8 +247,11 @@ frequent on a detail page; they are config, never an edit of the built file (Ste
 ## When the frame's menu disagrees with the shell
 
 The frame's sidebar is the designer's instance, often older than the product; the shell's
-menu is the product's. The menu — top level and nesting — comes from the shell. Three
-disagreements come up; in each, **ask in Step 0**, one line with the difference.
+menu is the product's. The menu — top level and nesting — comes from the shell. **Under an
+`OLDER` verdict the frame's menu is as old as its shell: its items follow `menu.json`, said in
+the defaults line and one ledger row, not asked.** Otherwise — a current or newer shell, or a
+difference the brief makes on purpose — three disagreements come up; in each, **ask in Step 0**,
+one line with the difference.
 `shell.js` refuses an active path it cannot find and prints which case it is.
 
 | the frame shows | ask | if outdated | if on purpose |
@@ -274,6 +281,7 @@ Seen on every frame so far; write the line, do not ask:
 | placeholder icons — a magnifier in the pagination, on export buttons, on the alert's close | kept as drawn: "placeholder icons as in the frame" |
 | `Inter` on table or list components | the shell's Geist is used: "component font Inter, page font Geist; text widths ±3px" |
 | a blue selected tab | the shell's black one (§ Tabs) |
+| menu items that differ from `menu.json`, under an `OLDER` verdict | "frame menu older than the product's: <section> has <item> extra / missing; menu.json's items used" |
 
 ## What the shell does not cover
 

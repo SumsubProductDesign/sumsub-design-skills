@@ -1,5 +1,7 @@
 # Run log — <session: what was built>
 
+**On copying: delete the guidance paragraphs (this one and every prose block under a heading); keep the headings, the bullets and the tables.** The prose is for the writer; the reader maintains the skill and has the template.
+
 Started by the skill at Step 0 and filled in as it goes — the person never has to create it.
 One file per session at `_work/run-log.md`; a session that builds two prototypes keeps
 one log with a block per prototype in §3 and §4. It exists for one purpose: so the person

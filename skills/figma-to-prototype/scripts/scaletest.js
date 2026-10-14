@@ -7,7 +7,7 @@
 // (_pix.cjs bounds), so the whole test is one round of Chrome instead of six.
 const {spawn} = require('child_process'), {execFileSync} = require('child_process');
 const fs = require('fs'), path = require('path');
-const {CHROME} = require(path.join(__dirname, '_chrome.cjs'));
+const {CHROME, watchdog} = require(path.join(__dirname, '_chrome.cjs'));
 const [file, outdir, hash = ''] = process.argv.slice(2);
 if (!file || !outdir) { console.error('usage: scaletest.js <file.html> <outdir> [#hash]'); process.exit(1); }
 fs.mkdirSync(outdir, {recursive: true});
@@ -17,8 +17,9 @@ const shot = ([w, h]) => new Promise((resolve, reject) => {
   const ch = spawn(CHROME, ['--headless=new', '--disable-gpu', '--force-device-scale-factor=1',
     '--window-size=' + w + ',' + h, '--screenshot=' + out, '--virtual-time-budget=4000',
     'file://' + path.resolve(file) + hash], {stdio: 'ignore'});
+  watchdog(ch, 'scaletest');       // a hung Chrome is killed on the clock (CHROME_TIMEOUT, 60 s)
   ch.on('error', reject);
-  ch.on('close', () => resolve(out));
+  ch.on('close', () => ch.timedOut ? reject(new Error('no render at ' + w + ': Chrome was killed on the clock')) : resolve(out));
 });
 
 (async () => {

@@ -1,0 +1,8 @@
+{ "theme": "light",
+  "canvas": "responsive",
+  "frame": {"fileKey": "8VpSRNe9ur7SBctw0JrtOE", "nodeId": "2344:130722", "width": 375, "height": 812, "chrome": 0},
+  "header": {"back": true, "step": [1, 3], "toPhone": true, "lang": "En"},
+  "footer": {"buttons": [{"label": "Start verification", "id": "start"}]},
+  "whitelabel": true,
+  "narrow": 600,
+  "title": "Applicant data" }
