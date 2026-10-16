@@ -2,7 +2,7 @@
 // crop.js <reference.png> <prototype.png> <x> <y> <w> <h> [zoom] [bx by] [out.png]
 // Stacked comparison: reference above, prototype below, same crop, zoomed.
 // bx/by let the second image be cropped at a different origin (different canvas offsets).
-const {execSync} = require('child_process'), fs = require('fs'), path = require('path'), os = require('os');
+const {execFileSync} = require('child_process'), fs = require('fs'), path = require('path'), os = require('os'), {pathToFileURL} = require('url');
 const {CHROME, TIMEOUT} = require(path.join(__dirname, '_chrome.cjs'));
 // default output goes next to the other renders when the project layout exists,
 // so a comparison does not end up beside the deliverable
@@ -26,15 +26,17 @@ for (const [name, v] of [['x', x], ['y', y], ['w', w], ['h', h], ['zoom', z], ['
 }
 const tmp = path.join(os.tmpdir(), '_crop_' + Date.now() + '.html');
 const pane = (img, ox, oy) =>
-  `<div class=wrap><img src="file://${path.resolve(img)}" style="left:${-ox*z}px;top:${-oy*z}px"></div>`;
+  `<div class=wrap><img src="${pathToFileURL(path.resolve(img)).href}" style="left:${-ox*z}px;top:${-oy*z}px"></div>`;
 fs.writeFileSync(tmp, `<style>body{margin:0;background:#fff;font:10px monospace}
 .wrap{position:relative;width:${w*z}px;height:${h*z}px;overflow:hidden}
 .wrap img{position:absolute;transform-origin:top left;transform:scale(${z});image-rendering:pixelated}
 .lbl{padding:2px 4px;background:#eee}</style>
 <div class=lbl>REFERENCE</div>${pane(a, x, y)}<div class=lbl>PROTOTYPE</div>${pane(b, bx, by)}`);
-try { execSync(`"${CHROME}" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files ` +
-  `--window-size=${Math.ceil(w*z)+4},${Math.ceil(h*z*2)+40} --screenshot="${out}" ` +
-  `--virtual-time-budget=3000 "file://${tmp}" 2>/dev/null`, {stdio: 'ignore', timeout: TIMEOUT * 1000, killSignal: 'SIGKILL'});
+// Chrome gets its arguments as an array, not through a shell: an output path with quotes or $(…) stays data,
+// and the image paths go into the page as file: URLs, escaped
+try { execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files',
+  `--window-size=${Math.ceil(w*z)+4},${Math.ceil(h*z*2)+40}`, `--screenshot=${out}`,
+  '--virtual-time-budget=3000', pathToFileURL(tmp).href], {stdio: 'ignore', timeout: TIMEOUT * 1000, killSignal: 'SIGKILL'});
   // the clock of _chrome.cjs: a hung Chrome is killed after CHROME_TIMEOUT s and this call fails with a line
 } catch (e) { console.error('crop: ' + (e && e.signal === 'SIGKILL' ? `Chrome did not finish within ${TIMEOUT}s and was killed (CHROME_TIMEOUT raises the clock)` : e && e.message)); process.exit(1); }
 console.log(out);

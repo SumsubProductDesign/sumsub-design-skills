@@ -4,6 +4,9 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.274.1 — 2026-10-16 (figma-to-prototype: no shell strings in grab.js and crop.js)
+- **`grab.js` and `crop.js` no longer build a shell command from paths.** Both passed an output path (and `grab.js` an asset URL) inside a `curl` / Chrome command string, so a name with quotes or `$(…)` would have run as a command — flagged high by the GitLab security review. They now call `curl` and Chrome with an argument array (`execFileSync`), `crop.js` puts the image paths into its page as escaped `file:` URLs, and `grab.js` refuses a prefix that contains a path (`/`, `..`). Behaviour is otherwise the same.
+
 ## v3.274.0 — 2026-10-14 (figma-to-prototype: WebSDK prototypes, from the kit's own components)
 The first WebSDK prototype built with the skill (address autocomplete) had to find its own way to the kit and to every mobile check; that way is now the skill's, tested on five eval runs over two flows (Switch device on desktop frames, General flow on mobile frames with a camera) and one dashboard regression run. User-visible:
 

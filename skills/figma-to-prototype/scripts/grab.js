@@ -3,13 +3,15 @@
 // Keeps a large get_design_context response OUT of the conversation:
 // writes its text to <outdir>/<prefix>.jsx for grepping, and curls every asset
 // it references into <outdir>/icons/. Asset traffic costs no tokens.
-const fs = require('fs'), path = require('path'), {execSync} = require('child_process');
+const fs = require('fs'), path = require('path'), {execFileSync} = require('child_process');
 // the default outdir is the project's _work/figma-ref, found by walking up from the cwd to the folder that
 // holds _work: run from inside _work/figma-ref it used to create _work/figma-ref/_work/figma-ref/
 let root = process.cwd(); while (!fs.existsSync(path.join(root, '_work')) && path.dirname(root) !== root) root = path.dirname(root);
 if (!fs.existsSync(path.join(root, '_work'))) root = process.cwd();
 const [file, prefix = '', outdir = path.join(root, '_work/figma-ref')] = process.argv.slice(2);
 if (!file) { console.error('usage: grab.js <persisted.json> <prefix> [outdir]'); process.exit(1); }
+// the prefix names files inside outdir: no path separators and no `..`, so it cannot write elsewhere
+if (/[\\/]|\.\./.test(prefix)) { console.error(`grab.js: prefix "${prefix}" has a path in it; give a plain name`); process.exit(1); }
 const j = JSON.parse(fs.readFileSync(file, 'utf8'));
 const txt = (Array.isArray(j) ? j.map(x => x.text) : [j.text || JSON.stringify(j)]).join('\n=====\n');
 fs.mkdirSync(path.join(outdir, 'icons'), {recursive: true});
@@ -21,7 +23,8 @@ while ((m = re.exec(txt))) list.push([m[1], m[2]]);
 for (const [name, url] of list) {
   const ext = url.split('.').pop().replace(/[^a-z0-9]/gi, '') || 'svg';
   const out = path.join(outdir, 'icons', `${prefix}__${name}.${ext}`);
-  if (!fs.existsSync(out)) execSync(`curl -sL -o "${out}" "${url}"`);
+  // curl gets its arguments as an array, not through a shell: a path or URL with quotes or $(…) stays data
+  if (!fs.existsSync(out)) execFileSync('curl', ['-sL', '-o', out, url]);
 }
 console.log(`jsx: ${outTxt} (${txt.length} chars), assets: ${list.length}`);
 console.log(list.map(x => x[0]).join(' '));
