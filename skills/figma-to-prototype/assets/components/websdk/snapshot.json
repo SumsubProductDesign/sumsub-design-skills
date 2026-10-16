@@ -1,0 +1,3931 @@
+{
+  "taken": "2026-10-08",
+  "upstream": "storybook-websdk-uikit.dev.euc1.sumsub.net",
+  "bodyClass": "sns-uikit sns-theme-light sb-main-padded sb-show-main",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    "https://fonts.googleapis.com/css?family=Manrope:200,300,400,500,600,700,800|Dosis:600"
+  ],
+  "stories": [
+    {
+      "component": "SdkText",
+      "story": "default",
+      "id": "components-sdktext--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkText",
+      "story": "all-variants",
+      "id": "components-sdktext--all-variants",
+      "unread": false,
+      "measure": {
+        "tag": "table",
+        "w": 920,
+        "h": 335,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIcon",
+      "story": "default",
+      "id": "components-sdkicon--default",
+      "unread": false,
+      "measure": {
+        "tag": "svg",
+        "w": 24,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIcon",
+      "story": "all-icons",
+      "id": "components-sdkicon--all-icons",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 2710,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIllustration",
+      "story": "default",
+      "id": "components-sdkillustration--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 112,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIllustration",
+      "story": "small",
+      "id": "components-sdkillustration--small",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 112,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIllustration",
+      "story": "large",
+      "id": "components-sdkillustration--large",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 184,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "28px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIllustration",
+      "story": "no-background",
+      "id": "components-sdkillustration--no-background",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 152,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(240, 240, 240)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLoader",
+      "story": "default",
+      "id": "components-sdkloader--default",
+      "unread": false,
+      "measure": {
+        "tag": "svg",
+        "w": 26.39,
+        "h": 26.39,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(20, 60, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkDotsLoader",
+      "story": "default",
+      "id": "components-sdkdotsloader--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 120,
+        "h": 88,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "40px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInput",
+      "story": "default",
+      "id": "components-sdkinput-input-sdkinput--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 300,
+        "h": 152,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputLabel",
+      "story": "default",
+      "id": "components-sdkinput-label-sdkinputlabel--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 76,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSpanRequired",
+      "story": "default",
+      "id": "components-sdkspanrequired--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "700",
+        "line": "24px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "default",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--default",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 90,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "required",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--required",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 90,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "with-errors",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--with-errors",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 142,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "with-description",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--with-description",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 114,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "with-title-right",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--with-title-right",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 110,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputFieldset",
+      "story": "complete-example",
+      "id": "components-sdkinput-fieldset-sdkinputfieldset--complete-example",
+      "unread": false,
+      "measure": {
+        "tag": "fieldset",
+        "w": 920,
+        "h": 162,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonInput",
+      "story": "default",
+      "id": "components-sdkbutton-sdkbuttoninput--default",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "9px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonInput",
+      "story": "value",
+      "id": "components-sdkbutton-sdkbuttoninput--value",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "9px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonInput",
+      "story": "icons",
+      "id": "components-sdkbutton-sdkbuttoninput--icons",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "9px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonInput",
+      "story": "disabled",
+      "id": "components-sdkbutton-sdkbuttoninput--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(32, 37, 44, 0.05)",
+        "radius": "12px",
+        "padding": "9px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonInput",
+      "story": "invalid",
+      "id": "components-sdkbutton-sdkbuttoninput--invalid",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "9px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonAsync",
+      "story": "loading",
+      "id": "components-sdkbutton-sdkbuttonasync--loading",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 329.63,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonAsync",
+      "story": "success",
+      "id": "components-sdkbutton-sdkbuttonasync--success",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 106,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButtonAsync",
+      "story": "success-with-icon",
+      "id": "components-sdkbutton-sdkbuttonasync--success-with-icon",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 106,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "primary",
+      "id": "components-sdkbutton--primary",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 83.98,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "secondary",
+      "id": "components-sdkbutton--secondary",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 85.98,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "small",
+      "id": "components-sdkbutton--small",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 80,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "plain",
+      "id": "components-sdkbutton--plain",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 51.98,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "32px",
+        "padding": "11px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "field",
+      "id": "components-sdkbutton--field",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 51.98,
+        "h": 40,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "32px",
+        "padding": "7px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "link",
+      "id": "components-sdkbutton--link",
+      "unread": false,
+      "measure": {
+        "tag": "span",
+        "w": 51.08,
+        "h": 22,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "500",
+        "line": "24px",
+        "color": "rgb(20, 60, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "32px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "link-underlined",
+      "id": "components-sdkbutton--link-underlined",
+      "unread": false,
+      "measure": {
+        "tag": "p",
+        "w": 920,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "topbar",
+      "id": "components-sdkbutton--topbar",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 84,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(198, 234, 79)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "icon-only",
+      "id": "components-sdkbutton--icon-only",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "8px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "with-left-icon",
+      "id": "components-sdkbutton--with-left-icon",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 107.98,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkButton",
+      "story": "all-variants",
+      "id": "components-sdkbutton--all-variants",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 759.19,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkHeader",
+      "story": "default",
+      "id": "components-sdkheader--default",
+      "unread": false,
+      "measure": {
+        "tag": "header",
+        "w": 718,
+        "h": 68,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px 4px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkHeader",
+      "story": "with-back-button",
+      "id": "components-sdkheader--with-back-button",
+      "unread": false,
+      "measure": {
+        "tag": "header",
+        "w": 718,
+        "h": 68,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px 4px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkHeader",
+      "story": "with-lang-selector",
+      "id": "components-sdkheader--with-lang-selector",
+      "unread": false,
+      "measure": {
+        "tag": "header",
+        "w": 718,
+        "h": 68,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px 4px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkHeader",
+      "story": "empty",
+      "id": "components-sdkheader--empty",
+      "unread": false,
+      "measure": {
+        "tag": "header",
+        "w": 718,
+        "h": 68,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px 4px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLangSelector",
+      "story": "default",
+      "id": "components-sdklangselector--default",
+      "unread": false,
+      "measure": {
+        "tag": "span",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkStepsPopup",
+      "story": "default",
+      "id": "components-sdkstepspopup--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 212,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "16px 32px 160px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkStepsPopup",
+      "story": "first-step-active",
+      "id": "components-sdkstepspopup--first-step-active",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 212,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "16px 32px 160px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkStepsPopup",
+      "story": "last-step-active",
+      "id": "components-sdkstepspopup--last-step-active",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 212,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "16px 32px 160px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkStepsPopup",
+      "story": "all-done",
+      "id": "components-sdkstepspopup--all-done",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 212,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "16px 32px 160px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkStepsPopup",
+      "story": "single-step",
+      "id": "components-sdkstepspopup--single-step",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 212,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "16px 32px 160px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkContent",
+      "story": "default",
+      "id": "components-sdkcontent--default",
+      "unread": false,
+      "measure": {
+        "tag": "section",
+        "w": 920,
+        "h": 74,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "24px 16px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkContent",
+      "story": "document-definition",
+      "id": "components-sdkcontent--document-definition",
+      "unread": false,
+      "measure": {
+        "tag": "section",
+        "w": 920,
+        "h": 142,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "24px 16px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkFooter",
+      "story": "default",
+      "id": "components-sdkfooter--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 1000,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(255, 255, 255, 0.2)",
+        "radius": "32px 32px 0px 0px",
+        "padding": "8px 16px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkFooter",
+      "story": "with-custom-content",
+      "id": "components-sdkfooter--with-custom-content",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 1000,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(255, 255, 255, 0.2)",
+        "radius": "32px 32px 0px 0px",
+        "padding": "8px 16px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkFooter",
+      "story": "with-backdrop-blur",
+      "id": "components-sdkfooter--with-backdrop-blur",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 560,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkBaseContainer",
+      "story": "default",
+      "id": "components-sdkbasecontainer--default",
+      "unread": false,
+      "measure": {
+        "tag": "main",
+        "w": 718,
+        "h": 200,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "32px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkBaseContainer",
+      "story": "full-layout",
+      "id": "components-sdkbasecontainer--full-layout",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 198,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLogo",
+      "story": "default",
+      "id": "components-sdklogo--default",
+      "unread": false,
+      "measure": {
+        "tag": "svg",
+        "w": 138,
+        "h": 22,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgba(32, 37, 44, 0.6)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLogoBlock",
+      "story": "default",
+      "id": "components-sdklogoblock--default",
+      "unread": false,
+      "measure": {
+        "tag": "span",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLogoBlock",
+      "story": "empty",
+      "id": "components-sdklogoblock--empty",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLogoBlock",
+      "story": "small",
+      "id": "components-sdklogoblock--small",
+      "unread": false,
+      "measure": {
+        "tag": "span",
+        "w": 40,
+        "h": 40,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLogoBlock",
+      "story": "extra-small",
+      "id": "components-sdklogoblock--extra-small",
+      "unread": false,
+      "measure": {
+        "tag": "span",
+        "w": 32,
+        "h": 32,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "8px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "default",
+      "id": "components-sdkiconblock--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "status",
+      "id": "components-sdkiconblock--status",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "attention",
+      "id": "components-sdkiconblock--attention",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(191, 131, 0, 0.1)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "error",
+      "id": "components-sdkiconblock--error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(209, 36, 36, 0.1)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "success",
+      "id": "components-sdkiconblock--success",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 139, 94, 0.1)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "disabled",
+      "id": "components-sdkiconblock--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 48,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(236, 237, 242, 0.6)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "small",
+      "id": "components-sdkiconblock--small",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 40,
+        "h": 40,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkIconBlock",
+      "story": "extra-small",
+      "id": "components-sdkiconblock--extra-small",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 32,
+        "h": 32,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "8px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPageTitle",
+      "story": "default",
+      "id": "components-sdkpagetitle--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 64,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPageTitle",
+      "story": "align-left",
+      "id": "components-sdkpagetitle--align-left",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 64,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPageTitle",
+      "story": "align-center",
+      "id": "components-sdkpagetitle--align-center",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 64,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPageTitle",
+      "story": "subtitle-with-line-breaks",
+      "id": "components-sdkpagetitle--subtitle-with-line-breaks",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 136,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "default",
+      "id": "components-sdkfield-sdkinputfield--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "with-value",
+      "id": "components-sdkfield-sdkinputfield--with-value",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "required",
+      "id": "components-sdkfield-sdkinputfield--required",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "disabled",
+      "id": "components-sdkfield-sdkinputfield--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "readonly",
+      "id": "components-sdkfield-sdkinputfield--readonly",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "with-error",
+      "id": "components-sdkfield-sdkinputfield--with-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 136,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "multiple-errors",
+      "id": "components-sdkfield-sdkinputfield--multiple-errors",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 160,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "with-description",
+      "id": "components-sdkfield-sdkinputfield--with-description",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 102,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "password-field",
+      "id": "components-sdkfield-sdkinputfield--password-field",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 76,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "with-left-slot",
+      "id": "components-sdkfield-sdkinputfield--with-left-slot",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 76,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputField",
+      "story": "with-right-slot",
+      "id": "components-sdkfield-sdkinputfield--with-right-slot",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 76,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "default",
+      "id": "components-sdkfield-sdkselectfield--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "with-value",
+      "id": "components-sdkfield-sdkselectfield--with-value",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "required",
+      "id": "components-sdkfield-sdkselectfield--required",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "disabled",
+      "id": "components-sdkfield-sdkselectfield--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "with-error",
+      "id": "components-sdkfield-sdkselectfield--with-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 136,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "with-description",
+      "id": "components-sdkfield-sdkselectfield--with-description",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 102,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "native-variant",
+      "id": "components-sdkfield-sdkselectfield--native-variant",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "with-flags",
+      "id": "components-sdkfield-sdkselectfield--with-flags",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "grouped-options",
+      "id": "components-sdkfield-sdkselectfield--grouped-options",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelectField",
+      "story": "fullscreen-variant",
+      "id": "components-sdkfield-sdkselectfield--fullscreen-variant",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTextareaField",
+      "story": "default",
+      "id": "components-sdkfield-sdktextareafield--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 166,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTextareaField",
+      "story": "with-value",
+      "id": "components-sdkfield-sdktextareafield--with-value",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 166,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTextareaField",
+      "story": "required",
+      "id": "components-sdkfield-sdktextareafield--required",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 166,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTextareaField",
+      "story": "with-error",
+      "id": "components-sdkfield-sdktextareafield--with-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 194,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPhoneField",
+      "story": "default",
+      "id": "components-sdkfield-sdkphonefield--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 360,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPhoneField",
+      "story": "with-value",
+      "id": "components-sdkfield-sdkphonefield--with-value",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 360,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPhoneField",
+      "story": "with-error",
+      "id": "components-sdkfield-sdkphonefield--with-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 360,
+        "h": 136,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkDateField",
+      "story": "default",
+      "id": "components-sdkfield-sdkdatefield--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkDateField",
+      "story": "with-value",
+      "id": "components-sdkfield-sdkdatefield--with-value",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 108,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkDateField",
+      "story": "with-error",
+      "id": "components-sdkfield-sdkdatefield--with-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 136,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelect",
+      "story": "default",
+      "id": "components-sdkselect--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 220,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelect",
+      "story": "grouped-options",
+      "id": "components-sdkselect--grouped-options",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 220,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelect",
+      "story": "with-flags",
+      "id": "components-sdkselect--with-flags",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 220,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSelect",
+      "story": "items-with-description",
+      "id": "components-sdkselect--items-with-description",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 220,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCheckboxCommon",
+      "story": "default",
+      "id": "components-sdkinput-checkbox-sdkcheckboxcommon--default",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 24,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCheckboxCommon",
+      "story": "all-variants",
+      "id": "components-sdkinput-checkbox-sdkcheckboxcommon--all-variants",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 64,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputCheckbox",
+      "story": "default",
+      "id": "components-sdkinput-checkbox-sdkinputcheckbox--default",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkRadioCommon",
+      "story": "default",
+      "id": "components-sdkinput-radio-sdkradiocommon--default",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 24,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "default",
+      "id": "components-sdkinput-radio-sdkinputradio--default",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "active",
+      "id": "components-sdkinput-radio-sdkinputradio--active",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "disabled",
+      "id": "components-sdkinput-radio-sdkinputradio--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgba(32, 37, 44, 0.6)",
+        "bg": "rgba(32, 37, 44, 0.05)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "with-left-icon",
+      "id": "components-sdkinput-radio-sdkinputradio--with-left-icon",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "with-left-icon-active",
+      "id": "components-sdkinput-radio-sdkinputradio--with-left-icon-active",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "long-label",
+      "id": "components-sdkinput-radio-sdkinputradio--long-label",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 58,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkInputRadio",
+      "story": "required",
+      "id": "components-sdkinput-radio-sdkinputradio--required",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "default",
+      "id": "components-sdkinput-radio-radiocheckcontainer--default",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "checked",
+      "id": "components-sdkinput-radio-radiocheckcontainer--checked",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "disabled",
+      "id": "components-sdkinput-radio-radiocheckcontainer--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgba(32, 37, 44, 0.6)",
+        "bg": "rgba(32, 37, 44, 0.05)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "error",
+      "id": "components-sdkinput-radio-radiocheckcontainer--error",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "with-icon",
+      "id": "components-sdkinput-radio-radiocheckcontainer--with-icon",
+      "unread": false,
+      "measure": {
+        "tag": "label",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainer",
+      "story": "as-button",
+      "id": "components-sdkinput-radio-radiocheckcontainer--as-button",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 920,
+        "h": 44,
+        "font": "Arial",
+        "size": "13.3333px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "12px",
+        "padding": "4px 12px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainerGroup",
+      "story": "default",
+      "id": "components-sdkinput-radio-radiocheckcontainergroup--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 189,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainerGroup",
+      "story": "with-checked",
+      "id": "components-sdkinput-radio-radiocheckcontainergroup--with-checked",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 142,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "RadioCheckContainerGroup",
+      "story": "with-checkbox",
+      "id": "components-sdkinput-radio-radiocheckcontainergroup--with-checkbox",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 142,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkRadioButtonExpanded",
+      "story": "default",
+      "id": "components-sdkradiobuttonexpanded--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 198,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkRadioButtonExpanded",
+      "story": "active",
+      "id": "components-sdkradiobuttonexpanded--active",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 198,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "12px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkRadioButtonExpanded",
+      "story": "long-label-with-icon",
+      "id": "components-sdkradiobuttonexpanded--long-label-with-icon",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 540,
+        "h": 218,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToggle",
+      "story": "default",
+      "id": "components-sdktoggle--default",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 34,
+        "h": 20,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(32, 37, 44, 0.6)",
+        "radius": "9999px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToggle",
+      "story": "disabled",
+      "id": "components-sdktoggle--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 34,
+        "h": 20,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(32, 37, 44, 0.2)",
+        "radius": "9999px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkChoiceList",
+      "story": "default",
+      "id": "components-sdkchoicelist--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 166,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "16px",
+        "padding": "2px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkChoiceList",
+      "story": "single-option",
+      "id": "components-sdkchoicelist--single-option",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 74,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "16px",
+        "padding": "2px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkChoiceList",
+      "story": "long-labels",
+      "id": "components-sdkchoicelist--long-labels",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 166,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "16px",
+        "padding": "2px 0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkFlag",
+      "story": "default",
+      "id": "components-sdkflag--default",
+      "unread": false,
+      "measure": {
+        "tag": "img",
+        "w": 24,
+        "h": 18,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkFlag",
+      "story": "grid",
+      "id": "components-sdkflag--grid",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 2448,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLink",
+      "story": "default",
+      "id": "components-sdklink--default",
+      "unread": false,
+      "measure": {
+        "tag": "a",
+        "w": 61.78,
+        "h": 22,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(20, 60, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "5px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLink",
+      "story": "in-text",
+      "id": "components-sdklink--in-text",
+      "unread": false,
+      "measure": {
+        "tag": "p",
+        "w": 920,
+        "h": 22,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkLink",
+      "story": "standalone",
+      "id": "components-sdklink--standalone",
+      "unread": false,
+      "measure": {
+        "tag": "a",
+        "w": 61.78,
+        "h": 22,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(20, 60, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "5px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSeparator",
+      "story": "default",
+      "id": "components-sdkseparator--default",
+      "unread": false,
+      "measure": {
+        "tag": "hr",
+        "w": 920,
+        "h": 1,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(128, 128, 128)",
+        "bg": "rgba(32, 37, 44, 0.1)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSeparator",
+      "story": "or",
+      "id": "components-sdkseparator--or",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 24,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "default",
+      "id": "components-sdktag--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 65.13,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(32, 37, 44)",
+        "bg": "rgba(32, 37, 44, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "success",
+      "id": "components-sdktag--success",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 72.31,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(7, 79, 61)",
+        "bg": "rgba(0, 139, 94, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "info",
+      "id": "components-sdktag--info",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 43.16,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(0, 35, 105)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "warning",
+      "id": "components-sdktag--warning",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 70.41,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(191, 131, 0)",
+        "bg": "rgba(191, 131, 0, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "state-error",
+      "id": "components-sdktag--state-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 50.23,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(127, 8, 8)",
+        "bg": "rgba(209, 36, 36, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "disabled",
+      "id": "components-sdktag--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 73.77,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgba(32, 37, 44, 0.6)",
+        "bg": "rgba(32, 37, 44, 0.05)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTag",
+      "story": "closable",
+      "id": "components-sdktag--closable",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 67.16,
+        "h": 26,
+        "font": "Manrope",
+        "size": "14px",
+        "weight": "500",
+        "line": "20px",
+        "color": "rgb(0, 35, 105)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "8px",
+        "padding": "2px 8px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "warning-with-title",
+      "id": "components-sdkalert--warning-with-title",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 78,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(191, 131, 0, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "error-with-title",
+      "id": "components-sdkalert--error-with-title",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 78,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(209, 36, 36, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "alert-info",
+      "id": "components-sdkalert--alert-info",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "success",
+      "id": "components-sdkalert--success",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 139, 94, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "alert-neutral",
+      "id": "components-sdkalert--alert-neutral",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(236, 237, 242, 0.2)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "without-icon",
+      "id": "components-sdkalert--without-icon",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 78,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAlert",
+      "story": "with-footer-action",
+      "id": "components-sdkalert--with-footer-action",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 106,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(209, 36, 36, 0.1)",
+        "radius": "16px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "default",
+      "id": "components-sdktoast--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 118,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "success",
+      "id": "components-sdktoast--success",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 118,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "state-error",
+      "id": "components-sdktoast--state-error",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 118,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "warning",
+      "id": "components-sdktoast--warning",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 118,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "with-icon",
+      "id": "components-sdktoast--with-icon",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 90,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkToast",
+      "story": "with-link",
+      "id": "components-sdktoast--with-link",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 144,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCard",
+      "story": "default",
+      "id": "components-sdkcard--default",
+      "unread": false,
+      "measure": {
+        "tag": "article",
+        "w": 506,
+        "h": 98,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCard",
+      "story": "with-left-icon-and-counter",
+      "id": "components-sdkcard--with-left-icon-and-counter",
+      "unread": false,
+      "measure": {
+        "tag": "article",
+        "w": 506,
+        "h": 98,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCard",
+      "story": "collapsed",
+      "id": "components-sdkcard--collapsed",
+      "unread": false,
+      "measure": {
+        "tag": "article",
+        "w": 506,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCard",
+      "story": "accordion",
+      "id": "components-sdkcard--accordion",
+      "unread": false,
+      "measure": {
+        "tag": "details",
+        "w": 506,
+        "h": 98,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(236, 237, 242)",
+        "radius": "16px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTips",
+      "story": "default",
+      "id": "components-sdktips--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 590,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTips",
+      "story": "text",
+      "id": "components-sdktips--text",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 144,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTips",
+      "story": "without-title",
+      "id": "components-sdktips--without-title",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 562,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTabs",
+      "story": "default",
+      "id": "components-sdktabs--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 72,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(13, 17, 23)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTabs",
+      "story": "disabled",
+      "id": "components-sdktabs--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 72,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(13, 17, 23)",
+        "radius": "0px",
+        "padding": "20px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkValidationStep",
+      "story": "default",
+      "id": "components-sdkvalidationstep--default",
+      "unread": false,
+      "measure": {
+        "tag": "li",
+        "w": 920,
+        "h": 46,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkValidationStep",
+      "story": "accepted",
+      "id": "components-sdkvalidationstep--accepted",
+      "unread": false,
+      "measure": {
+        "tag": "li",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkValidationStep",
+      "story": "rejected",
+      "id": "components-sdkvalidationstep--rejected",
+      "unread": false,
+      "measure": {
+        "tag": "li",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkValidationStep",
+      "story": "required",
+      "id": "components-sdkvalidationstep--required",
+      "unread": false,
+      "measure": {
+        "tag": "li",
+        "w": 920,
+        "h": 50,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSplashScreen",
+      "story": "default",
+      "id": "components-sdksplashscreen--default",
+      "unread": false,
+      "measure": {
+        "tag": "main",
+        "w": 718,
+        "h": 202,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "32px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkSplashScreen",
+      "story": "with-button",
+      "id": "components-sdksplashscreen--with-button",
+      "unread": false,
+      "measure": {
+        "tag": "main",
+        "w": 718,
+        "h": 258,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgb(255, 255, 255)",
+        "radius": "32px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkModal",
+      "story": "default",
+      "id": "components-sdkmodal--default",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 122.36,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkModal",
+      "story": "default-with-footer",
+      "id": "components-sdkmodal--default-with-footer",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 122.36,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkModal",
+      "story": "big-height",
+      "id": "components-sdkmodal--big-height",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 122.36,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkBottomSheet",
+      "story": "default",
+      "id": "components-sdkbottomsheet--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkBottomSheet",
+      "story": "title",
+      "id": "components-sdkbottomsheet--title",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkBottomSheet",
+      "story": "title-and-subtitle",
+      "id": "components-sdkbottomsheet--title-and-subtitle",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkTwoFaCodeInput",
+      "story": "default",
+      "id": "components-sdktwofacodeinput--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTwoFaCodeInput",
+      "story": "invalid",
+      "id": "components-sdktwofacodeinput--invalid",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkTwoFaCodeInput",
+      "story": "disabled",
+      "id": "components-sdktwofacodeinput--disabled",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 44,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkUploadButton",
+      "story": "default",
+      "id": "components-sdkuploadbutton--default",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 85.98,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "600",
+        "line": "24px",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(32, 37, 44)",
+        "radius": "32px",
+        "padding": "11px 16px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkDropdownMenu",
+      "story": "default",
+      "id": "components-sdkdropdownmenu--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 148,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "50px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkDropdownMenu",
+      "story": "with-selected-item",
+      "id": "components-sdkdropdownmenu--with-selected-item",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 148,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "50px"
+      },
+      "open": true
+    },
+    {
+      "component": "SdkAvatar",
+      "story": "with-image",
+      "id": "components-sdkavatar--with-image",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 32,
+        "h": 32,
+        "font": "Arial",
+        "size": "13.3333px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "50%",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAvatar",
+      "story": "with-character",
+      "id": "components-sdkavatar--with-character",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 32,
+        "h": 32,
+        "font": "Arial",
+        "size": "13.3333px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "50%",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkAvatar",
+      "story": "default",
+      "id": "components-sdkavatar--default",
+      "unread": false,
+      "measure": {
+        "tag": "button",
+        "w": 32,
+        "h": 32,
+        "font": "Arial",
+        "size": "13.3333px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(20, 60, 255, 0.1)",
+        "radius": "50%",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPanel",
+      "story": "default",
+      "id": "components-sdkpanel--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 93,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(32, 37, 44, 0.05)",
+        "radius": "8px",
+        "padding": "12px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkPrompt",
+      "story": "default",
+      "id": "components-sdkprompt--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 48,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "0px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCameraPopup",
+      "story": "default",
+      "id": "components-sdkcamerapopup--default",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 140,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "50px"
+      },
+      "open": false
+    },
+    {
+      "component": "SdkCameraPopup",
+      "story": "with-icon",
+      "id": "components-sdkcamerapopup--with-icon",
+      "unread": false,
+      "measure": {
+        "tag": "div",
+        "w": 920,
+        "h": 178,
+        "font": "Manrope",
+        "size": "16px",
+        "weight": "400",
+        "line": "normal",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "50px"
+      },
+      "open": false
+    }
+  ]
+}

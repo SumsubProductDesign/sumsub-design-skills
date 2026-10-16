@@ -1173,10 +1173,13 @@ if (require.main === module && (process.argv.includes('--api') || process.argv.i
   if (process.argv.includes('--doc')) {
     if (!doc) { console.error('--doc <component>: ' + names.join(' ')); process.exit(2); }
     const md = fs.readFileSync(path.join(__dirname, 'VERSION.md'), 'utf8').split('\n');
-    const key = doc.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
-    const h = md.findIndex(l => /^## /.test(l) && l.slice(3).toLowerCase().replace(/[`*]/g, '').startsWith(key));
+    // a component recorded inside another's section is looked up there; lint fails on any --api name without one
+    const IN = {group: 'radio and checkbox', selectMenu: 'select', tagMultiselect: 'multiselect', dataList: 'five components', kbd: 'five components', card: 'collapsible card'};
+    const key = IN[doc] || doc.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+    const h = md.findIndex(l => /^###? /.test(l) && l.replace(/^#+ /, '').toLowerCase().replace(/[`*]/g, '').startsWith(key));
     if (h < 0) { console.error(`VERSION.md has no section starting "${key}"; try --api ${doc}`); process.exit(2); }
-    let e = h + 1; while (e < md.length && !/^## /.test(md[e])) e++;
+    const end = new RegExp('^#{2,' + md[h].indexOf(' ') + '} ');    // a ### section ends at the next ### or ##
+    let e = h + 1; while (e < md.length && !end.test(md[e])) e++;
     console.log(md.slice(h, e).join('\n').trim());
   }
 }

@@ -1,0 +1,697 @@
+{
+  "note": "What scripts/sbkit.cjs reads out of the WebSDK UI kit's Storybook: one entry per component, the stories whose CSS and markup are kept, and, for a component that renders only after a click, the trigger. `owns` pins a CSS module to the component: a class name the module has, or a list of names it must all have; the most specific pin wins. Without a pin the module goes to the component whose name a class carries, else to the one component whose stories show it, else to the earliest entry here — so the primitives (text, input, loader) come first.",
+  "upstream": "storybook-websdk-uikit.dev.euc1.sumsub.net",
+  "frame": "1000x800",
+  "waitMs": 15000,
+  "components": [
+    {
+      "name": "SdkText",
+      "owns": [
+        [
+          "text",
+          "header1"
+        ]
+      ],
+      "stories": [
+        "default",
+        "all-variants"
+      ]
+    },
+    {
+      "name": "SdkIcon",
+      "stories": [
+        "default",
+        "all-icons"
+      ]
+    },
+    {
+      "name": "SdkIllustration",
+      "stories": [
+        "default",
+        "small",
+        "large",
+        "no-background"
+      ]
+    },
+    {
+      "name": "SdkLoader",
+      "owns": [
+        "loader"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkDotsLoader",
+      "owns": [
+        "dotsLoader"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkInput",
+      "path": "components/SdkInput/input/SdkInput",
+      "owns": [
+        [
+          "input",
+          "inputContainer",
+          "isEmpty"
+        ]
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkInputLabel",
+      "path": "components/SdkInput/label/SdkInputLabel",
+      "owns": [
+        [
+          "item",
+          "itemText",
+          "errors"
+        ]
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkSpanRequired",
+      "owns": [
+        "requiredAsterisk"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkInputFieldset",
+      "path": "components/SdkInput/fieldset/SdkInputFieldset",
+      "owns": [
+        [
+          "item",
+          "itemText",
+          "errors",
+          "error"
+        ]
+      ],
+      "stories": [
+        "default",
+        "required",
+        "with-errors",
+        "with-description",
+        "with-title-right",
+        "complete-example"
+      ]
+    },
+    {
+      "name": "SdkButtonInput",
+      "path": "components/SdkButton/SdkButtonInput",
+      "owns": [
+        [
+          "no_style",
+          "sizeM"
+        ]
+      ],
+      "stories": [
+        "default",
+        "value",
+        "icons",
+        "disabled",
+        "invalid"
+      ]
+    },
+    {
+      "name": "SdkButtonAsync",
+      "path": "components/SdkButton/SdkButtonAsync",
+      "stories": [
+        "loading",
+        "success",
+        "success-with-icon"
+      ]
+    },
+    {
+      "name": "SdkButton",
+      "owns": [
+        [
+          "button",
+          "primary",
+          "topbar"
+        ]
+      ],
+      "stories": [
+        "primary",
+        "secondary",
+        "small",
+        "plain",
+        "field",
+        "link",
+        "link-underlined",
+        "topbar",
+        "icon-only",
+        "with-left-icon",
+        "all-variants"
+      ]
+    },
+    {
+      "name": "SdkHeader",
+      "owns": [
+        "SdkHeader"
+      ],
+      "stories": [
+        "default",
+        "with-back-button",
+        "with-lang-selector",
+        "empty"
+      ]
+    },
+    {
+      "name": "SdkLangSelector",
+      "owns": [
+        "langSelector"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkStepsPopup",
+      "owns": [
+        [
+          "step",
+          "step-label"
+        ]
+      ],
+      "stories": [
+        "default",
+        "first-step-active",
+        "last-step-active",
+        "all-done",
+        "single-step"
+      ]
+    },
+    {
+      "name": "SdkContent",
+      "owns": [
+        "SdkContent"
+      ],
+      "stories": [
+        "default",
+        "document-definition"
+      ]
+    },
+    {
+      "name": "SdkFooter",
+      "owns": [
+        "SdkFooter"
+      ],
+      "stories": [
+        "default",
+        "with-custom-content",
+        "with-backdrop-blur"
+      ]
+    },
+    {
+      "name": "SdkBaseContainer",
+      "owns": [
+        "container"
+      ],
+      "stories": [
+        "default",
+        "full-layout"
+      ]
+    },
+    {
+      "name": "SdkLogo",
+      "owns": [
+        [
+          "dark",
+          "light"
+        ]
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkLogoBlock",
+      "owns": [
+        "logoBlock"
+      ],
+      "stories": [
+        "default",
+        "empty",
+        "small",
+        "extra-small"
+      ]
+    },
+    {
+      "name": "SdkIconBlock",
+      "owns": [
+        [
+          "iconBlock",
+          "sizeExtraSmall"
+        ]
+      ],
+      "stories": [
+        "default",
+        "status",
+        "attention",
+        "error",
+        "success",
+        "disabled",
+        "small",
+        "extra-small"
+      ]
+    },
+    {
+      "name": "SdkPageTitle",
+      "owns": [
+        "pageTitle",
+        "pageSubtitle"
+      ],
+      "stories": [
+        "default",
+        "align-left",
+        "align-center",
+        "subtitle-with-line-breaks"
+      ]
+    },
+    {
+      "name": "SdkInputField",
+      "path": "components/SdkField/SdkInputField",
+      "stories": [
+        "default",
+        "with-value",
+        "required",
+        "disabled",
+        "readonly",
+        "with-error",
+        "multiple-errors",
+        "with-description",
+        "password-field",
+        "with-left-slot",
+        "with-right-slot"
+      ]
+    },
+    {
+      "name": "SdkSelectField",
+      "path": "components/SdkField/SdkSelectField",
+      "stories": [
+        "default",
+        "with-value",
+        "required",
+        "disabled",
+        "with-error",
+        "with-description",
+        "native-variant",
+        "with-flags",
+        "grouped-options",
+        "fullscreen-variant"
+      ]
+    },
+    {
+      "name": "SdkTextareaField",
+      "path": "components/SdkField/SdkTextareaField",
+      "stories": [
+        "default",
+        "with-value",
+        "required",
+        "with-error"
+      ]
+    },
+    {
+      "name": "SdkPhoneField",
+      "path": "components/SdkField/SdkPhoneField",
+      "owns": [
+        "phoneInputContainer"
+      ],
+      "stories": [
+        "default",
+        "with-value",
+        "with-error"
+      ]
+    },
+    {
+      "name": "SdkDateField",
+      "path": "components/SdkField/SdkDateField",
+      "owns": [
+        "nativeDate"
+      ],
+      "stories": [
+        "default",
+        "with-value",
+        "with-error"
+      ]
+    },
+    {
+      "name": "SdkSelect",
+      "owns": [
+        [
+          "optionsList",
+          "noResults"
+        ]
+      ],
+      "stories": [
+        "default",
+        "grouped-options",
+        "with-flags",
+        "items-with-description"
+      ],
+      "click": "#storybook-root button"
+    },
+    {
+      "name": "SdkCheckboxCommon",
+      "path": "components/SdkInput/checkbox/SdkCheckboxCommon",
+      "stories": [
+        "default",
+        "all-variants"
+      ]
+    },
+    {
+      "name": "SdkInputCheckbox",
+      "path": "components/SdkInput/checkbox/SdkInputCheckbox",
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkRadioCommon",
+      "path": "components/SdkInput/radio/SdkRadioCommon",
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkInputRadio",
+      "path": "components/SdkInput/radio/SdkInputRadio",
+      "stories": [
+        "default",
+        "active",
+        "disabled",
+        "with-left-icon",
+        "with-left-icon-active",
+        "long-label",
+        "required"
+      ]
+    },
+    {
+      "name": "RadioCheckContainer",
+      "path": "components/SdkInput/radio/RadioCheckContainer",
+      "stories": [
+        "default",
+        "checked",
+        "disabled",
+        "error",
+        "with-icon",
+        "as-button"
+      ]
+    },
+    {
+      "name": "RadioCheckContainerGroup",
+      "path": "components/SdkInput/radio/RadioCheckContainerGroup",
+      "stories": [
+        "default",
+        "with-checked",
+        "with-checkbox"
+      ]
+    },
+    {
+      "name": "SdkRadioButtonExpanded",
+      "stories": [
+        "default",
+        "active",
+        "long-label-with-icon"
+      ]
+    },
+    {
+      "name": "SdkToggle",
+      "owns": [
+        "switch",
+        "thumb"
+      ],
+      "stories": [
+        "default",
+        "disabled"
+      ]
+    },
+    {
+      "name": "SdkChoiceList",
+      "owns": [
+        "choice-list"
+      ],
+      "stories": [
+        "default",
+        "single-option",
+        "long-labels"
+      ]
+    },
+    {
+      "name": "SdkFlag",
+      "owns": [
+        "fallbackFlag"
+      ],
+      "stories": [
+        "default",
+        "grid"
+      ]
+    },
+    {
+      "name": "SdkLink",
+      "owns": [
+        "link",
+        "underline"
+      ],
+      "stories": [
+        "default",
+        "in-text",
+        "standalone"
+      ]
+    },
+    {
+      "name": "SdkSeparator",
+      "owns": [
+        "separator",
+        "horizontal"
+      ],
+      "stories": [
+        "default",
+        "or"
+      ]
+    },
+    {
+      "name": "SdkTag",
+      "stories": [
+        "default",
+        "success",
+        "info",
+        "warning",
+        "state-error",
+        "disabled",
+        "closable"
+      ]
+    },
+    {
+      "name": "SdkAlert",
+      "owns": [
+        "alert",
+        "alertIcon"
+      ],
+      "stories": [
+        "warning-with-title",
+        "error-with-title",
+        "alert-info",
+        "success",
+        "alert-neutral",
+        "without-icon",
+        "with-footer-action"
+      ]
+    },
+    {
+      "name": "SdkToast",
+      "owns": [
+        [
+          "container",
+          "closing"
+        ]
+      ],
+      "stories": [
+        "default",
+        "success",
+        "state-error",
+        "warning",
+        "with-icon",
+        "with-link"
+      ]
+    },
+    {
+      "name": "SdkCard",
+      "owns": [
+        [
+          "card",
+          "counter"
+        ]
+      ],
+      "stories": [
+        "default",
+        "with-left-icon-and-counter",
+        "collapsed",
+        "accordion"
+      ]
+    },
+    {
+      "name": "SdkTips",
+      "stories": [
+        "default",
+        "text",
+        "without-title"
+      ],
+      "owns": [
+        [
+          "list",
+          "row",
+          "rightIcon"
+        ]
+      ]
+    },
+    {
+      "name": "SdkTabs",
+      "owns": [
+        "ToggleGroup"
+      ],
+      "stories": [
+        "default",
+        "disabled"
+      ]
+    },
+    {
+      "name": "SdkValidationStep",
+      "stories": [
+        "default",
+        "accepted",
+        "rejected",
+        "required"
+      ],
+      "owns": [
+        [
+          "step",
+          "iconContainer"
+        ]
+      ]
+    },
+    {
+      "name": "SdkSplashScreen",
+      "owns": [
+        "splash_screen"
+      ],
+      "stories": [
+        "default",
+        "with-button"
+      ]
+    },
+    {
+      "name": "SdkModal",
+      "owns": [
+        [
+          "DialogOverlay",
+          "fullscreenOverlay"
+        ]
+      ],
+      "stories": [
+        "default",
+        "default-with-footer",
+        "big-height"
+      ],
+      "click": "#storybook-root button"
+    },
+    {
+      "name": "SdkBottomSheet",
+      "owns": [
+        [
+          "DialogOverlay",
+          "customScroll"
+        ]
+      ],
+      "stories": [
+        "default",
+        "title",
+        "title-and-subtitle"
+      ],
+      "click": "#storybook-root button"
+    },
+    {
+      "name": "SdkTwoFaCodeInput",
+      "owns": [
+        "PinInputRoot"
+      ],
+      "stories": [
+        "default",
+        "invalid",
+        "disabled"
+      ]
+    },
+    {
+      "name": "SdkUploadButton",
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkDropdownMenu",
+      "owns": [
+        "DropdownMenuContent",
+        "DropdownMenuItem"
+      ],
+      "stories": [
+        "default",
+        "with-selected-item"
+      ],
+      "click": "#storybook-root button"
+    },
+    {
+      "name": "SdkAvatar",
+      "owns": [
+        "avatar",
+        "char"
+      ],
+      "stories": [
+        "with-image",
+        "with-character",
+        "default"
+      ]
+    },
+    {
+      "name": "SdkPanel",
+      "owns": [
+        "panel",
+        "delimiter"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkPrompt",
+      "owns": [
+        "promptButtons"
+      ],
+      "stories": [
+        "default"
+      ]
+    },
+    {
+      "name": "SdkCameraPopup",
+      "owns": [
+        "cameraPopup"
+      ],
+      "stories": [
+        "default",
+        "with-icon"
+      ]
+    }
+  ]
+}

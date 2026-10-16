@@ -8,9 +8,13 @@
 // there after the session: a log written the next day can still fill §5 exactly. On
 // 2026-10-02 a log written after the fact marked all four fields "not measured".
 //
-// With no argument it reads the newest transcript of the current directory's project. Prints:
+// With no argument it reads the transcript of the session that works in the current folder — opened
+// there, or above it and naming it (scripts/_transcript.cjs); another project's session at a parent
+// folder is not it, and the script says "no transcript for this folder". Prints:
 //   * skill    — the version that ran: plugin.json beside the skill, or the git commit of a
-//                standalone copy (a plugin version alone hides which skill code it carried);
+//                standalone copy (a plugin version alone hides which skill code it carried) — the
+//                copy the lines since --since name, so a run on the folder's own .claude/skills/
+//                copy is not reported as the plugin a session read a week before;
 //   * wall     — first line to last, and how much of it was the person's turn (the gaps before
 //                each of their messages), so the agent's own time is the rest;
 //   * rounds   — every message the person typed, with its time: the rows of §1's rounds table;
@@ -35,17 +39,13 @@ for (let i = 0; i < argv.length; i++) {
   else file = argv[i];
 }
 if (!file) {
-  const base = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
   // the session's cwd may be a parent of the project folder (one folder per prototype, the session opened
-  // above it): walk up until a folder has transcripts (2026-10-06: a run in <session>/<prototype>/ found none)
-  let list = [], d = process.cwd(), dir = '';
-  while (!list.length && d) {
-    dir = path.join(base, d.replace(/[^A-Za-z0-9]/g, '-'));
-    try { list = fs.readdirSync(dir).filter(f => f.endsWith('.jsonl')).map(f => path.join(dir, f)); } catch (e) {}
-    d = path.dirname(d) === d ? '' : path.dirname(d);
-  }
-  if (!list.length) { console.error(`runstats: no transcript under ${dir} — pass the .jsonl path`); process.exit(2); }
-  file = list.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0];
+  // above it): the lookup walks up, and takes only a session that worked in this folder (2026-10-06: a run
+  // in <session>/<prototype>/ found none; 2026-10-12: a run folder without a transcript yet read another
+  // project's session at the parent)
+  const tr = require(path.join(__dirname, '_transcript.cjs'));
+  file = tr.findTranscript(process.cwd());
+  if (!file) { console.error(`runstats: no transcript for this folder — none under ${tr.projectsDir()} was opened in ${process.cwd()} or above it and names it; pass the .jsonl path`); process.exit(2); }
 }
 
 // the skill version that RAN: the copy whose files the session itself read or executed, found in
@@ -62,13 +62,21 @@ function versionOf(dir) {
   try { return fs.readFileSync(path.join(dir, '.version-under-test'), 'utf8').trim(); } catch (e) {}
   return 'unknown';
 }
-function versionUsed(text) {
+function versionUsed(text, roots) {
   const seen = new Map();
-  for (const m of text.matchAll(/((?:\/[^\s"'`:\\]+?)?\/(?:\.claude\/skills|skills)\/figma-to-prototype)\/(?:SKILL\.md|scripts|references|assets)/g)) {
-    let dir = m[1].replace(/^\$HOME/, os.homedir());
-    // only a copy that exists, under its real path: '$HOME/…' and '/Users/…' are one copy, and a
+  const home = os.homedir();
+  // a standalone copy under <folder>/.claude/skills/: a transcript names it through a shell variable
+  // ($R/.claude/skills/…), under ~ or relative to the run folder, so an unresolved path of that shape is
+  // looked up from the session's folders upward (2026-10-12: a run on the folder's own copy was reported
+  // as the plugin's clone and the marketplace clone, read before the run began)
+  const standalone = roots.flatMap(require(path.join(__dirname, '_transcript.cjs')).up)
+    .map(d => path.join(d, '.claude', 'skills', 'figma-to-prototype')).find(d => fs.existsSync(path.join(d, 'SKILL.md')));
+  for (const m of text.matchAll(/((?:~|\$[A-Za-z_]+)?(?:\/[^\s"'`:\\]+?)?\/?(?:\.claude\/skills|skills)\/figma-to-prototype)\/(?:SKILL\.md|scripts|references|assets)/g)) {
+    let dir = m[1].replace(/^(~|\$HOME)(?=\/)/, home);
+    // only a copy that exists, under its real path: '$HOME/…', '~/…' and '/Users/…' are one copy, and a
     // fragment of a path quoted in a message is none
-    if (!dir.startsWith('/') || !fs.existsSync(path.join(dir, 'SKILL.md'))) continue;
+    if (!dir.startsWith('/')) { if (standalone && /(^|\/)\.claude\/skills\/figma-to-prototype$/.test(dir)) dir = standalone; else continue; }
+    if (!fs.existsSync(path.join(dir, 'SKILL.md'))) continue;
     try { dir = fs.realpathSync(dir); } catch (e) {}
     seen.set(dir, (seen.get(dir) || 0) + 1);
   }
@@ -185,7 +193,10 @@ const nFig = Object.values(figma).reduce((a, b) => a + b, 0);
 const g = Object.values(growth).reduce((a, b) => a + b, 0) || 1;
 
 console.log(`transcript: ${file}`);
-version = versionUsed(fs.readFileSync(file, 'utf8')) || ('not seen in the transcript; this script is ' + versionOf(path.resolve(__dirname, '..')));
+// the copy the lines since --since name (a plugin read a week before the run is not the run's), resolved
+// from the session's folders and this one
+version = versionUsed(JSON.stringify(rows), [...new Set(rows.map(o => o.cwd).filter(Boolean))].concat(process.cwd()))
+  || ('not seen in the transcript; this script is ' + versionOf(path.resolve(__dirname, '..')));
 console.log(`skill   : ${version}`);
 console.log(`wall    : ${hm(wall)} (${new Date(t0).toISOString().slice(0, 16)} → ${new Date(t1).toISOString().slice(0, 16)} UTC), of which the person's turn ${hm(human)}, the agent's ${hm(wall - human)}`);
 console.log(`rounds  : ${rounds.length} messages from the person${askForms ? ` · ${askForms} forms, ${askQuestions} questions, ${hm(askWait)} of their turn` : ''}`);

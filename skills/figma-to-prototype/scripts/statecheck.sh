@@ -1,7 +1,17 @@
 #!/bin/bash
 # statecheck.sh <file.html> [options] — render a forced state once, measure it once.
 #
-#   --hash '#editor-colors'            route the prototype to a view
+#   --hash '#editor-colors'            route the prototype to a view. '#view?hold' holds the page's
+#                                      timers (interaction-plumbing.md § Timed transitions): without
+#                                      --device the render runs under virtual time, which fires every
+#                                      setTimeout before the shot, so a timed state renders as the
+#                                      state after it; --js 'window.__proto.timers(false)' holds them too.
+#                                      A hash without its '#' is given one: --hash tips routed nowhere
+#                                      and said nothing (2026-10-14). A hash that leaves the page as
+#                                      it loads without one — what it shows, its fields, its visible
+#                                      elements, read before --js — prints one warning line: the page
+#                                      has no route for it (run 18 gated a click-only page at #custom
+#                                      and read a 476px residual off its first screen, 2026-10-14)
 #   --css  'CSS'                       injected stylesheet; MIRROR a :hover rule here
 #                                      instead of trying to move a real mouse
 #   --no-anim                          kill transitions and animations. Required whenever the
@@ -44,7 +54,11 @@
 #                                      anything is BLOCKED. element.click() in a probe is not this:
 #                                      it fires through whatever lies on top — on 2026-10-02 an
 #                                      invisible full-width toast wrapper covered a header button,
-#                                      every probe passed, and only the user's own click found it
+#                                      every probe passed, and only the user's own click found it.
+#                                      A control inside a <select> is the select's part, not a
+#                                      control: Chrome's customisable select has an inner
+#                                      button.selectedcontent, the click lands on the select as it
+#                                      should, and it read as BLOCKED in every WebSDK report (2026-10-12)
 #   --texts file.txt [--texts-in CSS]  is every string of the design shown? One string per line,
 #                                      from `figctx.py <context> --texts` of the zone's design
 #                                      context. Each must appear in the visible text (innerText,
@@ -89,22 +103,38 @@
 #                                      that reads the DOM compensates for Chrome's --dump-dom
 #                                      viewport, 87px shorter than the window (see _chrome.sh);
 #                                      before 2026-09-25 every DOM-side height was that much short
+#   --device                           render as a device of exactly --size, through the DevTools
+#                                      protocol (scripts/_cdp.cjs, Node 22+): a phone's viewport below
+#                                      768 wide, no scrollbar gutter, the PNG at the width asked. The
+#                                      command line clamps a window to 500px wide and lays the page
+#                                      out there while cropping the PNG to the width asked — so a
+#                                      375 render made without this is a 500 layout, and every
+#                                      mobile check on it silently reads the desktop breakpoint
+#                                      (a WebSDK run, 2026-10-05). Use it for any page that
+#                                      re-flows by width at a --size under 500. A probe's Promise
+#                                      runs in real time here, not against the virtual-time
+#                                      budget; the page is read once #__probe exists (up to 8 s)
 #   --full                             render at the CONTENT's height, not the window's: one
 #                                      measuring pass asks the page (and any scrolling box inside
 #                                      it) how tall it really is. A page longer than the canvas is
 #                                      otherwise gated on its first screen only
 #
+# Every render is on a clock — CHROME_TIMEOUT seconds, 60 by default (_chrome.sh): a Chrome that
+# hangs is killed, one line says so and the call exits 124, instead of holding a pre-commit for
+# hours as one did across the machine's sleep.
+#
 # Everything comes back in one answer, so a visual state costs one call rather than six.
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"; . "$DIR/_chrome.sh"
 
-SRC=""; HASH=""; CSS=""; JS=""; PROBE=""; JSSET=""; PROBESET=""; HITS=""; TEXTS=""; TEXTSIN=""; FRAMES=""; NOANIM=""; RECTSOF=""; RECTS=""; POINTS=""; MINPX=""; REF=""; ZONES=""; OUT=""; SIZE="1440x900"; FULL=
+SRC=""; HASH=""; CSS=""; JS=""; PROBE=""; JSSET=""; PROBESET=""; HITS=""; TEXTS=""; TEXTSIN=""; FRAMES=""; NOANIM=""; RECTSOF=""; RECTS=""; POINTS=""; MINPX=""; REF=""; ZONES=""; OUT=""; SIZE="1440x900"; FULL=; DEVICE=
 while [ $# -gt 0 ]; do
   case "$1" in
     --hash) HASH="$2"; shift 2 ;;
     --css) CSS="$2"; shift 2 ;;
     --no-anim) NOANIM=1; shift ;;
     --full) FULL=1; shift ;;
+    --device) DEVICE=1; shift ;;
     --js) JS="$2"; JSSET=1; shift 2 ;;
     --probe) PROBE="$2"; PROBESET=1; shift 2 ;;
     --js-file|--probe-file)
@@ -129,6 +159,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$SRC" ] || { sed -n '2,20p' "$0"; exit 1; }
+# --hash tips, without the '#', was appended to the URL as it came and routed nowhere, silently: the
+# render was the first screen and every probe on it read the wrong state (run 16, 2026-10-14)
+case "$HASH" in ''|'#'*) ;; *) HASH="#$HASH" ;; esac
 [ -f "$SRC" ] || { echo "not found: $SRC" >&2; exit 1; }
 # an empty --probe is a script that went missing on the way — "$(cat typo.js)", an unset variable —
 # and without this it is silently no probe at all: the call renders and says nothing
@@ -149,9 +182,21 @@ if [ -n "$RECTSOF" ]; then
 fi
 # a --js without a probe still gets a DOM pass, so an error in it is reported instead of
 # rendering the state it failed to force
-JSONLY=""; [ -z "$PROBE" ] && [ -n "$JS$HITS$TEXTS$FRAMES" ] && { JSONLY=1; PROBE='return "ok"'; }
+# --hash gets one too: the page's state is read there before --js (below) and again, in parallel,
+# from the page loaded without the hash; the same answer means the hash routed nowhere
+JSONLY=""; [ -z "$PROBE" ] && [ -n "$JS$HITS$TEXTS$FRAMES$HASH" ] && { JSONLY=1; PROBE='return "ok"'; }
+# what the page shows, as one short string: its visible text, its fields, its visible elements' tags
+# and classes, the scroll. Two loads in the same state give the same string
+HASHSIG=""; [ -n "$HASH" ] && HASHSIG='function(){var s=[document.body.innerText,scrollY];
+  [].forEach.call(document.querySelectorAll("input,select,textarea"),function(e){s.push(e.checked+":"+e.value)});
+  [].forEach.call(document.body.querySelectorAll("*"),function(e){if(!e.checkVisibility||e.checkVisibility({visibilityProperty:true}))
+    s.push(e.tagName+"."+(typeof e.className==="string"?e.className:""))});
+  var t=s.join("\n"),h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return (h>>>0).toString(36)+"/"+t.length}'
 [ -n "$NOANIM" ] && CSS="*{transition:none!important;animation:none!important}$CSS"
 W="${SIZE%x*}"; H="${SIZE#*x}"
+# a window under 500 wide is laid out at 500 by the command line: fine for a left-aligned block
+# (the synthetic frames of lint and doctor), a lie for anything that re-flows by width
+[ -z "$DEVICE" ] && [ "$W" -lt 500 ] && echo "statecheck: --size $SIZE is under Chrome's 500px window minimum — the page lays out at 500 and the PNG is cropped; a page that re-flows by width needs --device" >&2
 # --full: a page taller than the window is verified at its own height, not at the top screen.
 # One measuring pass asks the page how tall its content really is — the island scrolls inside a
 # viewport shell, so the number lives on the scrolling box, not on the document — and the render
@@ -167,7 +212,7 @@ if [ -n "$FULL" ]; then
       if(c.overflowY==="auto"||c.overflowY==="scroll"){box=e;break;} e=e.parentElement;}
     return box ? Math.max(box.scrollHeight, slot.scrollHeight)
                : Math.max(document.scrollingElement.scrollHeight, slot.scrollHeight);'
-  FH=$("$0" "$SRC" --size "${W}x${H}" --probe "$MEASURE" 2>/dev/null | sed -n 's/^probe : //p' | tr -d '"')
+  FH=$("$0" "$SRC" --size "${W}x${H}" ${DEVICE:+--device} --probe "$MEASURE" 2>/dev/null | sed -n 's/^probe : //p' | tr -d '"')
   case "$FH" in ''|*[!0-9]*) ;; *) [ "$FH" -gt "$H" ] && H=$((FH + 40)) ;; esac
   echo "full  : rendering ${W}x${H} (content asked for $FH)"
 fi
@@ -177,9 +222,9 @@ SHOT="${OUT:-$TMP}/state.png"
 PAGE="$TMP/page.html"
 
 # inject the forced state
-node - "$SRC" "$PAGE" "$CSS" "$JS" "$PROBE" "$HITS" "$TEXTS" "$TEXTSIN" "$FRAMES" <<'NODE'
+node - "$SRC" "$PAGE" "$CSS" "$JS" "$PROBE" "$HITS" "$TEXTS" "$TEXTSIN" "$FRAMES" "$HASHSIG" <<'NODE'
 const fs = require('fs');
-const [src, out, css, js, probe, hits, textsFile, textsIn, frames] = process.argv.slice(2);
+const [src, out, css, js, probe, hits, textsFile, textsIn, frames, hashsig] = process.argv.slice(2);
 const texts = textsFile ? fs.readFileSync(textsFile, 'utf8').split('\n').map(t => t.trim()).filter(Boolean) : null;
 let h = fs.readFileSync(src, 'utf8');
 // a page made for a claude.ai artifact (artifact-page.js) has no <head>: inject at the top, so
@@ -205,6 +250,8 @@ const HITS = String.raw`function(scope){
     var c=(typeof e.className==='string'?e.className:'').trim().split(/\s+/).filter(Boolean).slice(0,2);if(c.length)s+='.'+c.join('.');
     var t=(e.getAttribute('aria-label')||e.getAttribute('title')||e.textContent||e.value||'').trim().replace(/\s+/g,' ').slice(0,28);
     return s+(t?' "'+t+'"':'')}
+  // the parts of a native <select> (the customisable select's inner button, its options) are the select's
+  set.forEach(function(e){if(e.parentElement&&e.parentElement.closest('select'))set.delete(e)});
   var r={found:set.size,ok:0,off:0,inert:0,blocked:{},via:{}};
   set.forEach(function(e){
     if(e.disabled||(e.checkVisibility&&!e.checkVisibility({visibilityProperty:true}))){r.inert++;return}
@@ -254,6 +301,7 @@ const code = (js ? js.replace(/;?\s*$/, ';\n') : '') + 'return (function(){' + p
 const lit = JSON.stringify(code).replace(/</g, '\\u003c');
 const body = probe
   ? '<script>addEventListener("load",function(){setTimeout(function(){' +
+    (hashsig ? 'var __hs=(' + hashsig + ')();' : '') +
     'var __o,__f;try{__f=new Function(' + lit + ')}catch(e){__o="ERROR: the script does not parse — "+(e&&e.message||e)+' +
     '" (a $ or a backtick inside double quotes is expanded by the shell first: pass it with --js-file / --probe-file)"}' +
     'if(__f){try{__o=__f()}catch(e){__o="ERROR: "+(e&&e.message||e)}}' +
@@ -265,6 +313,7 @@ const body = probe
     'var d=document.createElement("div");d.id="__probe";' +
     'd.textContent=JSON.stringify(__o===undefined?null:__o);' +
     'document.body.appendChild(d);' +
+    (hashsig ? 'var s=document.createElement("div");s.id="__hashsig";s.style.display="none";s.textContent=__hs;document.body.appendChild(s);' : '') +
     (hits ? '(' + HITS + ')(' + JSON.stringify(hits).replace(/</g, '\\u003c') + ');' : '') +
     (texts ? '(' + TEXTS + ')(' + JSON.stringify(texts).replace(/</g, '\\u003c') + ',' + JSON.stringify(textsIn || 'body').replace(/</g, '\\u003c') + ');' : '') +
     (frames ? '(' + FRAMES + ')(' + JSON.stringify(frames).replace(/</g, '\\u003c') + ');' : '') +
@@ -276,25 +325,42 @@ fs.writeFileSync(out, h.slice(0, i) + inject + h.slice(i));
 NODE
 
 URL="file://$(cd "$(dirname "$PAGE")" && pwd)/$(basename "$PAGE")$HASH"
-if [ -n "$PROBE" ]; then
+# the same page without the hash, read at the same moment (before --js), while the render runs
+[ -n "$HASHSIG" ] && { "$0" "$SRC" --size "${W}x${H}" ${DEVICE:+--device} ${CSS:+--css "$CSS"} --probe "return ($HASHSIG)()" 2>/dev/null \
+  | sed -n 's/^probe : //p' | tr -d '"' > "$TMP/nohash.sig" & NOHASH=$!; }
+if [ -n "$DEVICE" ]; then
+  # one pass through the protocol: the viewport is exactly WxH, so the DOM and the pixels come
+  # from the same layout and no --dump-dom delta applies. The page is read once the probe has
+  # written its answer (or after 8 s), then screenshotted
+  UNTIL=""; [ -n "$PROBE" ] && UNTIL='document.getElementById("__probe")'
+  node "$DIR/_cdp.cjs" shot "$URL" "${W}x${H}" "$SHOT" --wait 400 ${UNTIL:+--until "$UNTIL"} --dom "$TMP/dom.html" >/dev/null \
+    || { echo "statecheck: the --device render failed (scripts/_cdp.cjs needs Node 22+ and a Chrome)" >&2; exit 2; }
+  DOM=$(cat "$TMP/dom.html")
+elif [ -n "$PROBE" ]; then
   # the DOM pass: --dump-dom lays the page out DELTA px shorter than the window (see _chrome.sh),
   # so the window is grown by that much and the probe sees the height that was asked for. The
   # screenshot of that pass is laid out at the grown size, which is wrong at the bottom of any
   # fluid page — so when pixels are wanted (or the render is kept), a second, probe-free pass at
   # the true size takes them. Nothing changes for a call that only asks the page a question
   DELTA=$(chrome_dom_delta)
-  DOM=$("$CHROME" $FLAGS --window-size="$W,$((H + DELTA))" --screenshot="$TMP/dom.png" --dump-dom "$URL" 2>/dev/null)
+  DOM=$(chrome_run $FLAGS --window-size="$W,$((H + DELTA))" --screenshot="$TMP/dom.png" --dump-dom "$URL")
   if [ -n "$RECTS$POINTS$MINPX$REF$OUT$FRAMES" ]; then
-    "$CHROME" $FLAGS --window-size="$W,$H" --screenshot="$SHOT" "$URL" 2>/dev/null
+    chrome_run $FLAGS --window-size="$W,$H" --screenshot="$SHOT" "$URL"
   else
     SHOT="$TMP/dom.png (DOM pass, ${DELTA}px taller than asked; add --out for a true render)"
   fi
 else
-  DOM=$("$CHROME" $FLAGS --window-size="$W,$H" --screenshot="$SHOT" "$URL" 2>/dev/null)
+  DOM=$(chrome_run $FLAGS --window-size="$W,$H" --screenshot="$SHOT" "$URL")
 fi
 
 echo "render: $SHOT"
 STATUS=0
+if [ -n "$HASHSIG" ]; then
+  wait "$NOHASH" 2>/dev/null || true
+  SIG=$(echo "$DOM" | grep -o '<div id="__hashsig"[^>]*>[^<]*' | sed 's/<div id="__hashsig"[^>]*>//' | head -1)
+  [ -n "$SIG" ] && [ "$SIG" = "$(cat "$TMP/nohash.sig" 2>/dev/null)" ] \
+    && echo "statecheck: the hash changed nothing: the page has no route for $HASH — add a hash route in gen.js or use --js" >&2
+fi
 if [ -n "$PROBE" ]; then
   ANS=$(echo "$DOM" | grep -o '<div id="__probe">[^<]*' | sed 's/<div id="__probe">//;s/&lt;/</g;s/&gt;/>/g;s/&amp;/\&/g' | head -1)
   if ! echo "$DOM" | grep -q '<div id="__probe">'; then

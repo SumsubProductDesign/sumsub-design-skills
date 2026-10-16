@@ -24,13 +24,17 @@ Figma value, prototype value, status (fixed / cannot fix and why / placeholder �
 include the deliberate simplifications (a squircle approximated with
 `border-radius`, an invisible layer skipped), the forced ones (a substituted
 font, a line break Chrome makes differently), everything inferred, every hover
-invented, and every mockup self-contradiction reproduced verbatim rather than
-silently corrected. Give the user a short summary in chat and the file path —
+invented, every mockup self-contradiction reproduced verbatim rather than
+silently corrected, and every unfilled place as Step 0 answered it (*proposed* is a
+placeholder; one off the task path is never asked and stays verbatim, a
+contradiction). Give the user a short summary in chat and the file path —
 and **never say it matches if it does not.**
 
 **A handoff document**, from `assets/handoff-template.md`. The two sections that
 get skipped and shouldn't are the *interaction inventory* — which must list what
-is deliberately inert, or the next session will "fix" a dead click — and the
+is deliberately inert, or the next session will "fix" a dead click, and
+which states advance by time (a loading state's timer: its seconds are a
+§ Placeholders row, the network has the real ones) — and the
 *measured baseline-offset table*, without which nobody can add a text run
 correctly. Write it in the team's language. It also carries the **state and
 re-render map** (`references/architecture.md` § The state and re-render map — write it down once): globals with their defaults, the
@@ -89,7 +93,11 @@ two exceptions that both cost a real run a round:
 * **What the design does not draw is asked, not decided.** A loading or
   in-progress state, a transitional screen, an option list, a rule: rule 3 and
   the Step 0 row *data and rules the frames do not show*. A stated assumption
-  is still an invention when nothing in the frames supports it.
+  is still an invention when nothing in the frames supports it. How a drawn
+  loading state ends — by a timer, a tap or both — is the Step 0 row *behaviour
+  the brief names but no frame draws*: asked once, never a timer put in silently,
+  and only for a state that draws a loader; a button-less transition that draws
+  no loader is by tap, said in the defaults line.
 * **When the screenshot and the words disagree about scope, ask which.** "In
   scenario 3 only, or everywhere?" is one line; a guess applied everywhere is
   undone everywhere.

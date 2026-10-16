@@ -9,6 +9,11 @@
 #   (standalone:  ln -sf ../../scripts/pre-commit .git/hooks/pre-commit)
 # Bypass once:    git commit --no-verify
 # Quick mode (no headless renders, ~1s): LINT_QUICK=1 git commit …
+#
+# Every headless render in the lint is on a clock: CHROME_TIMEOUT seconds, 60 by default. A Chrome
+# that hangs — one did across the machine's sleep and held a commit for nine hours (2026-10-13) — is
+# killed, the check fails with one line, and the commit is refused instead of waiting.
+export CHROME_TIMEOUT="${CHROME_TIMEOUT:-60}"
 ROOT="$(git rev-parse --show-toplevel)"
 for LINT in "$ROOT/skills/figma-to-prototype/scripts/lint.sh" "$ROOT/scripts/lint.sh"; do
   [ -x "$LINT" ] && exec "$LINT" ${LINT_QUICK:+--quick}

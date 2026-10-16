@@ -37,4 +37,18 @@ if (!CHROME) {
   console.error('no Chrome found; set CHROME=/path/to/chrome (Chrome, Chromium, Brave or Edge, 112+)');
   process.exit(1);
 }
-module.exports = {CHROME};
+// Every headless render is on a clock — CHROME_TIMEOUT seconds, 60 by default, the same clock
+// _chrome.sh keeps: watchdog(child, what) kills the Chrome after that long and prints one line,
+// so a Chrome that hangs across the machine's sleep fails the call instead of holding a
+// pre-commit for hours (2026-10-13). deadline(what) does the same for a whole process.
+const TIMEOUT = Number(process.env.CHROME_TIMEOUT) > 0 ? Number(process.env.CHROME_TIMEOUT) : 60;
+const LINE = what => `${what}: Chrome did not finish within ${TIMEOUT}s and was killed — a hang across the machine's sleep? (CHROME_TIMEOUT raises the clock)`;
+function watchdog(child, what) {
+  const t = setTimeout(() => { child.timedOut = true; console.error(LINE(what)); try { child.kill('SIGKILL'); } catch (e) {} }, TIMEOUT * 1000);
+  child.on('close', () => clearTimeout(t));
+  return child;
+}
+function deadline(what) {       // the process exits 124 with the line if it is still running after the clock
+  setTimeout(() => { console.error(LINE(what)); process.exit(124); }, TIMEOUT * 1000).unref();
+}
+module.exports = {CHROME, TIMEOUT, watchdog, deadline};

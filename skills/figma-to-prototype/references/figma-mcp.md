@@ -20,14 +20,17 @@ each is kept to the rule and one line of what it cost. The symptom table in
 - `get_design_context` on a large frame
 - A whole-frame response is cut before its constants
 - Leaves that render empty or as the wrong thing
+- A modal instance whose texts the MCP never returns
 - `download_assets` restrictions
 - Invisible content, three flavours
 - Frames disagree with each other
 - A mockup can contradict itself
+- A mockup can be unfilled
 - States are not in the tree
 - Two more shapes worth knowing
 - `get_variable_defs` on the group, not once on the file
 - A repeating structure: one instance in full, the rhythm from a scan
+- The WebSDK files
 - Inlining an icon
 - Step 2 in full — extract from Figma
 
@@ -107,10 +110,12 @@ value against the text box height in metadata or against ink width in the refere
 A section or a page is every frame on it: such a call comes back over the tool limit and
 lands in a 139k-character file, read for four frame ids. The person sent a section or page
 link → ask for the frame links in the Step 0 message (two clicks for a designer, cheaper
-than the call). Nobody to ask → one call on the section, saved to its file,
-`scripts/figmeta.py <file> 2` for the frame ids and sizes, then every later call on a
-frame id. The frame itself over the limit → the same file, `figmeta.py` with a regex for
-the zone, then `get_metadata` on that zone's node.
+than the call). Nobody to ask → one call on the section; over the limit it lands in its
+file, `scripts/figmeta.py <file> 2` for the frame ids and sizes; under it (a four-frame
+section came back inline at 25k characters) the ids and sizes are read once from the
+response and go into `gen.js` beside the values, never retyped into a file. Then every
+later call on a frame id. The frame itself over the limit → the same file, `figmeta.py` with
+a regex for the zone, then `get_metadata` on that zone's node.
 
 ## A node that lies outside the frame
 
@@ -135,6 +140,15 @@ preview is its first lines.** Work from the file with `figctx.py` / `figmeta.py`
 from the preview — the asset constants come last and are not in it. When the constants are
 missing *from the file itself*, the server cut it: `figctx.py`'s `UNDEFINED` line lists
 them, and that is the list of leaf calls to make.
+
+**A response under that limit comes back inline, whole, and is not written out again.** The
+rule "raw responses go to a file" is about the source staying checkable, not about the file:
+a section's metadata of 25k characters read in the conversation is already paid for, and
+retyping it into `_work/figma-ref/` costs as much output as the build (the Switch device run
+priced it and did not). The values a build needs go into `gen.js` with their node ids, as
+Step 3 wants them anyway, and the ledger names the call they came from; the file is written
+only when it is short enough to be cheaper than a second call — a leaf's design context of a
+few hundred lines.
 
 ## `get_design_context` on a large frame
 
@@ -174,11 +188,33 @@ for an alternate state is checked against the mockup's pixels (one `pixprobe.sh`
 it is built on; other values in the same frame are correct, so probe, do not
 blanket-replace.
 
+## A modal instance whose texts the MCP never returns
+
+A dialog placed as one instance over a frame can hold its texts out of reach of every call.
+The Switch device run's QR modal (2026-10-12): the instance's own design context came back at
+103 KB and **cut before its texts** — the markup of the header and the QR's SVG groups, then
+nothing; and **each nested instance** (the Topbar, the Row, the Content under the QR), asked on
+its own, returned **an empty wrapper with only a render** — no `<p>`, no string, `figctx.py
+--texts` finding no text in any of them (it now says "no text in this context" and exits 1).
+Five calls bought nothing.
+
+The sign is the pair: the instance cut before any text, and its first nested instance empty.
+After that, **stop calling**. Read the strings from the render — `get_screenshot` of the modal's
+node, or the frame's render you already hold — and write them into the ledger with their source:
+"QR modal: 6 strings read from the render of `<node>`; the design context is cut before them and
+the nested instances return empty wrappers". A string read that way is still checked with
+`statecheck.sh --texts` against a file of those strings, typed from the render. Geometry and
+tokens come from the kit's `modal()` as always; the texts are all the MCP was asked for.
+
 ## `download_assets` restrictions
 
 Ids must be flat (`^\d+[:-]\d+$`); paths into instances (`I123:456;789:012`) are
 rejected. Hard cap of 20 assets per call, returned without names in an order you have to
 reconstruct. The fallback; the main icon route is design context with `disableCodeConnect`.
+**A picture that lives in a nested instance cannot be exported alone** — the Tips frame's image
+slot of the General flow is `I1:7508;10189:6215;1:7505`, and the call refuses the id: export the
+frame itself (`1:7502`) at 2x and cut the slot out with `scripts/cut.js` at the slot's rectangle
+from `get_metadata`, its `x`/`y`/`width`/`height` doubled.
 
 ## Invisible content, three flavours
 
@@ -202,6 +238,41 @@ dropdown read "Welcome" where the editor reads "Warning", and its width follows 
 Both swatches of "Error" filled `#D42F2F` while the caption read `#D12424`; a "Success"
 status drawn blue. Reproduce it literally and write it in the ledger — a mockup bug or a
 deliberate state, not yours to decide silently.
+
+## A mockup can be unfilled
+
+A contradiction is a choice someone made; an unfilled place is one nobody got to — a component
+dropped in with its defaults, copied down a list and never edited. Built literally it is what the
+audience sees first, and the prototype looks broken although the agent saw it. The signals:
+
+- **identical siblings** — the same instance repeated with the same text and the same counter
+  digit, where the rest of the frame says they differ;
+- **a state only on the first row** of a repeated list — a divider, a check, an active fill: the
+  story's default, copied, not a design;
+- **a component's default text** — "Body", "Title", "Label", "Text", "Button" — or Lorem ipsum;
+- **a select whose only option is the one chosen**, when the task picks from it.
+
+Run 15's Welcome (`1:7480`): the step list is three rows "1 · Identity document", the same digit in
+every plate, a divider under the first row only, while the same screen under the consent sheet
+(`1:7593`) rings Step 1/3. The run saw it and left it verbatim with a ledger line, so a prototype
+built for a team demo opened on a screen that looks broken.
+
+**On a screen of the task path, or the first screen, it is one question in the Step 0 form** —
+SKILL.md Step 0, the row *data and rules the frames do not show*. The question says what the frame
+draws ("three rows '1 · Identity document' under a Step 1/3 ring") and offers three answers:
+
+| answer | what is built | the ledger |
+|---|---|---|
+| *verbatim* | the frame as drawn | *source* — the safe default for a study with respondents, where what is drawn is what is tested |
+| *proposed* | the agent's values, from the flow's own context: the three steps of a "1/3" ring as Identity document, Selfie, Proof of address — written into the question | *placeholder*, and a row in the handoff's § Placeholders, "made up, not the product's" |
+| *given* | the person's values, verbatim | *source* |
+
+The recommendation follows the purpose: *proposed* for a demo, *verbatim* for a usability test —
+and for a demo it is unconditional: "the flow only walks the document step" is not a reason for
+*verbatim* (run 16's), because what the team sees first is the Welcome's list, and three identical
+rows read as broken whichever step the tasks go on to.
+Never replaced silently, and never asked off the task path: there an unfilled place is a ledger
+line and a row in the handoff's § 8, reproduced verbatim like a contradiction.
 
 ## States are not in the tree
 
@@ -243,6 +314,21 @@ get_design_context ONE representative row      exact colours, sizes, strings
 The scan gives the *where*, the one design context the *what*, the screenshot the
 strings that differ between instances. Take the whole tree only when the structure is
 irregular, or when you need `hidden` flags across a frame.
+
+## The WebSDK files
+
+The widget's frames live in three kinds of file: the UI kit (`Gh2QlRTetoSQdlK9G1nDq4`, base
+components), the Organisms (`8VpSRNe9ur7SBctw0JrtOE`, whose `Examples` sections hold canonical
+`Widget` instances at 1440×900 and 375×812 — the mobile reference of the shell gate is one),
+and the product files where a designer draws a flow (the first run's `8jLpqR6jNXzoHl0D6XGPWN`).
+A screen's frame is the `1.1 Desktop — Applicant data` kind: a `Widget` instance under a
+`Browser navigation` bar of 80. Call `get_metadata` on that frame, never on the section; the
+`Widget` instance's own metadata gives the content node (`Slot` → the organism) for
+`get_design_context`. A `get_screenshot` of the frame is the gate's reference at 1x
+(`maxDimension` the frame's width); 2x for a plate comes only from `download_assets`. Frames in
+these files move and vanish between increments — the first run lost one mid-build and both its
+narrow sections within a week — so the section's metadata is re-read before every increment.
+The profile itself: `references/websdk.md` § The profile, and how it is decided.
 
 ## Inlining an icon
 
@@ -294,5 +380,8 @@ from `get_metadata`, styles and text from `get_design_context`, never the revers
 **layer names lie**; **raw responses go to a file, not into the conversation** — a large
 one persists to `_work/figma-ref/` on its own, a small one comes back inline and you write
 it to `_work/figma-ref/<node>.jsx` yourself before working from it, or the next session has
-no source to check the values against. `scripts/grab.js` downloads a persisted response's
-assets by `curl`; `scripts/icons.js` assembles the inline `ICONS` block.
+no source to check the values against. One that is inline and still long (a section's
+metadata at 25k characters) is the exception: its values go into `gen.js` with their node
+ids and the ledger names the call — never a hand copy of the response (§ Where a big
+response goes). `scripts/grab.js` downloads a persisted response's assets by `curl`;
+`scripts/icons.js` assembles the inline `ICONS` block.

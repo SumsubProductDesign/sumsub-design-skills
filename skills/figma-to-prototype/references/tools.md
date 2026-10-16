@@ -11,12 +11,14 @@ necessary. SKILL.md lists them by the step that meets them; this is the full tab
 | `scripts/pre-commit` | the git hook that runs `lint.sh`; `LINT_QUICK=1` for the quick mode |
 | `scripts/shell.js` | render the default dashboard shell from a config — basic layout (264 sidebar with labels) or fullscreen (52 icon rail, breadcrumb header, optional tabs) — into a page or a fragment with a content slot; assets and version in `assets/shell/dashboard/` |
 | `scripts/shellgate.sh` | the shell gate in one call: render the shell at the frame's size, screenshot, landmark ink boxes (logo, active row, Collapse) frame vs shell, zone %, header only if current, and the ledger line |
-| `scripts/blockgate.sh` | the content gate in one call: render a block, align it with the design node's render by ink profile, report the offset and the residual per band — no hand-cropping of the reference |
+| `scripts/blockgate.sh` | the content gate in one call: render a block — or a state of a page through `statecheck.sh`'s options (`--hash`, `--js`, `--no-anim`, `--device`), cut by an element's own rect (`--crop-of '#content-slot'`), or a PNG already rendered — align it with the design node's render by ink profile, report the offset and the residual per band — no hand-cropping of the reference |
 | `scripts/figmeta.py` | print the top levels (or a regex match) of a saved `get_metadata` result — a whole page's metadata exceeds the tool limit and lands in a file; the shell needs two levels of it |
-| `scripts/figctx.py` | read a saved `get_design_context` result: outline with the auto-layout tokens, the leaves a truncated response left undefined (`UNDEFINED`), downloaded SVGs whose own id names another layer (`NAME MISMATCH`), per-row strings and icons (`--split`), every text string for `statecheck.sh --texts` (`--texts`), asset download (`--assets`) — the table's spec and data in three calls, no chunked reading |
+| `scripts/figctx.py` | read a saved `get_design_context` result: outline with the auto-layout tokens, the leaves a truncated response left undefined (`UNDEFINED`), downloaded SVGs whose own id names another layer (`NAME MISMATCH`), per-row strings and icons (`--split`), every text string for `statecheck.sh --texts` (`--texts`; "no text in this context" and exit 1 when it holds none), asset download (`--assets`) — the table's spec and data in three calls, no chunked reading |
 | `assets/templates/list-table.js` | the elastic list page for Step 3, the product's SnsTable: toolbar (controls.js search and buttons), header, rows with optional expanded content that opens on a click, footer; three sizes; the divider drawn above a hover fill. Takes the column rules and the cells' markup from the generator, returns `css`, `html` and `script` |
+| `assets/components/websdk/controls.js` | the WebSDK kit's components for a WebSDK prototype, rendered from the kit's snapshot in the same folder (`kit.css`, `markup/`, `icons/`, `flags/`): header with the step ring and the steps popup, content, footer, the widget container, page title, every field (input, select, textarea, phone, date, fieldset), checkbox, radio, toggle, choice list, button in its six types, logo and icon blocks, illustration, alert, toast, tag, loaders, card, tips, validation step, splash screen, tabs, link, separator — with `script` for the toggle, the tabs, the password eye, the date picker, the steps popup and a toast's cross; Manrope embedded. `--api` / `--api <name>` / `--doc <name>` as the dashboard's |
+| `assets/fixture-websdk.js` | the WebSDK whole-widget fixture: the Applicant data form under the header and over the footer's button, a status screen and the rest of the library in one page, rendered by lint at 720 and at 375 (`--device`) and compared with `assets/components/websdk/reference/` |
 | `assets/components/controls.js` | the design system's controls, with `script` for live radios and checkboxes (`--api` prints every signature) — input (with a secret variant), textarea, inline select, search bar, button, radio, checkbox, select and its menu, both multiselects, tag, counter in three kinds, status and status select, empty state, code block, link, tabs, tooltip, toast, alert, modal, card — with every shipped state, verified against the product's Storybook; values and the Figma-name lookup in `assets/components/VERSION.md` |
-| `scripts/dscheck.js` | has the design system moved under the components: reads the Storybook stories listed in `assets/components/storybook.json` and prints every value that no longer matches `assets/components/VERSION.md`; `--record` writes the live values back |
+| `scripts/dscheck.js` | has the design system moved under the components: reads the Storybook stories listed in `assets/components/storybook.json` and prints every value that no longer matches `assets/components/VERSION.md`; `--record` writes the live values back; `--spec assets/components/websdk/storybook.json` does the same for the WebSDK kit, against its own Storybook and the values `websdk/controls.js` depends on |
 | `assets/templates/fluid-page.js` | the two-column content page that shrinks: the primary column gives up width to its floor, the aside keeps the frame's, the gutter stays the island's 32 |
 | `assets/templates/test-scaffold.js` | an unmoderated test's scaffolding, deliberately not the design system: the task bar above the canvas and the outcome card (done, which of how many, back to the platform with a close attempt and the text fallback); disarms every `target="_blank"`; events in `window.__events` |
 | `assets/templates/fit-height.js` | a fixed-height block that scales down from its top centre when the window is short — the vertical counterpart of `fluid-page.js`; reserve for what stays put under it |
@@ -27,8 +29,8 @@ necessary. SKILL.md lists them by the step that meets them; this is the full tab
 | `scripts/rulecheck.cjs` | a logic demo's rule table (`_work/rules.json`), row by row in fresh processes: type, pick and click as a person would, read the outcome, compare; `--markdown` for the handoff's § Rules |
 | `scripts/encode.sh` | a photo plate to WebP or JPEG through Chrome's own encoder, pixel size kept — never a drawn plate |
 | `scripts/weight.cjs` | where a page's weight is: every inlined image heaviest first, with its format, pixel size and place; photo-like PNGs, duplicates and plates that are not 2x flagged; the page against a limit (16 MB by default) |
-| `scripts/modelcheck.cjs` | the session's model and effort, read from its transcript: `ok` on Opus or Fable at medium or above, otherwise `OFFER` and the line to show the person once (the prototype's quality may suffer) |
-| `scripts/runstats.cjs` | §5 of the run log, counted from the session's transcript: the skill version, wall time split into the person's turn and the agent's, every message the person typed, tool and Figma calls, peak context and where it grew. Works after the fact |
+| `scripts/modelcheck.cjs` | the session's model and effort, read from its transcript: `ok` on Opus or Fable at medium or above, otherwise `OFFER` and the line to show the person once (the prototype's quality may suffer). With no path, the transcript of the session that works in the current folder — opened there, or above it and naming it; another project's session at a parent folder is not it, and the answer is `unknown: no transcript for this folder` |
+| `scripts/runstats.cjs` | §5 of the run log, counted from the session's transcript: the skill version (the copy the lines since `--since` name — a folder's own `.claude/skills/` copy included), wall time split into the person's turn and the agent's, every message the person typed, tool and Figma calls, peak context and where it grew. Works after the fact; finds the transcript as `modelcheck.cjs` does, and says "no transcript for this folder" rather than reading another project's |
 | `scripts/statecheck.sh` | force a state (injected CSS/JS), render, and return bboxes, pixel colours, canvas rects by CSS selector, a behaviour probe, a real-click hit test of every live control (`--hits`), the design's strings found on the page (`--texts`) and a regression diff — one call, fresh process |
 | `scripts/zonediff.sh` | % of differing pixels per named zone, two PNGs, plus a difference map |
 | `scripts/inkbbox.sh` | ink bbox inside given rectangles (inverse mode for dark zones) |
@@ -49,6 +51,10 @@ necessary. SKILL.md lists them by the step that meets them; this is the full tab
 | `scripts/serve.cjs` | static server, `no-store`, paths relative to itself; `SPA=1` serves the entry for every route of a History-API prototype |
 | `scripts/publish.sh` | deploy the prototype to Vercel production, report the URL and any protection |
 | `scripts/unpublish.sh` | list projects; delete deployments and project, behind a typed confirmation |
+| `scripts/websdk-shell.js` | the WebSDK shell from a config: the top bar, the widget box with the kit's inner column as `#content-slot`, the footer, "Powered by Sumsub" — responsive as the SDK is, or a fixed page of the frame's size for the gate; `--fragment` for a generator; assets and the record in `assets/shell/websdk/` |
+| `scripts/websdkgate.sh` | the WebSDK shell gate in one call: the shell rendered at the frame's size (through the protocol under 500), five landmarks (back button, step ring, widget box, footer button, "Powered by") as ink boxes frame vs shell, the frame's top bar offset read at the widget's edge and subtracted below it, two zones, the ledger line |
+| `scripts/_cdp.cjs` | headless Chrome over the DevTools protocol (Node 22+): a viewport of exactly the size asked — the command line clamps a window to 500 wide, so a phone render made that way is a 500 layout cropped to 375 — a click in a live page, the DOM and the pixels from one layout. Behind `statecheck.sh --device`, `shoot.js --device` (and any width under 500) and `sbkit.cjs` |
+| `scripts/sbkit.cjs` | the WebSDK UI kit as a snapshot of its Storybook: the CSS as the components apply it and every story's markup from `assets/components/websdk/stories.json`, the build's hashed class names (`_button_9pfi4_1`, new on every build) renamed to stable ones (`sdk-button`, `sdk-button__primary`) through one table, `modules.json`; the measurements and the hash table written into `assets/components/websdk/VERSION.md` |
 
 ## Contents
 
@@ -62,7 +68,10 @@ necessary. SKILL.md lists them by the step that meets them; this is the full tab
 **Before a commit to the skill**, `scripts/lint.sh` checks that every script
 still parses and returns the known answer on a synthetic frame, and that the
 documents still agree with each other and with the file tree. It takes about a hundred seconds with the renders (`--quick` for the
-document checks alone), so run it once, before the commit, not after every edit; and make
+document checks alone), so run it once, before the commit, not after every edit; every
+headless render in it is on a clock — `CHROME_TIMEOUT` seconds, 60 by default — so a Chrome that
+hangs across the machine's sleep fails the check with one line instead of holding the commit for
+hours (`statecheck.sh`, `shoot.js` and `_cdp.cjs` keep the same clock outside the lint); and make
 the edits small — one file or one rule at a time — rather than one large
 patch script whose single typo throws every change away and costs a full
 cycle (`references/traps.md` § Editing the skill's own scripts has the two
@@ -96,14 +105,23 @@ remaining bug — an alignment search that stepped over odd offsets — in one r
 That proves the tools and the documents, not the behaviour. Before handing the
 skill to someone new, or after a material change to this file, run the one
 real build described in `assets/eval.md` — a fixed three-frame design, a
-twenty-one-row checklist, and the numbers of the last accepted run.
+twenty-one-row checklist, and the numbers of the last accepted run. The websdk
+profile has its own sheet, `assets/eval-websdk.md` — two flows: Switch device (four
+desktop frames, a thirteen-row checklist, runs 13 and 14) and General flow (ten mobile
+frames with a camera, a fifteen-row checklist, run 15) — for a change to the profile's
+reference, `websdk/controls.js`, `websdk-shell.js` or the widget gate.
 
 The other thing that goes stale is the component library: the design system
 moves and `assets/components/controls.js` keeps rendering last quarter's
 values. `scripts/dscheck.js` reads the same Storybook stories and prints every
 value that no longer matches the record. It needs the network, takes about half
 a minute, and is worth a run before a handover or whenever a control looks
-subtly wrong against a fresh mockup.
+subtly wrong against a fresh mockup. **The WebSDK kit has the same two
+questions**: `dscheck.js --spec assets/components/websdk/storybook.json` is the
+cheap one (42 values, a minute), `sbkit.cjs` the expensive one (every class and
+rule, five minutes, Node 22) when the kit itself changed — then `modules.json`
+is read for a module that moved, `lint.sh` renders `fixture-websdk.js` against
+its references at 720 and 375, and the shell's gate runs against its frames.
 
 ## Before you start, in full
 
@@ -198,7 +216,7 @@ brings it), and left to judgment this gets run sometimes and not others.
 ## Anthropic's skill-authoring guide, and what keeps each rule
 
 The guide is `platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`.
-This skill was measured against it on 2026-10-04 and broke six of its rules. Each
+This skill was measured against it on 2026-10-04 and broke six of its rules; re-read against it on 2026-10-14 before the WebSDK release, which added the hard name and description limits, the Windows-path check and the five review rows. Each
 rule below is kept by a lint check, named by its exact label so lint can confirm
 the check exists, or by a step before a release that a person runs. A rule with
 neither is a rule that drifts back.
@@ -206,8 +224,8 @@ neither is a rule that drifts back.
 | rule | kept by |
 |---|---|
 | `SKILL.md`'s body stays under 500 lines; a step's full text is its reference's "Step N in full" | lint: `SKILL.md body under 500 lines` |
-| `name` is lowercase letters, digits and hyphens, and matches the folder | lint: `frontmatter name matches the folder` |
-| `description` is present, at most 1024 characters, says what the skill does and when to use it | lint: `description present` (a warning above 1024) |
+| `name` is lowercase letters, digits and hyphens, at most 64, neither "anthropic" nor "claude", and matches the folder | lint: `frontmatter name matches the folder`, `name at most 64 of [a-z0-9-], no reserved word` |
+| `description` is present, at most 1024 characters (a hard limit), says what the skill does and when to use it; no XML tags in the frontmatter | lint: `description present`, `description at most 1024 characters`, `frontmatter carries no XML tags` |
 | `description` is written in the third person — no "I", "you", "we" | lint: `description has no first or second person` |
 | references sit one level deep: every one is in `SKILL.md`'s map, and a pointer between them names its section | lint: `every reference-to-reference pointer names its section`, `listed: ` |
 | a reference longer than 100 lines opens with its contents | lint: `every long reference opens with its contents, in order` |
@@ -215,7 +233,12 @@ neither is a rule that drifts back.
 | a long procedure has a checklist the model copies and ticks | lint: `SKILL.md: the run checklist names every step 0–9` |
 | MCP tools are named with their server | lint: `the Figma tools are named with their server` |
 | scripts handle their errors and say what to do, rather than leaving it to the model | every script's own lint cases (a missing file, a bad argument, an empty answer each print a line and exit non-zero) |
-| test with the models the skill will run on | before a release: one build from `assets/eval.md` on the model the team uses — Opus or Fable; the team does not run the skill on Sonnet or Haiku, so they are not tested. A session started on another model, or below medium effort, is offered a switch once: lint: `modelcheck.cjs: Sonnet or a low effort is offered a switch, Opus at high is not` |
+| forward slashes in every path, no Windows-style ones | lint: `no Windows-style paths in the documents` |
+| the packages the scripts need are listed and checked, not assumed | `doctor.sh` runs first in Step 0 and names each missing tool with its install line; its own lint cases |
+| no "voodoo constants": a number in a script says where it comes from | before a release: read the diff of `scripts/` since the last release for bare numbers without a comment (the frames' values carry their node id, the kit's its variable) |
+| concise, consistent terminology, one default instead of a menu of options, execution intent clear (run a script vs read it) | before a release: read `SKILL.md`'s diff since the last release with these four questions; lint cannot judge prose |
+| team feedback incorporated | before a release: the colleagues' runs since the last one (their run logs' §6, the eval runs' findings) are each either fixed or written down as not fixed and why |
+| test with the models the skill will run on (the guide's checklist says Haiku, Sonnet and Opus) | before a release: one build from `assets/eval.md` on the model the team uses — Opus or Fable; **a deliberate deviation**: the team does not run the skill on Sonnet or Haiku, so they are not tested. A session started on another model, or below medium effort, is offered a switch once: lint: `modelcheck.cjs: Sonnet or a low effort is offered a switch, Opus at high is not` |
 | at least three evaluations, written before the documentation they test | before a release: `assets/eval.md`'s run, plus the last three real runs' logs read against its checklist |
 | watch how the model navigates the skill — which files it opens, which it never does | before a release: in that eval run, `runstats.cjs` lists the reads; a reference nobody opens is a candidate to merge, one opened every time is a candidate for `SKILL.md` |
 

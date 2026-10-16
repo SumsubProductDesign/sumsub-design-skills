@@ -37,7 +37,7 @@ var x=c.getContext("2d");x.imageSmoothingQuality="high";if(${JSON.stringify(mime
 x.drawImage(i,0,0,c.width,c.height);document.getElementById("o").textContent=c.toDataURL(${JSON.stringify(mime)},${Number(q)})};
 i.src="data:image/png;base64,${b64}";</script></body></html>`);
 ' "$IN" "$TMP/p.html" "$MIME" "$Q" "${WIDTH:-0}"
-"$CHROME" $FLAGS --window-size=100,100 --screenshot="$TMP/s.png" --dump-dom "file://$TMP/p.html" 2>/dev/null \
+chrome_run $FLAGS --window-size=100,100 --screenshot="$TMP/s.png" --dump-dom "file://$TMP/p.html" \
   | sed -n 's/.*<pre id="o">data:[^,]*,\([A-Za-z0-9+/=]*\).*/\1/p' | head -1 > "$TMP/b64"
 [ -s "$TMP/b64" ] || { echo "encode: Chrome returned no image (is $IN a PNG?)" >&2; exit 1; }
 node -e 'const fs=require("fs");fs.writeFileSync(process.argv[2],Buffer.from(fs.readFileSync(process.argv[1],"utf8").trim(),"base64"))' "$TMP/b64" "$OUT"

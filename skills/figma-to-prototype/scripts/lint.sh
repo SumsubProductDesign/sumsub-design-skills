@@ -41,6 +41,9 @@ T="${TMPDIR:-/tmp}/skill-lint-$$"; mkdir -p "$T/ic"; trap 'rm -rf "$T"' EXIT
 FRAME='<!doctype html><html><head><title>lint</title></head><body style="margin:0;background:#fff"><div id="app" style="position:relative;width:200px;height:100px;overflow:hidden"><div class="box" style="position:absolute;left:20px;top:20px;width:40px;height:40px;background:#ff0000"></div></div></body></html>'
 printf '%s' "$FRAME" > "$T/a.html"
 printf '%s' "${FRAME/background:#ff0000/background:#fff}" > "$T/b.html"
+# a timed state: '#t' shows "first" and a 300 ms timer turns it into "second" — unless the hash carries
+# ?hold or the page's window.__proto.timers(false) was called (interaction-plumbing.md § Timed transitions)
+printf '%s' '<!doctype html><html><head><meta charset="utf-8"><title>timed</title></head><body style="margin:0"><div id="x">home</div><script>var t=null,hold=false;window.__proto={timers:function(on){hold=!on;if(!on)clearTimeout(t)}};function show(){var h=location.hash.slice(1),held=hold||/\?hold$/.test(h);h=h.replace(/\?hold$/,"");document.getElementById("x").textContent=h==="t"?"first":"home";clearTimeout(t);if(h==="t"&&!held)t=setTimeout(function(){document.getElementById("x").textContent="second"},300)}addEventListener("hashchange",show);show()</script></body></html>' > "$T/timed.html"
 printf '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50"><rect x="10" y="5" width="30" height="20" fill="#ff0000"/><text x="5" y="40" font-size="12" fill="#000000">Hi</text></svg>' > "$T/l.svg"
 sed 's/#ff0000/#0000ff/; s/#000000/#ffffff/' "$T/l.svg" > "$T/d.svg"
 printf '<svg width="24" height="24" viewBox="0 0 24 24" style="x" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z"/></svg>' > "$T/ic/zone__imgA.svg"
@@ -98,7 +101,19 @@ kill "$(cat "$T/pid2")" 2>/dev/null
 case "$HDR" in *"200"*"no-store"*|*"no-store"*"200"*) pass "serve.cjs ROOT=… serves with no-store" ;; *) fail "serve.cjs — got: $(echo "$HDR" | head -2 | tr '\n' ' ')" ;; esac
 
 if [ -z "$QUICK" ]; then
-  echo "level 1 — headless renders"
+  echo "level 1 — headless renders (each on a ${CHROME_TIMEOUT:-60}s clock: CHROME_TIMEOUT)"
+  # the clock, against a Chrome that never returns: one line, the call fails, nothing waits for it.
+  # The fake execs sleep so the kill reaches the process that holds the pipe (a bash wrapper's sleep
+  # would survive it and hold a command substitution open for the whole 30 s)
+  mkdir -p "$T/fc"; printf '#!/bin/bash\nexec sleep 30\n' > "$T/fc/chrome"; chmod +x "$T/fc/chrome"
+  HUNG=$(CHROME="$T/fc/chrome" CHROME_TIMEOUT=1 "$DIR/statecheck.sh" "$T/a.html" --size 200x100 --probe 'return 1' 2>&1); HUNG_RC=$?
+  expect "statecheck.sh: a Chrome that hangs is killed on the clock, one line, exit 124" "1 rc=124" "$(echo "$HUNG" | grep -c 'did not finish within 1s') rc=$HUNG_RC"
+  HUNG=$(CHROME="$T/fc/chrome" CHROME_TIMEOUT=1 node "$DIR/shoot.js" "$T/a.html" "$T/hung" 200 100 2>&1); HUNG_RC=$?
+  expect "shoot.js: a Chrome that hangs is killed on the clock, the view fails with a line" "1 1 rc=1" "$(echo "$HUNG" | grep -c 'did not finish within 1s') $(echo "$HUNG" | grep -c 'killed on the clock') rc=$HUNG_RC"
+  if node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+    HUNG=$(CHROME="$T/fc/chrome" CHROME_TIMEOUT=1 node "$DIR/_cdp.cjs" shot "file://$T/a.html" 375x100 "$T/hung.png" 2>&1); HUNG_RC=$?
+    expect "_cdp.cjs: a Chrome that hangs is killed on the clock and the shot fails with a line" "1 rc=1" "$(echo "$HUNG" | grep -c 'did not finish within 1s') rc=$HUNG_RC"
+  fi
   DOC=$("$DIR/doctor.sh" 2>&1); [ $? -eq 0 ] && pass "doctor.sh ready" || fail "doctor.sh: $(echo "$DOC" | grep FAIL | head -2 | tr '\n' ' ')"
   # the split that decides what a colleague has to install: a missing OPTIONAL warns and still
   # says ready, a missing REQUIRED fails and prints the line that fixes it. Checked by shadowing
@@ -118,6 +133,231 @@ if [ -z "$QUICK" ]; then
   [ -s "$A" ] && [ -s "$B" ] && pass "shoot.js rendered both frames" || fail "shoot.js rendered both frames"
   expect "zonediff.sh" "box 100.00%" "$("$DIR/zonediff.sh" "$A" "$B" '[["all",0,0,200,100],["box",20,20,40,40]]' "$T/map.png" 2>&1)"
   expect "zonediff.sh --zones, the spelling statecheck.sh uses" "box 100.00%" "$("$DIR/zonediff.sh" "$A" "$B" --zones '[["box",20,20,40,40]]' 2>&1)"
+  # a render under 500 wide: the command line lays the page out at 500 and crops the PNG, so the
+  # protocol path (--device, _cdp.cjs) is the one that gives a 375 viewport. Known answer by
+  # construction: the synthetic frame's red square is still at 20,20 and innerWidth is what was asked
+  if node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+    CD=$(node "$DIR/_cdp.cjs" shot "file://$T/a.html" 375x100 "$T/cdp.png" 2>&1)
+    expect "_cdp.cjs shot: renders at the width asked" "375x100" "$CD"
+    expect "_cdp.cjs shot: the PNG is 375 wide" "375" "$(node -e 'const {decode}=require(process.argv[1]);console.log(decode(process.argv[2]).width)' "$DIR/_png.cjs" "$T/cdp.png" 2>&1)"
+    expect "_cdp.cjs shot: the frame's square is where it was" "#ff0000" "$("$DIR/pixprobe.sh" "$T/cdp.png" '[[40,40]]' 2>&1)"
+    expect "statecheck --device: the probe sees the viewport that was asked, under 500" "probe : 375" "$("$DIR/statecheck.sh" "$T/a.html" --size 375x100 --device --probe 'return innerWidth' 2>&1)"
+    expect "statecheck --device: a probe's Promise is awaited in real time" 'probe : "late"' "$("$DIR/statecheck.sh" "$T/a.html" --size 375x100 --device --probe 'return new Promise(function(r){setTimeout(function(){r("late")},300)})' 2>&1)"
+    node "$DIR/shoot.js" "$T/a.html" "$T/sd" 375 100 --device >/dev/null 2>&1
+    expect "shoot.js --device: a 375 render is 375 wide" "375" "$(node -e 'const {decode}=require(process.argv[1]);console.log(decode(process.argv[2]).width)' "$DIR/_png.cjs" "$T/sd/view_375.png" 2>&1)"
+    expect "statecheck --device: a timed state is read in real time, before its timer" 'probe : "first"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 375x100 --device --hash '#t' --probe 'return document.getElementById("x").textContent' 2>&1 | grep '^probe')"
+    expect "shoot.js --device: a page with timers gets no warning" "0" "$(node "$DIR/shoot.js" "$T/timed.html" "$T/sdt" 375 100 '#t' --device 2>&1 >/dev/null | grep -c 'hold')"
+  else
+    echo "  skip  _cdp.cjs / --device cases: Node $(node -v) has no WebSocket (22+ needed)"
+  fi
+  # the WebSDK controls: every function renders, the classes and scoped attributes they write exist in
+  # the kit's snapshot — in kit.css, or in a story's markup for a class the kit writes without a rule
+  # (a renamed module or a changed scope would otherwise ship unstyled markup), the
+  # three reads work, and the whole-widget fixture renders as recorded at 720 and, through --device, at 375
+  WK="$ROOT/assets/components/websdk"
+  if [ -f "$WK/controls.js" ] && [ -f "$WK/kit.css" ]; then
+    expect "websdk controls.js: --api lists every export with a header" "0" "$(node "$WK/controls.js" --api | grep -c 'no header comment')"
+    expect "websdk controls.js: --api <name> prints one header, --doc <name> its section" "// button( ## Button" \
+      "$(node "$WK/controls.js" --api button | head -1 | cut -c1-10) $(node "$WK/controls.js" --doc button | head -1 | cut -c1-9)"
+    expect "websdk controls.js: every function has its --doc section in VERSION.md" "missing: none" "missing: $(M=$(for n in $(node -e 'const W=require(process.argv[1]);console.log(Object.keys(W).filter(k=>k!=="css"&&k!=="script").join(" "))' "$WK/controls.js"); do node "$WK/controls.js" --doc $n >/dev/null 2>&1 || printf '%s ' "$n"; done); echo "${M:-none}")"
+    node "$ROOT/assets/fixture-websdk.js" "$T/fxw.html" >/dev/null 2>&1 && pass "fixture-websdk.js builds" || fail "fixture-websdk.js failed: $(node "$ROOT/assets/fixture-websdk.js" "$T/fxw.html" 2>&1 | tail -1)"
+    # by token, never by substring: a class is in kit.css when a selector names it whole, in the markup when a
+    # story's class attribute carries it whole. The substring check passed a radio label written with the
+    # module's root class (sdk-input-radio), because "sdk-input-radio__label" contains it — the class has no
+    # rule and no story uses it, and the radio sat beside the text instead of at the row's edge (2026-10-12).
+    # A class that has a rule must be one a story uses too; a variant passes when a sibling of its family does
+    # (sdk-loader__loaderColorBlue: the stories show White, kit.css has the set)
+    cat > "$T/wclass.cjs" <<'NODE'
+const fs = require('fs'), p = require('path');
+const [htmlF, cssF, mkDir] = process.argv.slice(2);
+const html = fs.readFileSync(htmlF, 'utf8').replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<script>[\s\S]*?<\/script>/g, '');
+const css = fs.readFileSync(cssF, 'utf8');
+const toks = s => new Set([...s.matchAll(/class="([^"]*)"/g)].flatMap(m => m[1].split(/\s+/)).filter(Boolean));
+const ruled = c => new RegExp('\\.' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\w-])').test(css);
+const story = new Set();
+for (const d of fs.readdirSync(mkDir)) for (const f of fs.readdirSync(p.join(mkDir, d))) for (const t of toks(fs.readFileSync(p.join(mkDir, d, f), 'utf8'))) story.add(t);
+const stem = c => c.replace(/[A-Z][a-z0-9]*$/, '');
+// the sheet's footer slot has no story (stories.json: default, title, title-and-subtitle), while its three
+// classes are the module's own rules, named as the modal's footer, whose story shows them: a sheet class
+// passes when its modal twin is in a story and ruled
+const twin = c => c.startsWith('sdk-bottom-sheet__') ? c.replace('sdk-bottom-sheet__', 'sdk-modal__') : null;
+const miss = [], unused = [];
+for (const c of toks(html)) {
+  if (!/^(sdk-|Sdk|RadioCheck)/.test(c)) continue;
+  if (!ruled(c)) { if (!story.has(c)) miss.push(c); continue; }
+  if (story.has(c) || (stem(c) !== c && [...story].some(x => stem(x) === stem(c) && ruled(x)))) continue;
+  if (twin(c) && story.has(twin(c)) && ruled(twin(c))) continue;
+  unused.push(c);
+}
+const attrs = new Set(html.match(/data-s-[a-z0-9-]+/g) || []);
+const mk = [...story].join(' ') + ' ' + require('child_process').execSync('cat ' + JSON.stringify(mkDir) + '/*/*.html').toString();
+for (const a of attrs) if (!css.includes('[' + a + ']') && !mk.includes(a)) miss.push(a);
+console.log('missing: ' + (miss.join(' ') || 'none') + ' | ruled but in no story: ' + (unused.join(' ') || 'none'));
+NODE
+    expect "websdk fixture: every class it writes is a whole class of kit.css or of a story, and a ruled one a story uses" "missing: none | ruled but in no story: none" \
+      "$(node "$T/wclass.cjs" "$T/fxw.html" "$WK/kit.css" "$WK/markup" 2>&1)"
+    sed 's/sdk-input-radio__label/sdk-input-radio/g' "$T/fxw.html" > "$T/fxw-radio.html"
+    expect "websdk fixture: … the radio label written with the module's root class fails it" "missing: sdk-input-radio |" \
+      "$(node "$T/wclass.cjs" "$T/fxw-radio.html" "$WK/kit.css" "$WK/markup" 2>&1)"
+    # the steps popup in the kit's structure: the plate is __container, each row sdk-steps-popup; it opens
+    # on the ring and the active row is darker (until 2026-10-13 the plate had no rule and the rows no class)
+    node -e 'const W=require(process.argv[1]);require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>${W.css}main{height:460px}</style></head><body class="sns-uikit sns-theme-light">${W.container(W.header({back:true,step:[2,3],steps:[{label:"One",state:"done"},{label:"Two",state:"active"},{label:"Three"}]})+W.content("x"))}<script>${W.script}</script></body></html>`)' "$WK/controls.js" "$T/steps.html"
+    expect "websdk header steps: the ring opens the kit's plate, three rows on top, the active one darker" '[false,"absolute",3,true]' \
+      "$("$DIR/statecheck.sh" "$T/steps.html" --size 720x500 --no-anim --js 'document.querySelector("[data-sdk-steps-trigger]").click()' --probe 'var p=document.querySelector(".sdk-steps-popup__container"),r=[].slice.call(p.querySelectorAll(".sdk-steps-popup")),c=function(e){return getComputedStyle(e.querySelector(".sdk-steps-popup__step-label")).color};return [p.hidden,getComputedStyle(p).position,r.filter(function(e){var b=e.getBoundingClientRect(),h=document.elementFromPoint(b.left+20,b.top+b.height/2);return h&&e.contains(h)}).length,c(r[1])!==c(r[2])]' 2>&1 | sed -n 's/^probe : //p')"
+    # iconBlock({text}) — a step's digit in the plate, the kit's caption face, centred (the Welcome frame's
+    # steps; the first Switch device build spliced its own span into the icon's place)
+    node -e 'const W=require(process.argv[1]);require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>${W.css}</style></head><body class="sns-uikit sns-theme-light">${W.iconBlock({size:"extraSmall",text:"2"})}${W.iconBlock({icon:"id-card"})}</body></html>`)' "$WK/controls.js" "$T/iblk.html"
+    expect "websdk iconBlock({text}): the digit in the plate, caption 14/20, centred in the 32 plate; icon unchanged" '["2","14px","20px",32,true,1]' \
+      "$("$DIR/statecheck.sh" "$T/iblk.html" --size 600x200 --probe 'var p=document.querySelectorAll(".sdk-icon-block"),t=p[0].querySelector("span.sdk-text__caption"),c=getComputedStyle(t),a=p[0].getBoundingClientRect(),b=t.getBoundingClientRect();return [t.textContent,c.fontSize,c.lineHeight,Math.round(a.width),Math.abs((a.left+a.right)/2-(b.left+b.right)/2)<1&&Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<1,p[1].querySelectorAll("svg").length]' 2>&1 | sed -n 's/^probe : //p')"
+    # splashScreen({illustration}) — the frame's picture in the icon's place at its own size, no footer and the room 16
+    # without buttons; the kit centres the content by itself (the General flow's Verified was built from text() and
+    # page CSS because the section said "the 48 icon", 2026-10-14). With an icon and buttons: the 72 slot, the footer, 72
+    node -e 'const W=require(process.argv[1]);const art=`<svg xmlns="http://www.w3.org/2000/svg" width="172" height="172" viewBox="0 0 172 172"><circle cx="86" cy="86" r="40" fill="none" stroke="#008b5e" stroke-width="6"/></svg>`;require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>${W.css}body{margin:0}.w{height:600px;width:375px;display:flex;flex-direction:column}.w>main{flex:1 1 0}</style></head><body class="sns-uikit sns-theme-light"><div class="w" id="a">${W.splashScreen({illustration:art,title:"Your profile has been verified",message:"You may close this page"})}</div><div class="w" id="b">${W.splashScreen({icon:"check-circle",iconType:"success",title:"Verified",message:"Done",buttons:[W.button({label:"Close"})]})}</div></body></html>`)' "$WK/controls.js" "$T/splash.html"
+    expect "websdk splashScreen(): illustration at its own 172 in the icon's place, no footer, room 16, centred by the kit; with buttons the 72 icon, the footer, room 72" '[[false,"16px",172,true,24],[true,"72px",72,true,24]]' \
+      "$("$DIR/statecheck.sh" "$T/splash.html" --size 400x1300 --probe 'function m(id){var w=document.querySelector("#"+id),s=w.querySelector(".sdk-splash-screen"),h=s.querySelector(".sdk-splash-screen__header"),msg=s.querySelector(".sdk-splash-screen__message"),f=s.firstElementChild,r=s.getBoundingClientRect(),pb=parseFloat(getComputedStyle(s).paddingBottom),top=f.getBoundingClientRect().top-r.top,bot=r.bottom-pb-msg.getBoundingClientRect().bottom;return [!!w.querySelector(".sdk-footer"),getComputedStyle(w.querySelector(".sdk-content")).getPropertyValue("--content-bind1").trim(),Math.round(f.getBoundingClientRect().width),Math.abs(top-bot)<=1,Math.round(h.getBoundingClientRect().top-f.getBoundingClientRect().bottom)]}return [m("a"),m("b")]' 2>&1 | sed -n 's/^probe : //p')"
+    # content({illustration}): the kit's slot sits 4 inside the widget's edges with 16 to the column and nothing else;
+    # illustration({size:'d'}) inside it is the Tips frame's grey plate, the kit's radius 28 (the General flow
+    # run built the slot by hand, 2026-10-14); a bare <img> keeps its own height and gets no background. The 'd'
+    # plate is content-sized between 140 and 240: an svg left to the kit's height:100% reads 240, one sized by a
+    # page rule collapses the plate to its own height (run 16 measured 161), and height:236 holds the frame's
+    node -e 'const W=require(process.argv[1]);const art=`<svg xmlns="http://www.w3.org/2000/svg" width="236" height="166" viewBox="0 0 236 166"><rect x="2" y="2" width="232" height="162" rx="20" fill="none" stroke="#143cff" stroke-width="4"/></svg>`;const img=`<img width="236" height="166" alt="" src="data:image/svg+xml,${encodeURIComponent(art)}">`;const box=(id,ill)=>`<div class="w" id="${id}">${W.container(W.header({back:true,step:[1,3],lang:"En"})+W.content(W.pageTitle({title:"Tips"}),{bottom:72,illustration:ill})+W.footer({buttons:[W.button({label:"Continue"})]}))}</div>`;require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${W.css}body{margin:0;--components-widget-border-width:1px}.w{height:660px;width:359px;margin:0 8px 20px;display:flex;flex-direction:column}.w>main{flex:1 1 0}#c svg,#d svg{width:236px;height:166px}</style></head><body class="sns-uikit sns-theme-light">${box("a",W.illustration({svg:art,size:"d"}))}${box("b",img)}${box("c",W.illustration({svg:art,size:"d",height:236}))}${box("d",W.illustration({svg:art,size:"d"}))}</body></html>`)' "$WK/controls.js" "$T/illus.html"
+    expect "websdk content({illustration}): the slot 4 inside the widget's edges, 16 to the title; illustration({size:d}) the grey plate, radius 28, 240 with the svg at the kit's 100%; a bare img its own 166, no plate; height:236 holds the frame's height over a page-sized svg, and without it the plate collapses to the svg's 166" '[[5,4,349,16,240,"rgb(236, 237, 242)","28px"],[5,4,349,16,166,null],[5,4,349,16,236,"rgb(236, 237, 242)","28px"],[5,4,349,16,166,"rgb(236, 237, 242)","28px"]]' \
+      "$("$DIR/statecheck.sh" "$T/illus.html" --size 375x2800 --device --probe 'function m(id){var w=document.querySelector("#"+id+" main"),s=w.querySelector(".sdk-content__illustration"),p=s.querySelector(".SdkIllustration"),a=s.querySelector("svg,img"),W=w.getBoundingClientRect(),S=s.getBoundingClientRect(),hd=w.querySelector(".sdk-header").getBoundingClientRect(),n=s.nextElementSibling.getBoundingClientRect(),r=[Math.round(S.left-W.left),Math.round(S.top-hd.bottom),Math.round(S.width),Math.round(n.top-S.bottom)];if(p){var c=getComputedStyle(p);r.push(Math.round(p.getBoundingClientRect().height),c.backgroundColor,c.borderRadius)}else r.push(Math.round(a.getBoundingClientRect().height),null);return r}return [m("a"),m("b"),m("c"),m("d")]' 2>&1 | sed -n 's/^probe : //p')"
+    # the slot is the section's child, not the 506 column's: at 1440 the column put a 530 plate 94 from the widget's
+    # edge while the kit's Figma draws it 4 inside the 718 widget (Eugene, run 16's Tips, 2026-10-14) — at 720 as at 375
+    node -e 'const W=require(process.argv[1]);const art=`<svg xmlns="http://www.w3.org/2000/svg" width="236" height="166" viewBox="0 0 236 166"><rect x="2" y="2" width="232" height="162" fill="none" stroke="#143cff" stroke-width="4"/></svg>`;require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>${W.css}body{margin:0;--components-widget-border-width:1px}.w{height:660px;width:718px;margin:0 1px;display:flex;flex-direction:column}.w>main{flex:1 1 0}</style></head><body class="sns-uikit sns-theme-light"><div class="w" id="a">${W.container(W.header({back:true,step:[1,3],lang:"En"})+W.content(W.pageTitle({title:"Tips"}),{bottom:72,illustration:W.illustration({svg:art,size:"d"})})+W.footer({buttons:[W.button({label:"Continue"})]}))}</div></body></html>`)' "$WK/controls.js" "$T/illus720.html"
+    expect "websdk content({illustration}) at 720: the slot is the section's child, 4 inside the 718 widget on both sides (708 wide), 4 under the header, 16 to the column" '[718,5,5,708,4,16,"sdk-content w-room-72"]' \
+      "$("$DIR/statecheck.sh" "$T/illus720.html" --size 720x700 --probe 'var w=document.querySelector("#a main"),s=w.querySelector(".sdk-content__illustration"),W=w.getBoundingClientRect(),S=s.getBoundingClientRect(),hd=w.querySelector(".sdk-header").getBoundingClientRect(),n=w.querySelector(".sdk-content__SdkContentInner").getBoundingClientRect();return [Math.round(W.width),Math.round(S.left-W.left),Math.round(W.right-S.right),Math.round(S.width),Math.round(S.top-hd.bottom),Math.round(n.top-S.bottom),s.parentElement.className]' 2>&1 | sed -n 's/^probe : //p')"
+    # cameraFrame(): the Organisms "POI camera" layout fills the widget at every width — the stage 8 in, the 48 / 56 / 48
+    # bar 48 apart and centred, the white 16/24 caption, the picture filling the stage (the General flow run baked the
+    # whole box and centred a 357×560 plate in the 718 desktop widget, 2026-10-14)
+    node -e 'const W=require(process.argv[1]);const pic=`<img alt="" src="data:image/svg+xml,${encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\"><rect width=\"40\" height=\"40\" fill=\"#c00\"/></svg>")}">`;const scr=(id,f)=>`<div class="w" id="${id}">${W.header({back:true,step:[1,3],lang:"En"})}${W.container(f)}</div>`;require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${W.css}html,body{margin:0}body{--components-widget-border-width:1px}.w{height:660px;max-width:718px;margin:0 auto;padding:0 8px;display:flex;flex-direction:column}.w>main{flex:1 1 0;min-height:0}</style></head><body class="sns-uikit sns-theme-light">${scr("a",W.cameraFrame({caption:"ID card front",loading:true,shutter:{id:"shut"}}))}${scr("b",W.cameraFrame({caption:"ID card front",inner:pic,gallery:{disabled:true}}))}${scr("c",W.cameraFrame({caption:"ID card front",inner:pic,overlay:{loader:true,title:"Uploading",text:"Please wait a moment"}}))}</body></html>`)' "$WK/controls.js" "$T/cam.html"
+    WCAM='function m(id){var r=document.getElementById(id),w=r.querySelector("main").getBoundingClientRect(),c=r.querySelector(".w-camera").getBoundingClientRect(),s=r.querySelector(".w-camera__stage").getBoundingClientRect(),b=[].map.call(r.querySelectorAll(".w-camera__button"),function(e){return e.getBoundingClientRect()}),d=r.querySelector(".w-camera__disc").getBoundingClientRect(),cap=getComputedStyle(r.querySelector(".w-camera__message .sdk-text")),pic=r.querySelector(".w-camera__picture");return [Math.round(c.width)===Math.round(w.width)-2&&Math.round(c.height)===Math.round(w.height)-2,Math.round(s.left-c.left),Math.round(b[0].width),Math.round(b[1].width),Math.round(d.width),Math.round(b[1].left-b[0].right),Math.round((b[1].left+b[1].right)/2-(c.left+c.right)/2),cap.fontSize+"/"+cap.lineHeight,cap.color,!!r.querySelector(".w-camera__stage .sdk-dots-loader"),pic?Math.round(pic.getBoundingClientRect().width)===Math.round(s.width)&&getComputedStyle(pic).objectFit==="cover":null,r.querySelector(".w-camera__button").disabled]}return [m("a"),m("b")]'
+    WCAMX='[[true,8,48,56,46,48,0,"16px/24px","rgb(255, 255, 255)",true,null,false],[true,8,48,56,46,48,0,"16px/24px","rgb(255, 255, 255)",false,true,true]]'
+    expect "websdk cameraFrame() at 720: fills the widget, stage 8 in, buttons 48 / 56 (disc 46) / 48 apart by 48, centred, caption white 16/24, the loader or the picture filling the stage" "$WCAMX" \
+      "$("$DIR/statecheck.sh" "$T/cam.html" --size 720x1400 --probe "$WCAM" 2>&1 | sed -n 's/^probe : //p')"
+    if node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+      expect "websdk cameraFrame() at 375 through --device: the same layout, filling the phone's widget" "$WCAMX" \
+        "$("$DIR/statecheck.sh" "$T/cam.html" --size 375x1400 --device --probe "$WCAM" 2>&1 | sed -n 's/^probe : //p')"
+    fi
+    # cameraFrame({overlay}): the "Uploading" tint covers the whole frame (stage, caption and bar), black .5 with a 16px
+    # backdrop blur, the kit's ring at 40 with its spin class, the title header1 16 under it and the line 8 under the title (the frame's
+    # Title block: 64 = header 32 + 8 + body 24), in white
+    expect "websdk cameraFrame({overlay}): the tint over the whole frame, rgba(0,0,0,.5) + blur(16px), the ring 40 spinning, white header1 title (24) 16 under the ring, the line 8 under it" '[true,"rgba(0, 0, 0, 0.5)","blur(16px)",40,true,"rgb(255, 255, 255)","24px",16,8]' \
+      "$("$DIR/statecheck.sh" "$T/cam.html" --size 720x2100 --probe 'var r=document.getElementById("c"),c=r.querySelector(".w-camera").getBoundingClientRect(),o=r.querySelector(".w-camera__overlay"),ob=o.getBoundingClientRect(),cs=getComputedStyle(o),l=o.querySelector("svg"),t=o.querySelector(".sdk-text__header1"),b=o.querySelector(".sdk-text__body"),ts=getComputedStyle(t);return [Math.round(ob.width)===Math.round(c.width)&&Math.round(ob.height)===Math.round(c.height),cs.backgroundColor,cs.backdropFilter,Math.round(l.getBoundingClientRect().width),l.classList.contains("spin"),ts.color,ts.fontSize,Math.round(t.getBoundingClientRect().top-l.getBoundingClientRect().bottom),Math.round(b.getBoundingClientRect().top-t.getBoundingClientRect().bottom)]' 2>&1 | sed -n 's/^probe : //p')"
+    # sumsubIdBlock(): the Welcome frames' Sumsub ID block from the Figma "Welcome block" (no kit story; three runs and a
+    # hand build wrote it by hand, 2026-10-14) — the column's width, the content 16 from the outer edge (the stroke is
+    # inside: padding 15 + the 1px border, 80 high collapsed), radius 24, the kit's 34×20 toggle at the row's start,
+    # the green icon 20, the email input 46 from the content edge (the text column's)
+    expect "websdk sumsubIdBlock({email}) at 720: the column's width, content 16 in, radius 24, the toggle 34×20 at the row's start, the icon 20, the input 46 from the content edge" '[true,16,16,"24px","rgba(32, 37, 44, 0.1)","34x20",0,20,46,true]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --probe 'var b=document.getElementById("fx-sid"),r=b.getBoundingClientRect(),c=getComputedStyle(b),top=b.querySelector(".w-sumsub-id__top").getBoundingClientRect(),t=document.getElementById("fx-sid-toggle").getBoundingClientRect(),i=b.querySelector(".w-sumsub-id__icon svg").getBoundingClientRect(),e=b.querySelector(".w-sumsub-id__email .sdk-input__inputContainer").getBoundingClientRect();return [Math.round(r.width)===Math.round(b.parentElement.getBoundingClientRect().width),Math.round(top.left-r.left),Math.round(top.top-r.top),c.borderTopLeftRadius,c.borderTopColor,Math.round(t.width)+"x"+Math.round(t.height),Math.round(t.left-top.left),Math.round(i.width),Math.round(e.left-top.left),/gradient/.test(c.backgroundImage)]' 2>&1 | sed -n 's/^probe : //p')"
+    # content()'s room under the column is a class rule of zero specificity, not an inline variable: bottomNarrow
+    # applies under the narrow width, and a page's own rule wins without !important (2026-10-12: an inline value
+    # ignored the page's media query, and the Welcome block overlapped its footer by 22px at 375)
+    node -e 'const W=require(process.argv[1]);require("fs").writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-8"><style>${W.css}#b .sdk-content{--content-bind1:200px}</style></head><body class="sns-uikit sns-theme-light"><div id="a">${W.content("a",{bottom:72,bottomNarrow:140,narrow:800})}</div><div id="b">${W.content("b",{bottom:72})}</div><div id="c">${W.content("c",{bottom:72,bottomNarrow:140,narrow:500})}</div></body></html>`)' "$WK/controls.js" "$T/room.html"
+    expect "websdk content(): bottomNarrow under the narrow width, a page rule without !important, the wide value above" '["140px","200px","72px"]' \
+      "$("$DIR/statecheck.sh" "$T/room.html" --size 720x600 --probe 'return ["a","b","c"].map(function(i){return getComputedStyle(document.querySelector("#"+i+" .sdk-content")).getPropertyValue("--content-bind1").trim()})' 2>&1 | sed -n 's/^probe : //p')"
+    expect "websdk fixture: the kit's font is embedded and loads" "[true,\"loaded\"]" \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --probe 'return document.fonts.ready.then(function(){return [document.fonts.check("16px Manrope"), [...document.fonts].filter(function(f){return f.family==="Manrope"}).some(function(f){return f.status==="loaded"}) ? "loaded" : "unloaded"]})' 2>&1 | sed -n 's/^probe : //p')"
+    # the script keeps the select's closed value and a radio row's isActive in step with the pick: the
+    # kit's Vue did both, the markup alone does neither, and a picked country never showed on the first
+    # Switch device build (2026-10-14)
+    expect "websdk fixture: a picked option shows in the closed select, flag and label" '["Greece",true,false]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --js 'var s=document.getElementById("fx-country");s.value="GRC";s.dispatchEvent(new Event("change",{bubbles:true}))' --probe 'var s=document.getElementById("fx-country"),b=s.querySelector("button.selectedcontent");return [b.textContent.trim(),!!b.querySelector("img"),s.classList.contains("sdk-select-native--placeholder")]' 2>&1 | sed -n 's/^probe : //p')"
+    expect "websdk fixture: a pick moves isActive to the picked radio's row" '[false,true]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --js 'document.querySelectorAll("input[name=fx-doc]")[1].click()' --probe 'return [].map.call(document.querySelectorAll("input[name=fx-doc]"),function(r){return r.closest(".RadioCheckContainer").classList.contains("isActive")})' 2>&1 | sed -n 's/^probe : //p')"
+    # the fieldset's radio rows are one framed list: the kit's group block around them (the fieldset's own
+    # gap of 8 kept them apart as separate boxes on the first Switch device build)
+    expect "websdk fixture: fieldset() joins radio({group}) rows in the kit's group block, the frames overlapping by 1" '[true,-1]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --probe 'var r=document.querySelectorAll("input[name=fx-doc]"),a=r[0].closest(".RadioCheckContainer"),b=r[1].closest(".RadioCheckContainer");return [a.parentElement.classList.contains("sdk-base-container__container")&&a.parentElement===b.parentElement,Math.round(b.getBoundingClientRect().top-a.getBoundingClientRect().bottom)]' 2>&1 | sed -n 's/^probe : //p')"
+    expect "websdk fixture: the script flips a toggle and moves the tabs" '["true","on"]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 720x600 --js 'document.querySelectorAll(".fx-row .sdk-toggle")[1].click();document.querySelectorAll(".sdk-tabs__ToggleGroupItem")[0].click()' --probe 'return [document.querySelectorAll(".fx-row .sdk-toggle")[1].getAttribute("aria-checked"),document.querySelectorAll(".sdk-tabs__ToggleGroupItem")[0].getAttribute("data-state")]' 2>&1 | sed -n 's/^probe : //p')"
+    # the kit's two dialog shapes are components, not breakpoints (the UI kit's Figma, page "Modal"): modal() is
+    # "Modal / Full" and fills the page at every width, bottomSheet() is "Modal / Bottom sheet", sized by its
+    # content and at the page's bottom at every width — the General flow run switched them at 1023 (2026-10-14).
+    # Their host is the page's column (the fixture's .fx-widget, the shell's .ws-column: position relative, the
+    # top bar, the widget box, the whitelabel line), the dialogs its last children: the kit's tint, absolute and
+    # 8 in (0 at ≤ 726), dims the bar and the Powered-by line and the modal fills the column 8 in — hosted
+    # inside container() it stopped at the box's edges, the bar undimmed, white gaps above and below (run 17)
+    WDLG='function o(t,id){document.getElementById(t).click();var d=document.getElementById(id),col=document.querySelector(".fx-widget"),w=col.getBoundingClientRect(),r=d.getBoundingClientRect(),c=getComputedStyle(d.querySelector("[class$=__DialogContent]")),t2=document.querySelector("[data-sdk-overlay="+id+"]").getBoundingClientRect(),h=col.querySelector("[class*=sdk-header]").getBoundingClientRect(),wl=col.querySelector(".fx-whitelabel").getBoundingClientRect();return [!d.hidden,Math.round(w.bottom-r.bottom),r.height>w.height*0.8,parseFloat(c.borderTopLeftRadius)>0,Math.round(t2.top-w.top),Math.round(w.bottom-t2.bottom),t2.top<h.bottom,t2.bottom>wl.top,id==="fx-modal"?Math.round(r.top-w.top):null]}'
+    expect "websdk modal() and bottomSheet() at 1100, hosted by the column: the tint 8 in from its top and bottom, over the top bar and the whitelabel line; the modal fills it from +8 to −8, the sheet's bottom at −8, content-sized, corners rounded" '[[true,8,true,true,8,8,true,true,8],[true,8,false,true,8,8,true,true,null]]' \
+      "$("$DIR/statecheck.sh" "$T/fxw.html" --size 1100x1200 --no-anim --probe "$WDLG;var a=o('fx-why','fx-modal');document.querySelector('[data-sdk-overlay=fx-modal]').click();return [a,o('fx-consent-open','fx-sheet')]" 2>&1 | sed -n 's/^probe : //p')"
+    if node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+      expect "websdk modal() and bottomSheet() at 375 through --device: the same two shapes, full-bleed — the tint 0 in, over the bar and the whitelabel; the modal fills the column, the sheet content-sized at its bottom, top corners kept" '[[true,0,true,true,0,0,true,true,0],[true,0,false,true,0,0,true,true,null]]' \
+        "$("$DIR/statecheck.sh" "$T/fxw.html" --size 375x1200 --device --no-anim --probe "$WDLG;var a=o('fx-why','fx-modal');document.querySelector('[data-sdk-overlay=fx-modal]').click();return [a,o('fx-consent-open','fx-sheet')]" 2>&1 | sed -n 's/^probe : //p')"
+    fi
+    if [ -f "$WK/reference/fixture-websdk-720.png" ]; then
+      node "$DIR/shoot.js" "$T/fxw.html" "$T/fxw" 720 2400 >/dev/null 2>&1
+      FWD=$(TH=6 "$DIR/zonediff.sh" "$WK/reference/fixture-websdk-720.png" "$T/fxw/view_720.png" '[["all",0,0,720,2400]]' "$T/fxw-diff.png" 2>&1)
+      FWP=$(echo "$FWD" | sed -n 's/.*all \([0-9.]*\)%.*/\1/p')
+      awk -v p="$FWP" 'BEGIN{exit !(p+0<=0.10)}' && pass "the websdk fixture renders as recorded at 720 (assets/components/websdk/reference/): $FWP% ≤ 0.10" \
+        || fail "the websdk fixture drifted at 720: $FWP% > 0.10 — look at $T/fxw-diff.png before re-recording"
+    else echo "  skip  websdk fixture at 720: no reference yet (record it with shoot.js into $WK/reference/fixture-websdk-720.png)"; fi
+    if [ -f "$WK/reference/fixture-websdk-375.png" ] && node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+      node "$DIR/shoot.js" "$T/fxw.html" "$T/fxw3" 375 2600 --device >/dev/null 2>&1
+      FWD3=$(TH=6 "$DIR/zonediff.sh" "$WK/reference/fixture-websdk-375.png" "$T/fxw3/view_375.png" '[["all",0,0,375,2600]]' "$T/fxw3-diff.png" 2>&1)
+      FWP3=$(echo "$FWD3" | sed -n 's/.*all \([0-9.]*\)%.*/\1/p')
+      awk -v p="$FWP3" 'BEGIN{exit !(p+0<=0.10)}' && pass "the websdk fixture renders as recorded at 375 through --device: $FWP3% ≤ 0.10" \
+        || fail "the websdk fixture drifted at 375: $FWP3% > 0.10 — look at $T/fxw3-diff.png"
+    fi
+  fi
+  # the WebSDK shell and its gate: the examples render with the slot, a fixed canvas is the size asked,
+  # the gate against the shell's own render is the identity (every landmark at Δ0, no bar offset), and
+  # the gate against the recorded frames prints the known ledger line — the frame's 60 bar against the
+  # kit's 68 on desktop, the landmarks within the component's own differences on mobile
+  if [ -f "$DIR/websdk-shell.js" ]; then
+    WSM=$(node "$DIR/websdk-shell.js" "$ROOT/assets/shell/websdk/examples/desktop.json" --out "$T/ws.html" 2>&1)
+    expect "websdk-shell.js: renders the desktop example with the slot and the kit's numbers" '"slot":"#content-slot","dialogs":".ws-column","header":68,"widgetMax":718,"contentMax":506' "$WSM"
+    expect "websdk-shell.js: the slot is the kit's inner column, empty" '["sdk-content__SdkContentInner",0]' \
+      "$("$DIR/statecheck.sh" "$T/ws.html" --size 1440x820 --probe 'var s=document.getElementById("content-slot");return [s.className,s.children.length]' 2>&1 | sed -n 's/^probe : //p')"
+    expect "websdk-shell.js: --fragment carries no document tags" "0" "$(node "$DIR/websdk-shell.js" "$ROOT/assets/shell/websdk/examples/desktop.json" --fragment 2>/dev/null | grep -c '<!doctype\|<html\|<body')"
+    # a footer with a line under its button (the Welcome frame's warning) goes through the config, so
+    # the gate's footer zone sees it (2026-10-12: without it the zone read 21%)
+    node -e 'const fs=require("fs"),c=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));c.footer.html="<div class=\"lint-warn\">Do not switch the device</div>";fs.writeFileSync(process.argv[2],JSON.stringify(c))' "$ROOT/assets/shell/websdk/examples/desktop.json" "$T/wsfh.json"
+    expect "websdk-shell.js: footer.html is rendered inside the kit's footer, under the button" "1" "$(node "$DIR/websdk-shell.js" "$T/wsfh.json" --fragment 2>/dev/null | grep -c 'sdk-footer__inner"><button[^>]*>.*</button><div class="lint-warn">')"
+    expect "websdk-shell.js: a missing config is refused with a reason" "no config at" "$(node "$DIR/websdk-shell.js" "$T/nope.json" 2>&1)"
+    node "$DIR/websdk-shell.js" "$ROOT/assets/shell/websdk/examples/desktop.json" --out "$T/wsf.html" --canvas 1440x820 >/dev/null 2>&1
+    node "$DIR/shoot.js" "$T/wsf.html" "$T/wsf" 1440 820 >/dev/null 2>&1
+    WG=$("$DIR/websdkgate.sh" "$ROOT/assets/shell/websdk/examples/desktop.json" "$T/wsf/view_1440.png" --chrome 0 --out "$T/wsgate" 2>&1)
+    expect "websdkgate.sh vs the shell's own render: identity" "the landmarks agree within 1px" "$WG"
+    expect "websdkgate.sh vs the shell's own render: five landmarks, every Δ 0" "5" "$(echo "$WG" | grep 'landmark:' | grep -vc '[+-][1-9]')"
+    WGD=$("$DIR/websdkgate.sh" "$ROOT/assets/shell/websdk/examples/desktop.json" "$ROOT/assets/shell/websdk/reference/frame-desktop-1440x900.png" --out "$T/wsgate-d" 2>&1)
+    expect "websdkgate.sh vs the 1440 frame: the frame's 60 bar against the kit's 68, nothing else" "the frame's top bar area is 60 against the kit's 68, everything under it 8px lower in the shell; the landmarks agree within 1px" "$WGD"
+    if node -e 'process.exit(typeof WebSocket === "undefined" ? 1 : 0)'; then
+      WGM=$("$DIR/websdkgate.sh" "$ROOT/assets/shell/websdk/examples/mobile.json" "$ROOT/assets/shell/websdk/reference/frame-mobile-375x812.png" --out "$T/wsgate-m" 2>&1)
+      expect "websdkgate.sh vs the 375 frame: rendered as a device, the bar's offset read, the rest within 2px" "the frame's top bar area is 56 against the kit's 68, everything under it 12px lower in the shell; the landmarks agree within 2px" "$WGM"
+      # a mobile frame with device chrome above and below the page: config.frame.chrome {top, bottom} cuts both
+      # (the General flow run cropped its PNG to 660 rows by hand and passed chrome 0, 2026-10-14) — first the
+      # run's own Welcome frame, then the shell's render padded with 62 rows above and 90 below, the identity
+      WGS=$("$DIR/websdkgate.sh" "$ROOT/assets/shell/websdk/examples/mobile-safari.json" "$ROOT/assets/shell/websdk/reference/frame-mobile-safari-375x812.png" --out "$T/wsgate-s" 2>&1)
+      expect "websdkgate.sh vs the 375 frame with a status bar and a Safari bar: both cut, named in the ledger line, the bar's offset, the rest within 1px" "375x660 (device chrome, not rendered: 62 above, 90 below, cut from the 375x812 frame): the frame's top bar area is 56 against the kit's 68, everything under it 12px lower in the shell; the landmarks agree within 1px" "$WGS"
+      node "$DIR/websdk-shell.js" "$ROOT/assets/shell/websdk/examples/mobile.json" --out "$T/wsm.html" --canvas 375x660 >/dev/null 2>&1
+      node "$DIR/shoot.js" "$T/wsm.html" "$T/wsm" 375 660 --device >/dev/null 2>&1
+      node -e 'const {decode,encode}=require(process.argv[1]);const im=decode(process.argv[2]),T=62,B=90,H=im.height+T+B,out=new Uint8Array(im.width*H*4);for(let i=0;i<out.length;i+=4){out[i]=40;out[i+1]=40;out[i+2]=40;out[i+3]=255}out.set(im.data,im.width*T*4);require("fs").writeFileSync(process.argv[3],encode(im.width,H,out))' "$DIR/_png.cjs" "$T/wsm/view_375.png" "$T/wsm-padded.png"
+      node -e 'const fs=require("fs"),c=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));c.frame.chrome={top:62,bottom:90};fs.writeFileSync(process.argv[2],JSON.stringify(c))' "$ROOT/assets/shell/websdk/examples/mobile.json" "$T/wsm-chrome.json"
+      WGP=$("$DIR/websdkgate.sh" "$T/wsm-chrome.json" "$T/wsm-padded.png" --out "$T/wsgate-p" 2>&1)
+      expect "websdkgate.sh: a synthetic 375x812 frame with both bars, chrome {top: 62, bottom: 90} from the config — the page 375x660, the identity" "chrome top 62 bottom 90 → page 375x660" "$WGP"
+      expect "websdkgate.sh: … every landmark at Δ0" "5 the landmarks agree within 1px" "$(echo "$WGP" | grep 'landmark:' | grep -vc '[+-][1-9]') $(echo "$WGP" | sed -n 's/.*): \(the landmarks agree within 1px\).*/\1/p')"
+      WGC=$("$DIR/websdkgate.sh" "$ROOT/assets/shell/websdk/examples/mobile.json" "$T/wsm-padded.png" --chrome 62 --chrome-bottom 90 --out "$T/wsgate-c" 2>&1)
+      expect "websdkgate.sh: … and --chrome 62 --chrome-bottom 90 on the command line, over a config without chrome, the same" "5 the landmarks agree within 1px" "$(echo "$WGC" | grep 'landmark:' | grep -vc '[+-][1-9]') $(echo "$WGC" | sed -n 's/.*): \(the landmarks agree within 1px\).*/\1/p')"
+    fi
+  fi
+  expect "statecheck under 500 without --device says the layout is at 500" "needs --device" "$("$DIR/statecheck.sh" "$T/a.html" --size 375x100 --probe 'return 1' 2>&1 >/dev/null)"
+  expect "shoot.js under 500 without --device warns, and names --device" "needs --device" "$(node "$DIR/shoot.js" "$T/a.html" "$T/sw" 375 100 2>&1 >/dev/null)"
+  # virtual time fires a page's timers before the shot (run 16's 1440 baselines of two timed states showed the
+  # next screen, 2026-10-14): the trap as it is, then the two ways out — '#state?hold' and timers(false)
+  TPROBE='return new Promise(function(r){setTimeout(function(){r(document.getElementById("x").textContent)},600)})'
+  expect "statecheck: under virtual time a timed state is the state after it by the time of the shot" 'probe : "second"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash '#t' --probe "$TPROBE" 2>&1 | grep '^probe')"
+  expect "statecheck --hash '#t?hold': the page holds its timer, the state as drawn" 'probe : "first"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash '#t?hold' --probe "$TPROBE" 2>&1 | grep '^probe')"
+  expect "statecheck --hash t (no '#'): the '#' is supplied, the page is routed" 'probe : "second"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash 't' --probe "$TPROBE" 2>&1 | grep '^probe')"
+  expect "statecheck --hash 't?hold' (no '#'): routed and held" 'probe : "first"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash 't?hold' --probe "$TPROBE" 2>&1 | grep '^probe')"
+  expect "statecheck --js 'window.__proto.timers(false)' holds it too" 'probe : "first"' "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash '#t' --js 'window.__proto.timers(false)' --probe "$TPROBE" 2>&1 | grep '^probe')"
+  expect "shoot.js: a page with timers shot under virtual time warns, naming --device and ?hold" "1" "$(node "$DIR/shoot.js" "$T/timed.html" "$T/st" 200 100 '#t' 2>&1 >/dev/null | grep -c 'rendered with --device or as #hash?hold')"
+  # a --hash the page has no route for rendered its first screen and said nothing — run 18 read a 476px
+  # residual off a click-only page before it noticed (2026-10-14). timed.html routes; a.html does not
+  expect "statecheck --hash on a page with no hash routes: one warning line naming the hash" "the hash changed nothing: the page has no route for #custom" "$("$DIR/statecheck.sh" "$T/a.html" --size 200x100 --hash '#custom' 2>&1 >/dev/null)"
+  expect "statecheck --hash on a page that routes it: no warning" "0" "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash '#t?hold' 2>&1 >/dev/null | grep -c 'changed nothing')"
+  expect "shoot.js '#t?hold': no warning, the PNG named by the state" "0 t_200.png" "$(node "$DIR/shoot.js" "$T/timed.html" "$T/sth" 200 100 '#t?hold' 2>&1 >/dev/null | grep -c 'hold') $(ls "$T/sth" 2>&1)"
   expect "zonediff.sh: a malformed zone is one line, not a stack trace" 'bad zones — a zone is ["name",x,y,w,h], got ["box",20,20,40]' "$("$DIR/zonediff.sh" "$A" "$B" '[["box",20,20,40]]' 2>&1)"
   expect "zonediff.sh map is the reference's own size" "200 100" "$(node -e 'const b=require("fs").readFileSync(process.argv[1]);console.log(b.readUInt32BE(16),b.readUInt32BE(20))' "$T/map.png" 2>&1)"
   expect "inkbbox.sh" "box x 20..59 (w 40) y 20..59 (h 40)" "$("$DIR/inkbbox.sh" "$A" '[["box",10,10,60,60]]' 2>&1)"
@@ -243,6 +483,20 @@ PROBE
   node "$DIR/shoot.js" "$T/bg-ref.html" "$T/bgref" 200 120 >/dev/null 2>&1
   BG=$("$DIR/blockgate.sh" "$T/bg-mine.html" "$T/bgref/view_200.png" --out "$T/bg" 2>&1)
   expect "blockgate.sh finds the block offset and matches the band" "sits +0,+30 | worst residual 0px" "$(echo "$BG" | sed -n 's/.*your render sits \([-+0-9,]*\) against.*/sits \1/p') | $(echo "$BG" | sed -n 's/^verdict : \(worst residual [0-9]*px\).*/\1/p')"
+  # the same gate on a rendered state, known by construction: the PNG it just made reads the same; a --js
+  # that moves the block back to the reference's place reads offset 0; --crop-of cuts the render by the
+  # element's own rect, so the block alone against the block alone is the identity (the websdk column)
+  BGV() { echo "$1" | sed -n 's/.*your render sits \([-+0-9,]*\) against.*/sits \1/p' | tr -d '\n'; echo " | $(echo "$1" | sed -n 's/^verdict : \(worst residual [0-9]*px\).*/\1/p')"; }
+  expect "blockgate.sh on a PNG of the state: the same answer, no render" "sits +0,+30 | worst residual 0px" "$(BGV "$("$DIR/blockgate.sh" "$T/bg/view_200.png" "$T/bgref/view_200.png" 2>&1)")"
+  expect "blockgate.sh --js: the state is rendered through statecheck.sh and gated" "sits +0,+0 | worst residual 0px" "$(BGV "$("$DIR/blockgate.sh" "$T/bg-mine.html" "$T/bgref/view_200.png" --js 'document.querySelector("b").style.top="20px"' 2>&1)")"
+  node "$DIR/cut.js" "$T/bgref/view_200.png" 30 20 120 20 "$T/bg-blk.png" >/dev/null 2>&1
+  BGC=$("$DIR/blockgate.sh" "$T/bg-mine.html" "$T/bg-blk.png" --crop-of b --size 200x120 2>&1)
+  expect "blockgate.sh --crop-of: the render cut by the element's rect against the block's reference is the identity" "sits +0,+0 | worst residual 0px | cut at 30,50 120x20" "$(BGV "$BGC") | $(echo "$BGC" | grep -o 'cut at 30,50 120x20')"
+  expect "blockgate.sh --hash on a page with no hash routes says so too" "blockgate: the hash changed nothing" "$("$DIR/blockgate.sh" "$T/bg-mine.html" "$T/bgref/view_200.png" --hash '#custom' 2>&1 >/dev/null)"
+  BGP=$("$DIR/blockgate.sh" "$T/bg/view_200.png" "$T/bgref/view_200.png" --js 'x' 2>&1); BGP_RC=$?
+  expect "blockgate.sh: a state option on a PNG is refused with a reason" "a PNG takes --crop only rc=2" "$(echo "$BGP" | grep -o 'a PNG takes --crop only' | tr -d '\n') rc=$BGP_RC"
+  BGN=$("$DIR/blockgate.sh" "$T/bg-mine.html" "$T/bg-blk.png" --crop-of nope --size 200x120 2>&1); BGN_RC=$?
+  expect "blockgate.sh --crop-of: an element the page has not got is named, exit 2" "nope: not found rc=2" "$(echo "$BGN" | grep -o 'nope: not found' | tr -d '\n') rc=$BGN_RC"
   expect "controls.js button: sizes 24/32/40 and the primary/secondary fills" "1 1 1 1 1" "$(for p in 'c-btn-large{padding:8px 16px}' 'c-btn-medium{padding:4px 12px}' 'c-btn-small{padding:0 8px}' 'c-btn-primary.c-btn-default{--c-bg:#030712' 'c-btn-secondary.c-btn-default{--c-fg:#1e2939;--c-bd:inset 0 0 0 1px #d1d5dc}'; do grep -c -- "$p" "$ROOT/assets/components/controls.js" | head -1; done | tr '\n' ' ' | sed 's/ $//')"
   node -e '
 const C=require(process.argv[1]),fs=require("fs");
@@ -532,6 +786,8 @@ fs.writeFileSync(process.argv[2],`<!doctype html><html><head><meta charset="utf-
   NAPI=$(node -e 'const C=require(process.argv[1]);console.log(Object.keys(C).filter(k=>k!=="css"&&k!=="script").length)' "$ROOT/assets/components/controls.js")
   expect "controls.js --api: one line per component; --api <name> the whole header; --doc <name> its VERSION.md section" "$NAPI 1 ## Input" \
   "$(node "$ROOT/assets/components/controls.js" --api | wc -l | tr -d ' ') $([ "$(node "$ROOT/assets/components/controls.js" --api input | wc -l | tr -d ' ')" -ge 5 ] && echo 1 || echo 0) $(node "$ROOT/assets/components/controls.js" --doc input | head -1 | cut -c1-8)"
+  # `--doc checkbox` printed nothing for a whole run (run 18, 2026-10-14): every name --api lists has a section
+  expect "controls.js: every function --api lists has its --doc section in VERSION.md" "missing: none" "missing: $(M=$(for n in $(node "$ROOT/assets/components/controls.js" --api | sed -n 's|^// \([A-Za-z]*\)(.*|\1|p'); do [ "$(node "$ROOT/assets/components/controls.js" --doc "$n" 2>/dev/null | wc -l)" -gt 1 ] || printf '%s ' "$n"; done); echo "${M:-none}")"
 expect "controls.js --api: a header comment for every exported component" "$NAPI 0" \
     "$(node "$ROOT/assets/components/controls.js" --api | grep -c '^// [a-zA-Z]*(') $(node "$ROOT/assets/components/controls.js" --api | grep -c 'no header comment')"
   # fit-height.js: the block scales by (host − reserve) / height from its top centre, capped at 1
@@ -684,12 +940,18 @@ NAME=$(sed -n 's/^name: *//p' SKILL.md | head -1)
 DLEN=$(python3 - <<'PY'
 import re
 s=open('SKILL.md',encoding='utf-8').read()
-m=re.search(r'^description: >-\n(.*?)\n---',s,re.S|re.M)
+m=re.search(r'^description: >-\n((?:[ \t]+.*\n?)+)',s,re.M)   # the folded block only — the next key ends it
 print(len(' '.join(l.strip() for l in m.group(1).splitlines())) if m else 0)   # characters, not bytes
 PY
 )
 [ "$DLEN" -gt 0 ] && pass "description present ($DLEN chars)" || fail "description missing or not in '>-' form"
-[ "$DLEN" -le 1024 ] || echo "  warn  description is $DLEN chars; the documented guideline is 1024"
+# Anthropic's guide makes these hard limits, not guidelines: name ≤ 64 of [a-z0-9-], no XML tags, neither reserved
+# word; description non-empty, ≤ 1024, no XML tags (re-read against the guide before a release, 2026-10-14)
+[ "$DLEN" -le 1024 ] && pass "description at most 1024 characters" || fail "description is $DLEN characters; the limit is 1024"
+expect "name at most 64 of [a-z0-9-], no reserved word" "ok" "$(printf '%s' "$NAME" | python3 -c 'import re,sys;n=sys.stdin.read();print("ok" if len(n)<=64 and re.fullmatch(r"[a-z0-9-]+",n) and not re.search("anthropic|claude",n) else n)')"
+expect "frontmatter carries no XML tags" "0" "$(awk 'NR==1&&/^---$/{f=1;next} f&&/^---$/{exit} f' SKILL.md | grep -cE '<[A-Za-z/][^>]*>')"
+# forward slashes only: a Windows path in an instruction breaks on every other system
+expect "no Windows-style paths in the documents" "0" "$(grep -hcE '[A-Za-z0-9_.-]\\[A-Za-z0-9_.-]+\.(md|js|cjs|sh|py|json|png|svg|webp|html)' $MD | awk '{s+=$1} END{print s+0}')"
 # the plugin's command popup shows it beside the name: Kostya's skills fit in 3–4 lines (~270 chars), and
 # a 996-char description filled the screen (2026-10-06)
 [ "$DLEN" -le 400 ] && pass "description fits the command popup ($DLEN ≤ 400 chars)" || fail "description is $DLEN chars; the popup wants 3–4 lines, at most 400"
@@ -750,6 +1012,11 @@ expect "statecheck --hits: … the other is reachable, the hidden one is not cou
 expect "statecheck --hits: … with exit 3" "exit 3" "$HB"
 expect "statecheck --hits scoped to an open modal passes" "1 controls · 1 reachable · 0 BLOCKED" \
   "$("$DIR/statecheck.sh" "$T/hits.html" --size 600x300 --js 'document.getElementById("m").hidden=false' --hits '#m' 2>&1)"
+# a control inside a <select> is the select's: Chrome's customisable select has an inner
+# button.selectedcontent, the click lands on the select, and it read as BLOCKED (2026-10-12)
+printf '%s' '<!doctype html><html><head><title>s</title><style>select,select::picker(select){appearance:base-select}</style></head><body style="margin:0"><select id=sel style="position:absolute;left:10px;top:20px"><button class=selectedcontent><selectedcontent></selectedcontent></button><option>Alpha</option><option>Beta</option></select></body></html>' > "$T/hsel.html"
+expect "statecheck --hits: the select's inner button is not a control of its own" "1 controls · 1 reachable · 0 BLOCKED" \
+  "$("$DIR/statecheck.sh" "$T/hsel.html" --size 600x300 --js 'var b=document.createElement("button");b.className="selectedcontent";b.textContent="x";document.getElementById("sel").prepend(b)' --hits auto 2>&1)"
 expect "statecheck --hits: a scope that matches nothing is an error" "exit 3" "$("$DIR/statecheck.sh" "$T/hits.html" --size 600x300 --hits '#nope' >/dev/null 2>&1; echo "exit $?")"
 # --texts: every string of a zone's design context is on the page, scoped to the zone, with case,
 # whitespace and quote marks folded; figctx.py --texts makes the list from the context
@@ -757,6 +1024,11 @@ printf '%s' '<div data-name="Modal"><p className="text-[14px]">First name</p><p>
 expect "figctx.py --texts: one string per line, JSX strings and entities decoded" '"First name" "\"Ivanov\"" "Иван Иванов"' \
   "$(python3 "$DIR/figctx.py" "$T/tx.jsx" --texts | while read -r l; do printf '"%s" ' "$(printf '%s' "$l" | sed 's/"/\\"/g')"; done)"
 python3 "$DIR/figctx.py" "$T/tx.jsx" --texts > "$T/tx.txt"
+# a context with no text node (a QR's SVG groups, a nested instance's empty wrapper) says so and exits 1,
+# instead of printing nothing (2026-10-12: a second call was spent to learn the first had no text)
+printf '%s' '<div data-name="Content"><svg><g id="qr"><path d="M0 0h1v1z"/></g></svg><div className="flex gap-[8px]"></div></div>' > "$T/tx-none.jsx"
+expect "figctx.py --texts: a context without text says so, exit 1" "no text in this context|1" \
+  "$(python3 "$DIR/figctx.py" "$T/tx-none.jsx" --texts | grep -o 'no text in this context')|$(python3 "$DIR/figctx.py" "$T/tx-none.jsx" --texts >/dev/null; echo $?)"
 printf '%s' '<!doctype html><html><head><title>t</title></head><body><div id=page><label>First name</label><div style="text-transform:uppercase">“ivanov”</div><div>Иван Иванов</div></div><div id=modal><label>First name</label><div>“Ivanov”</div></div></body></html>' > "$T/tx.html"
 expect "statecheck --texts: the page shows every string, quotes and case folded" "3 expected · 3 found · 0 MISSING" "$("$DIR/statecheck.sh" "$T/tx.html" --size 600x200 --texts "$T/tx.txt" 2>&1)"
 TXM=$("$DIR/statecheck.sh" "$T/tx.html" --size 600x200 --texts "$T/tx.txt" --texts-in '#modal' 2>&1; echo "exit $?")
@@ -912,8 +1184,26 @@ mkdir -p "$T/pc/plugins/cache/m/p/9.9.9/skills/figma-to-prototype" "$T/pc/plugin
 echo '{"version":"9.9.9"}' > "$T/pc/plugins/cache/m/p/9.9.9/.claude-plugin/plugin.json"; touch "$T/pc/plugins/cache/m/p/9.9.9/skills/figma-to-prototype/SKILL.md"
 printf '%s\n' "{\"type\":\"assistant\",\"timestamp\":\"2026-10-06T10:00:00Z\",\"message\":{\"id\":\"z\",\"content\":[{\"type\":\"tool_use\",\"name\":\"Read\",\"input\":{\"file_path\":\"$T/pc/plugins/cache/m/p/9.9.9/skills/figma-to-prototype/SKILL.md\"}}]}}" > "$T/rs2.jsonl"
 expect "runstats.cjs: the skill version is the copy the session read" "skill   : plugin 9.9.9 (plugin cache)" "$(node "$DIR/runstats.cjs" "$T/rs2.jsonl" 2>&1)"
-mkdir -p "$T/sess/proto"; SESS="$(cd "$T/sess" && pwd -P | sed 's/[^A-Za-z0-9]/-/g')"; mkdir -p "$T/cfg/projects/$SESS" && cp "$T/rs.jsonl" "$T/cfg/projects/$SESS/s.jsonl"
-expect "runstats.cjs without a path: the transcript of the session's cwd, found from a project subfolder" "rounds  : 2 messages" "$(cd "$T/sess/proto" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/runstats.cjs" 2>&1)"
+# … and the transcript is the session's that worked in the folder — opened there, or above it and naming
+# it — never the newest file at a parent (2026-10-12: a run folder without a transcript yet walked up to
+# ~/Documents/Claude/Code and read another project's Sonnet session: OFFER on a Fable run)
+mkdir -p "$T/sess/proto" "$T/sess/other"; SP="$(cd "$T/sess" && pwd -P)"; SESS="$(echo "$SP" | sed 's/[^A-Za-z0-9]/-/g')"; mkdir -p "$T/cfg/projects/$SESS"
+sed "s|^{|{\"cwd\":\"$SP\",|" "$T/rs.jsonl" > "$T/cfg/projects/$SESS/s.jsonl"
+printf '%s\n' "{\"type\":\"assistant\",\"cwd\":\"$SP\",\"timestamp\":\"2026-10-02T10:20:00Z\",\"effort\":\"high\",\"message\":{\"id\":\"a6\",\"model\":\"claude-opus-5-5\",\"content\":[{\"type\":\"tool_use\",\"name\":\"Bash\",\"input\":{\"command\":\"cd $SP/proto && ls\"}}]}}" >> "$T/cfg/projects/$SESS/s.jsonl"
+printf '%s\n' "{\"type\":\"assistant\",\"cwd\":\"$SP\",\"timestamp\":\"2026-10-12T10:00:00Z\",\"effort\":\"low\",\"message\":{\"id\":\"b1\",\"model\":\"claude-sonnet-5-5\",\"content\":[{\"type\":\"text\",\"text\":\"another project, opened at the same folder\"}]}}" > "$T/cfg/projects/$SESS/t.jsonl"
+touch -t 203001010000 "$T/cfg/projects/$SESS/t.jsonl"
+expect "runstats.cjs without a path: the transcript of the session's cwd, found from a project subfolder it names" "rounds  : 2 messages" "$(cd "$T/sess/proto" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/runstats.cjs" 2>&1)"
+expect "modelcheck.cjs without a path: that transcript, not the newer unrelated session at the parent" "ok    : claude-opus-5-5, effort high" "$(cd "$T/sess/proto" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/modelcheck.cjs" 2>&1)"
+expect "modelcheck.cjs: a folder no session worked in has no transcript — not the parent's newest" "unknown: no transcript for this folder" "$(cd "$T/sess/other" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/modelcheck.cjs" 2>&1)"
+expect "runstats.cjs: … says so, exit 2" "no transcript for this folder|2" "$(cd "$T/sess/other" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/runstats.cjs" 2>&1 | grep -o 'no transcript for this folder')|$(cd "$T/sess/other" && CLAUDE_CONFIG_DIR="$T/cfg" node "$DIR/runstats.cjs" >/dev/null 2>&1; echo $?)"
+# the skill line names the copy the run used — the folder's own .claude/skills/ copy, reached through a
+# shell variable — and from --since on only; the plugin a session read a week before is not the run's
+mkdir -p "$T/run/.claude/skills/figma-to-prototype"; touch "$T/run/.claude/skills/figma-to-prototype/SKILL.md"; echo "commit abc1234 2026-10-12" > "$T/run/.claude/skills/figma-to-prototype/.version-under-test"
+RP="$(cd "$T/run" && pwd -P)"
+printf '%s\n' "{\"type\":\"assistant\",\"cwd\":\"$RP\",\"timestamp\":\"2026-10-05T10:00:00Z\",\"message\":{\"id\":\"c1\",\"content\":[{\"type\":\"tool_use\",\"name\":\"Read\",\"input\":{\"file_path\":\"$T/pc/plugins/cache/m/p/9.9.9/skills/figma-to-prototype/SKILL.md\"}}]}}" \
+  "{\"type\":\"assistant\",\"cwd\":\"$RP\",\"timestamp\":\"2026-10-12T10:00:00Z\",\"message\":{\"id\":\"c2\",\"content\":[{\"type\":\"tool_use\",\"name\":\"Bash\",\"input\":{\"command\":\"R=$RP; node \$R/.claude/skills/figma-to-prototype/scripts/shoot.js\"}}]}}" > "$T/rs3.jsonl"
+expect "runstats.cjs: the skill line sees the folder's own .claude/skills copy through a shell variable, beside the plugin" "9.9.9 (plugin cache); commit abc1234 2026-10-12 (project skill $RP/.claude/skills/figma-to-prototype) — MORE THAN ONE COPY" "$(node "$DIR/runstats.cjs" "$T/rs3.jsonl" 2>&1 | grep '^skill')"
+expect "runstats.cjs --since: … and names only the copy the run used" "skill   : commit abc1234 2026-10-12 (project skill $RP/.claude/skills/figma-to-prototype)" "$(node "$DIR/runstats.cjs" "$T/rs3.jsonl" --since 2026-10-10T00:00:00Z 2>&1)"
 RS=$(node "$DIR/runstats.cjs" "$T/rs.jsonl" 2>&1)
 expect "runstats.cjs: wall time, and the person's turn from the agent's last line" "wall    : 19m" "$RS"
 expect "runstats.cjs: … a line out of time order counts where it belongs, and a form's wait is the person's" "the person's turn 15m, the agent's 4m" "$RS"
@@ -1147,9 +1437,21 @@ expect "marketplace: SKILL.md names shell-env beside the \$SKILL export, and aut
 # eval.md §4: every row of the run table has the header's cell count — four rows were a cell short for
 # two weeks and runs 5 and 6 read under the wrong column
 expect "eval.md run table: every row has as many cells as the header" "1" "$(awk '/^\| \| run 1 \| run 2/,/^$/' "$ROOT/assets/eval.md" | awk -F'|' 'NF>1{print NF}' | sort -u | wc -l | tr -d ' ')"
+expect "eval-websdk.md run table: every row has as many cells as the header, and the brief is the run's" "1 1" "$(awk '/^\| \| run 13 \| run 14/,/^$/' "$ROOT/assets/eval-websdk.md" | awk -F'|' 'NF>1{print NF}' | sort -u | wc -l | tr -d ' ') $(grep -c 'node-id=10469-43306' "$ROOT/assets/eval-websdk.md")"
+expect "eval-websdk.md §6 (General flow): the run 15 table's rows have the header's cell count, the brief names the section, the frames table has ten rows" "1 1 10" "$(awk '/^\| \| run 15 \|/,/^$/' "$ROOT/assets/eval-websdk.md" | awk -F'|' 'NF>1{print NF}' | sort -u | wc -l | tr -d ' ') $(grep -c 'node-id=1-6246' "$ROOT/assets/eval-websdk.md") $(awk '/^### 6.1/,/^### 6.2/' "$ROOT/assets/eval-websdk.md" | grep -c '^| [A-Z][^|]*| `1:')"
 expect "Step 0 asks through AskUserQuestion, never as text" "1" "$(grep -c 'Every question goes through the `AskUserQuestion` tool, never as text' SKILL.md)"
 expect "Step 0: a parameter with a default is not a question, no option points at Other, no baking offered" "1 1 1" "$(grep -c 'A parameter with a written default is not a question' SKILL.md) $(grep -c 'no option of yours may only point at it' SKILL.md) $(grep -c 'Never offer to bake what holds' SKILL.md)"
+# an unfilled place on the task path (three identical "1 · Identity document" rows, run 15) is one
+# Step 0 question with three answers, never built verbatim unasked; the reference has the signals
+expect "Step 0: unfilled content is one question, verbatim / proposed / given; figma-mcp.md has the section" "1 1 1" "$(grep -c '\*\*Unfilled content\*\* on the task path.*\*verbatim\*.*\*proposed\*.*\*given\*' SKILL.md) $(grep -c '^## A mockup can be unfilled$' references/figma-mcp.md) $(grep -c 'An unfilled place asked in Step 0 is a `placeholder` row' SKILL.md)"
+# a drawn loading state has no drawn exit (run 15 asked on its own whether the camera's states
+# advance by timers or taps): the same row asks it once, three answers; the plumbing has the section
+expect "Step 0: a loading state's exit is one question, timer and tap / timer only / tap only; interaction-plumbing.md has the section" "1 1 1" "$(grep -c '\*\*A loading state\*\* the frames draw.*\*timer and tap\*.*\*timer only\*.*\*tap only\*' SKILL.md) $(grep -c '^## Timed transitions — one timer per loading state$' references/interaction-plumbing.md) $(grep -c 'which states advance by time' references/handoff.md)"
 
+# the websdk profile: Step 0 reads it, the canvas has the responsive mode, Step 4 names its exception,
+# Step 7 checks the widths, and the version check repeats at its three moments
+expect "SKILL.md: the websdk profile in Step 0, the canvas, Step 2, Step 3, Step 4, Step 7 and the map" "1 1 1 1 1 1 1" "$(grep -c '^| \*\*profile\*\* |' SKILL.md) $(grep -c 'responsive\* — the websdk profile' SKILL.md) $(grep -c 'websdk-shell.js`, `websdkgate.sh`, one frame per width' SKILL.md) $(grep -c 'websdk-shell.js --fragment' SKILL.md) $(grep -c 'The websdk profile is the exception' SKILL.md) $(grep -c '^| the three widths (websdk) |' SKILL.md) $(grep -c '^| `references/websdk.md` |' SKILL.md)"
+expect "SKILL.md: the version check repeats before Step 3, before Step 9 and at every increment" "1" "$(grep -c 'The version check runs again at three moments' SKILL.md)"
 # the run checklist has a line per step, 0 to 9, and each step it names exists
 expect "SKILL.md: the run checklist names every step 0–9" "10" "$(sed -n '/^Prototype run:/,/^```/p' SKILL.md | grep -cE '^- \[ \] [0-9] ')"
 
@@ -1159,6 +1461,21 @@ expect "SKILL.md: the run checklist names every step 0–9" "10" "$(sed -n '/^Pr
 for f in references/*.md assets/*.md; do grep -q "$f" SKILL.md && pass "listed: $f" || fail "not in SKILL.md: $f"; done
 for f in scripts/* assets/templates/*; do b=$(basename "$f"); case "$b" in _*|*.html) continue ;; esac
   grep -q "$b" SKILL.md references/tools.md && pass "listed: $b" || fail "not in SKILL.md or tools.md: $b"; done
+# the WebSDK kit snapshot: the spec parses and names stories, sbkit refuses a missing spec with a
+# line, and a taken snapshot carries no build hash — a `_name_hash_n` left in kit.css is a class
+# the rename table missed, and it changes on the kit's next build
+expect "sbkit.cjs: a missing spec is refused with a reason" "no spec at" "$(node "$DIR/sbkit.cjs" --spec "$T/none.json" 2>&1; echo "exit $?")"
+expect "sbkit.cjs: … with exit 1" "exit 1" "$(node "$DIR/sbkit.cjs" --spec "$T/none.json" 2>&1 >/dev/null; echo "exit $?")"
+WK=assets/components/websdk
+expect "websdk/storybook.json: parses, every check has a story, a selector and recorded values, no selector on a build hash" "ok" "$(node -e 'const s=require(process.argv[1]);const bad=[];for(const c of s.components)for(const k of c.checks){if(!k.story||!k.sel||!k.expect||!Object.keys(k.expect).length)bad.push(c.component+"/"+k.what+": incomplete");if(/_[A-Za-z][\w-]*_[a-z0-9]{5}_\d+/.test(k.sel))bad.push(c.component+"/"+k.what+": hashed selector");if(Object.values(k.expect).some(v=>v===""))bad.push(c.component+"/"+k.what+": unrecorded value")}console.log(bad.length?bad.join("; "):"ok")' "$ROOT/$WK/storybook.json" 2>&1)"
+expect "dscheck.js --spec: a missing spec is refused with a reason" "no spec at" "$(node "$DIR/dscheck.js" --spec "$T/none.json" 2>&1)"
+expect "websdk/stories.json parses, every component names a story" "ok" "$(node -e 'const s=require(process.argv[1]);const bad=s.components.filter(c=>!c.stories||!c.stories.length).map(c=>c.name);console.log(bad.length?"no stories: "+bad.join(","):"ok")' "$ROOT/$WK/stories.json" 2>&1)"
+if [ -f "$WK/kit.css" ]; then
+  expect "websdk/kit.css carries no build hash" "0" "$(grep -cE '_[A-Za-z][A-Za-z0-9-]*_[a-z0-9]{5}_[0-9]+|--v[0-9a-f]{8}\b' "$WK/kit.css")"
+  expect "websdk/kit.css carries none of Storybook's own rules" "0" "$(grep -cE '\.sb-|#storybook|sb-common-assets|keyframes sb-' "$WK/kit.css")"
+  expect "websdk: kit.css, modules.json and VERSION.md are one capture" "1" "$(d=$(sed -n 's/.*snapshot of \([0-9-]*\) .*/\1/p' "$WK/kit.css" | head -1); [ -n "$d" ] && grep -q "\"taken\": \"$d\"" "$WK/modules.json" && grep -q "| taken | $d |" "$WK/VERSION.md" && echo 1 || echo "0 (kit.css says '$d')")"
+  expect "websdk/markup: every captured story has its file" "ok" "$(node -e 'const fs=require("fs"),p=require("path");const s=require(p.resolve(process.argv[1]));const miss=s.stories.filter(x=>!x.unread).filter(x=>!fs.existsSync(p.join(process.argv[2],x.component,x.story+".html"))).map(x=>x.component+"/"+x.story);console.log(miss.length?"missing: "+miss.join(" "):"ok")' "$WK/snapshot.json" "$WK/markup" 2>&1)"
+fi
 # quoted headings next to a file name must exist in that file
 python3 - <<'PY' || bad=1
 import re,glob,sys

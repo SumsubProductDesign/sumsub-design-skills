@@ -40,7 +40,11 @@ esac
 # ---- required
 if command -v node >/dev/null 2>&1; then
   v=$(node -v)
-  case "$v" in v1[89].*|v[2-9][0-9].*) pass "node $v" ;; *) fail "node $v — need 18 or newer"; howto node ;; esac
+  case "$v" in
+    v2[2-9].*|v[3-9][0-9].*) pass "node $v" ;;
+    v1[89].*|v2[01].*) pass "node $v"; warn "node $v has no WebSocket: device renders (statecheck.sh --device, shoot.js under 500 wide) and the WebSDK kit snapshot (sbkit.cjs) need 22 or newer" ;;
+    *) fail "node $v — need 18 or newer"; howto node ;;
+  esac
 else fail "node not found — every .js tool and all JSON handling needs it"; howto node; fi
 if CH=$(bash -c ". '$DIR/_chrome.sh'; printf '%s' \"\$CHROME\"" 2>&1); then pass "chrome: $CH"; else fail "$CH"; howto chrome; fi
 if command -v curl >/dev/null 2>&1; then pass "curl"; else fail "curl not found — assets are downloaded with it"; fi

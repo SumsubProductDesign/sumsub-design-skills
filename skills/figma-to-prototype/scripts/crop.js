@@ -3,7 +3,7 @@
 // Stacked comparison: reference above, prototype below, same crop, zoomed.
 // bx/by let the second image be cropped at a different origin (different canvas offsets).
 const {execSync} = require('child_process'), fs = require('fs'), path = require('path'), os = require('os');
-const {CHROME} = require(path.join(__dirname, '_chrome.cjs'));
+const {CHROME, TIMEOUT} = require(path.join(__dirname, '_chrome.cjs'));
 // default output goes next to the other renders when the project layout exists,
 // so a comparison does not end up beside the deliverable
 const defOut = fs.existsSync('_work/shots') ? '_work/shots/compare.png' : 'compare.png';
@@ -32,7 +32,9 @@ fs.writeFileSync(tmp, `<style>body{margin:0;background:#fff;font:10px monospace}
 .wrap img{position:absolute;transform-origin:top left;transform:scale(${z});image-rendering:pixelated}
 .lbl{padding:2px 4px;background:#eee}</style>
 <div class=lbl>REFERENCE</div>${pane(a, x, y)}<div class=lbl>PROTOTYPE</div>${pane(b, bx, by)}`);
-execSync(`"${CHROME}" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files ` +
+try { execSync(`"${CHROME}" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files ` +
   `--window-size=${Math.ceil(w*z)+4},${Math.ceil(h*z*2)+40} --screenshot="${out}" ` +
-  `--virtual-time-budget=3000 "file://${tmp}" 2>/dev/null`, {stdio: 'ignore'});
+  `--virtual-time-budget=3000 "file://${tmp}" 2>/dev/null`, {stdio: 'ignore', timeout: TIMEOUT * 1000, killSignal: 'SIGKILL'});
+  // the clock of _chrome.cjs: a hung Chrome is killed after CHROME_TIMEOUT s and this call fails with a line
+} catch (e) { console.error('crop: ' + (e && e.signal === 'SIGKILL' ? `Chrome did not finish within ${TIMEOUT}s and was killed (CHROME_TIMEOUT raises the clock)` : e && e.message)); process.exit(1); }
 console.log(out);
