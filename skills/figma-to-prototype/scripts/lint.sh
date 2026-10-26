@@ -85,7 +85,11 @@ expect "vercel judge: the prototype's own redirect is routing, not a wall" "reac
 expect "vercel judge: a hop to another host is the wall" "another host answered" "$(bash -c ". '$DIR/_vercel.sh'; vc_judge https://p.vercel.app 200 https://vercel.com/login" 2>&1)"
 mkdir -p "$T/spa"; echo '<html></html>' > "$T/spa/index.html"
 printf '%s' '{"cleanUrls":true,"redirects":[{"source":"/","destination":"/s1"}]}' > "$T/spa/vercel.json"
-PUB=$(PATH="$T/vc:$PATH" FAKE_WHO='anna-m' "$DIR/publish.sh" "$T/spa" --project reg-check --spa --dry 2>&1)
+# the audience is the person's answer: without --for the script asks and stops, colleagues are refused
+# (run 21 deployed on an audience read out of its own button, 2026-10-26)
+expect "publish.sh without --for: asks who will open the link, deploys nothing, exit 2" "1 2" "$(PATH="$T/vc:$PATH" FAKE_WHO='anna-m' "$DIR/publish.sh" "$T/spa" --project reg-check --dry 2>&1 | grep -c 'who will open the link') $(PATH="$T/vc:$PATH" FAKE_WHO='anna-m' "$DIR/publish.sh" "$T/spa" --project reg-check --dry >/dev/null 2>&1; echo $?)"
+expect "publish.sh --for colleagues: refused, names the publish-page skill" "publish-page skill" "$(PATH="$T/vc:$PATH" FAKE_WHO='anna-m' "$DIR/publish.sh" "$T/spa" --project reg-check --for colleagues --dry 2>&1)"
+PUB=$(PATH="$T/vc:$PATH" FAKE_WHO='anna-m' "$DIR/publish.sh" "$T/spa" --project reg-check --for outside --spa --dry 2>&1)
 expect "publish.sh --spa: the payload's redirects survive next to the rewrite and our headers" "SPA, every path → index.html + the payload's own redirects" "$PUB"
 expect "publish.sh --spa: cleanUrls is dropped, with the reason" "cleanUrls dropped" "$PUB"
 expect "publish.sh --dry shows the vercel.json that would go up" '"destination": "/index.html"' "$PUB"
@@ -357,6 +361,14 @@ NODE
   # residual off a click-only page before it noticed (2026-10-14). timed.html routes; a.html does not
   expect "statecheck --hash on a page with no hash routes: one warning line naming the hash" "the hash changed nothing: the page has no route for #custom" "$("$DIR/statecheck.sh" "$T/a.html" --size 200x100 --hash '#custom' 2>&1 >/dev/null)"
   expect "statecheck --hash on a page that routes it: no warning" "0" "$("$DIR/statecheck.sh" "$T/timed.html" --size 200x100 --hash '#t?hold' 2>&1 >/dev/null | grep -c 'changed nothing')"
+  # the state the page loads in has the same signature with and without its hash: a page that exposes
+  # window.__proto.routes is told so instead of "no route" (run 19 read the warning on #warning, 2026-10-26)
+  cat > "$T/routes.html" <<'HTML'
+<!doctype html><body><p id="x">first</p><script>window.__proto={routes:['#one','#two']};function r(){document.getElementById('x').textContent=location.hash==='#two'?'second':'first'}addEventListener('hashchange',r);r()</script></body>
+HTML
+  expect "statecheck --hash on the state the page loads in, routes exposed: said so, not 'no route'" "#one is the state the page loads in" "$("$DIR/statecheck.sh" "$T/routes.html" --size 200x100 --hash '#one' 2>&1 >/dev/null)"
+  expect "statecheck --hash outside window.__proto.routes: no route, with the list" "no route for #three (window.__proto.routes: #one,#two)" "$("$DIR/statecheck.sh" "$T/routes.html" --size 200x100 --hash '#three' 2>&1 >/dev/null)"
+  expect "statecheck --hash on a page without routes exposed: the warning names both readings" "expose window.__proto.routes" "$("$DIR/statecheck.sh" "$T/a.html" --size 200x100 --hash '#custom' 2>&1 >/dev/null)"
   expect "shoot.js '#t?hold': no warning, the PNG named by the state" "0 t_200.png" "$(node "$DIR/shoot.js" "$T/timed.html" "$T/sth" 200 100 '#t?hold' 2>&1 >/dev/null | grep -c 'hold') $(ls "$T/sth" 2>&1)"
   expect "zonediff.sh: a malformed zone is one line, not a stack trace" 'bad zones — a zone is ["name",x,y,w,h], got ["box",20,20,40]' "$("$DIR/zonediff.sh" "$A" "$B" '[["box",20,20,40]]' 2>&1)"
   expect "zonediff.sh map is the reference's own size" "200 100" "$(node -e 'const b=require("fs").readFileSync(process.argv[1]);console.log(b.readUInt32BE(16),b.readUInt32BE(20))' "$T/map.png" 2>&1)"
@@ -1213,6 +1225,20 @@ expect "runstats.cjs: the context peak" "context : peak 52k" "$RS"
 expect "runstats.cjs: the growth goes to the tools that caused it" "extraction 100%" "$RS"
 expect "runstats.cjs: a cost line to end a delivery with" "cost    : 4m of work · 2 tool calls · 1 Figma · mostly extraction" "$RS"
 expect "runstats.cjs --round: this increment only, from the person's last message" "rounds  : 1 messages" "$(node "$DIR/runstats.cjs" "$T/rs.jsonl" --round 2>&1)"
+# a writing Figma call is an edit, not extraction, and a gap over an hour before the person's message
+# is printed as idle — one run read 88 use_figma calls as "extraction 43%" and a night as 45 hours
+cat > "$T/rs3.jsonl" <<'JSONL'
+{"type":"user","timestamp":"2026-10-15T10:00:00Z","message":{"role":"user","content":"swap the card fills in Figma too"}}
+{"type":"assistant","timestamp":"2026-10-15T10:01:00Z","message":{"id":"b1","content":[{"type":"tool_use","name":"mcp__plugin_sumsub-design_figma__use_figma","input":{}}],"usage":{"input_tokens":10,"cache_read_input_tokens":50000,"cache_creation_input_tokens":0,"output_tokens":5}}}
+{"type":"user","timestamp":"2026-10-15T10:01:05Z","message":{"role":"user","content":[{"type":"tool_result","content":"ok"}]}}
+{"type":"assistant","timestamp":"2026-10-15T10:02:00Z","message":{"id":"b2","content":[{"type":"text","text":"swapped"}],"usage":{"input_tokens":10,"cache_read_input_tokens":54000,"cache_creation_input_tokens":0,"output_tokens":5}}}
+{"type":"user","timestamp":"2026-10-16T08:02:00Z","message":{"role":"user","content":"now the toast"}}
+{"type":"assistant","timestamp":"2026-10-16T08:03:00Z","message":{"id":"b3","content":[{"type":"text","text":"done"}],"usage":{"input_tokens":10,"cache_read_input_tokens":54000,"cache_creation_input_tokens":0,"output_tokens":5}}}
+JSONL
+RS3=$(node "$DIR/runstats.cjs" "$T/rs3.jsonl" 2>&1)
+expect "runstats.cjs: a writing Figma call is listed as an edit" "figma   : 1 calls — use_figma 1 · of which edits 1 (use_figma 1)" "$RS3"
+expect "runstats.cjs: … and its growth is the figma edits phase, not extraction" "extraction 0% · figma edits 100%" "$RS3"
+expect "runstats.cjs: a night inside the person's turn is printed as idle" "22h 00m of the person's turn is idle" "$RS3"
 
 # the run log: the template exists, Step 8 requires it, and the skill offers it without sending
 # it. The last one is the point — a log collected quietly reads as a record of who erred.
@@ -1451,7 +1477,7 @@ expect "Step 0: a loading state's exit is one question, timer and tap / timer on
 # the websdk profile: Step 0 reads it, the canvas has the responsive mode, Step 4 names its exception,
 # Step 7 checks the widths, and the version check repeats at its three moments
 expect "SKILL.md: the websdk profile in Step 0, the canvas, Step 2, Step 3, Step 4, Step 7 and the map" "1 1 1 1 1 1 1" "$(grep -c '^| \*\*profile\*\* |' SKILL.md) $(grep -c 'responsive\* — the websdk profile' SKILL.md) $(grep -c 'websdk-shell.js`, `websdkgate.sh`, one frame per width' SKILL.md) $(grep -c 'websdk-shell.js --fragment' SKILL.md) $(grep -c 'The websdk profile is the exception' SKILL.md) $(grep -c '^| the three widths (websdk) |' SKILL.md) $(grep -c '^| `references/websdk.md` |' SKILL.md)"
-expect "SKILL.md: the version check repeats before Step 3, before Step 9 and at every increment" "1" "$(grep -c 'The version check runs again at three moments' SKILL.md)"
+expect "SKILL.md: the version check repeats before Step 3, before each delivery's cost line, before Step 9, at every increment and at a new day — and step 9 no longer forbids it" "1 1 1 0" "$(grep -c 'The version check runs again, silently when nothing changed' SKILL.md) $(grep -c 'every new day of a session that stays open' SKILL.md) $(grep -c 'the version check (pre-flight steps 1–3) before the cost line' SKILL.md) $(grep -c 'do not re-check in this conversation' SKILL.md)"
 # the run checklist has a line per step, 0 to 9, and each step it names exists
 expect "SKILL.md: the run checklist names every step 0–9" "10" "$(sed -n '/^Prototype run:/,/^```/p' SKILL.md | grep -cE '^- \[ \] [0-9] ')"
 

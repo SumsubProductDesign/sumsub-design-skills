@@ -56,6 +56,11 @@ are load-bearing.
 
 ## `disableCodeConnect: true`, on every `get_design_context` call
 
+The server's own instructions ask for its `figma-design-to-code` skill before any
+`get_design_context`. This skill's order stands in for it — the flag, the saved files,
+`figctx.py` — and a run that skipped it lost nothing (run 20 noted the doubt); do not
+load it on top, its adapt-to-the-codebase workflow is not this one.
+
 Without it, a file wired to a component library returns component snippets
 (`<SnsIcon icon="settings"/>`) instead of asset URLs — one call on an icon rail without
 the flag cost ~15k tokens and had to be repeated. With it, every icon arrives as a named
@@ -227,7 +232,7 @@ expect the zone diff over the empty area to come back near zero.
 
 Across three screens of one file the breadcrumb, the menu column, the preview's title and
 the device width all differed in areas every screen supposedly shared. **Before extracting
-a new frame, zone-diff its shared areas against the screens already built, and show the
+a new frame, zone-diff its shared areas against the screens already built — and on a first build the set's frames against each other, before the first design context — and show the
 person what diverges** — one call, and it catches what would surface in front of a
 respondent. One divergence needs no question: **a frame that documents states is a
 specimen** — geometry and styling from it, content from the screen frame (a specimen's

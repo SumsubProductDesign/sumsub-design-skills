@@ -6,6 +6,7 @@ Step 8 is the procedure; this is the full text it was condensed from.
 ## Contents
 
 - Step 8 in full — deviations, then handoff
+- A change that goes back to Figma
 - Asking versus deciding, in full
 
 ## Step 8 in full — deviations, then handoff
@@ -82,6 +83,64 @@ it is their session, it sits in their folder, and nothing about it is automatic.
 A log collected quietly would be read as a record of who made mistakes, and the
 people it is meant to help would start working around the skill to avoid it.
 
+## A change that goes back to Figma
+
+A prototype session often becomes the place where the design is decided — a
+drawer variant tried in code, a confirmation modal and a toast added because the
+demo needed them, the sample data chosen while clicking — and then the frames
+have to catch up. The 2026-10-15 run changed the prototype and the Figma file
+together in 17 of 27 rounds, made 88 `use_figma` calls of its own and met six
+Plugin API traps the mockup skill already names (a double tint drawn by hand
+instead of the `Tint` component, clones inside a slot that lost their ids where
+`slot.appendChild` with the other children hidden is the path). The frames are
+drawn by the sibling skill `/sumsub-design:sumsub-mockup`, not by this session's
+own calls (SKILL.md Step 0, *a change in Figma, asked alongside the prototype*);
+what this session owns is the brief it hands over, and `gen.js` already holds
+everything the brief needs, because every value sits next to its node id.
+
+The hand-over brief is one message to the mockup skill, **written the way that
+skill reads a request** — its *Add-to-existing-page* mode fires on "add <X> to
+the existing page <Y>", inspects that page, keeps its chrome and asks for the
+canonical node URL when it cannot find it — so the brief gives it exactly that,
+in this order:
+
+1. **The request, in its form.** "Add <the element> to the existing page
+   <Figma URL with the node id>", one page per message: the skill builds one
+   screen, shows its link and stops, and its own rule is that a burst of heavy
+   calls takes the MCP server down. A second variant's ten pages are ten
+   requests, the first checked before the next is sent.
+2. **The element in the design system's names,** not the library's: *Modal
+   Basic* with a *Tint*, *Drawer Basic*, *SnsToast*, a *Checkbox* inside a
+   *Menu item* — the component the file's own kit has, which the mockup skill's
+   tables name and `controls.js` only mirrors. It fills the component through
+   `setProperties` and places content into a slot; a brief that names a CSS
+   class or a `gen.js` function gives it nothing to build from.
+3. **The values, from `gen.js`, each with its node id:** every text, size,
+   option list and control state the element carries, verbatim. A picture goes
+   as the asset itself — the WebP, the 2x cut — never as "the one on page X":
+   the 2026-10-15 run lost a round to a photo picked from a page of candidates.
+4. **The prototype's render of the state** — one `shoot.js` screenshot at the
+   frame's size, cut to the changed region with `crop.js` when the page is
+   large — as the picture to match, with the sentence that the prototype is
+   what the team saw and agreed to.
+5. **What is placeholder** — the § Placeholders rows that touch the change, so
+   the frame does not turn a made-up value into a design decision.
+
+The brief cannot give that skill what it lacks: a mode for editing dozens of
+existing nodes at once — which is why a bulk edit stays here — and four of
+Figma's Plugin API traps met on that run (a slot's `insertChild` ignoring its
+index, a hidden clone with no children, docked content that needs a clipping
+frame, a fixed-size checkbox inside a menu item), which are its maintainer's to
+add, not this brief's to repeat.
+
+A bulk edit of existing nodes stays in the session, as the Step 0 row says, and
+is chunked — the mockup skill's own rule is that heavy `use_figma` calls back to
+back take the MCP server down. Either way the round is logged as *Figma* or
+*both* with the skill that did it, and a trap met in Figma's Plugin API — a
+slot, a clone, a component property — is a §6 line that names `sumsub-mockup`
+as the file it belongs in, not `references/traps.md` § Figma MCP, which holds
+the server's reading traps only.
+
 ## Asking versus deciding, in full
 
 **Ask when different readings mean materially different work,** and ask with
@@ -102,6 +161,17 @@ two exceptions that both cost a real run a round:
   scenario 3 only, or everywhere?" is one line; a guess applied everywhere is
   undone everywhere.
 
+**Before the cost line, the version check once more** (SKILL.md pre-flight,
+steps 1–3), silently when `main` still has the version this session runs. A
+two-day session checked on its first morning, read "current", and the release
+with the fixes for two of the things it then hit was merged on its second
+morning while it was still building; the person learned it from the log review
+ten days later. A session that stays open across a day repeats the check at the
+start of the new day for the same reason. The check can only see what is
+merged: a change in review is not installable, so the honest answer on a day
+between a PR and its merge is still "current" — the fix for that is the merge,
+not the check.
+
 **End every delivery with its cost, in one line.** `node "$SKILL/scripts/runstats.cjs" --round`
 prints it for the increment just finished: minutes of work, tool calls, Figma
 calls, and the phase that took most of it (`cost : 14m of work · 62 tool calls
@@ -113,6 +183,14 @@ that looks wrong to the person is a §6 entry on the spot.
 **Say every decision you made for the user, in the same response.** Which
 element got which behaviour, what was left inert, what was approximated. These
 are invisible in a screenshot; unnamed, they are unreviewable.
+
+**Speak in actions, never in the skill's own numbering.** "Step 9", "the
+pre-flight", "shell.md § The gate" are this document's index, and the person has
+not read it: a progress line that says "reading step 9 of the skill and checking
+the Vercel login" told the designer nothing on the 2026-10-26 run, and she said so.
+Say what is being done and why — "publishing: checking that you are logged in to
+Vercel, then one file goes up" — and keep the step numbers for the checklist, the
+run log and the ledger, where the maintainer reads them.
 
 **Deliver first, improve after an "ok".** When a request produces something
 the user is waiting for — a wrapper, a screen, a link — hand it over as soon

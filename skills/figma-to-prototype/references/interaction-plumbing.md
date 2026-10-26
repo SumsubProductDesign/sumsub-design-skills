@@ -159,6 +159,17 @@ the transition stops applying. Some Chrome versions serialise the shorthand as
 not judge from the shorthand either way — check the longhands
 (`transitionDuration: 0s`, `transitionDelay: 300ms`).
 
+**When the person asks for a transition anyway** — "a subtle open and close for
+the drawer" — it is rule 5's exception by request and a ledger line, and it
+moves only `transform` and `opacity`, never a layout property: not `width`, not
+`left` or `margin`, not a grid's columns. A docked drawer that pushed the grid
+once animated the content's width, and every card image jittered for the 240 ms;
+the fix was to slide the drawer alone and let the content reflow once, when the
+slide ends. The product-motion skill keeps the same rule (its C7: a size change
+is a scale or a clip). It is judged by eye in a visible pane — virtual time does
+not advance a transition, and a hidden browser pane pauses one (`traps.md`
+§ Measurement) — and it stays off under `prefers-reduced-motion`, like the loader.
+
 ## Timed transitions — one timer per loading state
 
 A loading state the frames draw (the kit's ring or dots, a state named Loading /
@@ -208,7 +219,8 @@ them, when two of the four were a loader. The plumbing is the same for all three
 
   ```js
   var loadTimer = null, hold = false;
-  window.__proto = {timers: function (on) { hold = !on; if (!on) clearTimeout(loadTimer); }};
+  window.__proto = {timers: function (on) { hold = !on; if (!on) clearTimeout(loadTimer); },
+                    routes: ['#…']};   // every hash the page routes, the load state first: statecheck.sh --hash reads it
   function show(hash) {                                   // '#upload' or '#upload?hold'
     var held = hold || /\?hold$/.test(hash), name = hash.slice(1).replace(/\?hold$/, '');
     clearTimeout(loadTimer); loadTimer = null;

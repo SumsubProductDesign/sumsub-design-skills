@@ -30,10 +30,13 @@ it. The log is still useful without it.
 
 **Rounds.** One row per message from the person that changed the build — `runstats.cjs`
 lists them with their times. The last column is what makes §5 readable: a round spent on a
-new requirement is the work; a round spent on the skill's mistake is a §6 entry.
+new requirement is the work; a round spent on the skill's mistake is a §6 entry. The
+*prototype / Figma / both* column says where the round landed; a Figma round names the skill
+that drew it — `sumsub-mockup`, or this session's own `use_figma` — so §5's Figma calls can be
+read as extraction or as edits.
 
-| # | time | what was asked | what changed | new requirement / skill's error / both |
-|---|---|---|---|---|
+| # | time | what was asked | what changed | prototype / Figma / both | new requirement / skill's error / both |
+|---|---|---|---|---|---|
 
 ## 2. What the skill decided at Step 0
 
@@ -84,7 +87,8 @@ real numbers (`--since <ISO time>` for the part of a long session that was this 
 * **Figma MCP calls:** total, and the split (metadata / screenshot / design context / assets)
 * **tool calls:** total, and the skill's scripts by name
 * **context:** peak and last, and roughly where it grew — *extraction* (Figma calls
-  and reading their output) / *build* (writing the generator and the page) / *verification*
+  and reading their output) / *figma edits* (`use_figma` and the other writing calls: a round that
+  changes the file beside the prototype is not extracting) / *build* (writing the generator and the page) / *verification*
   (renders, diffs, probes, and the cycles a failed check cost). A run that used twice the
   budget and cannot say which third ate it teaches nothing; the 2026-09-24 run was 330k
   against a measured 280k and the log could not say why. Reading the skill's own files is
@@ -119,7 +123,9 @@ A long run may group this section by phase instead — `### 6a. First build`,
 `### 6b. Publishing`, `### 6c. The platform`, `### 6d. My own slips` — keeping
 the four questions above inside each. The 2026-09-28 → 10-02 log did, over five
 days and forty increments, and it read better than one flat list: a finding
-about the platform and a finding about a script are fixed by different people.
+about the platform and a finding about a script are fixed by different people. A finding in
+Figma's Plugin API — a slot, a clone, a component property, a menu item's sizing — is tagged
+`sumsub-mockup`: it is that skill's to fix, and this one's maintainer cannot fix it here.
 
 ## 7. Anything else
 

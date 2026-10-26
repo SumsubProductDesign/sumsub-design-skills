@@ -590,6 +590,10 @@ timed states showed the next screen, and only the 375 ones, made through
 `--js 'window.__proto.timers(false)'`) hold a page's timers — the convention in
 `references/interaction-plumbing.md` § Timed transitions; `--no-anim` kills the
 transitions. `shoot.js` warns when a page that sets timers is shot with neither.
+`statecheck.sh --hash` on the state the page loads in sees the same page with and
+without the hash — the same sign as a missing route; a page that exposes
+`window.__proto.routes` (every hash it routes, beside `timers`) is told which it
+is, so expose it from `gen.js` and read "no route" as a real miss.
 
 Renders run in parallel where there is more than one. `shoot.js` shoots four
 views at a time (`SHOOT_PARALLEL` changes the number) and `scaletest.js` shoots
@@ -717,3 +721,8 @@ width: a 1x plate diffs at 0.00% and looks soft on the respondent's screen.
 Verify interactions separately from pixels, and scaling separately from both.
 The rest of this file is the full method; `references/traps.md` § Measurement
 has the artefacts that produce false failures.
+
+**The numbers go into §4 of the run log as they print**, here, against the
+threshold from Step 0 — not at the end with the handoff: two runs filled §3–§5 in
+one edit after delivery, and a log written from memory drops exactly the cycle
+nobody can explain later.

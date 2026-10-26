@@ -18,6 +18,7 @@ choices that made that cheap on a real project, and the one that didn't.
 - State lifecycle
 - Two or three controls, one state: setting versus view
 - Generator, not hand-written HTML
+- Two variants from one generator
 - Icons
 - Scale-only adaptivity
 - Edits to a built file must be able to fail
@@ -269,6 +270,28 @@ Two conventions that pay off later:
 * **`<defs>` + `<use>`** to deduplicate large repeated path data (tooltips,
   repeated icons) rather than emitting it per instance.
 
+## Two variants from one generator
+
+A demo often compares two answers to one question — a drawer that covers the
+grid against one that pushes it, a flow through a modal against one through a
+page — and the second variant has twice arrived as a request mid-run (the OCR
+report's prototypes 1 and 2, the Document examples' options 1 and 2). Both
+times it was built from the same frames, the same plates and the same data, and
+the first time it cost a second build of mostly the same pieces.
+
+One generator, one flag: `node _work/gen/gen.js --option 2` writes
+`<name>-option2.html` beside `<name>.html`. The data literals, the plates, the
+controls and the panel registry are shared; the flag switches only what the
+variants disagree on — one layout function, one drawer class, one set of
+measurements — and the default build is the variant the team is expected to
+pick. Each variant is its own deliverable: its own zone diffs against its own
+frames, its own `--hits`, its own artifact or project published to its own path
+every round (`references/publishing.md` § As a claude.ai artifact), and a line
+in the handoff saying which is which. When the team has chosen, the other
+variant is **frozen, not deleted**: the flag stays buildable from the same
+`gen.js`, so the comparison can be shown again, and the ledger says from which
+round it stopped following the content.
+
 ## Icons
 
 Inline the export's `<path>` data unchanged, with the `viewBox` carrying the
@@ -327,6 +350,11 @@ And after every injection, assert that the key definitions (`<script`, the
 icon table, each top-level builder) occur exactly once — and that every icon
 the page uses is defined: an edit script wiped icon definitions twice through a
 comment on the same line (2026-09-28), and the page rendered with holes.
+
+Before the build itself, `node --check _work/gen/gen.js`: a patch that left a
+duplicated `else` broke one build, and a syntax error met by the render is a
+half-written page with no line number, while `--check` names the line in under
+a second.
 
 **Publish only after the edit has asserted.** `edit; build; publish` published
 an unchanged file once: the anchor did not match, the script printed its error
@@ -492,6 +520,8 @@ the reserve. Width has `fluid-page.js`; this is the other axis.
 3. column rules from the tokens: `w-[248px] shrink-0` → `{width: 248}`, `flex-[1_0_0] min-w-[200px]` → `{flex: 1, min: 200}`, a column present in rows but not in the header → `hideInHeader: true`;
 4. copy `assets/templates/gen-list.skeleton.js` to `gen.js`, fill data, spec and cell styles;
 5. verify: `node gen.js --canvas WxH` at the frame's size, then ink boxes of a header label, a first-row text and the right-most control against the frame, each shifted by the slot offset (slot origin minus the frame's content origin). Flexible columns share the island's extra width — at 1440 the island is 9px wider than a 1440 frame's, so right-hand columns sit 4–9px right of the frame: expected, not a miss.
+
+**And before leaving this step, §3 of the run log** — live controls, plates, the components used, what was built by hand — written now, from the generator in front of you, not reconstructed with the handoff: two runs wrote it at the end from memory, and the second said so in its own §6.
 
 The fluid modes: `references/shell.md` § Content in a fluid shell.
 
