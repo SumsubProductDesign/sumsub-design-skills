@@ -5,7 +5,7 @@ const dir = path.join(__dirname, "../reference/products/island-migration");
 const lib = fs.readFileSync(path.join(dir, "island-migration-lib.js"), "utf8");
 const helpers = new Set([...lib.matchAll(/^\s*(?:async\s+)?function\s+(\w+)|^\s*const\s+(\w+)\s*=/gm)].map(m => m[1] || m[2]));
 let bad = 0;
-for (const f of ["plan.js", "build.js", "finish.js"]) {
+for (const f of ["plan.js", "build.js", "finish.js", "case.js"]) {
   const src = fs.readFileSync(path.join(dir, f), "utf8");
   const defined = new Set([...src.matchAll(/(?:function\s+(\w+))|(?:const\s+(\w+)\s*=)|(?:let\s+(\w+))/g)].map(m => m[1] || m[2] || m[3]));
   const called = new Set([...src.matchAll(/(?<![.\w])(\w+)\s*\(/g)].map(m => m[1]));

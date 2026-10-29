@@ -4,6 +4,11 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.275.0 — 2026-10-29 (island engine: CM case pages keep their tabs over the left column)
+- **Case pages get the CM kit's `Case page tab content` instance.** On a case page the tabs are not in the header: they sit under it over the left column only, up to the right panel (designers' sample New Layout `16:20783`). The engine used to put them into the `*Header*` sub-header across the full width and rebuild the left column block by block. New step `case.js` (`caseLayout(pageId)`), run between `build.js` and `finish.js`: it switches the header's tab strip off, moves the tabs (labels, selected, counters) onto the instance's own strip, puts the instance of the selected tab in Main content (`Is empty` from what the build placed), stretches the strip to the right panel and sets the body padding to 0 — the instance brings its own. It reports the original's blocks against what the instance shows, so a difference goes to the designer. Any other page returns `skipped`.
+- **`Case page tab content` (Case management Components) moved to the grey island layout** as in the sample: `Container` on `background/neutral/ghost`, padding 20 (`spacing/xl`), gap 16 (`spacing/lg`); every table, empty state and the Events log in a `Page / Body / IslandCard`; empty states as `Default` inside their island; the tab strip fills the column. `Case page Overview tab content`: Transactions in an island, gap 16. Takes effect in files once the library is published.
+- `finish.js`: the case column instance is not reported in `notIsland`. `scripts/check-island-engine.js` checks `case.js` too.
+
 ## v3.274.1 — 2026-10-16 (figma-to-prototype: no shell strings in grab.js and crop.js)
 - **`grab.js` and `crop.js` no longer build a shell command from paths.** Both passed an output path (and `grab.js` an asset URL) inside a `curl` / Chrome command string, so a name with quotes or `$(…)` would have run as a command — flagged high by the GitLab security review. They now call `curl` and Chrome with an argument array (`execFileSync`), `crop.js` puts the image paths into its page as escaped `file:` URLs, and `grab.js` refuses a prefix that contains a path (`/`, `..`). Behaviour is otherwise the same.
 
