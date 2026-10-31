@@ -291,6 +291,31 @@ When asked to replicate an existing design (Specs, Applicant page, Flow Builder 
 
 ---
 
+## 17. Four traps met by a designer's run (figma-to-prototype → Figma, 2026-10-16)
+
+Reported by Eugene Durov from a 27-round session that changed Figma frames alongside a prototype. Each one passed a screenshot check and showed up later.
+
+### 17.1 A slot ignores the index of `insertChild`
+`slot.insertChild(i, node)` puts the node into the slot, but not at `i` — in that run the KYB chips landed first in all 16 rows. Inserting is fine; **ordering is not**. To put a slot's children in a given order, `appendChild` them one by one in that order (each append goes to the end):
+
+```js
+const want = ["Name", "Status", "Chips", "Date"];          // the order you need
+for (const nm of want) { const k = slot.children.find(c => c.name === nm); if (k) slot.appendChild(k); }
+```
+
+Read the order back (`slot.children.map(c => c.name)`) after any reorder. Filling an empty slot in order (`insertChild(0)`, `insertChild(1)`, … or plain `appendChild`) is unaffected — the island engine fills slots that way.
+
+### 17.2 A hidden clone of a select inside a master has no children
+`clone()` of a hidden select (or any hidden instance) inside a main component came back without children — nothing to set texts on. Clone the **visible** node, configure it, then hide it or bind its visibility to a boolean property.
+
+### 17.3 Docked drawer content runs under the drawer's header
+Content placed in a docked (permanent) drawer column scrolled up over the drawer's own header. Put the content in a frame with `clipsContent = true` (name it `Scroll viewport`) that starts under the header and fills the rest of the drawer height; the scrolling content goes inside it.
+
+### 17.4 A FIXED checkbox in a menu item overlaps wrapped labels
+A `*Checkbox*` left at FIXED 156×24 inside menu items: a label that wraps to a second line overlaps the next item. Set the checkbox to `layoutSizingHorizontal = "FILL"`, `layoutSizingVertical = "HUG"`. A screenshot of the frame does not show it — the overlap appears only in the open menu, so check the menu state, or read the text heights against the item heights.
+
+---
+
 ## 16. Behavior rules
 
 - **Do not take screenshots.** Inspect via `use_figma`. Screenshots only when the user explicitly asks.

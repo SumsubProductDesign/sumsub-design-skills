@@ -329,7 +329,7 @@ Third escape route in the same class: skill expanded all cards (per (a)) and did
 **Rule:** when you expand a card (`Collapsed=No`), you MUST populate its Content slot in the same `use_figma` chunk. The card is not "done" until its Content slot contains the organism instance from the section map. Splitting "expand cards" into one chunk and "add content" into a later chunk is a banned-class behavior — same content-skipping pattern.
 
 **Slot-fill mechanics:** APCardCollapsible's Content area is either:
-- A SLOT type child → `contentSlot.insertChild(0, organismInstance)` (NOT `appendChild` — slot semantics require `insertChild`)
+- A SLOT type child → `contentSlot.insertChild(0, organismInstance)` into the empty slot. To **reorder** a slot's children use `appendChild` in the wanted order — a slot ignores `insertChild`'s index (`reference/figma-gotchas.md` §17.1)
 - An INSTANCE_SWAP property → `cardInstance.setProperties({"<slotPropertyKey>": variant.id})`
 
 Detect which by reading the property type on YOUR file's instance, not on canonical library's instance. Library and consumer file expose the same logical slot via different API surface — see Rule #4.45 in `websdk-mockup` for the same pattern.

@@ -4,6 +4,10 @@ Entries focus on what's **user-visible** (new rules the skill now follows, new a
 
 ---
 
+## v3.277.0 — 2026-10-31 (sumsub-mockup: four Plugin API traps from a figma-to-prototype run)
+- **`reference/figma-gotchas.md` §17 — four traps** a designer's run met while changing Figma frames (reported by Eugene Durov with PR #5): a slot ignores `insertChild`'s index — reorder with `appendChild` in the wanted order; a hidden clone of a select inside a master has no children — clone it visible, hide after; docked drawer content runs under the drawer's header — wrap it in a clipping `Scroll viewport` frame; a FIXED 156×24 checkbox in menu items overlaps wrapped labels — Fill / Hug, and check the open menu, a frame screenshot misses it.
+- **SKILL.md:** the slot rule "insertChild, not appendChild" now says what each is for — `insertChild` into an empty slot, `appendChild` one by one to reorder.
+
 ## v3.276.0 — 2026-10-31 (figma-to-prototype: a change in Figma is routed, not drawn by hand)
 A designer's run (Document examples, 2026-10-15 → 16) changed the prototype and the Figma file together in 17 of 27 rounds: a second drawer variant, a confirmation modal and a toast were decided in the prototype and then drawn in Figma, and the sample data was synced into both. The session did it with 88 `use_figma` calls of its own and met six Plugin API traps that `sumsub-mockup` already names. Checked on two eval runs of the AML brief (runs 19 and 20 in `assets/eval.md`). User-visible:
 
