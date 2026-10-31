@@ -14,6 +14,10 @@ logic.
 - Environment
 - Editing the skill's own scripts
 
+Traps of Figma's **Plugin API** — `use_figma` writing into a file: slots, clones, component
+properties, a menu item's sizing — are not here. They belong to the `sumsub-mockup` skill,
+which draws the frames (SKILL.md Step 0, *a change in Figma, asked alongside the prototype*).
+
 ## Figma MCP
 
 | Symptom | Cause | Fix |
@@ -30,6 +34,7 @@ logic.
 | Two frames disagree about a shared element | Frames drift as a file grows | Zone-diff shared areas before extracting; ask which is canonical |
 | Two design contexts from one frame name different glyphs with the same const, and the icons swap silently | const names are unique only inside ONE design context; `figctx.py --assets` used to write the file under that name | it now keeps the first file and saves the second as `<const>-<url8>.svg`, printing CLASH and a `_assets.json` of file → URL. On the Applicant page 6 of 41 consts collided — `imgNormalId` was an id glyph in one context and a checkmark in another |
 | An icon inside an instance comes back as the component's DEFAULT glyph, and the layer name agrees with the wrong one | the export for a slot serialises the component, not the override; the layer keeps the slot's name (`normal/search`) | the rule below — an implausible leaf gets its own `get_design_context` — reads the real one. The Applicant header's Add tag gave a magnifier this way, 2026-09-21 |
+| The design context lists a frame's children in one order and the render draws them in another | the context follows the layer order; an absolutely positioned child paints where its coordinates say, whatever its place in the list | Order from `get_metadata` coordinates and the render; the context's order only inside an auto-layout row. A detail drawer's context listed Samples first and the render had them after the characteristics — the render was followed, and was right |
 
 ## Figma → CSS rendering
 
@@ -45,6 +50,7 @@ logic.
 | A field is narrower than the design context says | Fixed widths overflow the container; one field is `flex-1` | Compute the remainder, don't copy the number |
 | A line wraps differently from the mockup | Chrome and Figma break the same string differently at the same width | Explicit `<br>` at the mockup's break; record it as a deviation |
 | an exported glyph comes back the wrong way round — a tooltip's arrow pointing up while the tooltip sits above its target | the export is the raw shape; Figma turned its *wrapper* (`rotate-180`, `scale-x-[-1]`) and the wrapper is not in the SVG | read the wrapper's transform in the design context and apply it in CSS; the same for a shape utility-inset inside its box (`inset-[6.38%]`), which becomes padding. One component hit both on 2026-09-20, and the Applicant page's Add tag icon again on 2026-09-21 |
+| A control's border is cut on one side, and only inside a header or a toolbar | the stroke is painted outside the box — an outline, or a border on a wrapper 1px larger — and the parent clips at `overflow:hidden`; Figma's outside stroke never grows the layer, so the frame shows it whole | Paint the stroke inside the box the parent clips to, or give the parent the pixel; `statecheck.sh --frames` with the control in its list. A pagination's outside border on a 32-high box inside an overflow-hidden header lost its top and bottom, and the person found it |
 
 ## Generator
 
@@ -113,6 +119,7 @@ logic.
 | `fluidcheck.sh` says `ok` while the page really is wider than the window | the overflow can live on `body`, not on `documentElement`: a shell that hides the document's scrollbars so its island can scroll puts it there | it reads the larger of the two; an elastic page below its floor that looks fine and clips is the symptom of reading only one |
 | A zone diff reports 0.00% while a whole panel changed colour | the default threshold is 60, and grey `#f3f4f6` to cream `#fffbeb` is a sum of 30 | `TH=6 zonediff.sh …` for a self-render that must be identical; the default is for comparing against a Figma render, where anti-aliasing needs the room |
 | A tightened threshold has no effect and the run reports clean | `zonediff.sh` takes `TH` from the ENVIRONMENT; a 5th positional was silently ignored | it now refuses a 5th argument and prints the right form. Cost two wrong measurements on 2026-09-21 before the render was checked another way |
+| A transition never advances in the browser pane, though neither virtual time nor `--device` is involved | the pane is hidden: a background page throttles its timers and pauses CSS transitions | Front the tab (`tabs_select`) before sampling a transition; a hidden pane is for reading a page, not for timing one. A 240 ms drawer slide read as stuck until the pane was shown |
 
 ## Environment
 

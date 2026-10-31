@@ -16,15 +16,20 @@
 //                copy the lines since --since name, so a run on the folder's own .claude/skills/
 //                copy is not reported as the plugin a session read a week before;
 //   * wall     — first line to last, and how much of it was the person's turn (the gaps before
-//                each of their messages), so the agent's own time is the rest;
+//                each of their messages), so the agent's own time is the rest; a gap over an hour
+//                inside their turn is printed apart as idle — a session left open overnight read
+//                as "45h 35m" once, and the log had to explain the number by hand;
 //   * rounds   — every message the person typed, with its time: the rows of §1's rounds table;
-//   * tools    — calls by tool, Figma MCP split by call, and the skill's scripts by name;
+//   * tools    — calls by tool, Figma MCP split by call — and of those, the edits (use_figma,
+//                upload_assets and the other writing calls) apart from the reads, because a run
+//                that changes the file alongside the prototype is not extracting;
+//                the skill's scripts by name;
 //   * cost     — one line to end a delivery with: minutes, tool calls, Figma calls and the phase
 //                that took most of the growth. --round counts from the person's last message, i.e.
 //                this increment only. "Why did that take so long?" was asked six times in two
 //                weeks of one person's sessions, each time after the fact; the line answers it first
 //   * context  — the peak and the last prompt size (input + cache), output tokens, compactions,
-//                and the growth split into extraction / build / verification / other by which
+//                and the growth split into extraction / figma edits / build / verification / other by which
 //                tools the turn before called. The split is an estimate; the totals are not.
 // Reads the file, writes nothing. no-font: it emits no page.
 'use strict';
@@ -108,8 +113,12 @@ const stamped = rows.filter(o => !isNaN(T(o)));
 if (!stamped.length) { console.error('runstats: no timestamped lines in ' + file); process.exit(2); }
 
 const SCRIPTS = /\b(statecheck|zonediff|shellgate|blockgate|inkbbox|pixprobe|minpx|scanline|shoot|crop|cut|scaletest|fluidcheck|probe|doctor|lint|figmeta|figctx|grab|icons|svg_dump|align_exports|hex_sweep|bbox|shell|publish|unpublish|artifact-page|runstats)\.(?:sh|js|cjs|py)\b/g;
+// the Figma MCP's writing calls: a round spent editing the file is not extraction, and one run put 88
+// use_figma calls into "extraction 43%" before the two were told apart
+const FIGMA_EDIT = /__(use_figma|upload_assets|generate_figma_design|create_new_file|send_code_to_figma|html_to_figma|add_code_connect_map|send_code_connect_mappings|create_generative_plugin|update_generative_plugin)$/;
 const phaseOf = (name, input) => {
   const s = name + ' ' + JSON.stringify(input || {});
+  if (FIGMA_EDIT.test(name)) return 'figma edits';
   if (/figma/i.test(name) || /\b(figmeta|figctx|grab|svg_dump|align_exports|hex_sweep|icons)\.(py|js)\b/.test(s)) return 'extraction';
   if (/\b(statecheck|zonediff|shellgate|blockgate|inkbbox|pixprobe|minpx|scanline|shoot|crop|scaletest|fluidcheck|probe)\.(sh|js)\b/.test(s)) return 'verification';
   if (name === 'Read' && /\.png"/i.test(s)) return 'verification';
@@ -117,13 +126,13 @@ const phaseOf = (name, input) => {
   return 'other';
 };
 
-const tools = {}, figma = {}, scripts = {}, rounds = [];
+const tools = {}, figma = {}, figEdits = {}, scripts = {}, rounds = [];
 const marks = [];
 let human = 0, peak = 0, last = 0, out = 0, compactions = 0;
 // a form (AskUserQuestion) waits for the person inside a tool call: from the call to its result is
 // their turn too, and without this the agent was charged the six minutes a person spent on nine forms
 const asks = {}; let askForms = 0, askQuestions = 0, askWait = 0;
-const growth = { extraction: 0, build: 0, verification: 0, other: 0 };
+const growth = { extraction: 0, 'figma edits': 0, build: 0, verification: 0, other: 0 };
 const seen = new Set();
 let lastSize = 0, lastPhases = null;
 for (const o of rows) {
@@ -166,7 +175,7 @@ for (const o of rows) {
       if (b.type !== 'tool_use') continue;
       tools[b.name] = (tools[b.name] || 0) + 1;
       if (b.name === 'AskUserQuestion') { askForms++; askQuestions += ((b.input || {}).questions || []).length; if (!isNaN(t)) asks[b.id] = t; }
-      if (/figma/i.test(b.name)) { const k = b.name.replace(/^.*__/, ''); figma[k] = (figma[k] || 0) + 1; }
+      if (/figma/i.test(b.name)) { const k = b.name.replace(/^.*__/, ''); figma[k] = (figma[k] || 0) + 1; if (FIGMA_EDIT.test(b.name)) figEdits[k] = (figEdits[k] || 0) + 1; }
       if (b.name === 'Bash') for (const s of new Set(String((b.input || {}).command || '').match(SCRIPTS) || [])) scripts[s] = (scripts[s] || 0) + 1;
       (lastPhases = lastPhases || []).push(phaseOf(b.name, b.input));
     }
@@ -176,10 +185,13 @@ for (const o of rows) {
 // a resumed session appends lines whose times are not in file order, so time is read sorted:
 // the person's turn runs from the agent's last line before their message to the message
 marks.sort((a, b) => a[0] - b[0]);
-let lastAgent = NaN;
+// a gap over an hour before the person's message is still their turn, but it is a night or a
+// weekend, not time spent: counted apart as idle so the wall figure can be read
+const IDLE = 60 * 60000;
+let lastAgent = NaN, idle = 0;
 for (const [t, who] of marks) {
   if (who === 'agent') lastAgent = t;
-  else if (!isNaN(lastAgent)) { human += t - lastAgent; lastAgent = NaN; }
+  else if (!isNaN(lastAgent)) { const d = t - lastAgent; human += d; if (d > IDLE) idle += d; lastAgent = NaN; }
 }
 human += askWait;
 const times = stamped.map(T).sort((a, b) => a - b);
@@ -190,6 +202,7 @@ const k = n => (n >= 1000 ? Math.round(n / 1000) + 'k' : String(n));
 const list = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([n, c]) => `${n} ${c}`).join(' · ') || 'none';
 const nTools = Object.values(tools).reduce((a, b) => a + b, 0);
 const nFig = Object.values(figma).reduce((a, b) => a + b, 0);
+const nEdits = Object.values(figEdits).reduce((a, b) => a + b, 0);
 const g = Object.values(growth).reduce((a, b) => a + b, 0) || 1;
 
 console.log(`transcript: ${file}`);
@@ -198,14 +211,14 @@ console.log(`transcript: ${file}`);
 version = versionUsed(JSON.stringify(rows), [...new Set(rows.map(o => o.cwd).filter(Boolean))].concat(process.cwd()))
   || ('not seen in the transcript; this script is ' + versionOf(path.resolve(__dirname, '..')));
 console.log(`skill   : ${version}`);
-console.log(`wall    : ${hm(wall)} (${new Date(t0).toISOString().slice(0, 16)} → ${new Date(t1).toISOString().slice(0, 16)} UTC), of which the person's turn ${hm(human)}, the agent's ${hm(wall - human)}`);
+console.log(`wall    : ${hm(wall)} (${new Date(t0).toISOString().slice(0, 16)} → ${new Date(t1).toISOString().slice(0, 16)} UTC), of which the person's turn ${hm(human)}, the agent's ${hm(wall - human)}${idle ? ` · ${hm(idle)} of the person's turn is idle (gaps over an hour: a session left open, not a round)` : ''}`);
 console.log(`rounds  : ${rounds.length} messages from the person${askForms ? ` · ${askForms} forms, ${askQuestions} questions, ${hm(askWait)} of their turn` : ''}`);
 for (const [ts, txt] of rounds) console.log(`          ${ts.slice(0, 16).replace('T', ' ')}  ${txt.slice(0, 110)}${txt.length > 110 ? '…' : ''}`);
 console.log(`tools   : ${nTools} calls — ${list(tools)}`);
-console.log(`figma   : ${nFig} calls — ${list(figma)}`);
+console.log(`figma   : ${nFig} calls — ${list(figma)}${nEdits ? ` · of which edits ${nEdits} (${list(figEdits)}) — the rest is reading` : ''}`);
 console.log(`scripts : ${list(scripts)}`);
 console.log(`context : peak ${k(peak)}, last ${k(last)}, output ${k(out)}, compactions ${compactions}`);
 const top = Object.entries(growth).sort((a, b) => b[1] - a[1])[0];
 const topScript = Object.entries(scripts).sort((a, b) => b[1] - a[1])[0];
 console.log(`cost    : ${hm(wall - human)} of work · ${nTools} tool calls · ${nFig} Figma${top && top[1] > 0 ? ` · mostly ${top[0]}` : ''}${topScript ? ` (${topScript[0]} ×${topScript[1]})` : ''}`);
-console.log(`growth  : extraction ${Math.round(100 * growth.extraction / g)}% · build ${Math.round(100 * growth.build / g)}% · verification ${Math.round(100 * growth.verification / g)}% · other ${Math.round(100 * growth.other / g)}%  (estimate: each turn's growth goes to the tools the turn before called)`);
+console.log(`growth  : extraction ${Math.round(100 * growth.extraction / g)}%${growth['figma edits'] ? ` · figma edits ${Math.round(100 * growth['figma edits'] / g)}%` : ''} · build ${Math.round(100 * growth.build / g)}% · verification ${Math.round(100 * growth.verification / g)}% · other ${Math.round(100 * growth.other / g)}%  (estimate: each turn's growth goes to the tools the turn before called)`);

@@ -2,9 +2,9 @@
 name: figma-to-prototype
 description: >-
   Turn a Figma frame into a pixel-exact, self-contained clickable HTML prototype for a usability
-  interview, a demo or a dev handover; extend or publish one built this way. Use when a design has
-  to become clickable, interactive or working HTML. Works in Russian and English. Not for a quick
-  approximate mockup or for building inside Figma.
+  interview, a demo or a dev handover; extend or publish one, or bring its Figma frames up to date
+  with what the prototype decided. Use when a design has to become clickable, interactive or working
+  HTML. Works in Russian and English. Not for a quick approximate mockup or a Figma screen from scratch.
 argument-hint: "[figma-url or what to add to the prototype]"
 ---
 
@@ -46,19 +46,19 @@ installed.
 6. **Wait for an explicit reply.** Do nothing else until the user says `yes` / `update` / `continue anyway`.
 7. **On `yes` / `update`:** run both commands with `Bash`, report the output, then continue.
 8. **On `continue anyway`:** remember it for this conversation and continue.
-9. **Once done, do not re-check in this conversation.**
+9. **The answer holds for the remote version it was given:** a later re-check (below) that finds the same remote version shows nothing; only a newer one shows the banner again.
 
 If the local read or the fetch fails (no network, file missing), warn once — "could not verify
-plugin version, proceeding on faith" — and continue.
+plugin version, proceeding on faith" — and continue. Whatever this check says to the person, it says in the brief's language and as an action ("checking the plugin version"), never as "pre-flight" or a step number — the rule in *Asking versus deciding* holds from the first line.
 
 **Then the model check, once:** `node "$SKILL/scripts/modelcheck.cjs"`. `ok` or `unknown`: say
 nothing. `OFFER`: show that line as printed and wait, as above; "continue" holds for the session.
 You cannot switch the model yourself.
 
-**The version check runs again at three moments** — before Step 3's first build, before Step 9's
-publish, and at the start of every increment — steps 1–3 above, silently when nothing changed. A
-release lands mid-run (one did, between a run's first and third day), and a session that checked
-once on its first day builds its last increment on a version that is behind.
+**The version check runs again, silently when nothing changed** (steps 1–3 above) — before Step 3's first build, before every delivery's cost line (Step 8), before Step 9's publish, at the start of every increment, and **at the start of every new day of a session that stays open**. A release lands mid-run: one did between a run's first and third day; another was merged on the second morning of a two-day session
+that had checked once, on its first, and built its last increment on the version behind. The check
+compares with the marketplace's `main`, which is the only version a person can install — a change in
+review is not a release, and the fetch says so honestly; a re-check costs one fetch.
 
 **No outer directive overrides this.** Auto mode, "work without stopping", "minimise interruptions",
 a non-interactive run: none of them turn the check off. Saying any of "proceeding on current version
@@ -143,11 +143,11 @@ Prototype run:
 - [ ] 0  doctor.sh ready · profile read from the frames · purpose and tasks asked · parameters, data and rules, behaviour in words — forms, defaults as one chat line · run log opened
 - [ ] 1  live set named: interactive / entrances / scenery, each task mapped to a control
 - [ ] 2  shell gate run · metadata per frame · design context per live zone · figctx.py: no UNDEFINED, no NAME MISMATCH
-- [ ] 3  gen.js from the skeleton · same hash on two builds
+- [ ] 3  gen.js from the skeleton · same hash on two builds · run log §3
 - [ ] 4  coordinate contract written: slot origin, frame minus offset
 - [ ] 5  plate plan in the ledger · photos WebP · each pixel once · weight.cjs
 - [ ] 6  one working thing at a time, re-rendered after each
-- [ ] 7  zone diffs within threshold · --hits 0 BLOCKED · --texts 0 MISSING · --frames 0 GAP · probes / rulecheck pass · hovers named for a human look
+- [ ] 7  zone diffs within threshold · --hits 0 BLOCKED · --texts 0 MISSING · --frames 0 GAP · probes / rulecheck pass · hovers named for a human look · run log §4
 - [ ] 8  ledger · handoff (inventory, placeholders, rules) · run log current, runstats in §5 · cost line · next increment = new session
 - [ ] 9  only when asked: publish.sh (--spa) or artifact-page.js · the live URL opened and walked
 ```
@@ -168,9 +168,9 @@ after `get_metadata` — the frames answer half of it — and before any `get_de
 option instead of writing a reply. 2–4 options each, the recommended one first, marked
 "(Recommended)". The tool adds "Other" for free text, so no option of yours may only point at it
 ("another — type it in Other"). **A parameter with a written default is not a question**: the
-defaults in force go to the chat as one line ("default shell, standard hovers, one file") and a form
+defaults in force go to the chat as one line ("default shell, standard hovers, one file") — **as text, in the same turn, before the form, never a form alone**: that line also reads the purpose back from the brief, names the live set (Step 1) and lists the values the tasks need that no frame draws, or says there are none; one run sent the form bare, and the person saw none of that until the handoff — and a form
 holds only what no frame answers, no default settles and the brief has not said (a brief naming the
-purpose gets its reading back in a line, not a form): the canvas, the data, the behaviour in words,
+purpose gets its reading back in that line, not a form): the canvas, the data, the behaviour in words,
 an entrance outside the task. Never offer to bake what holds state (Step 5).
 
 **1. What is this prototype for?** Five options; the answer decides what has to be live:
@@ -234,8 +234,9 @@ Then settle the parameters — each of these blocked a real run when left open
 | **live controls** | **Default: on** — radios, checkboxes, fields and menus carry their own state (rule 4). Off only for a screen that must be a picture; say so in the handoff |
 | **accuracy threshold** | two numbers: against a frame of the components' generation, a percentage (≤3% per frame, ≤2% per text-free zone); against an older frame the gates instead (`shellgate.sh` landmarks, `blockgate.sh` residuals ≤1px) and one ledger line per difference. Say which is in force before the first build. A logic demo may trade pixel strictness for every row of `_work/rules.json` passing |
 | fonts | which families; confirm they exist before promising fidelity |
-| **data and rules the frames do not show** | **Default: ask, never fill in.** List every value the tasks need that no frame draws — a select's other options, the field set after a change, the rule behind a computed value, a limit, a message — in the same message, each with where it goes. Three answers: *given* (data in `gen.js` verbatim; a rule as a table, the same rows in `_work/rules.json`), *take it from X* (read it, do not paraphrase), *make it up* (a `placeholder` ledger line and a row in the handoff's § Placeholders). **Unfilled content** on the task path or the first screen — identical rows, a component's default text, Lorem ipsum — is one question per place: what the frame draws, then *verbatim* (*source*; the default for a test with respondents), *proposed* (the agent's values from the flow, written into the option; *placeholder*; recommended for every demo — "the flow only walks this one step" is not a reason against it: the demo opens on that list, and three identical rows read as broken) or *given*. Never replaced silently (`references/figma-mcp.md` § A mockup can be unfilled). Holds for every later round |
+| **data and rules the frames do not show** | **Default: ask, never fill in.** List every value the tasks need that no frame draws — a select's other options, the field set after a change, the rule behind a computed value, a limit, a message — in the same message, each with where it goes. Three answers: *given* (data in `gen.js` verbatim; a rule as a table, the same rows in `_work/rules.json`), *take it from X* (read it, do not paraphrase; when X holds more than one candidate — a page of photos, a folder of samples — a contact sheet and a form naming them, because the first pick from a page is rarely the one meant), *make it up* (a `placeholder` ledger line and a row in the handoff's § Placeholders). **Unfilled content** on the task path or the first screen — identical rows, a component's default text, Lorem ipsum — is one question per place: what the frame draws, then *verbatim* (*source*; the default for a test with respondents), *proposed* (the agent's values from the flow, written into the option; *placeholder*; recommended for every demo — "the flow only walks this one step" is not a reason against it: the demo opens on that list, and three identical rows read as broken) or *given*. Never replaced silently (`references/figma-mcp.md` § A mockup can be unfilled). Holds for every later round |
 | **behaviour the brief names but no frame draws** | a hover zoom, a drag, "the label follows the input". **Default: describe it in one line before building it** — trigger, what appears, where, how big, what ends it — and ask for a reference. Build on a yes; built from the words alone it is a ledger line. **A loading state** the frames draw (the kit's ring or dots, a state named Loading / Uploading / Processing) has no drawn exit, so the form asks once how it ends: *timer and tap* (recommended for a demo — it advances by itself after 2 s and on a tap, so the presenter never waits), *timer only* (recommended for a usability test — a tap on a loader is behaviour the product does not have), *tap only*. **Only a state that draws a loader**: every other button-less transition on the task path — a viewfinder that frames the document, a shutter, a sheet that closes — is by tap, said in the defaults line, no question. The seconds are a placeholder (the real ones are the network's): a row in the handoff's § Placeholders; the timer itself per `references/interaction-plumbing.md` § Timed transitions. Holds for every later round |
+| **a change in Figma, asked alongside the prototype** | **Default: say where it goes before touching Figma; this session's own `use_figma` calls are no route.** A prototype session often becomes where the design is decided, and the frames then catch up — one run changed the prototype and the file together in 17 of 27 rounds and met six Plugin API traps on its own that the mockup skill already names. Three routes, each said in the round's reply: a **new frame, screen or state drawn from the prototype** (a second variant's pages, a confirmation modal, a toast the prototype already has) goes to the sibling skill `/sumsub-design:sumsub-mockup` through the Skill tool, with the hand-over brief from `references/handoff.md` § A change that goes back to Figma — a new element on an existing page is its *Add-to-existing-page* mode; a **bulk edit of existing nodes** (fills, texts, properties, flags across many instances) stays in the session, chunked, after that skill's API sections are read — font loading before any text write, `slot.appendChild` with the other slot children hidden, the `Tint` component, no `throw` at the end of a writing call — and `/figma-use` as the MCP server demands; a **master component or variant** is `/sumsub-design:sumsub-component`. The round is logged as *Figma* or *both*, with the skill that did it (`assets/run-log-template.md`, the rounds table). Holds for every later round |
 
 ### Open the run log now, not in Step 8
 
@@ -250,7 +251,7 @@ end:
 | the person says something does not work or looks wrong | **a §6 line first, the fix after**, tagged *found by* and *cost* — this is the moment it costs one sentence |
 | Step 3–6, each build | §3, per prototype |
 | Step 7 | §4: the numbers as printed, against the threshold from Step 0 |
-| the end of the session | §5 from `node "$SKILL/scripts/runstats.cjs"`, pasted; §8 — ask the person once whether it did its job, and write their words |
+| the delivery message (Step 8) | §5 from `node "$SKILL/scripts/runstats.cjs"`, pasted; §8 — the delivery message asks once whether it did its job, and their words go in, or "not said" when the next message brings none. Not "the end of the session": a log closed later gets §3–§5 written from memory in one edit, as one run's did |
 
 ## Step 1 — derive the live set from the tasks
 
@@ -261,8 +262,8 @@ content** (baked, Step 5), **interactive only where a task is answered**. A dead
 tested area is a defect; for every task, name the control that answers it and confirm it is in the
 interactive tier. Everything else is scenery and is baked. Anything live beyond the three tiers is
 its own yes/no question to the user, with its cost — default no, never folded into a plan table.
-Before extracting a frame you have not seen, zone-diff its shared areas against the screens already
-built and ask which is canonical where they differ. `references/research-prototypes.md` § Step 1 in
+Before the first `get_design_context`, zone-diff the shared areas of **every frame of the set against each other** (`cut.js` + `zonediff.sh` on their renders), and later a new frame against the screens already
+built; where they differ, ask which is canonical, with a crop. On a first build there are no screens yet, and one run read that as nothing to compare and pulled three design contexts in one burst. `references/research-prototypes.md` § Step 1 in
 full — derive the live set from the tasks, and §3 for the tiers with their costs.
 
 ## Step 2 — extract from Figma
@@ -287,7 +288,7 @@ present):
 get_metadata      frame   → tree, sizes, what is hidden   (a FRAME id: never a section or a page)
 get_variable_defs frame   → resolved tokens (again per repeated group — cheaper than dc per variant)
 get_screenshot    frame   → the reference PNG for verification
-zone-diff shared areas against existing screens (cut.js + zonediff.sh, not a glance)
+zone-diff shared areas: the set's frames against each other, a new frame against built screens (cut.js + zonediff.sh, not a glance)
   per live zone:
 get_metadata      node    → coordinates
 get_design_context node   → styles, text, assets   (disableCodeConnect: true)
@@ -296,6 +297,7 @@ download_assets   frame @2x → one PNG; scripts/cut.js cuts every plate from it
 ```
 
 * **`disableCodeConnect: true`, always** — or icons come back as snippets.
+* **A flag, a photo, any picture inside an instance** is cut from that 2x export at its `get_metadata` rectangle (`cut.js`), never asked for by id: `download_assets` refuses a nested id, and the flags of a slot-based row once cost a quarter of an hour of refusals before the cut.
 * **Geometry from `get_metadata`, styles and text from `get_design_context`** —
   never the reverse; layer names lie.
 * **Raw responses go to a file**: a large one is saved for you, a small one you
@@ -318,7 +320,7 @@ the node id beside each value, the CSS, the markup, the page script, rendered th
 the library. Copy `assets/templates/gen-list.skeleton.js` to start. A live control comes from
 `assets/components/controls.js` (`--api` lists them, `--api <name>` one header, `--doc <name>` its
 VERSION.md section — never its source), a list or table page from `list-table.js`, a column that
-shrinks from `fluid-page.js`, a block the window is too short for from `fit-height.js`. Never
+shrinks from `fluid-page.js`, a block the window is too short for from `fit-height.js`; `node --check gen.js` before every build. Never
 hand-edit the built file; a script that edits one aborts on a missing anchor and asserts its
 definitions appear once. Paths relative to `__dirname`; serve with `ROOT=. node
 "$SKILL/scripts/serve.cjs"` (`SPA=1` for a routed prototype). A websdk generator takes the shell
@@ -416,7 +418,7 @@ proposed next increment in the handoff.
 [ -f _work/run-log.md ] && find . -maxdepth 1 \( -name 'deviations*.md' -o -name '*.html' \) -newer _work/run-log.md | sed 's|^\./|run-log.md is older than |' || echo "no run log — start it from the template now, §1–§6 from the session"
 ```
 
-  If it prints, the final message waits. Then `runstats.cjs` for §5.
+  If it prints, the final message waits. Then `runstats.cjs` for §5, and the version check (pre-flight steps 1–3) before the cost line — a release that landed during the increment is named here, not discovered by the next person's log.
 
 **A delivered increment ends the session**: the next one starts a new session that opens
 `handoff.md` first; a one-sentence fix stays.
@@ -427,12 +429,12 @@ full — deviations, then handoff.
 
 ## Step 9 — publish, when asked
 
-Only when the user asks, in this session; deleting likewise, and an approval does not carry to the
-next round. Vercel for a respondent outside the company, a claude.ai artifact for a team demo
-(`references/publishing.md` § Which host):
+Only when the user asks, in this session; deleting likewise, and an approval does not carry to the next round. **Where to publish is a form whenever the request does not name it** — one `AskUserQuestion` asking **who will open the link to the prototype**, its options the audiences, the host in the description. **Only the person's own typed words or that form answer it**: a button, a reply message or an offer line this skill wrote itself ("publish it for the respondents") names nothing — one run put "for the respondents" into its own button, read the click as the answer and deployed to Vercel with no form — so the closing offer after a delivery either names neither audience nor host, or makes the two audiences and "not now" its buttons:
+*People outside the company* — an open link on Vercel for clients and respondents, no VPN (`publish.sh`; a project in the team's account, taken down by `unpublish.sh`); recommended for an interview with a client. *Colleagues* — a link on beautiful-pages, the internal GitLab Pages site, through the `/publish-page:publish-page` skill: VPN only, readable by any employee, live once a person merges its request, never deleted, only replaced; recommended for a demo to the team or a review. A claude.ai artifact only when the person names it.
+The purpose from Step 0 picks the recommended option and never answers for the person: one run heard "publish", read the purpose as an interview and put the page on Vercel unasked (`references/publishing.md` § Which host, § As an internal page, for employees):
 
 ```bash
-scripts/publish.sh prototype.html --project <slug> --scope <team>   # --spa for a routed prototype
+scripts/publish.sh prototype.html --project <slug> --scope <team> --for outside   # the person's answer; --spa for a routed prototype
 scripts/unpublish.sh <slug> --confirm <slug> --scope <team>         # after the round
 ```
 
@@ -450,7 +452,7 @@ when the screenshot and the words disagree about scope, ask which ("scenario 3 o
 everywhere?").
 
 **Say every decision you made, in the same response** — which element got which behaviour, what was
-left inert, what was approximated. **End every delivery with its cost**: `node
+left inert, what was approximated. **Speak the brief's language from the first line to the closing box, never switching mid-session, and speak in actions, never in the skill's own numbering**: "Step 9", "the pre-flight", a reference's file name mean nothing to the person — say what is being done and why ("publishing: checking that you are logged in to Vercel, then one file goes up"); the step numbers stay in the checklist and the run log. **End every delivery with its cost**: `node
 "$SKILL/scripts/runstats.cjs" --round` prints one line — minutes, tool calls, Figma calls, what took
 most of it — and answers "why did that take so long?" before it is asked.
 
@@ -484,6 +486,7 @@ this map.
 | `references/publishing.md` | putting the prototype on a URL, and taking it down |
 | `references/shell.md` | the default dashboard shell — sidebar, island, header — its gate against the frame, and how content anchors inside it |
 | `references/websdk.md` | **the websdk profile, from Step 0 on** — how it is decided, the kit as a snapshot, the widget gate, the generator, the responsive contract, the three widths, the known ledger lines, what the kit does not have |
+| `/sumsub-design:sumsub-mockup` — a sibling skill, through the Skill tool | **a frame to draw in Figma from the prototype** — a variant's pages, a modal, a toast, a new element on an existing page — never drawn here with `use_figma`; the Step 0 row *a change in Figma, asked alongside the prototype* says which changes go there and which stay, and `references/handoff.md` § A change that goes back to Figma has the brief it is handed |
 | `assets/components/VERSION.md` | the controls' values and states, their source, and what is not covered yet — one section at a time, through `controls.js --doc <name>`, never the whole file |
 | `assets/CHANGELOG-entry.md` | the entry to paste into the plugin's own `CHANGELOG.md` at merge time, in that file's own format — the update prompt shows these entries verbatim, and an empty "what's new" is what a colleague sees without one |
 | `assets/run-log-template.md` | the run log the session keeps at `_work/run-log.md` (opened in Step 0, closed in Step 8): what was asked, decided, measured, and where the skill was wrong. Offered to the user once, sent by nobody but them |

@@ -12,6 +12,7 @@ the whole deliverable is one static file.
 - The trap that ruins a session
 - Unpublish
 - As a claude.ai artifact
+- As an internal page, for employees
 - Authentication
 - What it costs
 - Where the slug and the scope come from
@@ -31,8 +32,17 @@ raise that before publishing rather than after.
 **Offer, do not act.** "Only when asked" has a failure mode: the user carries the
 job of remembering, and a stale link sits in front of a respondent because
 nobody said the word. So take the reminding, not the deciding — when a chunk of
-work is finished *and verified*, end the reply with one line ("done — publish?")
-and publish on a yes. One line, not a paragraph, and never in the middle of a
+work is finished *and verified*, end the reply with one line ("done — keep it
+local, or publish?"); on a yes the audience is the form of § Which host, then
+the publish. **The offer must not answer its own question**: a button or reply
+text the skill writes ("publish it for the respondents") is not the person
+naming the audience — run 21 wrote that button, read the click as "outside the
+company" and deployed with no form. Either the offer names no audience and no
+host, or its buttons are exactly the two audiences and "not now", so the click
+itself is the person's answer. And the script holds the line when the text
+does not: `publish.sh` refuses to run without `--for outside`, prints the
+question instead, and refuses `--for colleagues` by name — that audience is the
+publish-page skill's. One line, not a paragraph, and never in the middle of a
 task: an intermediate state that has not passed verification is exactly what
 must not be on a public URL.
 
@@ -48,22 +58,36 @@ approved: approval does not carry from one round to the next.
 
 ## Which host
 
-Two ways to give someone a link, and the audience decides:
+The audience decides where a link goes, and the person decides the audience:
 
-| | Vercel (`publish.sh`) | claude.ai artifact (the Artifact tool) |
-|---|---|---|
-| who can open it | anyone holding the URL — a respondent from outside the company | private to the author until they share it; then the people they share it with, inside claude.ai |
-| right for | a moderated interview with a client | a demo to the team, a review |
-| updates | the same slug replaces the content at the same URL | the same file path republishes to the same URL |
-| limit | none that a prototype meets | **16 MB for the page**, base64 plates included |
+| | **people outside the company** — Vercel (`publish.sh`) | **colleagues** — beautiful-pages, the internal GitLab Pages site (`/publish-page:publish-page`) | claude.ai artifact (the Artifact tool), only when named |
+|---|---|---|---|
+| who can open it | anyone holding the URL — a respondent from outside the company | anyone on the corporate VPN; no per-page access control | private to the author until they share it; then the people they share it with, inside claude.ai |
+| right for | a moderated interview with a client | a demo to the team, a review, a page colleagues keep coming back to | a review inside claude.ai, when the person asks for an artifact |
+| goes live | on the deploy | once a person merges the request the upload opened | on the publish |
+| updates | the same slug replaces the content at the same URL | the same owner and slug open a new request that replaces the folder | the same file path republishes to the same URL |
+| taken down | `unpublish.sh` | **never** — a page is only replaced, the upload is the irreversible step | the Artifact tool's delete |
+| limit | none that a prototype meets | **1 MB per HTML file**, 10 MB a folder, no external resource but Google Fonts | **16 MB for the page**, base64 plates included |
 
-Ask which one when the purpose does not settle it. Everything below up to
-§ Unpublish is Vercel; § As a claude.ai artifact is the other.
+**Ask who will open the link whenever the request does not name where** — one
+form, "Who will open the link to the prototype?", its options the two
+audiences — *people outside the company*: an open link on Vercel for clients
+and respondents, no VPN; *colleagues*: a link on beautiful-pages, opens only on
+the corporate VPN, for any employee — the one the purpose points at marked
+recommended: an interview with a client → outside; a demo or a review →
+colleagues. The purpose narrows the
+recommendation; it does not answer for the person. On the 2026-10-26 eval run
+the purpose was an interview, the person said "publish", and the prototype went
+to Vercel on that word alone — a project created in the team's account, open to
+anyone with the link — where the team's own page was meant. The hosts differ in
+who can open the page and in whether it can ever come down; the form costs
+nothing. Everything below up to § Unpublish is Vercel; § As an internal page,
+for employees and § As a claude.ai artifact are the others.
 
 ## Publish
 
 ```bash
-scripts/publish.sh prototype.html --project sdk-flow-test --scope <team>
+scripts/publish.sh prototype.html --project sdk-flow-test --scope <team> --for outside
 scripts/publish.sh _work/site --project sdk-flow-test --scope <team> --spa   # a History-API prototype
 ```
 
@@ -198,6 +222,37 @@ first screen and one of the newest state.
 What to hand back is the same as for Vercel, minus the scope: the URL, that it is
 private until shared, and the source path that republishes it.
 
+## As an internal page, for employees
+
+The page colleagues open is Sumsub's internal GitLab Pages site, beautiful-pages:
+it opens only on the corporate VPN, and there any employee can read it. The
+`/publish-page:publish-page` skill (the internal marketplace) is the way in —
+load it through the Skill tool and follow it; this section says only what a
+prototype has to know before handing its files over.
+
+* **Its own gate comes first.** The skill confirms the audience with the person
+  before any upload, separately from the build's approval. That is not this
+  skill's Step 0 answer repeated: it is theirs to give again, because the upload
+  is the irreversible step — the content is a commit anyone with repository
+  access can read the moment the command returns, and **there is no unpublish
+  and no delete**: a page is only ever replaced by the next upload under the
+  same owner and slug.
+* **The address is `<owner>/<slug>`.** The owner is the team's folder — propose
+  `design` and the prototype's slug, the person may want the URL otherwise; a
+  different owner or slug later is a second page, the first keeps serving.
+* **1 MB per HTML file, 10 MB a folder, nothing loaded from outside but Google
+  Fonts.** A prototype under 1 MB goes as the one file it is. One above it goes
+  as a folder: `weight.cjs` says which plates carry the megabytes, those are
+  written beside the page as `.png` / `.webp` files (never `.svg` — the site's
+  check rejects every SVG asset; vectors stay inline) and referenced by bare
+  file name — the upload puts every non-HTML file under `assets/` and strips any
+  folder from the name, so the page references `assets/<name>`. Rule 1 (one
+  self-contained file) bends for this host alone, and the ledger says so.
+* **Live after the merge, not after the upload.** Hand back the request's link
+  and the page URL, and say that the page opens once a person merges; then open
+  the URL on the VPN and walk the first task with real clicks, as for any host.
+  Both links go in the handoff's § Published URL.
+
 ## Authentication
 
 Every CLI call the scripts make runs with stdin closed and under a two-minute
@@ -266,7 +321,7 @@ artifact made from the build by `scripts/artifact-page.js`
 (`references/publishing.md` § Which host, § As a claude.ai artifact):
 
 ```bash
-scripts/publish.sh prototype.html --project <slug> --scope <team>
+scripts/publish.sh prototype.html --project <slug> --scope <team> --for outside
 scripts/unpublish.sh <slug> --confirm <slug> --scope <team>   # after the round
 ```
 
@@ -276,6 +331,10 @@ Three things decide whether this goes well, and all three are in
 * **Publishing is outward-facing and deleting is irreversible.** Both happen
   only when the user asks in this session, and an approval for one round does
   not carry to the next.
+* **The app may stop the deploy for a permission, in any mode.** A publish is a
+  public surface, and the harness can hold `publish.sh` until the person allows
+  it even when they asked for the publish in chat. Hand them the command, or
+  ask once for the permission; never retry the deploy around it.
 * **Deployment protection is the trap.** With SSO on, a respondent outside the
   team hits a login wall instead of the prototype, and you learn this during the
   call. The script asks the URL anonymously; then open it once yourself.

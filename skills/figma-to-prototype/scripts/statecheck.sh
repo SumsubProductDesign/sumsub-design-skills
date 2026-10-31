@@ -11,7 +11,10 @@
 #                                      it loads without one — what it shows, its fields, its visible
 #                                      elements, read before --js — prints one warning line: the page
 #                                      has no route for it (run 18 gated a click-only page at #custom
-#                                      and read a 476px residual off its first screen, 2026-10-14)
+#                                      and read a 476px residual off its first screen, 2026-10-14).
+#                                      The state the page loads in looks the same: a page that exposes
+#                                      window.__proto.routes (every hash it routes) is told "is the
+#                                      state the page loads in" instead (run 19, 2026-10-26)
 #   --css  'CSS'                       injected stylesheet; MIRROR a :hover rule here
 #                                      instead of trying to move a real mouse
 #   --no-anim                          kill transitions and animations. Required whenever the
@@ -191,7 +194,7 @@ HASHSIG=""; [ -n "$HASH" ] && HASHSIG='function(){var s=[document.body.innerText
   [].forEach.call(document.querySelectorAll("input,select,textarea"),function(e){s.push(e.checked+":"+e.value)});
   [].forEach.call(document.body.querySelectorAll("*"),function(e){if(!e.checkVisibility||e.checkVisibility({visibilityProperty:true}))
     s.push(e.tagName+"."+(typeof e.className==="string"?e.className:""))});
-  var t=s.join("\n"),h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return (h>>>0).toString(36)+"/"+t.length}'
+  var t=s.join("\n"),h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return (h>>>0).toString(36)+"/"+t.length+"|"+((window.__proto&&window.__proto.routes)?[].concat(window.__proto.routes).join(","):"")}'
 [ -n "$NOANIM" ] && CSS="*{transition:none!important;animation:none!important}$CSS"
 W="${SIZE%x*}"; H="${SIZE#*x}"
 # a window under 500 wide is laid out at 500 by the command line: fine for a left-aligned block
@@ -358,8 +361,17 @@ STATUS=0
 if [ -n "$HASHSIG" ]; then
   wait "$NOHASH" 2>/dev/null || true
   SIG=$(echo "$DOM" | grep -o '<div id="__hashsig"[^>]*>[^<]*' | sed 's/<div id="__hashsig"[^>]*>//' | head -1)
-  [ -n "$SIG" ] && [ "$SIG" = "$(cat "$TMP/nohash.sig" 2>/dev/null)" ] \
-    && echo "statecheck: the hash changed nothing: the page has no route for $HASH — add a hash route in gen.js or use --js" >&2
+  if [ -n "$SIG" ] && [ "$SIG" = "$(cat "$TMP/nohash.sig" 2>/dev/null)" ]; then
+    # the same page with and without the hash: no route for it — or the state the page loads in, which
+    # looks identical. A page that exposes window.__proto.routes (every hash it routes) tells the two
+    # apart; run 19 read "no route for #warning" on its own first screen (2026-10-26)
+    ROUTES="${SIG#*|}"; H0="${HASH%\?hold}"
+    case ",$ROUTES," in
+      *",$H0,"*) echo "statecheck: $HASH is the state the page loads in (window.__proto.routes); the hash changed nothing, as expected" >&2 ;;
+      ",,")      echo "statecheck: the hash changed nothing: the page has no route for $HASH — add a hash route in gen.js or use --js; or it is the state the page loads in: expose window.__proto.routes in gen.js and this line tells the two apart" >&2 ;;
+      *)         echo "statecheck: the hash changed nothing: the page has no route for $HASH (window.__proto.routes: $ROUTES) — add a hash route in gen.js or use --js" >&2 ;;
+    esac
+  fi
 fi
 if [ -n "$PROBE" ]; then
   ANS=$(echo "$DOM" | grep -o '<div id="__probe">[^<]*' | sed 's/<div id="__probe">//;s/&lt;/</g;s/&gt;/>/g;s/&amp;/\&/g' | head -1)

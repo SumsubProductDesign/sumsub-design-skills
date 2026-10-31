@@ -136,7 +136,8 @@ function checkbox(spec = {}) {
     + `<span class="c-cb-b"><span class="c-cb-l">${esc(spec.label || '')}${spec.titleIcon ? `<span class="c-ti">${spec.titleIcon}</span>` : ''}</span>`
     + `${spec.caption ? `<span class="c-cb-c">${esc(spec.caption)}</span>` : ''}</span></label>`;
 }
-// group(items, spec) — a vertical stack of radios or checkboxes, 8px apart (the product's pitch: 24 + 8)
+// group(items, spec) — a vertical stack of radios or checkboxes, 8px apart (the product's pitch: 24 + 8);
+//   items are the RENDERED strings radio() / checkbox() return, not their specs (specs print [object Object])
 // role: 'radiogroup' for radios (the default when the first item is one), 'group' otherwise;
 // title draws a visible label above the group (Label / Vertical, 14/24 medium, 4 under), and
 // titleIcon puts a glyph after it — the product's Label / Vertical carries one on most of its

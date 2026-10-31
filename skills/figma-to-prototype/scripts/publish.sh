@@ -1,5 +1,11 @@
 #!/bin/bash
-# publish.sh <prototype.html|dir> --project <slug> [--scope <team>] [--password <pw>] [--spa] [--dry]
+# publish.sh <prototype.html|dir> --project <slug> --for outside [--scope <team>] [--password <pw>] [--spa] [--dry]
+#
+# --for   WHO WILL OPEN THE LINK — the person's answer, never this skill's guess: `outside` (people
+#         outside the company: an open link on Vercel, no VPN) is the only value this script serves;
+#         `colleagues` (beautiful-pages, VPN only) is the publish-page skill's job and is refused here.
+#         Without the flag the script prints the question and stops: run 21 (2026-10-26) read an
+#         audience out of a button it had written itself and deployed with no question asked.
 #
 # Publishes the prototype to Vercel as a static site and prints the URL.
 # A single self-contained HTML file is staged as index.html; a directory is
@@ -17,7 +23,7 @@
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"; . "$DIR/_vercel.sh"
 
-SRC=""; PROJ=""; PW=""; DRY=""; SCOPE=""; SPA=""
+SRC=""; PROJ=""; PW=""; DRY=""; SCOPE=""; SPA=""; FOR=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --project)  PROJ="$2"; shift 2 ;;
@@ -25,12 +31,26 @@ while [ $# -gt 0 ]; do
     --scope)    SCOPE="$2"; shift 2 ;;
     --dry)      DRY="1";   shift ;;
     --spa)      SPA="1";   shift ;;
+    --for)      FOR="$2";  shift 2 ;;
     *)          SRC="$1";  shift ;;
   esac
 done
-[ -n "$SRC" ] && [ -n "$PROJ" ] || { echo "usage: publish.sh <file.html|dir> --project <slug> [--scope <team>] [--password <pw>] [--spa] [--dry]" >&2; exit 1; }
+[ -n "$SRC" ] && [ -n "$PROJ" ] || { echo "usage: publish.sh <file.html|dir> --project <slug> --for outside [--scope <team>] [--password <pw>] [--spa] [--dry]" >&2; exit 1; }
 [ -e "$SRC" ] || { echo "not found: $SRC" >&2; exit 1; }
 echo "$PROJ" | grep -Eq '^[a-z0-9][a-z0-9-]{0,98}$' || { echo "project slug must be lowercase letters, digits and dashes: $PROJ" >&2; exit 1; }
+case "$FOR" in
+  outside) ;;
+  colleagues)
+    echo "publish.sh: colleagues read beautiful-pages (the internal GitLab Pages site, VPN only) — that is the publish-page skill's job, not Vercel. Not publishing." >&2; exit 2 ;;
+  *)
+    cat >&2 <<'Q'
+publish.sh: who will open the link to the prototype? Ask the person first — a form, or their own typed words;
+a button or reply text this skill wrote itself does not count. Then:
+  people outside the company → an open link on Vercel, no VPN:            publish.sh … --for outside
+  colleagues                 → beautiful-pages, VPN only, any employee:   the publish-page skill, not this script
+Q
+    exit 2 ;;
+esac
 
 # --- stage ---------------------------------------------------------------
 STAGE="${TMPDIR:-/tmp}/vercel-$PROJ-$$"
